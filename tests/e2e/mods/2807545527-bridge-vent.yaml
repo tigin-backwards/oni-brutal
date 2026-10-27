@@ -1,0 +1,28 @@
+# Bridge Vent (2807545527), class B; PLib.
+#
+# What it does: adds three pipe bridges that vent at their far end instead of joining another
+# pipe: the Liquid Bridge Vent (Plumbing, after the Liquid Vent, Liquid Piping), the Gas Bridge
+# Vent (Ventilation, after the Gas Vent, Gas Piping) and a high-pressure Gas Bridge Vent (after
+# the High Pressure Gas Vent, Improved Gas Piping). Their outlet may sit in a mesh or airflow
+# tile; a prefix on Exhaust.UpdateEmission emits at the rotated outlet.
+# How a player reaches it: the research screen, then the build menu (Plumbing, Ventilation).
+# What changes: a pipe can end in a vent through a wall.
+#
+# setup researches Liquid Piping; the Liquid Bridge Vent shows in the Plumbing menu, and the gas
+# ones are unlocked by their techs.
+from: early-base
+mods: [2807545527]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"LiquidPiping\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"LiquidPiping\").unlockedItemIDs": {contains: LiquidBridgeVent}
+      "Db.Get().Techs.Get(\"GasPiping\").unlockedItemIDs": {contains: GasBridgeVent}
+      "Db.Get().Techs.Get(\"ImprovedGasPiping\").unlockedItemIDs": {contains: GasHighPressBridgeVent}
+  - run: {seconds: 5}
+  - click: {ui: "**/PlanScreen/Toggle:Plumbing"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/LiquidBridgeVent Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/LiquidBridgeVent Group*": {active: true}
+  - shot: {name: plumbing-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2686262124-synchronized-telepad.yaml",
+ "mods": [
+  "2686262124"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Reject All on the Printing Pod's screen sets the next print to the same time as in the original",
+ "updated": "2026-10-26",
+ "commit": "cbabaaf0",
+ "mod_dlls": {
+  "2686262124": {
+   "SynchronizedTelepad.dll": "56383d6fc7804c9d5249bdfb61bffc2c69bacdbd554cbec57daffd8005bc6712"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-155051-8ce3a25e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T16:05:24",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T21:12:13",
+    "lane": 17,
+    "reference_run": "20261026-155051-8ce3a25e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T21:12:34",
+    "lane": 16,
+    "reference_run": "20261026-155051-8ce3a25e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

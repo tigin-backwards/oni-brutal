@@ -1,0 +1,28 @@
+# Synchronized Telepad (updated for Big Merge) (2686262124), class P.
+#
+# What it does: a postfix on Immigration.EndImmigration (a print chosen or all rejected) sets
+# the time before the next print so that it comes at 350 s into a cycle: the full wait, less
+# what is left of the cycle past 350 s (a cycle less when the cycle is not yet at 350 s).
+# How a player reaches it: the Printing Pod's choices, printed or rejected.
+# What changes: new Duplicants and care packages arrive at the same time of day.
+#
+# setup makes the Printing Pod ready; its screen opens through OniMcp and Reject All is
+# clicked and confirmed: the time to the next print, plus the time into the cycle, is the full
+# wait plus 350 s.
+from: early-base
+mods: [2686262124]
+setup:
+  - driver: {seed: 12345}
+  - driver: {setup.call: {target: "Immigration.Instance", method: "Sim200ms", args: [100000]}}
+steps:
+  - expect_state: {"Immigration.Instance.ImmigrantsAvailable": true}
+  - call: {tool: building_control, args: {domain: side_surface, surface: facility, kind: telepad, action: open_immigrants, confirm: true}}
+  - ui_wait: {path: "**/ImmigrantScreen/Layout", cond: stable}
+  - click: {ui: "**/ImmigrantScreen/Layout/BottomButtons/RejectButton"}
+  - ui_wait: {path: "**/ImmigrantScreen/ConfirmationBox", cond: stable}
+  - click: {ui: "**/ImmigrantScreen/ConfirmationBox/ConfirmationBoxBG/RejectButton"}
+  - expect_state:
+      "Immigration.Instance.ImmigrantsAvailable": false
+      "Immigration.Instance.GetTotalWaitTime()": {save_as: full}
+      "GameClock.Instance.GetTimeSinceStartOfCycle()": {save_as: t}
+      "Immigration.Instance.timeBeforeSpawn": "== original"

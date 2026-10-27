@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1741146856-liquefiable-sculptures.yaml",
+ "mods": [
+  "1741146856"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Ice Sculpture asks for LIQUIFIABLE; one of brine ice stands",
+ "updated": "2026-10-27",
+ "commit": "7572b718",
+ "mod_dlls": {
+  "1741146856": {
+   "LiquefiableSculptures.dll": "71f92caef67212b615ccf74203e1d77c9ed855709735e4be35b2abb231b712de"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-042211-787cf357",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T04:22:11",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-084335-545a69e2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T08:43:35",
+    "lane": 14,
+    "reference_run": "20261027-042211-787cf357",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-084335-545a69e2",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T08:44:22",
+    "lane": 14,
+    "reference_run": "20261027-042211-787cf357",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

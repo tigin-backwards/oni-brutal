@@ -1,0 +1,22 @@
+# LiquefiableSculptures (1741146856), class P.
+#
+# What it does: a prefix on BuildingTemplates.CreateBuildingDef gives the Ice Sculpture the
+# material category LIQUIFIABLE instead of Ice: any solid that melts into a liquid (ice,
+# snow, brine ice, frozen metals...) can be carved.
+# How a player reaches it: the build menu (Furniture), the Ice Sculpture's materials.
+# What changes: what an Ice Sculpture can be made of.
+#
+# The Ice Sculpture's definition asks for LIQUIFIABLE; one built by setup from brine ice in
+# the dug-out corridor west of the printing pod stands, made of it.
+from: early-base
+mods: [1741146856]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"IceSculpture\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [BrineIce], 200.0, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"IceSculpture\").MaterialCategory": {equals: [LIQUIFIABLE]}
+      "Assets.GetBuildingDef(\"IceSculpture\").MaterialCategory.Length": "== original"
+  - run: {seconds: 2}
+  - expect: {buildings: {IceSculpture: 1}}
+  - expect_state:
+      "all:Artable::[0].GetComponent<PrimaryElement>.ElementID": BrineIce

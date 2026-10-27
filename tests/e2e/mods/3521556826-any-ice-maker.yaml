@@ -1,0 +1,34 @@
+# Any Ice Maker (3521556826), class P,O.
+#
+# What it does: the Ice Maker freezes any of a dozen liquids, not only water: its option list
+# (the few-option side screen) offers ice, snow, polluted ice, brine ice, brine (from salt
+# water), murky brine ice and others, each delivered as its liquid and cooled to 10 °C under
+# its freezing point; liquids the colony has not discovered are listed only with the Show all
+# option or a piped input (Piped Everything). Copying settings carries the choice.
+# How a player reaches it: selecting an Ice Maker.
+# What changes: the Ice Maker freezes other liquids.
+#
+# With Show all, an Ice Maker built by setup in the dug-out corridor west of the printing pod
+# is selected; its option list is dumped, and Polluted Ice picked: its delivery asks for
+# polluted water.
+from: early-base
+mods: [3521556826]
+options:
+  "3521556826": {show_all: true}
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"IceMachine\")", method: Build, args: [131765, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {IceMachine: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: IceMachine}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_wait: {path: "**/FewOptionSelectionSideScreen", cond: stable}
+  - expect_state:
+      "selected:IceMachine.GetOptions().Length": ">= 10"
+      "selected:ManualDeliveryKG.RequestedItemTag.Name": Water
+  - ui_dump: {name: options, root: "**/FewOptionSelectionSideScreen"}
+  - click: {text: "Polluted Ice", under: "**/FewOptionSelectionSideScreen"}
+  - expect_state:
+      "selected:IceMachine.GetSelectedOption().Name": DirtyIce
+      "selected:ManualDeliveryKG.RequestedItemTag.Name": DirtyWater

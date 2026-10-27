@@ -1,0 +1,61 @@
+{
+ "spec": "mods/3298924449-ceres-single-asteroid.yaml",
+ "mods": [
+  "3298924449"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "New Game, Classic, the carousel picks the mod's cluster (asteroid list dumped), and the new game's only asteroid is its Ceres",
+ "updated": "2026-10-26",
+ "commit": "f4f72218",
+ "mod_dlls": {
+  "3298924449": {}
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-203918-0b6e3624",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T21:47:49",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-230700-62df17b6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T23:11:26",
+    "lane": 14,
+    "reference_run": "20261026-203918-0b6e3624",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-230700-62df17b6",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T23:11:28",
+    "lane": 15,
+    "reference_run": "20261026-203918-0b6e3624",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

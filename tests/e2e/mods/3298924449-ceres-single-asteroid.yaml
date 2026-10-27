@@ -1,0 +1,66 @@
+# 谷神星单星球（Ceres Single Asteroid Cluster） (3298924449), class X.
+#
+# What it does: a worldgen-only mod (no code): a classic-style Spaced Out cluster with the
+# Frosty Planet Pack's Ceres as its only asteroid (CeresSingleAsteroid, 280x380, two to four
+# traits, a niobium magma biome), the Ceres starmap POIs, Temporal Tear and Gravitas stations,
+# at coordinate prefix V-CER-C.
+# How a player reaches it: New Game, Survival, Classic, the cluster carousel or its
+# coordinate.
+# What changes: a Ceres start without the other asteroids.
+#
+# From the colony to the main menu, New Game, Survival, Classic: the coordinate
+# V-CER-C-12345-0-0-0 picks the game's own Ceres cluster, whose prefix the mod reuses, and the
+# carousel's left arrow, three times, the mod's (asteroid list dumped; the arrows draw a new
+# seed). The new game has one asteroid, the mod's Ceres at its size, with its traits and the
+# starmap's POIs.
+from: early-base
+mods: [3298924449]
+memory_gb: 8
+setup:
+  - driver: {seed: 12345}
+steps:
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/Main MenuButton", cond: stable}
+  - click: {ui: "**/PauseScreen/**/Main MenuButton"}
+  - ui_wait: {path: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton", cond: stable}
+  - click: {ui: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton"}   # Quit Without Saving
+  - ui_wait: {path: "**/MainMenu_SpacedOut/MainMenuMenubar/MainMenuButtons", cond: stable, frames: 3000}
+  - click: {text: "NEW GAME", under: "**/MainMenuButtons"}
+  - ui_wait: {path: "**/ModeSelectScreen/Panel/Content/RootToggles/StandardGame", cond: stable}
+  - click: {ui: "**/ModeSelectScreen/Panel/Content/RootToggles/StandardGame"}
+  - ui_wait: {path: "**/ClusterCategorySelectionScreen/Panel/Content/RootToggles/ClassicStyleGame", cond: stable}
+  - click: {ui: "**/ClusterCategorySelectionScreen/Panel/Content/RootToggles/ClassicStyleGame"}
+  - ui_wait: {path: "**/ColonyDestinationScreen2/Layout/Buttons/LaunchButton", cond: stable, frames: 3000}
+  - expect_state:
+      "all:DestinationSelectPanel::[0].clusterKeys": {contains: clusters/CeresSingleAsteroidCluster}
+  - click: {ui: "**/CoordinateContainer/SeedInput"}
+  - ui_wait: {path: "**/CoordinateContainer/SeedInput", cond: stable}
+  - type: {ui: "**/CoordinateContainer/SeedInput", text: "V-CER-C-12345-0-0-0", clear: true, enter: true}
+  - ui_wait: {path: "**/StartingAsteroidCategory/Content/Prefab_AsteroidLine/Label", cond: stable}
+  # The coordinate's prefix is the game's own Ceres cluster's too, which it picks; the mod's
+  # cluster sits three to the left in the carousel.
+  - expect_state: {"all:DestinationSelectPanel::[0].clusterKeys[4]": "dlc2::clusters/CeresClassicCluster"}
+  - click: {ui: "**/ColonyDestinationScreen2/Layout/Map/Padding/LeftArrow"}
+  - ui_wait: {path: "**/StartingAsteroidCategory/Content/Prefab_AsteroidLine/Label", cond: stable}
+  - click: {ui: "**/ColonyDestinationScreen2/Layout/Map/Padding/LeftArrow"}
+  - ui_wait: {path: "**/StartingAsteroidCategory/Content/Prefab_AsteroidLine/Label", cond: stable}
+  - click: {ui: "**/ColonyDestinationScreen2/Layout/Map/Padding/LeftArrow"}
+  - ui_wait: {path: "**/StartingAsteroidCategory/Content/Prefab_AsteroidLine/Label", cond: stable}
+  - expect_state:
+      "CustomGameSettings.Instance.GetCurrentQualitySetting(\"ClusterLayout\").id": clusters/CeresSingleAsteroidCluster
+  - ui_dump: {name: asteroids, root: "**/Section - Destination/World Scoll (Rect Size Set By Screen Code!)/Content/Details"}
+  - click: {ui: "**/ColonyDestinationScreen2/Layout/Buttons/LaunchButton"}
+  # Worldgen runs on its own thread; the Duplicant selection follows once the world is loaded.
+  - ui_wait: {path: "**/MinionSelectScreen/Content/BottomContent/Buttons/ProceedButton", cond: stable, frames: 60000}
+  - click: {ui: "**/MinionSelectScreen/Content/BottomContent/Buttons/ProceedButton"}
+  - ui_wait: {path: "**/MinionSelectScreen", cond: gone, frames: 6000}
+  - expect_state:
+      "ClusterManager.Instance.WorldContainers.Count": 1
+      "ClusterManager.Instance.GetStartWorld().worldName": worlds/CeresSingleAsteroid
+      "ClusterManager.Instance.GetStartWorld().worldSize.x": 280
+      "ClusterManager.Instance.GetStartWorld().worldSize.y": 380
+      "ClusterManager.Instance.GetStartWorld().WorldTraitIds.Count": [">= 2", "<= 4"]
+      "Components.LiveMinionIdentities.Count": 3
+      "all:TemporalTear::Length": 1
+      "all:HarvestablePOIClusterGridEntity::Length": ">= 20"
+      "all:ArtifactPOIClusterGridEntity::Length": ">= 5"

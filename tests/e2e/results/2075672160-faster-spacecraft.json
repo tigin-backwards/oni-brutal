@@ -1,0 +1,56 @@
+{
+ "spec": "mods/2075672160-faster-spacecraft.yaml",
+ "mods": [
+  "2075672160"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "in the base-game colony the Command Capsule carries the mod's component and the mod logs its option",
+ "updated": "2026-10-27",
+ "commit": "1ae06b70",
+ "mod_dlls": {
+  "2075672160": {
+   "FasterSpacecraft.dll": "0d2727edaf30c6ad011856468e141d7c9258a789ea0ee4b262ca3902851c6d6e",
+   "PLib.dll": "c4bb22f1bc06ebcb0dbba75a7f1bc46f63eaa3dae12c22a08729f1a6d3362dda"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-013141-9697dcd2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T01:59:51",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-030055-c7221fc2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T03:00:55",
+    "lane": 14,
+    "reference_run": "20261027-013141-9697dcd2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-030055-c7221fc2",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T03:00:56",
+    "lane": 15,
+    "reference_run": "20261027-013141-9697dcd2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,20 @@
+# Faster Spacecraft (2075672160), classes P, O (base game only).
+#
+# What it does: a rocket's mission takes less time the better its engines and modules
+# (Spacecraft.BeginMission scales the mission's duration by their total efficiency); with
+# the EnableRefresh option a rocket already in flight has its duration recomputed once (a
+# RefreshDuration component on the command module remembers that).
+# How a player reaches it: launching a rocket in the base game; the Mods screen's options.
+# What changes: shorter space missions.
+#
+# In the base-game colony, the Command Capsule's prefab carries the mod's component and the
+# mod logs its option when the colony loads.
+from: vanilla-base
+mods: [2075672160]
+require_log: ['Trip-duration updation is (en|dis)abled']
+steps:
+  - expect_state:
+      "DlcManager.IsExpansion1Active()": false
+      "Assets.GetPrefab(\"CommandModule\").GetComponent<FasterSpacecraft.RefreshDuration>": "== original"
+  - run: {seconds: 2}
+  - expect: {duplicants: ">= 1"}

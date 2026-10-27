@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2553830824-taller-mods-menu.yaml",
+ "mods": [
+  "2553830824"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the main menu's Mods screen opens with its panel 100 px shorter than the screen (dump matches)",
+ "updated": "2026-10-26",
+ "commit": "cbabaaf0",
+ "mod_dlls": {
+  "2553830824": {
+   "TallerModsMenu.dll": "fa42d69ec11aea1664ef0381a5a7c9d4d42b6b7dcad0e12e6360bd9041e1af36"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-182241-89a16e7c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T18:22:42",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T21:08:31",
+    "lane": 17,
+    "reference_run": "20261026-182241-89a16e7c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "mods": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T21:08:56",
+    "lane": 16,
+    "reference_run": "20261026-182241-89a16e7c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "mods": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

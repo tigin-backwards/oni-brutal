@@ -1,0 +1,25 @@
+# Taller Mods Menu (2553830824), class M.
+#
+# What it does: a postfix on ModsScreen.OnActivate makes the Mods screen's panel (its third
+# RectTransform) as tall as the screen less 100 px, so more mods show at once.
+# How a player reaches it: the main menu's Mods button.
+# What changes: the Mods screen's height.
+#
+# From a colony, Main Menu (quit without saving), then Mods: the Mods screen opens with its
+# panel 100 px shorter than the screen, and the panel (dumped, rows and all) lays out as in the
+# original.
+from: early-base
+mods: [2553830824]
+steps:
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/Main MenuButton", cond: stable}
+  - click: {ui: "**/PauseScreen/**/Main MenuButton"}
+  - ui_wait: {path: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton", cond: stable}
+  - click: {ui: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton"}   # Quit Without Saving
+  - ui_wait: {path: "**/MainMenu_SpacedOut/MainMenuMenubar/MainMenuButtons", cond: stable, frames: 3000}
+  - click: {text: "MODS", under: "**/MainMenuButtons"}
+  - ui_wait: {path: "**/ModsScreen/Panel", cond: stable}
+  - expect_state:
+      "ui:**/ModsScreen::GetComponentsInChildren<RectTransform>()[2].sizeDelta.y": [{save_as: tall}, "== original"]
+      "ui:**/ModsScreen::GetComponentsInChildren<RectTransform>()[0].rect.height": ">= tall + 99"
+  - ui_dump: {name: mods, root: "**/ModsScreen/Panel"}

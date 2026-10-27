@@ -1,0 +1,34 @@
+# Pipe Sterilisers (3733622245), class B.
+#
+# What it does: adds the Gas Pipe Steriliser (Ventilation) and the Liquid Pipe Steriliser
+# (Plumbing), each after its pipe germ sensor and researched with it (Pathogen Diagnostics): a
+# 1x1 powered building (120 W) built on a pipe that removes the germs of what flows through that
+# pipe segment.
+# How a player reaches it: the research screen, then the build menu (Plumbing, Ventilation).
+# What changes: germs can be cleaned out of pipes.
+#
+# setup researches Pathogen Diagnostics and builds a Liquid Pipe Steriliser in the corridor west
+# of the printing pod; it shows in the Plumbing menu and, selected, holds its steriliser set to
+# liquid pipes.
+from: early-base
+mods: [3733622245]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"MedicineIII\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidPipeSteriliser\")", method: Build, args: [131765, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"MedicineIII\").unlockedItemIDs": [{contains: GasPipeSteriliser}, {contains: LiquidPipeSteriliser}]
+  - run: {seconds: 5}
+  - expect: {buildings: {LiquidPipeSteriliser: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Plumbing"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/LiquidPipeSteriliser Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/LiquidPipeSteriliser Group*": {active: true}
+  - shot: {name: plumbing-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: LiquidPipeSteriliser}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<PipeSterilisers.ConduitPipeSterilizer>.conduitType": "== 'Liquid'"

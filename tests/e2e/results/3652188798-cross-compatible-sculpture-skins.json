@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3652188798-cross-compatible-sculpture-skins.yaml",
+ "mods": [
+  "3652188798"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the large sculpture's skins include copies of the others' (as many as the original's), and a built one carries the scaler",
+ "updated": "2026-10-26",
+ "commit": "f4f72218",
+ "mod_dlls": {
+  "3652188798": {
+   "BigSmallSculptures.dll": "10144c557b50c10254fb6a28b65af9410722b205eaafa23181dc5deb7a3b9967"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-220914-d134800a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T22:26:53",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-230700-62df17b6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T23:10:31",
+    "lane": 14,
+    "reference_run": "20261026-220914-d134800a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-230700-62df17b6",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T23:10:33",
+    "lane": 15,
+    "reference_run": "20261026-220914-d134800a",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

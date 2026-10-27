@@ -1,0 +1,27 @@
+# Cross-Compatible Sculpture Skins (3652188798), class P.
+#
+# What it does: each unlocked sculpture skin of the small, large and marble sculptures gets
+# copies for the other sculptures (a postfix on the ArtableStage constructor, with rarities and
+# decor remapped), and a SculptureAnimScaler on every sculpture scales a copied skin's anim to
+# its new size.
+# How a player reaches it: a sculpture's skin choices, or the art a Duplicant makes on it.
+# What changes: every sculpture can wear every sculpture skin.
+#
+# The large sculpture's skins include copies of other sculptures' (their count is the
+# original's), and a large sculpture built by setup in the dug-out corridor west of the
+# printing pod carries the scaler.
+from: early-base
+mods: [3652188798]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Sculpture\")", method: Build, args: [131128, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "count:Db.GetArtableStages().resources[*] if .prefabId == Sculpture": "== original"
+      "count:Db.GetArtableStages().resources[*] if .id.StartsWith(\"Sculpture_\") == true": ">= 1"
+  - run: {seconds: 2}
+  - expect: {buildings: {Sculpture: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: Sculpture}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:SculptureAnimScaler": exists

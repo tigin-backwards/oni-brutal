@@ -1,0 +1,29 @@
+# More Clothing (3765092134), classes B, P.
+#
+# What it does: five garments (a Winter Coat, a Soft Suit with its boots, Snazzy Swimwear,
+# Snazzy Rubber Boots and dress Shoes) made at the Clothing Refashionator and the Textile
+# Loom, with protection, decor and breathing effects of their own (the Soft Suit's helmet
+# assembles over the Duplicant's head in danger), and a 1x2 Mannequin in the Furniture menu
+# (Textile Production) that wears the clothing it is given and adds decor.
+# How a player reaches it: the fabricators' recipes; the build menu (Furniture).
+# What changes: more clothing, and mannequins to show it.
+#
+# The garments exist and Textile Production unlocks the Mannequin; one built by setup in the
+# dug-out corridor west of the printing pod is selected: its receptacle side screen is dumped.
+from: early-base
+mods: [3765092134]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Mannequin\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"UpgradedWarmCoat\")": exists
+      "Assets.GetPrefab(\"SnazzyShoes\")": exists
+      "Assets.GetPrefab(\"EVASuit\")": exists
+      "Db.Get().Techs.Get(\"Clothing\").unlockedItemIDs": {contains: Mannequin}
+  - run: {seconds: 2}
+  - expect: {buildings: {Mannequin: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: Mannequin}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/*Receptacle*", frames: 600}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: receptacle, root: "**/DetailsScreen/SideScreen/**/*Receptacle*"}

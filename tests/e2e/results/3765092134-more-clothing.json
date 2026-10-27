@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3765092134-more-clothing.yaml",
+ "mods": [
+  "3765092134"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the garments exist; a Mannequin built in the corridor is selected: its receptacle side screen dumped",
+ "updated": "2026-10-27",
+ "commit": "437ec043",
+ "mod_dlls": {
+  "3765092134": {
+   "MoreClothing.dll": "b834e4aa325d8e72aed2a88ea04b239e0d6cf5bbe6609280741468865028b929"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-033356-775c1da2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T03:33:57",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-034513-e001fb58",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T03:45:13",
+    "lane": 14,
+    "reference_run": "20261027-033356-775c1da2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "receptacle": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261027-034513-e001fb58",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T03:45:14",
+    "lane": 15,
+    "reference_run": "20261027-033356-775c1da2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "receptacle": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

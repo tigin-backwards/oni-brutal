@@ -1,0 +1,25 @@
+# Allow Edibles In Storage Dispenser (2839845786), classes P, B.
+#
+# What it does: the Automatic Dispenser (ObjectDispenser), the Rocket Port Solid Unloader and
+# the solid cargo bays (small and large) accept food as well as the other solids: their storage
+# filters become the non-edible solids plus FOOD.
+# How a player reaches it: select an Automatic Dispenser; its filter side screen lists food.
+# What changes: food can be dispensed and carried in rockets.
+#
+# setup builds an Automatic Dispenser in the dug-out corridor west of the printing pod.
+# Selected, its filter side screen lists the food categories beside the other solids.
+from: early-base
+mods: [2839845786]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"ObjectDispenser\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"ObjectDispenser\").GetComponent<Storage>.storageFilters": [{contains: Edible}, {contains: Metal}]
+      "Assets.GetPrefab(\"ObjectDispenser\").GetComponent<Storage>.storageFilters.Count": "== original"
+      "Assets.GetPrefab(\"CargoBayCluster\").GetComponent<Storage>.storageFilters": {contains: Edible}
+  - run: {seconds: 2}
+  - expect: {buildings: {ObjectDispenser: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: ObjectDispenser}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/TreeFilterableSideScreen", cond: stable}
+  - ui_dump: {name: filter, root: "**/DetailsScreen/SideScreen/**/TreeFilterableSideScreen", mask_text: ['\d+(\.\d+)? ?kg']}

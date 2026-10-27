@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2839845786-dispenser-edibles.yaml",
+ "mods": [
+  "2839845786"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Automatic Dispenser and cargo bays take food; the dispenser's filter side screen dumped",
+ "updated": "2026-10-27",
+ "commit": "28fa53ad",
+ "mod_dlls": {
+  "2839845786": {
+   "DispenserEdibles.dll": "f7dc3a8a97cae89bdaaf3431743046ef9b29e5f55de66115f88257698ec3e5c7"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-042211-787cf357",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T04:32:13",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-085757-63399062",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T08:57:57",
+    "lane": 14,
+    "reference_run": "20261027-042211-787cf357",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "filter": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261027-085757-63399062",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T08:58:47",
+    "lane": 14,
+    "reference_run": "20261027-042211-787cf357",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "filter": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

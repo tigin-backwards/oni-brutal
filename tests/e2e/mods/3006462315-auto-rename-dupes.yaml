@@ -1,0 +1,22 @@
+# Auto Rename Dupes (3006462315), class P,O.
+#
+# What it does: renames Duplicants from nine PLib option lists of comma-separated names, the
+# first list first: when a Duplicant spawns (MinionIdentity.OnSpawn) with a name not on the
+# lists, it takes a random unused name from the highest list that has one left; the lists
+# are read again when a save loads or a world is generated.
+# How a player reaches it: PLib options; loading a colony, printing Duplicants.
+# What changes: Duplicants named by the player's lists.
+#
+# The first list is set to Alpha, Beta and Gamma: once early-base loads, its three Duplicants
+# carry those three names, one each.
+from: early-base
+mods: [3006462315]
+options:
+  MauroJunior.AutoRenameDupes: {LIST_NAMEs_1_HIGH_PRIORITY: "Alpha, Beta, Gamma"}
+steps:
+  - run: {seconds: 2}
+  - expect: {duplicants: 3}
+  - expect_state:
+      "count:Components.LiveMinionIdentities.Items[*] if .name == Alpha": 1
+      "count:Components.LiveMinionIdentities.Items[*] if .name == Beta": 1
+      "count:Components.LiveMinionIdentities.Items[*] if .name == Gamma": 1

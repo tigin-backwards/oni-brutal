@@ -1,0 +1,60 @@
+{
+ "spec": "mods/3617546696-large-smart-battery.yaml",
+ "mods": [
+  "3617546696"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "after Renewable Energy the Power menu lists the battery (shot); a built one holds 100 kJ",
+ "updated": "2026-10-26",
+ "commit": "d1e7dcee",
+ "mod_dlls": {
+  "3617546696": {
+   "BCSmartBattery.dll": "949bdf5cbba9bfd81c7fefae2a5186210cda7f0bdcfedf345d84f09ec248c70c",
+   "PLib.dll": "55ce409618e6d102a1bcd0298911f3df49dda9a94ee153d02403035a1d6101d6"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-200500-101f1b1f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T20:17:04",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-203924-ebcd6150",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T20:52:50",
+    "lane": 15,
+    "reference_run": "20261026-200500-101f1b1f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "power-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-203924-ebcd6150",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T20:54:05",
+    "lane": 15,
+    "reference_run": "20261026-200500-101f1b1f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "power-menu": 0.0
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,33 @@
+# Large Smart Battery (3617546696), classes B, O.
+#
+# What it does: a 2x2 smart battery of 100,000 J beside the game's Smart Battery in the Power
+# menu, researched with Renewable Energy, built from steel, plastic and glass, with the Smart
+# Battery's automation port and charge thresholds; a PLib option picks a light or a standard
+# cost (materials, self-heat and leak).
+# How a player reaches it: the build menu (Power), after Renewable Energy.
+# What changes: a much larger smart battery.
+#
+# setup researches Renewable Energy; the Power menu lists the battery (shot), and one built by
+# setup in the dug-out corridor west of the printing pod is selected and holds 100,000 J.
+from: early-base
+mods: [3617546696]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"RenewableEnergy\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"BCSmartBattery\")", method: Build, args: [131128, Neutral, null, [Steel, Polypropylene, Glass], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"RenewableEnergy\").unlockedItemIDs": {contains: BCSmartBattery}
+  - run: {seconds: 10}
+  - expect: {buildings: {BCSmartBattery: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Power"}
+  # The build menu catches up over frames: 120 frames for all of it to settle.
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/BCSmartBattery Group*", cond: stable, stable: 120, frames: 600}
+  - shot: {name: power-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: BCSmartBattery}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:Battery.capacity": 100000
+      "selected:BatterySmart": exists

@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2687208049-rebalanced-skills.yaml",
+ "mods": [
+  "2687208049"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the skills database has the new tiers and prerequisites, and the Skills screen tree laid out by them matches (shot)",
+ "updated": "2026-10-27",
+ "commit": "ecf2040f",
+ "mod_dlls": {
+  "2687208049": {
+   "rebalancedSkills.dll": "4a3da97cf1bc181848aa9ac586792f277430ed69479e896df06f56de49066462"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-103032-617b0bb3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T10:57:52",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-112241-673f5693",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T11:22:41",
+    "lane": 15,
+    "reference_run": "20261027-103032-617b0bb3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "tree": 0.0
+    }
+   },
+   {
+    "run": "20261027-112241-673f5693",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T11:23:31",
+    "lane": 15,
+    "reference_run": "20261027-103032-617b0bb3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "tree": 0.0
+    }
+   }
+  ]
+ }
+}

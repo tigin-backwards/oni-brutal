@@ -1,0 +1,64 @@
+{
+ "spec": "mods/3580813956-radiation-farm-tile.yaml",
+ "mods": [
+  "3580813956"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Planter Box built in the corridor emits 300 rads; its slider (dumped) set to 1000 sets the emitter",
+ "updated": "2026-10-27",
+ "commit": "7a56f5f6",
+ "mod_dlls": {
+  "3580813956": {
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
+   "╓╓╓▓╫⌐.dll": "8d7963dccf28f1b3eb8b05c70ed82a8b5fbba1f6eea7fc85f99c9f1e443a7d90"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-021227-f470d6f8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T02:15:35",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-032052-3959be42",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T03:20:52",
+    "lane": 14,
+    "reference_run": "20261027-021227-f470d6f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261027-032052-3959be42",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T03:20:53",
+    "lane": 15,
+    "reference_run": "20261027-021227-f470d6f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

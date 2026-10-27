@@ -1,0 +1,30 @@
+# RadiationFarmTile 辐射种植砖 (3580813956), classes B, S, O.
+#
+# What it does: the Farm Tile, Hydroponic Farm, Planter Box, wide and backwall farms and the
+# flower pots emit radiation (a PLib option in Controler.json, shipped at 0), which a
+# slider side screen on each one sets, 0 to 20000; settings copy.
+# How a player reaches it: the planter's side screen; the Mods screen's options.
+# What changes: planters that grow radiation-loving plants and mutate seeds.
+#
+# With the option at 300 rads, a Planter Box built by setup in the dug-out corridor west of
+# the printing pod is selected: it emits 300 rads, its slider is dumped, and 1000 typed into
+# the slider's field sets it.
+from: early-base
+mods: [3580813956]
+options:
+  "3580813956": {$file: Controler.json, Intensity: 300}
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"PlanterBox\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {PlanterBox: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: PlanterBox}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/IntSliderSideScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<RadiationEmitter>.emitRads": 300
+  - ui_dump: {name: slider, root: "**/IntSliderSideScreen"}
+  - type: {ui: "**/IntSliderSideScreen/**/NumberInputField", text: "1000", enter: true, clear: true}
+  - expect_state:
+      "selected:GetComponent<种植砖.滑块控制>.intensity": 1000
+      "selected:GetComponent<RadiationEmitter>.emitRads": 1000

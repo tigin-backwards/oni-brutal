@@ -1,0 +1,16 @@
+# 高效钻头前锥 Efficient drill bit front cone 1.1 (2979315574), classes P, O.
+#
+# What it does: the Drillcone (NoseconeHarvest) holds 1000 t, asks for 100 t of diamond
+# (its delivery capacity) and drills at speed 50; PLib options (G000GG0.json, shared) turn
+# this off or set the capacity (1 to 1000 t) and the speed (10 to 100).
+# How a player reaches it: the rocket builder's Drillcone; the Mods screen's options.
+# What changes: a drillcone that rarely needs refilling and mines fast.
+#
+# The Drillcone's prefab holds the mod's values.
+from: early-base
+mods: [2979315574]
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"NoseconeHarvest\").GetComponent<ManualDeliveryKG>.capacity": 100000
+      "Assets.GetPrefab(\"NoseconeHarvest\").GetComponent<Storage>.capacityKg": 1000000
+      "sum:Assets.GetPrefab(\"NoseconeHarvest\").GetComponent<StateMachineController>.cmpdef.defs[*].harvestSpeed if .GetType().FullName == \"ResourceHarvestModule+Def\"": 50

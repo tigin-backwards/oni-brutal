@@ -1,0 +1,56 @@
+{
+ "spec": "mods/2979315574-efficient-drill-bit-front-cone.yaml",
+ "mods": [
+  "2979315574"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Drillcone's prefab holds the mod's capacity and speed",
+ "updated": "2026-10-27",
+ "commit": "7a56f5f6",
+ "mod_dlls": {
+  "2979315574": {
+   "G_╕▀╨º╫Ω═╖╟░╫╢.dll": "7669d5ea1cf79c96279893df771ba360c7b989bddec386a6a4d368f1f4d2073a",
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-021227-f470d6f8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T02:25:16",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-032523-66a2936f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T03:25:23",
+    "lane": 14,
+    "reference_run": "20261027-021227-f470d6f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-032523-66a2936f",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T03:25:24",
+    "lane": 15,
+    "reference_run": "20261027-021227-f470d6f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

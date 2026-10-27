@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3022469420-high-precision-temperature.yaml",
+ "mods": [
+  "3022469420"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "formatted temperatures keep four decimals (26.9734 °C) and the hover card over a corridor cell shows the gas temperature with decimals; the patch logs that it took",
+ "updated": "2026-10-27",
+ "commit": "ecf2040f",
+ "mod_dlls": {
+  "3022469420": {
+   "HighPrecisionTemperature.dll": "38f0b7f751e36c760618deda18c141d38933660a8686223962570a1ccb2897d8"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-102545-317b751b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T10:25:45",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-110211-e245e77d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T11:07:31",
+    "lane": 15,
+    "reference_run": "20261027-102545-317b751b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-110211-e245e77d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T11:08:17",
+    "lane": 15,
+    "reference_run": "20261027-102545-317b751b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

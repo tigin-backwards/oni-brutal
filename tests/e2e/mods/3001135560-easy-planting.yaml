@@ -1,0 +1,21 @@
+# Easy planting 轻松种植 (3001135560), class P; PLib options (Controler.json).
+#
+# What it does: postfixes on the prefabs of the farmable plants (Sleet Wheat, Bristle
+# Blossom, Thimble Reed, Bog Bucket, Gas Grass, Nosh Sprout, Waterweed, Arbor Tree, Oxyfern
+# and others) set their fertilizer and irrigation to 1 % of the game's (options feiliao and
+# jiaoguan, in percent).
+# How a player reaches it: plant a crop in a farm tile or planter.
+# What changes: crops need almost no fertilizer or water.
+#
+# The plants' irrigation and fertilizer monitors ask for a hundredth: Sleet Wheat drinks
+# 0.2 kg of water a cycle and eats 0.05 kg of dirt.
+from: early-base
+mods: [3001135560]
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"ColdWheat\").GetComponent<StateMachineController>.cmpdef.defs[3].GetType().FullName": IrrigationMonitor+Def
+      "Assets.GetPrefab(\"ColdWheat\").GetComponent<StateMachineController>.cmpdef.defs[3].consumedElements[0].massConsumptionRate": [">= 0.00033", "<= 0.00034"]
+      "Assets.GetPrefab(\"ColdWheat\").GetComponent<StateMachineController>.cmpdef.defs[2].GetType().FullName": FertilizationMonitor+Def
+      "Assets.GetPrefab(\"ColdWheat\").GetComponent<StateMachineController>.cmpdef.defs[2].consumedElements[0].massConsumptionRate": [">= 0.000083", "<= 0.000084"]
+      "Assets.GetPrefab(\"PrickleFlower\").GetComponent<StateMachineController>.cmpdef.defs[2].consumedElements[0].massConsumptionRate": [">= 0.00033", "<= 0.00034"]
+  - run: {seconds: 5}

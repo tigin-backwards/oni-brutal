@@ -1,0 +1,39 @@
+# Master Electrolizer V2 (Updated) (3340413393), class B.
+#
+# What it does: adds the Master Electrolyzer, a 2x3 electrolyzer with its own kanim,
+# researched with Improved Oxygen, to the Oxygen menu: piped water, 1 kg/s, becomes 0.888 kg/s
+# of oxygen and 0.112 kg/s of hydrogen at 40 °C, both stored and sent out of one gas output
+# (always dispensing). It draws 120 W; a postfix on BuildingComplete.OnSpawn swaps a built
+# one's anim to masterelectrolizer_kanim, playing "on".
+# How a player reaches it: the build menu (Oxygen), after the research.
+# What changes: an electrolyzer that pipes all of its gas.
+#
+# The converter is read; setup researches Improved Oxygen, the Oxygen menu lists the building
+# (shot), and one built by setup in the dug-out corridor west of the printing pod is
+# selected.
+from: early-base
+mods: [3340413393]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"ImprovedOxygen\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"MasterElectrolyzer\")", method: Build, args: [131765, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"ImprovedOxygen\").unlockedItemIDs": {contains: MasterElectrolyzer}
+      "Assets.GetBuildingDef(\"MasterElectrolyzer\").HeightInCells": 3
+      "Assets.GetPrefab(\"MasterElectrolyzer\").GetComponent<ElementConverter>.outputElements[0].elementHash": "== 'Oxygen'"
+      "Assets.GetPrefab(\"MasterElectrolyzer\").GetComponent<ElementConverter>.outputElements[0].storeOutput": true
+      "Assets.GetPrefab(\"MasterElectrolyzer\").GetComponent<ElementConverter>.outputElements[1].elementHash": "== 'Hydrogen'"
+      "Assets.GetPrefab(\"MasterElectrolyzer\").GetComponent<ConduitDispenser>.alwaysDispense": true
+  - run: {seconds: 10}
+  - expect: {buildings: {MasterElectrolyzer: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Oxygen"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/MasterElectrolyzer Group*", cond: stable, stable: 120, frames: 600}
+  - shot: {name: oxygen-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: MasterElectrolyzer}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:KBatchedAnimController.AnimFiles[0].name": masterelectrolizer_kanim
+  - world_shot: {name: built, ortho: 6, at: [113, 208]}

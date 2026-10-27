@@ -1,0 +1,62 @@
+{
+ "spec": "mods/3340413393-master-electrolizer-v2.yaml",
+ "mods": [
+  "3340413393"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "after Improved Oxygen the Oxygen menu lists the electrolyzer (shot); a built one plays its own kanim (world shot matches)",
+ "updated": "2026-10-26",
+ "commit": "cbabaaf0",
+ "mod_dlls": {
+  "3340413393": {
+   "MasterElectrolizer.dll": "c0288e45110a7035ee7dae3e113139cdfc96715b4a8760315875823c2220210a",
+   "YamlDotNet.dll": "e05c9c033c5d333e35feebbb87598ef81c178a6e28ae98cab99b2fd01be6cd9e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-192612-e52c7dc9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T19:41:42",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T21:50:14",
+    "lane": 17,
+    "reference_run": "20261026-192612-e52c7dc9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "oxygen-menu": 0.0,
+     "built": 0.019227
+    }
+   },
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T21:50:20",
+    "lane": 16,
+    "reference_run": "20261026-192612-e52c7dc9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "oxygen-menu": 0.0,
+     "built": 0.018536
+    }
+   }
+  ]
+ }
+}

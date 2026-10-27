@@ -1,0 +1,22 @@
+# Base Overheat Temperature Fix (2645894652), class P.
+#
+# What it does: a postfix on StandardAttributeFormatter.GetTooltip rewrites the Overheat
+# Temperature attribute's tooltip so its "Base Value" line reads as a temperature (75 °C)
+# instead of a raw Kelvin number.
+# How a player reaches it: select a building and hover its overheat temperature in the
+# details screen's effects.
+# What changes: the overheat tooltip's base value is in the player's temperature unit.
+#
+# The research station of the base is selected; its overheat attribute's tooltip text (the
+# one the details screen shows) carries the formatted base value.
+from: early-base
+mods: [2645894652]
+steps:
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [128, 208], ortho: 8}}
+  - click_world: {cell: [127, 207], select: ResearchCenter}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Modifiers>.attributes.Get(\"OverheatTemperature\").GetAttributeValueTooltip()": [{contains: "Base Value: 75"}, "== original"]
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Research Station"}

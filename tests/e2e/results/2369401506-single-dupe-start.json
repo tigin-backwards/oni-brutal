@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2369401506-single-dupe-start.yaml",
+ "mods": [
+  "2369401506"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a new base-game colony from the main menu offers one Duplicant card and embarks with one Duplicant",
+ "updated": "2026-10-27",
+ "commit": "1ae06b70",
+ "mod_dlls": {
+  "2369401506": {
+   "Single_Dupe_Start.dll": "a0cb5d95cf25af7c5a9d71c4fdbfb66e2e89ed7fd3011e17d9e0eacd5485e427"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-013141-9697dcd2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T01:44:44",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-025453-c1ae9cf2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T02:54:53",
+    "lane": 14,
+    "reference_run": "20261027-013141-9697dcd2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-025453-c1ae9cf2",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T02:54:54",
+    "lane": 15,
+    "reference_run": "20261027-013141-9697dcd2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

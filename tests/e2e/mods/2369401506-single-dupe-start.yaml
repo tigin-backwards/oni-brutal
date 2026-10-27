@@ -1,0 +1,34 @@
+# Single Dupe Start (2369401506), class M.
+#
+# What it does: a new colony starts with one Duplicant: a transpiler on
+# CharacterSelectionController.InitializeContainers offers one card instead of three, and for
+# the starting crew a postfix removes the "select your crew" title and re-centres the grid.
+# How a player reaches it: the main menu, New Game, up to the Duplicant selection.
+# What changes: one Duplicant to start with.
+#
+# A base-game Terra (fixed coordinate) is launched from the main menu: the Duplicant
+# selection offers one card, and the colony embarks with one Duplicant.
+from: main-menu
+spaced_out: false
+mods: [2369401506]
+require_log: ["MrPurple6411's Single Dupe Start patched."]
+steps:
+  - ui_wait: {path: "**/MainMenu/**/MainMenuButtons", cond: stable, frames: 3000}
+  - click: {text: "NEW GAME", under: "**/MainMenuButtons"}
+  - ui_wait: {path: "**/ModeSelectScreen/Panel/Content/RootToggles/StandardGame", cond: stable}
+  - click: {ui: "**/ModeSelectScreen/Panel/Content/RootToggles/StandardGame"}
+  - ui_wait: {path: "**/ClusterCategorySelectionScreen/Panel/Content/RootToggles/VanillaStyleGame", cond: stable}
+  - click: {ui: "**/ClusterCategorySelectionScreen/Panel/Content/RootToggles/VanillaStyleGame"}
+  - ui_wait: {path: "**/ColonyDestinationScreen2/Layout/Buttons/LaunchButton", cond: stable, frames: 3000}
+  - click: {ui: "**/CoordinateContainer/SeedInput"}
+  - ui_wait: {path: "**/CoordinateContainer/SeedInput", cond: stable}
+  - type: {ui: "**/CoordinateContainer/SeedInput", text: "SNDST-A-12345-0-0-0", clear: true, enter: true}
+  - ui_wait: {path: "**/CoordinateContainer/SeedInput/Text Area/Text", cond: text, value: "~SNDST-A-12345-0-0-0"}
+  - click: {ui: "**/ColonyDestinationScreen2/Layout/Buttons/LaunchButton"}
+  - ui_wait: {path: "**/MinionSelectScreen/Content/BottomContent/Buttons/ProceedButton", cond: stable, frames: 60000}
+  - expect_state:
+      "all:MinionSelectScreen::[0].containers.Count": 1
+  - click: {ui: "**/MinionSelectScreen/Content/BottomContent/Buttons/ProceedButton"}
+  - ui_wait: {path: "**/MinionSelectScreen", cond: gone, frames: 6000}
+  - expect_state:
+      "Components.LiveMinionIdentities.Count": 1

@@ -46,6 +46,8 @@ namespace OniMoono.Host
         {
             if (installed) return;
             installed = true;
+            // Before any mod's handler, as Unity's player registers its own first (D45).
+            AppDomain.CurrentDomain.AssemblyResolve += UnityRedirect;
             var harmony = new Harmony("OniMoono.Host.ModAccess");
             var loadDlls = AccessTools.Method("KMod.DLLLoader:LoadDLLs")
                 ?? throw new MissingMethodException("KMod.DLLLoader", "LoadDLLs");
@@ -53,7 +55,34 @@ namespace OniMoono.Host
             var location = AccessTools.PropertyGetter(Type.GetType("System.Reflection.RuntimeAssembly"), nameof(Assembly.Location))
                 ?? throw new MissingMethodException("System.Reflection.RuntimeAssembly", "get_Location");
             harmony.Patch(location, postfix: new HarmonyMethod(typeof(ModAccess), nameof(LocationPostfix)));
+            // A mod's own Assembly.LoadFrom of a file whose name is loaded gets what Mono gives (D45).
+            harmony.Patch(typeof(Assembly).GetMethod(nameof(Assembly.LoadFrom), [typeof(string)])!,
+                prefix: new HarmonyMethod(typeof(ModAccess), nameof(LoadFromPrefix)));
             AssemblyLoadContext.Default.Resolving += Resolve;
+        }
+
+        /// Set while ModAccess.LoadFrom loads a file it has placed already.
+        [ThreadStatic] static bool placing;
+
+        /// Assembly.LoadFrom(path) elsewhere than KMod's LoadDLLs (a mod loading a library itself):
+        /// the assembly already loaded that Mono gives for the file, or the file loaded beside it.
+        static bool LoadFromPrefix(string assemblyFile, ref Assembly __result)
+        {
+            if (placing || string.IsNullOrEmpty(assemblyFile)) return true;
+            string path;
+            try
+            {
+                path = Path.GetFullPath(assemblyFile);
+            }
+            catch (Exception e) when (e is ArgumentException or NotSupportedException or PathTooLongException)
+            {
+                return true;
+            }
+            if (!File.Exists(path)) return true;
+            if (AlreadyLoaded(path, out bool beside) is { } existing) __result = existing;
+            else if (beside) __result = Beside(path).LoadFromAssemblyPath(path);
+            else return true;
+            return false;
         }
 
         /// `Assembly.LoadFrom(path)` in LoadDLLs becomes `ModAccess.LoadFrom(path)`.
@@ -93,7 +122,7 @@ namespace OniMoono.Host
         {
             path = Path.GetFullPath(path);
             if (byPath.TryGetValue(path, out var loaded)) return loaded;
-            if (AlreadyLoaded(path) is { } existing) return existing;
+            if (AlreadyLoaded(path, out bool beside) is { } existing) return existing;
             var reason = Unreachable(path);
             byte[]? image, symbols = null;
             if (reason != null)
@@ -130,16 +159,31 @@ namespace OniMoono.Host
             // Its conversions of floats to integers give Mono's values out of range (MonoConversions),
             // and its directory listings come in Mono's order (MonoDirectoryListing, in that pass).
             if (MonoConversions.Adjust(image ?? File.ReadAllBytes(path), ref symbols, path) is { } converted) image = converted;
-            if (image == null) return Recorded(Assembly.LoadFrom(path));
+            // A strong-named file of another identity than the loaded assembly of its name loads
+            // beside it, as in Mono (D45).
+            var context = beside ? Beside(path) : AssemblyLoadContext.Default;
+            if (image == null)
+            {
+                if (beside) return Recorded(context.LoadFromAssemblyPath(path));
+                placing = true;
+                try
+                {
+                    return Recorded(Assembly.LoadFrom(path));
+                }
+                finally
+                {
+                    placing = false;
+                }
+            }
             Assembly assembly;
             try
             {
-                assembly = AssemblyLoadContext.Default.LoadFromStream(new MemoryStream(image), symbols == null ? null : new MemoryStream(symbols));
+                assembly = context.LoadFromStream(new MemoryStream(image), symbols == null ? null : new MemoryStream(symbols));
             }
             catch (BadImageFormatException) when (symbols != null)
             {
                 // Symbols the runtime cannot read (a Windows PDB): the assembly loads without them.
-                assembly = AssemblyLoadContext.Default.LoadFromStream(new MemoryStream(image));
+                assembly = context.LoadFromStream(new MemoryStream(image));
             }
             locations[assembly] = path;
             byPath[path] = assembly;
@@ -155,12 +199,15 @@ namespace OniMoono.Host
             return assembly;
         }
 
-        /// Mono loads a file whose assembly has no strong name as the assembly already loaded with
-        /// its simple name, whatever their versions (mono_domain_assembly_search: names compared
-        /// ignoring version, key and case); CoreCLR refuses a second version, and the game then
-        /// drops the mod (a mod shipping its own copy of a library another mod loaded first).
-        static Assembly? AlreadyLoaded(string path)
+        /// What Mono gives for a load of this file when an assembly of its name is loaded (D15,
+        /// D45; mono_domain_assembly_search compares names ignoring case): for a file without a
+        /// strong name, the first assembly loaded under its simple name, whatever their versions
+        /// (CoreCLR refuses a second version, and the game then drops the mod); for a strong-named
+        /// file, the loaded assembly of its identity, else null with `beside` set when the default
+        /// context holds another of its name (Mono loads the file beside it; CoreCLR refuses).
+        static Assembly? AlreadyLoaded(string path, out bool beside)
         {
+            beside = false;
             AssemblyName name;
             try
             {
@@ -170,28 +217,78 @@ namespace OniMoono.Host
             {
                 return null;
             }
-            if (name.GetPublicKeyToken() is { Length: > 0 } || Loaded(name.Name) is not { } assembly) return null;
+            if (name.GetPublicKeyToken() is { Length: > 0 })
+            {
+                if (Identical(name) is { } same) return same;
+                foreach (var a in AssemblyLoadContext.Default.Assemblies)
+                    if (!a.IsDynamic && string.Equals(a.GetName().Name, name.Name, StringComparison.OrdinalIgnoreCase))
+                    {
+                        beside = true;
+                        EngineLog.Engine($"mod access: {path} is {name.FullName}; {a.GetName().FullName} is loaded, and this one loads beside it (as in Mono)");
+                        break;
+                    }
+                return null;
+            }
+            if (Loaded(name.Name) is not { } assembly) return null;
             if (assembly.GetName().Version != name.Version)
                 EngineLog.Engine($"mod access: {path} is {name.Name} {name.Version}; {assembly.GetName().Version}, already loaded, stands in for it (as in Mono)");
             return assembly;
         }
 
-        /// The assembly loaded in the default context under this simple name (compared ignoring
-        /// case, as Mono compares), or null.
+        /// A context of its own for a strong-named file whose name the default context holds in
+        /// another identity; its references bind as the default context's do.
+        static AssemblyLoadContext Beside(string path) => new("OniMoono mod copy: " + path);
+
+        /// The assemblies loaded (not dynamic, not in a collectible context such as
+        /// MissingInterfaceMethods' probe), in load order, as Mono's domain lists them.
+        static IEnumerable<Assembly> LoadedAssemblies()
+        {
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+                if (!assembly.IsDynamic && AssemblyLoadContext.GetLoadContext(assembly) is { IsCollectible: false }) yield return assembly;
+        }
+
+        /// The first assembly loaded under this simple name (compared ignoring case, as Mono
+        /// compares), or null.
         static Assembly? Loaded(string? simpleName)
         {
-            foreach (var assembly in AssemblyLoadContext.Default.Assemblies)
-                if (!assembly.IsDynamic && string.Equals(assembly.GetName().Name, simpleName, StringComparison.OrdinalIgnoreCase)) return assembly;
+            foreach (var assembly in LoadedAssemblies())
+                if (string.Equals(assembly.GetName().Name, simpleName, StringComparison.OrdinalIgnoreCase)) return assembly;
             return null;
         }
 
-        /// A reference CoreCLR could not bind: one to an assembly without a strong name binds, as in
-        /// Mono, to the assembly loaded under its simple name whatever their versions (a mod built
-        /// against PLib 4.22 when another mod's older PLib is the one loaded); then the folders of
-        /// rewritten mods are searched as Assembly.LoadFrom's would be.
+        /// The first assembly loaded with this strong name, matched as Mono matches one
+        /// (mono_assembly_names_equal_flags): the simple name ignoring case, the culture when both
+        /// name one, the version unless either is 0.0.0.0, the public key token when both have one.
+        static Assembly? Identical(AssemblyName wanted)
+        {
+            foreach (var assembly in LoadedAssemblies())
+            {
+                var name = assembly.GetName();
+                if (!string.Equals(name.Name, wanted.Name, StringComparison.OrdinalIgnoreCase)) continue;
+                if (name.CultureName != null && wanted.CultureName != null && name.CultureName != wanted.CultureName) continue;
+                Version v = Normal(name.Version), w = Normal(wanted.Version);
+                if (v != w && v != Zero && w != Zero) continue;
+                if (name.GetPublicKeyToken() is { Length: > 0 } t && wanted.GetPublicKeyToken() is { Length: > 0 } u && !t.AsSpan().SequenceEqual(u)) continue;
+                return assembly;
+            }
+            return null;
+        }
+
+        static readonly Version Zero = new(0, 0, 0, 0);
+
+        static Version Normal(Version? v) => v == null ? Zero : new Version(v.Major, v.Minor, Math.Max(v.Build, 0), Math.Max(v.Revision, 0));
+
+        /// A reference CoreCLR could not bind binds as Mono binds it first, to an assembly already
+        /// loaded: one without a strong name to the first loaded under its simple name whatever
+        /// their versions (a mod built against PLib 4.22 when another mod's older PLib is the one
+        /// loaded), a strong-named one to the first of its identity (another version loaded beside
+        /// the first: AlreadyLoaded). Then the folders of rewritten mods are searched as
+        /// Assembly.LoadFrom's would be. What is still unbound reaches AssemblyResolve, whose first
+        /// handler is UnityRedirect.
         static Assembly? Resolve(AssemblyLoadContext context, AssemblyName name)
         {
-            if (name.GetPublicKeyToken() is not { Length: > 0 } && Loaded(name.Name) is { } loaded)
+            var loaded = name.GetPublicKeyToken() is { Length: > 0 } ? Identical(name) : Loaded(name.Name);
+            if (loaded != null)
             {
                 if (loaded.GetName().Version != name.Version)
                     EngineLog.Engine($"mod access: a reference to {name.Name} {name.Version} binds to {loaded.GetName().Version}, already loaded (as in Mono)");
@@ -206,6 +303,61 @@ namespace OniMoono.Host
             }
             return null;
         }
+
+        /// The AssemblyResolve handler Unity's player registers before any mod's (D45). For a full
+        /// name it loads the simple name, which in Mono gives a file of that name in the requesting
+        /// assembly's folder or the first assembly loaded under it, whatever its version and key (a
+        /// strong-named reference to another version than the one loaded binds there); failing
+        /// that, Mono raises AssemblyResolve again with the simple name and no requesting assembly,
+        /// so the handlers after it see the simple name first and then the full name.
+        static Assembly? UnityRedirect(object? sender, ResolveEventArgs e)
+        {
+            AssemblyName name;
+            try
+            {
+                name = new AssemblyName(e.Name);
+            }
+            catch (Exception ex) when (ex is ArgumentException or FileLoadException)
+            {
+                return null;
+            }
+            var simple = name.Name;
+            if (string.IsNullOrEmpty(simple) || simple == e.Name) return null;
+            // CoreCLR raises no Resolving event when the default context holds the name in
+            // another version: the loaded assembly of that identity (beside the first) comes
+            // first, as in Mono's search.
+            if (name.GetPublicKeyToken() is { Length: > 0 } && Identical(name) is { } identical) return identical;
+            // Mono looks in a mod assembly's folder before it raises the event (the game's and the
+            // host's folders are AssemblyPolicy's, which refuses some names there).
+            string? folder = null;
+            try
+            {
+                if (e.RequestingAssembly is { IsDynamic: false } requesting && requesting.Location is { Length: > 0 } location) folder = Path.GetDirectoryName(location);
+            }
+            catch (NotSupportedException)
+            {
+            }
+            if (folder != null && !AssemblyPolicy.IsPolicyDirectory(folder) && Path.Combine(folder, simple + ".dll") is var file && File.Exists(file))
+            {
+                try
+                {
+                    return LoadFrom(file);
+                }
+                catch (Exception ex) when (ex is FileLoadException or BadImageFormatException)
+                {
+                }
+            }
+            if (Loaded(simple) is { } loaded)
+            {
+                EngineLog.Engine($"mod access: a reference to {e.Name} binds to {loaded.GetName().FullName}, loaded under its simple name (as in Unity's player)");
+                return loaded;
+            }
+            return raiseResolve?.Invoke(null, [null, simple]) as Assembly;
+        }
+
+        /// AssemblyLoadContext.OnAssemblyResolve(RuntimeAssembly?, string): raises AppDomain's
+        /// AssemblyResolve as the runtime does.
+        static readonly MethodInfo? raiseResolve = typeof(AssemblyLoadContext).GetMethod("OnAssemblyResolve", BindingFlags.NonPublic | BindingFlags.Static);
 
         /// The first game member or type the assembly references that is not public, or null.
         static string? Unreachable(string path)

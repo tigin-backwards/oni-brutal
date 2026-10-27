@@ -249,7 +249,8 @@ game or mod code can notice. Each says how it is resolved, or why it is kept.
   `ModAccess`: such a file is given the loaded assembly (`LoadFrom`), and a reference CoreCLR cannot
   bind is given the assembly loaded under its simple name (the default context's Resolving event);
   each substitution is logged. `--check-types` loads two versions of an emitted assembly and binds a
-  third that references the second.
+  third that references the second. Strong-named assemblies and the rest of the binding order:
+  D45.
 - **D16 Exceptions nothing catches on other threads.** They end a CoreCLR process; Unity's
   player keeps running (measured with PerfProbe in the original: a thread's exception is logged,
   by UnityEngine's AppDomain.UnhandledException handler calling Debug.LogException; a thread-pool
@@ -933,6 +934,41 @@ game or mod code can notice. Each says how it is resolved, or why it is kept.
   spells a '/' as '+' (no CLR type name holds one otherwise). `Type.GetType` is left as it is.
   `--check-types` finds a nested type of a nested type so, ignoring case too, and a missing one
   as before.
+- **D45 References to an assembly another mod loaded.** Measured in the original player with
+  UnityProbe's binding probe (`AssemblyBinding.cs`, mods built by `tools/UnityProbe/Binding`),
+  read with Mono's `metadata/assembly.c` and `appdomain.c` (Unity's fork, branch
+  `unity-6000.3-mbe`). A mod's reference binds first to an assembly already loaded, searched in
+  load order (`mono_domain_assembly_search`): without a strong name, the first loaded under its
+  simple name, ignoring case, whatever the versions (PLib 4.8.1 references bind to another mod's
+  PLib 4.22, as D15 has it); with one, the first of the same identity (version and key). Then the
+  requesting mod's folder, whose file is taken whatever its version. Then AppDomain's
+  AssemblyResolve, whose first handler is one Unity's player registers (UnityEngine's
+  `ClassLibraryInitializer`): it loads the simple name, so a strong-named reference to another
+  version or key binds to the first assembly loaded under that name too, and failing that the
+  event is raised again with the simple name and no requesting assembly, before the other
+  handlers see the full name. KMod's `Assembly.LoadFrom` of a strong-named file gives the
+  loaded assembly of its identity, and a file of another version of it loads beside it
+  (`GetAssemblies` lists both; a reference of that version binds to it); a mod's own
+  `Assembly.LoadFrom` behaves as KMod's; `Assembly.Load(byte[])` always loads a new copy, as in
+  CoreCLR. CoreCLR fails strong-named references to other versions than the one loaded, refuses
+  a second file of a loaded name (KMod then drops the mod, even for a copy of the same version
+  but another build), and raises AssemblyResolve once. **Resolved in** `ModAccess`: references
+  bind as above (the default context's Resolving event, then an AssemblyResolve handler
+  registered before any mod's, which takes the folder, the simple name and then raises the
+  event again through `AssemblyLoadContext.OnAssemblyResolve`); a strong-named file of another
+  identity loads in a context of its own; a prefix of `Assembly.LoadFrom(string)` gives a mod's
+  own loads what KMod's get. Not covered: a strong-named reference whose other version sits in
+  the requesting mod's folder while one is loaded binds to the loaded one in ours (Mono loads the
+  file); and once a strong-named name has bound to the first loaded version, CoreCLR keeps that
+  binding for the default context, so a reference of that name after its own version loads
+  beside binds to the first still (Mono binds it to the new one). No mod in the Workshop
+  catalogue ships such a file: its strong-named libraries at a mod's
+  top level are copies of what the game or another mod ships (Newtonsoft.Json 7.0, YamlDotNet 15).
+  The load sweep's Stacking bed difference (`s2000`) was not this: ours's batch failed through
+  another mod, and bisecting left Stacking bed in a half without a mod that ships PLib.
+  `--check-types` loads a strong-named copy, another version beside it, references to both
+  versions and to a third, a mod's `Assembly.LoadFrom` of another version, and a reference to a
+  missing assembly, and checks the AssemblyResolve events.
 
 ## 3. The engine API (`OniMoono.UnityEngine`)
 

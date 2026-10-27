@@ -32,6 +32,7 @@
        lacks the types and members v1 has. -->
   <ItemGroup>
     <Compile Remove="Gone/**" />
+    <Compile Remove="Binding/**" />
     <ProjectReference Include="Gone/v1/ProbeGoneV1.csproj" />
   </ItemGroup>
 </Project>

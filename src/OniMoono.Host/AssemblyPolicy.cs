@@ -47,6 +47,16 @@ namespace OniMoono.Host
 
         /// Where the game's assemblies and our engine facades are (ModAccess resolves mods' references there).
         public static string[] ReferenceDirectories => [managedDir, engineDir];
+
+        /// Whether assemblies in this folder are this policy's to resolve: Managed/, the engine's
+        /// facades, the UI packages and the host's own folder.
+        public static bool IsPolicyDirectory(string folder)
+        {
+            var full = Path.TrimEndingDirectorySeparator(Path.GetFullPath(folder));
+            foreach (var dir in new[] { managedDir, engineDir, packagesDir, AppContext.BaseDirectory })
+                if (dir.Length > 0 && string.Equals(full, Path.TrimEndingDirectorySeparator(Path.GetFullPath(dir)), StringComparison.Ordinal)) return true;
+            return false;
+        }
         static OniMoono.Engine.Platform.GameLayout? layout;
         static string engineDir = "";
 

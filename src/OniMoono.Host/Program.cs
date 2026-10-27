@@ -757,6 +757,91 @@ namespace OniMoono.Host
                     try { Directory.Delete(dir, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
                 }
             });
+            Check("Strong-named copies, references to versions not loaded and the nested AssemblyResolve, as in Unity's player (ModAccess)", () =>
+            {
+                ModAccess.Install();
+                var dir = Directory.CreateTempSubdirectory("oni-moono-check-").FullName;
+                try
+                {
+                    // A public key (not signed: neither runtime checks a signature).
+                    byte[] key;
+                    using (var rsa = new System.Security.Cryptography.RSACryptoServiceProvider(1024))
+                    {
+                        var blob = rsa.ExportCspBlob(false);
+                        key = [.. BitConverter.GetBytes(0x2400), .. BitConverter.GetBytes(0x8004), .. BitConverter.GetBytes(blob.Length), .. blob];
+                    }
+                    // A library NAME VERSION in FOLDER whose Who() says "VERSION FOLDER", or a user whose
+                    // Call() returns REF's Who(), REF named with VERSION and TOKEN.
+                    string Write(string folder, string name, Action<Cecil.ModuleDefinition, Cecil.Cil.ILProcessor> body, string version = "1.0.0.0", byte[]? publicKey = null)
+                    {
+                        var assembly = Cecil.AssemblyDefinition.CreateAssembly(new Cecil.AssemblyNameDefinition(name, Version.Parse(version)) { PublicKey = publicKey }, name, Cecil.ModuleKind.Dll);
+                        var module = assembly.MainModule;
+                        var type = new Cecil.TypeDefinition("", name, Cecil.TypeAttributes.Public | Cecil.TypeAttributes.Abstract | Cecil.TypeAttributes.Sealed, module.TypeSystem.Object);
+                        module.Types.Add(type);
+                        var method = new Cecil.MethodDefinition("Run", Cecil.MethodAttributes.Public | Cecil.MethodAttributes.Static, module.TypeSystem.String);
+                        method.ImplAttributes |= Cecil.MethodImplAttributes.NoInlining;
+                        var il = method.Body.GetILProcessor();
+                        body(module, il);
+                        il.Emit(Cecil.Cil.OpCodes.Ret);
+                        type.Methods.Add(method);
+                        var path = Path.Combine(dir, folder, name + ".dll");
+                        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+                        assembly.Write(path);
+                        return path;
+                    }
+                    string Library(string folder, string name, string version, byte[]? publicKey = null) =>
+                        Write(folder, name, (_, il) => il.Emit(Cecil.Cil.OpCodes.Ldstr, $"{version} {folder}"), version, publicKey);
+                    string User(string folder, string name, string library, string version, byte[]? token = null) => Write(folder, name, (module, il) =>
+                    {
+                        var reference = new Cecil.AssemblyNameReference(library, Version.Parse(version)) { PublicKeyToken = token };
+                        module.AssemblyReferences.Add(reference);
+                        il.Emit(Cecil.Cil.OpCodes.Call, new Cecil.MethodReference("Run", module.TypeSystem.String, new Cecil.TypeReference("", library, module, reference)));
+                    });
+                    string Run(string path) => (string)ModAccess.LoadFrom(path).GetType(Path.GetFileNameWithoutExtension(path))!.GetMethod("Run")!.Invoke(null, null)!;
+
+                    const string strong = "OniMoonoCheckStrong", plain = "OniMoonoCheckPlain", missing = "OniMoonoCheckMissing";
+                    var first = ModAccess.LoadFrom(Library("s1", strong, "1.0.0.0", key));
+                    var token = first.GetName().GetPublicKeyToken();
+                    // A copy of the same identity is the loaded one; another version loads beside it.
+                    if (!ReferenceEquals(ModAccess.LoadFrom(Library("s1b", strong, "1.0.0.0", key)), first)) throw new InvalidOperationException("a copy of the loaded strong-named assembly loaded again");
+                    var second = ModAccess.LoadFrom(Library("s2", strong, "2.0.0.0", key));
+                    if (ReferenceEquals(second, first) || second.GetName().Version != new Version(2, 0, 0, 0) || Path.GetFileName(Path.GetDirectoryName(second.Location)) != "s2")
+                        throw new InvalidOperationException($"version 2 gave {second.GetName().Version} from {second.Location}");
+                    // A reference of that identity binds to it; one to a version not loaded, to the first loaded.
+                    if (Run(User("u2", "OniMoonoCheckUser2", strong, "2.0.0.0", token)) is var two && two != "2.0.0.0 s2") throw new InvalidOperationException($"a reference to version 2 bound to {two}");
+                    if (Run(User("u3", "OniMoonoCheckUser3", strong, "3.0.0.0", token)) is var three && three != "1.0.0.0 s1") throw new InvalidOperationException($"a reference to version 3 bound to {three}");
+                    // A mod's own Assembly.LoadFrom of another version of a loaded assembly without a strong name.
+                    var plainFirst = ModAccess.LoadFrom(Library("p1", plain, "1.0.0.0"));
+                    if (!ReferenceEquals(Assembly.LoadFrom(Library("p2", plain, "2.0.0.0")), plainFirst)) throw new InvalidOperationException("Assembly.LoadFrom loaded a second version");
+                    // A reference nothing binds: the handlers see its simple name (no requesting assembly), then its full name.
+                    var seen = new List<string>();
+                    ResolveEventHandler record = (_, e) =>
+                    {
+                        if (e.Name.StartsWith(missing, StringComparison.Ordinal)) seen.Add(e.Name + " from " + (e.RequestingAssembly?.GetName().Name ?? "null"));
+                        return null;
+                    };
+                    AppDomain.CurrentDomain.AssemblyResolve += record;
+                    try
+                    {
+                        Run(User("un", "OniMoonoCheckUserN", missing, "1.0.0.0"));
+                        throw new InvalidOperationException("a reference to a missing assembly bound");
+                    }
+                    catch (TargetInvocationException e) when (e.InnerException is FileNotFoundException)
+                    {
+                    }
+                    finally
+                    {
+                        AppDomain.CurrentDomain.AssemblyResolve -= record;
+                    }
+                    string[] expected = [missing + " from null", missing + ", Version=1.0.0.0, Culture=neutral, PublicKeyToken=null from OniMoonoCheckUserN"];
+                    if (!seen.SequenceEqual(expected)) throw new InvalidOperationException("AssemblyResolve saw " + string.Join("; ", seen));
+                    return "copies, versions beside, references and AssemblyResolve as in Unity's player";
+                }
+                finally
+                {
+                    try { Directory.Delete(dir, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+                }
+            });
             Check("Reflection writing a mod's static readonly field after its type is initialized (ModAccess)", () =>
             {
                 ModAccess.Install();

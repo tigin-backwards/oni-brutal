@@ -402,6 +402,18 @@ in small and non-inlined methods nothing patches. It runs through `scripts/e2e.p
 `from: main-menu`, as the canvas order probe does. ARCHITECTURE D41 records what it measured;
 `--check-types` ("GetCallingAssembly in a mod's patches …") encodes it.
 
+With `PROBE_SCENARIO=asmbind` only the assembly-binding probe runs (`AssemblyBinding.cs`, lines
+`AB …`, at mod load). Write its assemblies into the mod folder first: `dotnet run --project
+tools/UnityProbe/Binding -- MODFOLDER/binding` (libraries in several versions, with and without
+a strong name, each in a folder of its own, and users built against them). It loads each folder
+as KMod loads a mod's, or a user alone with `Assembly.LoadFrom`, and calls the users: each
+answer names the copy a reference bound to (another version loaded first, several loaded, a
+reference in other case, a copy beside the user, another key, none at all). It also logs
+`Assembly.LoadFrom`, `Load(byte[])` and `Load(name)` of loaded names, the AssemblyResolve
+handlers registered before its own and each event it sees with its frames. It runs through
+`scripts/e2e.py` with a spec `from: main-menu`, as the canvas order probe does. ARCHITECTURE D45
+records what it measured; `--check-types` ("Strong-named copies, …") encodes it.
+
 With `PROBE_SCENARIO=logthreads` only the log-threads probe runs (`LogThreads.cs`, lines `LT …`,
 10 s into the main menu): a managed `Thread`, a thread-pool item, a `Task` and the main thread
 log each type through `UnityEngine.Debug`, `Debug.unityLogger` and Klei's `Debug`, and handlers

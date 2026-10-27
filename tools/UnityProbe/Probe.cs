@@ -133,6 +133,12 @@ namespace SemanticsProbe
                 CallingAssembly.Run(harmony);
                 return;
             }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "asmbind")
+            {
+                Rec.Log("=== values: assembly binding");
+                AssemblyBinding.Run(mod, path);
+                return;
+            }
             if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "memberorder")
             {
                 Rec.Log("=== values: member order");

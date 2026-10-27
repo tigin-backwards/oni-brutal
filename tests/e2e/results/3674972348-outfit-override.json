@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3674972348-outfit-override.yaml",
+ "mods": [
+  "3674972348"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Duplicant's Blueprints tab has the Disable Override button (dumped), which turns its override off",
+ "updated": "2026-10-26",
+ "commit": "d1e7dcee",
+ "mod_dlls": {
+  "3674972348": {
+   "OutfitOverride.dll": "5984eb2de7e4d0bfe7407f307786c79e09641e28ddddf56c72b7faa48f4b8e94"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-200500-101f1b1f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T20:25:31",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-203924-ebcd6150",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T20:57:10",
+    "lane": 15,
+    "reference_run": "20261026-200500-101f1b1f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "button": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-203924-ebcd6150",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T20:58:08",
+    "lane": 15,
+    "reference_run": "20261026-200500-101f1b1f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "button": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

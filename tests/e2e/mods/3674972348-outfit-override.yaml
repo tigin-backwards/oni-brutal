@@ -1,0 +1,28 @@
+# Outfit Override (3674972348), classes P, O.
+#
+# What it does: a Duplicant wearing work clothes (and, by PLib options, Primo Garb, Warm
+# Coats, Pajamas or Swimwear) keeps the look of its Supply Closet outfit: patches on the
+# WearableAccessorizer choose the outfit's accessories. A Duplicant's outfit panel (the
+# Blueprints side screen tab) gets an Enable/Disable Override button for that Duplicant (on by
+# default).
+# How a player reaches it: a selected Duplicant's Blueprints tab.
+# What changes: Duplicants keep their chosen outfits.
+#
+# setup selects a Duplicant; its Blueprints tab shows Disable Override (dumped), and
+# clicking it turns the override off for that Duplicant.
+from: early-base
+mods: [3674972348]
+setup:
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "Components.LiveMinionIdentities.Items[1].GetComponent<KSelectable>"}]}}
+steps:
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/SidescreenTabHeader/TabRow/Blueprints Tab Instance", cond: stable}
+  - click: {ui: "**/DetailsScreen/SideScreen/SidescreenTabHeader/TabRow/Blueprints Tab Instance"}
+  - ui_wait: {path: "**/CosmeticsPanel/**/OverrideToggleButton", cond: stable}
+  - expect_ui:
+      "**/CosmeticsPanel/**/OverrideToggleButton/Label": {text: "Disable Override"}
+  - ui_dump: {name: button, root: "**/CosmeticsPanel/**/OverrideToggleButton"}
+  - click: {ui: "**/CosmeticsPanel/**/OverrideToggleButton"}
+  - expect_ui:
+      "**/CosmeticsPanel/**/OverrideToggleButton/Label": {text: "Enable Override"}
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[1].GetComponent<OverrideSaveState>.IsOverrideEnabled": false

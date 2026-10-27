@@ -1,0 +1,25 @@
+# 哈夫克的净水器｜Pollution Recycler (3712019800), class B.
+#
+# What it does: a 1x2 Pollution Recycler (120 W) in the Refinement menu, researched with the
+# first of Advanced Filtration, Liquid Based Refinement, Improved Combustion or Smelting the
+# game has: it takes dirt and polluted water and gives clean water through its outputs;
+# its mode is held at water (this version adds no mode toggle to the building).
+# How a player reaches it: the build menu (Refinement).
+# What changes: a compact water purifier.
+#
+# One built by setup in the dug-out corridor west of the printing pod is selected (its title
+# dumped).
+from: early-base
+mods: [3712019800]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"PollutionRecycler\")", method: Build, args: [131128, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"PollutionRecycler\").EnergyConsumptionWhenActive": 120
+      "Db.Get().Techs.Get(\"AdvancedFiltration\").unlockedItemIDs": {contains: PollutionRecycler}
+  - run: {seconds: 2}
+  - expect: {buildings: {PollutionRecycler: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: PollutionRecycler}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}

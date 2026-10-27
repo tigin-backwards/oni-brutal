@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3712019800-pollution-recycler.yaml",
+ "mods": [
+  "3712019800"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a built recycler is selected (dumped); it draws 120 W",
+ "updated": "2026-10-26",
+ "commit": "f4f72218",
+ "mod_dlls": {
+  "3712019800": {
+   "PollutionRecyclerMod.dll": "34939e5f173c166491df4221caa451f4c2163b359c4f5e98d5ffc5796a7c6a7b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-224716-becf6f37",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T22:47:16",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-230700-62df17b6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T23:14:34",
+    "lane": 14,
+    "reference_run": "20261026-224716-becf6f37",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-230700-62df17b6",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T23:14:37",
+    "lane": 15,
+    "reference_run": "20261026-224716-becf6f37",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

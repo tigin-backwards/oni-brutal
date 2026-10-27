@@ -1,0 +1,37 @@
+# Adjustable Sweeper (3143341732), class P.
+#
+# What it does: gives the Auto-Sweeper a range control: a SweeperRangeAdjust added to its
+# template is a user-controlled capacity from 1 to 16 tiles, so its side screen gets a
+# capacity control, and each frame (its Update) it sets the arm's pickup range, its range
+# visualizer and its chore consumer's reach to the chosen range. Copying settings carries it.
+# How a player reaches it: selecting an Auto-Sweeper.
+# What changes: the sweeper's reach, from its fixed 4 tiles up to 16.
+#
+# setup builds an Auto-Sweeper in the dug-out corridor west of the printing pod; it is
+# selected, starts at the game's range, and 10 typed into its range control sets its pickup
+# range and visualizer to 10.
+from: early-base
+mods: [3143341732]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SolidTransferArm\")", method: Build, args: [131765, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {SolidTransferArm: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: SolidTransferArm}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_wait: {path: "**/CapacityControlSideScreen", cond: stable}
+  - expect_state:
+      "selected:SweeperRangeAdjust.MaxCapacity": 16
+      "selected:SweeperRangeAdjust.UserMaxCapacity": "== original"
+      "selected:SolidTransferArm.pickupRange": "== original"
+  - ui_dump: {name: range, root: "**/CapacityControlSideScreen"}
+  - type: {ui: "**/CapacityControlSideScreen/**/InputField", text: "10", enter: true, clear: true}
+  - expect_state:
+      "selected:SweeperRangeAdjust.UserMaxCapacity": 10
+  - ui_wait: {path: "**/CapacityControlSideScreen", cond: stable}
+  - expect_state:
+      "selected:SolidTransferArm.pickupRange": 10
+      "selected:RangeVisualizer.RangeMax.x": 10
+      "selected:RangeVisualizer.RangeMin.y": -10
+  - ui_dump: {name: range-set, root: "**/CapacityControlSideScreen"}

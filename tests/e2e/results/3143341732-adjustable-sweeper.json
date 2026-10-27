@@ -1,0 +1,69 @@
+{
+ "spec": "mods/3143341732-adjustable-sweeper.yaml",
+ "mods": [
+  "3143341732"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a built Auto-Sweeper's range control (dumps match) takes 10, and its pickup range and visualizer follow",
+ "updated": "2026-10-26",
+ "commit": "cbabaaf0",
+ "mod_dlls": {
+  "3143341732": {
+   "AdjustableSweeper.dll": "d1f30b3742d96deb4dc6612a8aa6b53c9c5b2c12068d0d89aeeccfa4e2f17426"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-155051-8ce3a25e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T16:38:04",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T21:40:56",
+    "lane": 17,
+    "reference_run": "20261026-155051-8ce3a25e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "range": {
+      "differences": 0
+     },
+     "range-set": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T21:41:09",
+    "lane": 16,
+    "reference_run": "20261026-155051-8ce3a25e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "range": {
+      "differences": 0
+     },
+     "range-set": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

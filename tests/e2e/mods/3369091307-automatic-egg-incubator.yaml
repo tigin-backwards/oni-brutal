@@ -1,0 +1,36 @@
+# 全自动孵化器 automatic egg incubator (3369091307), classes P, O.
+#
+# What it does: the Incubator draws the PLib options' power (240 W) and heat (4 kW) and needs
+# no Duplicant: postfixes make EggNeedsAttention false and apply the Lullaby (EggSong) buff
+# themselves, the buff's duration becomes 1 s at the option's hatching multiplier (4), and a
+# finished egg is dropped by itself.
+# How a player reaches it: building an Incubator and putting an egg in it.
+# What changes: incubators run without lullabies by hand.
+#
+# options set 300 W and a multiplier of 5; an Incubator built by setup in the dug-out corridor
+# west of the printing pod is selected: it needs no attention, and its egg list is as long as
+# the original's.
+from: early-base
+mods: [3369091307]
+options:
+  "3369091307": {power: 300, songSpeed: 5}
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"EggIncubator\")", method: Build, args: [131127, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"EggIncubator\").EnergyConsumptionWhenActive": 300
+      "Assets.GetBuildingDef(\"EggIncubator\").ExhaustKilowattsWhenActive": 0
+      "Db.Get().effects.Get(\"EggSong\").duration": 1
+      "Db.Get().effects.Get(\"EggSong\").SelfModifiers[0].Value": 5
+  - run: {seconds: 2}
+  - expect: {buildings: {EggIncubator: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [111, 207], select: EggIncubator}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:EggIncubator.EggNeedsAttention()": false
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/IncubatorSideScreen", cond: stable}
+  # The egg grid's toggles grey out by what the colony has discovered and stored, read over
+  # frames: only the toggles' count is compared.
+  - expect_ui:
+      "**/IncubatorSideScreen/**/GridLayout/Toggle": {count: "== original"}

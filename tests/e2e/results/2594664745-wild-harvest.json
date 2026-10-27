@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2594664745-wild-harvest.yaml",
+ "mods": [
+  "2594664745"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "every wild harvestable plant is marked to harvest when ready",
+ "updated": "2026-10-27",
+ "commit": "cae5c4a5",
+ "mod_dlls": {
+  "2594664745": {
+   "WildHarvest.dll": "8373f4454817e14b7e5dc2d89fa85a2c31cc0ac26e32631bc8e5bcaef4a9aaec"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-063948-e1660148",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T07:07:22",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-093658-133631e6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:36:58",
+    "lane": 14,
+    "reference_run": "20261027-063948-e1660148",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-093658-133631e6",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T09:37:51",
+    "lane": 14,
+    "reference_run": "20261027-063948-e1660148",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

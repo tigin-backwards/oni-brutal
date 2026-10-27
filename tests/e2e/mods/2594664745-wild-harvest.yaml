@@ -1,0 +1,24 @@
+# Wild Harvest (2594664745), class P.
+#
+# What it does: a postfix on Harvestable.OnSpawn turns on "harvest when ready" for every
+# harvestable plant as it spawns, wild ones included, so Duplicants harvest them without an
+# order.
+# How a player reaches it: it is passive; plants growing in the world.
+# What changes: wild crops are harvested by themselves.
+#
+# setup plants a wild Mealwood in the dug-out corridor west of the printing pod: it and the
+# world's wild plants (Mealwoods, Grubfruit...) are all marked to harvest when ready, as the
+# game's wild plants are not.
+from: early-base
+mods: [2594664745]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(0, 112, 206, \"BasicSingleHarvestPlant\", \"BuildingBack\")", method: SetActive, args: [true]}}
+steps:
+  - run: {seconds: 2}
+  - expect_state:
+      "all:HarvestDesignatable::Length": ">= 1"
+      "count:all:HarvestDesignatable::[*] if .HarvestWhenReady == false": 0
+      "count:all:HarvestDesignatable::[*] if .GetComponent<KPrefabID>.PrefabTag.Name == BasicSingleHarvestPlant and .HarvestWhenReady == true": [">= 2", "== original"]
+  - driver: {camera.set: {cell: [112, 207], ortho: 6}}
+  - click_world: {cell: [112, 206], select: BasicSingleHarvestPlant}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}

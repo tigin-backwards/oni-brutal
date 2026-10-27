@@ -1,0 +1,42 @@
+# 净水器消毒出水和肥料金汞齐泥土粘土硫藻 (3276461530), class P.
+#
+# What it does: rebuilds the Water Sieve: no power, no heat, +100 decor in 20 tiles, buildable
+# anywhere, not floodable, entombable or overheatable. Its converter turns 1 kg/s of polluted
+# water into 10 kg/s of clean water and 1 kg/s each of algae, fertilizer, gold amalgam, clay,
+# sulfur and dirt, all stored (100 t, sealed and insulated); a CustomElementDropper drops the
+# solids in 200 kg lots, the sand delivery is gone, and its pipe takes 10 kg/s of any water
+# and sends out everything but polluted water.
+# How a player reaches it: building a Water Sieve.
+# What changes: a sieve that multiplies water and makes six solids from nothing.
+#
+# A sieve built by setup in the dug-out corridor west of the printing pod, with pipes on its
+# ports and 300 kg of polluted water stored, makes ten times the polluted water's mass of
+# clean water, and a kilogram of clay for each kilogram, until its output pipe is full.
+from: early-base
+mods: [3276461530]
+setup:
+  # Tiles under it (the floor here has pits), and a pipe on its input and output ports, which a
+  # sieve needs to run.
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Tile\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Tile\")", method: Build, args: [{"$": "Grid.XYToCell(113, 206)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Tile\")", method: Build, args: [{"$": "Grid.XYToCell(114, 206)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Tile\")", method: Build, args: [{"$": "Grid.XYToCell(115, 206)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"WaterPurifier\")", method: Build, args: [{"$": "Grid.XYToCell(113, 207)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "last:GetComponent<Storage>", method: AddLiquid, args: [DirtyWater, 300.0, 293.15, 255, 0]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidConduit\")", method: Build, args: [{"$": "Grid.XYToCell(112, 209)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidConduit\")", method: Build, args: [{"$": "Grid.XYToCell(115, 209)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"WaterPurifier\").RequiresPowerInput": false
+      "Assets.GetBuildingDef(\"WaterPurifier\").BaseDecor": 100
+      "Assets.GetPrefab(\"WaterPurifier\").GetComponent<ElementConverter>.outputElements.Length": 7
+      "Assets.GetPrefab(\"WaterPurifier\").GetComponent<ElementConverter>.outputElements[0].massGenerationRate": 10
+      "Assets.GetPrefab(\"WaterPurifier\").GetComponent<ManualDeliveryKG>": missing
+  - run: {seconds: 30}
+  - expect: {buildings: {WaterPurifier: 1}}
+  - expect_state:
+      "all:WaterPurifier::[0].GetComponent<Storage>.GetMassAvailable(\"DirtyWater\")": ["<= 299.5", {save_as: dirty}]
+      "all:WaterPurifier::[0].GetComponent<Storage>.GetMassAvailable(\"Clay\")": ">= 0.5"
+      "Game.Instance.liquidConduitFlow.GetContents(133039).mass": {save_as: piped}
+  - expect_state:
+      "all:WaterPurifier::[0].GetComponent<Storage>.GetMassAvailable(\"Water\")": ">= 9.5 * (300 - dirty) - piped"

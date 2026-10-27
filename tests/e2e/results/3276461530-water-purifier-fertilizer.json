@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3276461530-water-purifier-fertilizer.yaml",
+ "mods": [
+  "3276461530"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Water Sieve with pipes and 300 kg of polluted water makes ten times its mass of water and clay alongside, without power",
+ "updated": "2026-10-26",
+ "commit": "cbabaaf0",
+ "mod_dlls": {
+  "3276461530": {
+   "WaterPurifierFix20250922183058.dll": "5b57c01ee8f41de94945e71fc2b4f2abd44fccdbf0ef7c9cce6248693c41dd11"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-192612-e52c7dc9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T19:31:54",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T21:45:05",
+    "lane": 17,
+    "reference_run": "20261026-192612-e52c7dc9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T21:45:11",
+    "lane": 16,
+    "reference_run": "20261026-192612-e52c7dc9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

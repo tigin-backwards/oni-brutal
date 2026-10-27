@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3315374510-research-included.yaml",
+ "mods": [
+  "3315374510"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "unresearched techs read complete; the Power menu offers the transformer (dumped and shot)",
+ "updated": "2026-10-27",
+ "commit": "5b6dd095",
+ "mod_dlls": {
+  "3315374510": {
+   "ResearchIncluded.dll": "4ab08bd4de0fa29708d77732130e2740f63449cb672fceb47f18c2dfb8e79c81"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-051715-c581e5cb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T05:39:06",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-094140-a9619669",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:41:40",
+    "lane": 15,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "power-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "power-menu": 0.0
+    }
+   },
+   {
+    "run": "20261027-094140-a9619669",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T09:42:38",
+    "lane": 15,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "power-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "power-menu": 0.0
+    }
+   }
+  ]
+ }
+}

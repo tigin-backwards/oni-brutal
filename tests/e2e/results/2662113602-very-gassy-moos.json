@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2662113602-very-gassy-moos.yaml",
+ "mods": [
+  "2662113602"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "MooTuning carries 100 kg a cycle; a Gassy Moo lives on",
+ "updated": "2026-10-27",
+ "commit": "507839e4",
+ "mod_dlls": {
+  "2662113602": {
+   "VeryGassyMoosMerged.dll": "4825164a1c7025bf9aaf535f22f108d3dcc31586ed6c20ebde627feaa7c7d08b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-063948-e1660148",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T07:03:56",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-092308-3811fbdc",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:23:08",
+    "lane": 14,
+    "reference_run": "20261027-063948-e1660148",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-092308-3811fbdc",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T09:24:07",
+    "lane": 14,
+    "reference_run": "20261027-063948-e1660148",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

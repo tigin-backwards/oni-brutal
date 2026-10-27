@@ -1,0 +1,24 @@
+# Very Gassy Moos (2662113602), classes P, O.
+#
+# What it does: at load it sets the Gassy Moo's tuning from a PLib option, Gas per cycle
+# (100 kg; the game's is 10): the natural gas made per plant eaten, per kg of solid food, and
+# the smallest emission, in MooTuning's static fields (restart required).
+# How a player reaches it: ranching Gassy Moos; the options on the Mods screen.
+# What changes: ten times the natural gas from Moos.
+#
+# MooTuning carries the values for 100 kg a cycle; a Gassy Moo laid in the dug-out corridor
+# west of the printing pod lives on.
+from: early-base
+mods: [2662113602]
+setup:
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [0, 112, 206, Moo, Creatures]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "MooTuning.KG_POOP_PER_DAY_OF_PLANT": 50
+      "MooTuning.MIN_POOP_SIZE_IN_KG": [">= 14.999", "<= 15.001"]   # 100 * 0.15 in floats
+      "MooTuning.POOP_KG_COVERSION_RATE_FOR_SOLID_DIET": "== original"
+      "MooTuning.MIN_POOP_SIZE_IN_CALORIES": "== original"
+  - run: {seconds: 10}
+  - expect_state:
+      "last:GetComponent<KPrefabID>.PrefabTag.Name": Moo

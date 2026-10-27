@@ -1,0 +1,56 @@
+{
+ "spec": "mods/3344136862-yo-wire.yaml",
+ "mods": [
+  "3344136862"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "every wire rating carries 50000 W",
+ "updated": "2026-10-27",
+ "commit": "68f257e9",
+ "mod_dlls": {
+  "3344136862": {
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
+   "yo╡τ╧▀mod.dll": "788c74d745901ec02c185593f9de16abdfd1e004d115bd9069f49b878ac9f6a6"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-063948-e1660148",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T07:10:53",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-093016-dfb2e17d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:30:16",
+    "lane": 15,
+    "reference_run": "20261027-063948-e1660148",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-093016-dfb2e17d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T09:31:04",
+    "lane": 15,
+    "reference_run": "20261027-063948-e1660148",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

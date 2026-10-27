@@ -1,0 +1,24 @@
+# yo电线mod (3344136862), classes P, O.
+#
+# What it does: a prefix replaces Wire.GetMaxWattageAsFloat: every wire's rating comes from a
+# PLib option, 50000 W each by default (Wire and Conductive Wire, Heavi-Watt and Conductive
+# Heavi-Watt Wire).
+# How a player reaches it: build any wire; the options on the Mods screen.
+# What changes: wires that never overload.
+#
+# Each rating reads 50000 W; a wire built by setup in the dug-out corridor west of the
+# printing pod is a Max1000 (1 kW) wire, which now carries 50000 W.
+from: early-base
+mods: [3344136862]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Wire.GetMaxWattageAsFloat(0)": 50000
+      "Wire.GetMaxWattageAsFloat(2)": 50000
+      "Wire.GetMaxWattageAsFloat(4)": 50000
+  - run: {seconds: 2}
+  - expect: {buildings: {Wire: ">= 1"}}
+  - expect_state:
+      "all:Wire::[0].MaxWattageRating": Max1000
+      "Wire.GetMaxWattageAsFloat(\"Max1000\")": 50000

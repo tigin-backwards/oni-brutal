@@ -1,0 +1,22 @@
+# Skills and Stats Progress FIXED (3662450561), classes S, P.
+#
+# What it does: a Duplicant's attributes panel (Personality tab) gets lines of its own: skill
+# experience towards the next skill point (Exp: N/M P%, SP: available/gained), each
+# attribute's experience towards its next level, radiation, distance travelled by way of
+# moving today and in all, and speed; work results pop up over a Duplicant as they finish.
+# How a player reaches it: select a Duplicant, the Personality tab.
+# What changes: more numbers on the Duplicant panel.
+#
+# Nikola (selected in setup) shows the skill experience line on the Personality tab (shot,
+# the numbers masked).
+from: early-base
+mods: [3662450561]
+setup:
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "Components.LiveMinionIdentities.Items[1]"}]}}
+steps:
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - click: {ui: "**/DetailsScreen/Tabs/TabHeader/tab: PERSONALITY"}
+  - ui_wait: {path: "**/DetailsScreen/Body/TabBody/ScrollRect/Content/MinionPersonalityPanel", cond: stable}
+  - expect_ui:
+      "**/MinionPersonalityPanel/**/*": {any_text: "~SP:"}
+  - shot: {name: personality, crop: "**/DetailsScreen", threshold: 0.04}

@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3662450561-skills-and-stats-progress-fixed.yaml",
+ "mods": [
+  "3662450561"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Duplicant's Personality tab shows the mod's skill experience line (shot)",
+ "updated": "2026-10-27",
+ "commit": "7224eee1",
+ "mod_dlls": {
+  "3662450561": {
+   "SkillsAndStatsProgressFIXED.dll": "0a2b080faa2606783d99eec2ee9b41067dd1e7bdf07c723bff91f4f198b1460d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-005510-07dc8c66",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T01:01:55",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-020436-a3889541",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T02:04:36",
+    "lane": 14,
+    "reference_run": "20261027-005510-07dc8c66",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "personality": 0.002146
+    }
+   },
+   {
+    "run": "20261027-020436-a3889541",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T02:04:37",
+    "lane": 15,
+    "reference_run": "20261027-005510-07dc8c66",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "personality": 0.002146
+    }
+   }
+  ]
+ }
+}

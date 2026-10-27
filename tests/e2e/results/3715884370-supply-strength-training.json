@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3715884370-supply-strength-training.yaml",
+ "mods": [
+  "3715884370"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Duplicants who fetch sandstone for two ordered tiles gain Strength experience",
+ "updated": "2026-10-26",
+ "commit": "edbba542",
+ "mod_dlls": {
+  "3715884370": {
+   "ONI_mod_strength_train.dll": "e0f9effd71825b82d480b35bb5fcec0b40acaa16a470239622f8ab56a393372b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-205735-80da1c17",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T22:17:06",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-222309-a79acdeb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T22:23:09",
+    "lane": 16,
+    "reference_run": "20261026-205735-80da1c17",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-222309-a79acdeb",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T22:25:10",
+    "lane": 16,
+    "reference_run": "20261026-205735-80da1c17",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

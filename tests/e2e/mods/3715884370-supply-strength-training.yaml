@@ -1,0 +1,22 @@
+# Supply strength training (3715884370), class P,O.
+#
+# What it does: a postfix on ChoreDriver's OnChoreExit gives the Duplicant Strength experience
+# (a PLib option, 5 by default) for each supply errand it leaves: fetches, critical fetches,
+# storage fetches, transport (sweeping) and the like.
+# How a player reaches it: Duplicants doing supply errands.
+# What changes: haulers grow stronger.
+#
+# Two tiles are ordered in the dug-out corridor west of the printing pod: once the Duplicants
+# have fetched their sandstone and built them, their Strength experience has risen by at least
+# one delivery's 5.
+from: early-base
+mods: [3715884370]
+steps:
+  - expect_state:
+      "sum:Components.LiveMinionIdentities.Items[*].GetComponent<AttributeLevels>.GetAttributeLevel(\"Strength\").experience": {save_as: before}
+  - build: {prefab: Tile, cells: [[111, 208], [112, 208]], material: SandStone}
+  - expect: {blueprints: {Tile: 2}}
+  - run: {seconds: 900, until: {pending_construction: 0}}
+  - expect: {buildings: {Tile: 10}}
+  - expect_state:
+      "sum:Components.LiveMinionIdentities.Items[*].GetComponent<AttributeLevels>.GetAttributeLevel(\"Strength\").experience": ">= before + 5"

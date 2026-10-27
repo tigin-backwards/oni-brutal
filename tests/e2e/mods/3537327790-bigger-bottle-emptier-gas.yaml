@@ -1,0 +1,23 @@
+# Bigger Bottle Emptier Conduit Gas (3537327790), class P.
+#
+# What it does: a postfix on BottleEmptierConduitGasConfig.ConfigureBuildingTemplate sets the
+# Canister Drainer's storage to 1,600 kg (the game's is 10 kg).
+# How a player reaches it: building a Canister Drainer.
+# What changes: the drainer holds more gas at once.
+#
+# The prefab is read; a drainer built by setup in the dug-out corridor west of the printing pod
+# is selected, with 1,600 kg of storage.
+from: early-base
+mods: [3537327790]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"BottleEmptierConduitGas\")", method: Build, args: [131765, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"BottleEmptierConduitGas\").GetComponent<Storage>.capacityKg": 1600
+  - run: {seconds: 2}
+  - expect: {buildings: {BottleEmptierConduitGas: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: BottleEmptierConduitGas}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:Storage.capacityKg": 1600

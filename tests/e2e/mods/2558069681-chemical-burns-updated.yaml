@@ -1,0 +1,19 @@
+# [Vanilla + DLC] Chemical Burns Updated (2558069681), classes P, O.
+#
+# What it does: a breathing Duplicant's Sim200ms adds a ChemicalBurnMonitor that checks its
+# cell for corrosive chemicals (chlorine and bleach stone, liquid or gas, above a critical
+# mass): every 5 s there it takes the PLib options' damage and shows a Chemical burns status
+# item and notification.
+# How a player reaches it: Duplicants walking through chlorine.
+# What changes: chlorine hurts.
+#
+# After the colony runs, a breathing Duplicant carries the monitor, and nobody is burnt in the
+# clean base.
+from: early-base
+mods: [2558069681]
+steps:
+  - run: {seconds: 3}
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[1].GetComponent<ChemicalBurnMonitor>": exists
+      "Components.LiveMinionIdentities.Items[2].GetComponent<ChemicalBurnMonitor>": exists
+  - expect: {duplicants: 3}

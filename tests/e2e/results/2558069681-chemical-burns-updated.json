@@ -1,0 +1,56 @@
+{
+ "spec": "mods/2558069681-chemical-burns-updated.yaml",
+ "mods": [
+  "2558069681"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "breathing Duplicants carry the chemical burn monitor; nobody is burnt",
+ "updated": "2026-10-26",
+ "commit": "73711f65",
+ "mod_dlls": {
+  "2558069681": {
+   "ChemicalBurnsV2.dll": "1d5c9cc06e8c7d1c3abd3bf9f9d7c3e34bf68231ce1dee007cf29c255aebee47",
+   "PLib.dll": "c4bb22f1bc06ebcb0dbba75a7f1bc46f63eaa3dae12c22a08729f1a6d3362dda"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-200500-101f1b1f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T20:08:17",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-202022-adf95e2b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T20:50:16",
+    "lane": 14,
+    "reference_run": "20261026-200500-101f1b1f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-202022-adf95e2b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T20:50:26",
+    "lane": 15,
+    "reference_run": "20261026-200500-101f1b1f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3518867699-no-pipe-break.yaml",
+ "mods": [
+  "3518867699"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "water freezing in a pipe drops as ice and the pipe keeps all its hit points",
+ "updated": "2026-10-26",
+ "commit": "d993ae76",
+ "mod_dlls": {
+  "3518867699": {
+   "nopipebreak.dll": "71121a1dbe0b7987d7176ba3ae147155768d818c933bb48c42399335ec492298"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-203631-6eaffaae",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T20:49:03",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-224702-ec1abe8c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T22:49:55",
+    "lane": 17,
+    "reference_run": "20261026-203631-6eaffaae",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-224702-ec1abe8c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T22:49:56",
+    "lane": 16,
+    "reference_run": "20261026-203631-6eaffaae",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

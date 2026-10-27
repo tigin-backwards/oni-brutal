@@ -1,0 +1,25 @@
+# No pipe break (3518867699), class P.
+#
+# What it does: prefixes skip ConduitFlow.FreezeConduitContents and MeltConduitContents, the
+# calls that tell a pipe its contents froze or boiled: so the pipe takes no damage from it. The
+# contents still change state and leave the pipe as the simulation decides.
+# How a player reaches it: liquids or gases in pipes at extreme temperatures.
+# What changes: pipes no longer break from their contents changing state.
+#
+# setup builds a Liquid Reservoir in the dug-out corridor west of the printing pod, holding 50 kg
+# of water at 2 °C, and a liquid pipe at -173 °C on its output: the reservoir fills the pipe,
+# whose water freezes and drops as ice, and the pipe keeps all its hit points.
+from: early-base
+mods: [3518867699]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidReservoir\")", method: Build, args: [131764, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "last:GetComponent<Storage>", method: AddLiquid, args: [Water, 50.0, 275.0, 255, 0]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidConduit\")", method: Build, args: [131764, Neutral, null, [SandStone], 100.0, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 15}
+  - expect: {buildings: {LiquidConduit: 1, LiquidReservoir: 1}}
+  - expect_state:
+      "count:all:KPrefabID::[*] if .PrefabTag.Name == Ice": ">= 1"
+      "all:Conduit::[0].GetComponent<BuildingHP>.MaxHitPoints": {save_as: full}
+  - expect_state:
+      "all:Conduit::[0].GetComponent<BuildingHP>.HitPoints": "== full"

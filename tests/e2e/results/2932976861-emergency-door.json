@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2932976861-emergency-door.yaml",
+ "mods": [
+  "2932976861"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Base menu shot lists the door; built and selected, a pressure door with access control",
+ "updated": "2026-10-27",
+ "commit": "a0585958",
+ "mod_dlls": {
+  "2932976861": {
+   "░▓╚½├┼Emergency Door.dll": "f397bbb9963a2e051d09a30820890353e6aa71813ef2fe5975cc913f23eb7b5f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-074831-45ab7067",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:11:09",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-094212-b2312f58",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:50:37",
+    "lane": 17,
+    "reference_run": "20261027-074831-45ab7067",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "base-menu": 0.0
+    }
+   },
+   {
+    "run": "20261027-094212-b2312f58",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T09:51:30",
+    "lane": 17,
+    "reference_run": "20261027-074831-45ab7067",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "base-menu": 0.0
+    }
+   }
+  ]
+ }
+}

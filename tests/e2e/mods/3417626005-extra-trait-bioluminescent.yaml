@@ -1,0 +1,32 @@
+# Extra Trait: Bioluminescent (3417626005), class S.
+#
+# What it does: adds a good trait, Bioluminescent (BD_Bioluminescence, epic rarity, exclusive
+# with Glow Stick), that gives a Duplicant the Glow Stick's luminescence and counts as a glow
+# stick for sleeping (SleepChore.IsGlowStick). Every Duplicant gets a
+# BioluminescenceColorSelectable; selected, one with either light trait shows the Pixel Pack's
+# colour swatches under its side screen, and a swatch sets its light's colour. A Biolumin
+# Essence (from the Molecular Forge) grants the trait; a Trait Upgrade assignable slot is
+# added.
+# How a player reaches it: printing or picking a Duplicant with the trait; selecting it.
+# What changes: glowing Duplicants with a chosen light colour.
+#
+# setup gives a Duplicant the trait and selects it: it glows with the Glow Stick's lux, and the
+# swatches show under its details screen.
+from: early-base
+mods: [3417626005]
+setup:
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<Traits>", method: Add, args: [{"$": "Db.Get().traits.Get(\"BD_Bioluminescence\")"}]}}
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "Components.LiveMinionIdentities.Items[1].GetComponent<KSelectable>"}]}}
+steps:
+  - expect_state:
+      "count:DUPLICANTSTATS.GOODTRAITS[*] if .id == BD_Bioluminescence": 1
+      "Components.LiveMinionIdentities.Items[1].GetComponent<BD_Bioluminescence>": exists
+      "Components.LiveMinionIdentities.Items[1].GetComponent<BioluminescenceColorSelectable>.HasLightTrait()": true
+      "ComplexRecipeManager.Get().GetRecipe(\"SupermaterialRefinery_I_GeneShufflerRecharge_LightBugEgg_O_BD_BioluminEssence\")": exists
+  - run: {seconds: 2}
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[1].GetComponent<Modifiers>.attributes.Get(\"Luminescence\").GetTotalValue()": ">= 1"
+      "Components.LiveMinionIdentities.Items[1].GetComponent<Light2D>.enabled": true
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "type:BioluminescentDupes.Content.UI.Bioluminescence_Sidescreen::Target": exists

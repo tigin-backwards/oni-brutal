@@ -1,0 +1,43 @@
+# SaltBox 盐盒 (3139285721), classes B, P.
+#
+# What it does: adds the SaltBox (2x2, raw minerals, in the Food menu after Fine Dining): a
+# ration box for 500 kg of food that Duplicants also keep filled with salt (up to 300 kg). While
+# any food in it is less than half fresh it burns salt slowly into sand, and its food rots more
+# slowly (a +1.2 rot modifier, "Stored in a salt box") until all of it is fresh again.
+# How a player reaches it: the build menu (Food), after the research; its filter and capacity
+# side screens.
+# What changes: a food box that keeps food fresh with salt.
+#
+# Setup researches Fine Dining and sets 50 kg of salt down in the corridor west of the printing
+# pod. A SaltBox is ordered there through the build menu and built; Duplicants bring salt to it,
+# and its side screen offers food to store.
+from: early-base
+mods: [3139285721]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"FineDining\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Salt\").substance", method: SpawnResource, args: [[109.5, 207.5, -12], 50, 293, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"FineDining\").unlockedItemIDs": {contains: SaltBox}
+      "Assets.GetPrefab(\"SaltBox\").GetComponent<ManualDeliveryKG>.RequestedItemTag": "== 'Salt'"
+      "Assets.GetPrefab(\"SaltBox\").GetComponent<Storage>.capacityKg": 500
+  - run: {seconds: 5}
+  - click: {ui: "**/PlanScreen/Toggle:Food"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/SaltBox Group*", cond: stable}
+  - shot: {name: food-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click: {ui: "**/BuildingGroups/**/Grid/SaltBox Group*"}
+  - ui_wait: {path: "**/PlanBuildingSelectionPanel/ProductInfoScreen", cond: stable}
+  - click_world: {cell: [113, 206]}
+  - key: {code: Escape}
+  - expect: {blueprints: {SaltBox: 1}}
+  - run: {seconds: 900, until: {buildings: {SaltBox: 1}, pending_construction: 0}}
+  - run: {seconds: 300}
+  - expect_state:
+      "all:SaltBox.SaltBox::[0].GetComponent<Storage>.GetMassAvailable(\"Salt\")": "> 1"
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: SaltBox}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/TreeFilterableSideScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~SaltBox"}

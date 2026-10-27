@@ -1,0 +1,28 @@
+# Advanced Storage(V4) (3332098282), class B.
+#
+# What it does: adds two "tele storages" (TeleStorageLiquid and TeleStorageGas, 2x3, steel,
+# plastic and diamond, in the Base menu after Catalytics) that share one colony-wide store: what
+# any of them takes from its input pipe goes into the shared store (saved beside the save), and
+# each sends the element picked in its filter side screen out of its output pipe. A postfix on
+# SimpleInfoScreen.RefreshStoragePanel lists the shared store's contents for them.
+# How a player reaches it: the build menu (Base), after the research; the filter side screen.
+# What changes: storage reachable from anywhere through pipes.
+#
+# Setup builds a liquid tele storage in the corridor west of the printing pod. Selected, its
+# details screen's storage panel lists the shared store (empty) and its filter side screen
+# opens.
+from: early-base
+mods: [3332098282]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"TeleStorageLiquid\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Steel, Plastic, Diamond], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"Catalytics\").unlockedItemIDs": {contains: TeleStorageLiquid}
+      "Assets.GetPrefab(\"TeleStorageLiquid\").GetComponent<TeleStorage.TeleStorage>.Type": Liquid
+  - run: {seconds: 2}
+  - expect: {buildings: {TeleStorageLiquid: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: TeleStorageLiquid}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/FilterSideScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/**": {any_text: "~Empty"}

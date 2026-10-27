@@ -1,0 +1,34 @@
+# Building-Super Metal Refinery 超级金属精炼器 (3480374510), class P; PLib options
+# (Controler.json).
+#
+# What it does: postfixes on MetalRefineryConfig rework the Metal Refinery by options: its
+# power (Expand x 1200 W) and heat (SelfHeat x 16 kDTU/s), the metal each recipe makes
+# (Production x 100 kg) and its speed, a liquid coolant pipe or none (Liquid), building
+# anywhere without a foundation (Fly), working without a Duplicant (Manual), and the coolant's
+# heat law (Law).
+# How a player reaches it: build a Metal Refinery; the options in the mod's PLib dialog.
+# What changes: a stronger, self-running refinery.
+#
+# Its shipped Controler.json holds non-default values, so the options are set here: 1x power
+# and heat, 2x production, coolant pipe, no foundation, no Duplicant. setup builds a refinery
+# in the corridor west of the printing pod; selected, it lists its recipes, each making 200 kg.
+from: early-base
+mods: [3480374510]
+options:
+  "3480374510": {$file: Controler.json, Expand: 1, SelfHeat: 1, Production: 2, Liquid: true, Fly: true, Manual: true, Speed: 1, Law: true}
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"MetalRefinery\")", method: Build, args: [131765, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"MetalRefinery\").EnergyConsumptionWhenActive": 1200
+      "Assets.GetBuildingDef(\"MetalRefinery\").BuildLocationRule": "== 'Anywhere'"
+      "Assets.GetPrefab(\"MetalRefinery\").GetComponent<ComplexFabricator>.duplicantOperated": false
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0].Name == METALREFINERY": ">= 5"
+      "ComplexRecipeManager.Get().GetRecipe(\"METALREFINERY_I_Cuprite_O_Copper\").results[0].amount": 200
+      "ComplexRecipeManager.Get().GetRecipe(\"METALREFINERY_I_IronOre_O_Iron\").results[0].amount": 200
+  - run: {seconds: 2}
+  - expect: {buildings: {MetalRefinery: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: MetalRefinery}
+  - ui_wait: {path: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView", cond: stable}
+  - ui_dump: {name: recipes, root: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView"}

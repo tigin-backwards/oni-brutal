@@ -1,0 +1,76 @@
+{
+ "spec": "mods/3480374510-super-metal-refinery.yaml",
+ "mods": [
+  "3480374510"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "with options set, a Metal Refinery built lists recipes making 200 kg (dump), no Duplicant",
+ "updated": "2026-10-27",
+ "commit": "7a927b44",
+ "mod_dlls": {
+  "3480374510": {
+   "MetalRefinery.dll": "4e16c514140452155ac06ded2c7908e199833bf9947fce99868a0cba50c8f25b",
+   "PLib.dll": "893dc1ea3eddd02c85d433231aae356be27be07ddfc1a98fb2c51d84748208e8"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-111432-ae629e14",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T11:34:55",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-114144-61e46230",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-27T12:04:18",
+    "lane": 17,
+    "reference_run": "20261027-111432-ae629e14",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261027-114144-61e46230",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-27T12:05:08",
+    "lane": 17,
+    "reference_run": "20261027-111432-ae629e14",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

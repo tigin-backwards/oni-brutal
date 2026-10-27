@@ -1,0 +1,23 @@
+# [Vanilla + DLC] Diet Variety (3235885361), class P,O.
+#
+# What it does: Duplicants want varied meals: each standard Duplicant gets a VarietyMonitor
+# whose Varied Diet effect (DietVarietyEffect) gives morale for each distinct food among its
+# last meals (15 counted) less a minimum (5 kinds), one point each; every meal eaten refreshes
+# it. Food fetching adds a path cost to food eaten lately, so they pick something else, and A
+# New Hope gains the minimum's morale to start with. A PastMealsEaten on the save remembers the
+# meals. All amounts are PLib options.
+# How a player reaches it: playing; a Duplicant's morale tooltip.
+# What changes: a morale penalty for monotonous diets.
+#
+# Once early-base loads, a standard Duplicant who has eaten nothing tracked carries the Varied
+# Diet effect at -5 morale.
+from: early-base
+mods: [3235885361]
+steps:
+  - run: {seconds: 2}
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[1].GetComponent<VarietyMonitor>": exists
+      "Components.LiveMinionIdentities.Items[1].GetComponent<Effects>.HasEffect(\"DietVarietyEffect\")": true
+      "Components.LiveMinionIdentities.Items[1].GetComponent<Effects>.Get(\"DietVarietyEffect\").effect.SelfModifiers[0].Value": -5
+      "Db.Get().effects.Get(\"AnewHope\").SelfModifiers.Count": "== original"
+      "SaveGame.Instance.GetComponent<PastMealsEaten>": exists

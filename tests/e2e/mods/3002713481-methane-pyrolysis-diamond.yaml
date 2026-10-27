@@ -1,0 +1,31 @@
+# 热裂解甲烷制钻石, methane pyrolysis into diamond (3002713481), class B; PLib options.
+#
+# What it does: adds MM20230708GG1, filed under Refinement: a 4x3 powered machine (2000 W,
+# 30 kDTU/s, options) that takes natural gas from a gas pipe (0.8 kg/s) and makes diamond
+# (0.5 kg/s, dropped in 30 kg lumps) and hydrogen (0.2 kg/s), both at 200 °C. It doubles as a
+# ladder. It is added without a plan screen subcategory, and the Refinement menu does not list
+# it (in either player).
+# How a player reaches it: the build menu (Refinement).
+# What changes: a source of diamond from natural gas.
+#
+# setup builds one in the corridor west of the printing pod and selects it: its converter
+# makes diamond and hydrogen from natural gas.
+from: early-base
+mods: [3002713481]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"MM20230708GG1\")", method: Build, args: [131765, Neutral, null, [Copper, Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "last:GetComponent<KSelectable>"}]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"MM20230708GG1\").EnergyConsumptionWhenActive": 2000
+      "Assets.GetBuildingDef(\"MM20230708GG1\").ShowInBuildMenu": true
+  - run: {seconds: 2}
+  - expect: {buildings: {MM20230708GG1: 1}}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<ElementConverter>.outputElements[0].elementHash": "== 'Diamond'"
+      "selected:GetComponent<ElementConverter>.outputElements[0].massGenerationRate": 0.5
+      "selected:GetComponent<ElementConverter>.outputElements[1].elementHash": "== 'Hydrogen'"
+      "selected:GetComponent<ElementConverter>.consumedElements[0].MassConsumptionRate": 0.8
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {active: true}

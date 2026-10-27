@@ -1,0 +1,27 @@
+# 缺氧属性修改 (OxygenNotIncluded Attribute Modification) (3558002322), class P.
+#
+# What it does: a cheat pack. Before Db.Initialize: every interest gives +1000 to its
+# attributes, bad traits are drawn from the good ones, passive experience is 500 times, suits
+# slow athletics less, element chunks may weigh a billion kg (logged). Every Storage holds
+# 200000 t (a constructor postfix), the reservoirs, ration box and fridge far more than the
+# game's; batteries hold 100 MJ; every wire carries 50 MW; the generators make megawatts;
+# the printing pod always has Duplicants on offer; non-bionic Duplicants get three interests.
+# How a player reaches it: it is passive.
+# What changes: nearly every limit.
+#
+# The tunings and prefabs carry the values (logged); the printing pod is ready at once; the
+# colony's manual generator, selected, is rated in megawatts.
+from: early-base
+mods: [3558002322]
+require_log: ['\[ONI_ATTR_MOD\] APTITUDE_ATTRIBUTE_BONUSES patched in Db\.Initialize\. Length: 16']
+steps:
+  - expect_state:
+      "TUNING.DUPLICANTSTATS.APTITUDE_BONUS": 1000
+      "TUNING.SKILLS.PASSIVE_EXPERIENCE_PORTION": 500
+      "Assets.GetPrefab(\"Battery\").GetComponent<Battery>.capacity": 100000000
+      "Assets.GetPrefab(\"LiquidReservoir\").GetComponent<Storage>.capacityKg": 50000000
+      "Assets.GetBuildingDef(\"ManualGenerator\").GeneratorWattageRating": 4000000
+  - run: {seconds: 2}
+  - expect_state:
+      "Immigration.Instance.ImmigrantsAvailable": true
+      "all:ManualGenerator::[0].GetComponent<Generator>.WattageRating": 4000000

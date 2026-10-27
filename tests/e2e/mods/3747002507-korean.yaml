@@ -1,0 +1,25 @@
+# Korean - 한국어 (3747002507), class P (strings only).
+#
+# What it does: for a player who plays in the game's own Korean (ko_klei), overloads the
+# translation with its own ko.po (3500 strings: fixes, unified terms, missing strings) after
+# the game's loads and whenever strings are overloaded again, and renames buildings whose
+# names were cached before (BuildingComplete, UserNameable and KSelectable patches).
+# How a player reaches it: the game in Korean (its Translations screen).
+# What changes: Korean text across the game.
+#
+# The spec plays in Korean (`language: ko_klei`): strings the mod's file changes read its
+# text, and the pause menu (with its Supply Closet button) is dumped and shot.
+from: early-base
+mods: [3747002507]
+language: ko_klei
+require_log: ['\[Korean\] ===== OnLoad']
+steps:
+  - expect_state:
+      "Localization.GetCurrentLanguageCode()": ko_klei
+      "Strings.Get(\"STRINGS.UI.FRONTEND.PAUSE_SCREEN.LOCKERMENU\").String": "공급품 보관소"
+      "Strings.Get(\"STRINGS.BUILDINGS.PREFABS.ADVANCEDDOCTORSTATION.NAME\").String": {contains: "질병 진료소"}
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/LayoutContent", cond: stable}
+  - ui_dump: {name: pause, root: "**/PauseScreen/LayoutContent"}
+  - shot: {name: pause, crop: "**/PauseScreen/LayoutContent"}
+  - key: {code: Escape}

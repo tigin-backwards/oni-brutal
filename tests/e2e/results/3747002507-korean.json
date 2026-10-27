@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3747002507-korean.yaml",
+ "mods": [
+  "3747002507"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "played in Korean: strings the mod's file changes read its text; the pause menu dumped and shot",
+ "updated": "2026-10-27",
+ "commit": "77aef08d",
+ "mod_dlls": {
+  "3747002507": {
+   "Korean.dll": "aa7ccca762fd924f312f12637c79149e2c8832f70b2fb1aac8d2eb2120cfd38c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-235258-afb42cfe",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T00:17:22",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-013002-3a5aa806",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T01:30:02",
+    "lane": 14,
+    "reference_run": "20261026-235258-afb42cfe",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "pause": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "pause": 0.0
+    }
+   },
+   {
+    "run": "20261027-013002-3a5aa806",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T01:30:03",
+    "lane": 15,
+    "reference_run": "20261026-235258-afb42cfe",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "pause": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "pause": 0.0
+    }
+   }
+  ]
+ }
+}

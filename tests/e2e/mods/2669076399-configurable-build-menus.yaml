@@ -1,0 +1,19 @@
+# [Vanilla + DLC] Configurable Build Menus (2669076399), classes S, O.
+#
+# What it does: a JSON file beside the mod (written with its defaults on first start) adds
+# build menus and categories and moves buildings between menus. By default it adds a Decor
+# menu (flowers, paintings, sculptures moved there) and moves the reservoirs to Plumbing and
+# Ventilation, the storage bins and dispenser to the head of Shipping, the wash basins to
+# Plumbing and the bunker door and launch pad ports to Rocketry.
+# How a player reaches it: the build menu; the JSON file for other layouts.
+# What changes: where buildings are found in the build menu.
+#
+# The Storage Bin heads the Shipping menu (shot).
+from: early-base
+mods: [2669076399]
+steps:
+  - run: {seconds: 2}
+  - click: {ui: "**/PlanScreen/Toggle:Shipping"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/StorageLocker Group*", cond: stable, stable: 120, frames: 600}
+  - shot: {name: shipping-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}

@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3439686467-insulate-storage-bin.yaml",
+ "mods": [
+  "3439686467"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "an Insulate Storage Bin built in the corridor holds 100 t; its capacity side screen dumped",
+ "updated": "2026-10-27",
+ "commit": "77aef08d",
+ "mod_dlls": {
+  "3439686467": {
+   "HeatExchangeNotIncluded_StorageBin.dll": "521e8218e4155065965475fcbaeafb6257a69402abc2f158a10dfabced071e49"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-235258-afb42cfe",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T00:00:20",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-012301-2db0a63a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T01:23:01",
+    "lane": 14,
+    "reference_run": "20261026-235258-afb42cfe",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "capacity": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261027-012301-2db0a63a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T01:23:02",
+    "lane": 15,
+    "reference_run": "20261026-235258-afb42cfe",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "capacity": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

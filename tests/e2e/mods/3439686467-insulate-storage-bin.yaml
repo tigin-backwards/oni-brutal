@@ -1,0 +1,25 @@
+# Insulate Storage Bin (3439686467), classes B, O.
+#
+# What it does: an Insulate Storage Bin (1x2, refined metal and insulite by default) whose
+# stored items exchange no heat with the bin's surroundings and, with the Sealed option, emit
+# no gas; it holds 100 t (the StorageCapacity option, in tonnes) and is always operational.
+# How a player reaches it: the build menu (Base); options in the Mods screen.
+# What changes: storage that keeps items at their temperature.
+#
+# One built by setup in the dug-out corridor west of the printing pod is selected: it holds
+# 100 t, and its capacity side screen is dumped.
+from: early-base
+mods: [3439686467]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"InsulateStorageBin\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper, Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {InsulateStorageBin: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: InsulateStorageBin}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Storage>.capacityKg": 100000
+      "selected:GetComponent<Storage>.allowItemRemoval": true
+  - ui_wait: {path: "**/DetailsScreen/**/CapacityControlSideScreen", cond: stable}
+  - ui_dump: {name: capacity, root: "**/CapacityControlSideScreen"}

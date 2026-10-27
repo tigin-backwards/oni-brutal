@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2999464166-mini-water-purifier.yaml",
+ "mods": [
+  "2999464166"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the research unlocks it; one built in the corridor has the mod's converter and ports (title dumped)",
+ "updated": "2026-10-27",
+ "commit": "1ae06b70",
+ "mod_dlls": {
+  "2999464166": {
+   "├╘─π╛╗╦«╞≈┤┐╛╗╦«░µ.dll": "da937b4c58dfdecf196887c89217a2d8eb8cc2965a91c01d4bc79a0e73c690d9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-013141-9697dcd2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T01:39:03",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-025318-0bbf0393",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T02:53:18",
+    "lane": 14,
+    "reference_run": "20261027-013141-9697dcd2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261027-025318-0bbf0393",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T02:53:19",
+    "lane": 15,
+    "reference_run": "20261027-013141-9697dcd2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

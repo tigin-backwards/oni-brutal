@@ -1,0 +1,28 @@
+# 迷你净水器纯净水版 (Mini water purifier, clean water) (2999464166), class B.
+#
+# What it does: a 1x2 Mini Water Purifier (MiniWaterPurifier) in the Refining menu, researched
+# with Improved Oxygen (ImprovedOxygen): unpowered and placeable anywhere, it takes 1 kg/s of
+# any water by pipe and gives 10 kg/s of clean water out of its pipe output, with +300 decor.
+# How a player reaches it: the build menu (Refining), after the research.
+# What changes: a free water multiplier.
+#
+# The research unlocks it; one built by setup in the dug-out corridor west of the printing
+# pod is selected (its title dumped): it has the mod's converter and pipe ports.
+from: early-base
+mods: [2999464166]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"MiniWaterPurifier\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"ImprovedOxygen\").unlockedItemIDs": {contains: MiniWaterPurifier}
+      "Assets.GetBuildingDef(\"MiniWaterPurifier\").RequiresPowerInput": false
+  - run: {seconds: 2}
+  - expect: {buildings: {MiniWaterPurifier: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: MiniWaterPurifier}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}
+  - expect_state:
+      "selected:GetComponent<ElementConverter>.outputElements[0].massGenerationRate": 10
+      "selected:GetComponent<ConduitConsumer>.consumptionRate": 10
+      "selected:GetComponent<Storage>.capacityKg": 50000

@@ -7,9 +7,12 @@
 # How a player reaches it: the build menu (Furniture).
 # What changes: stackable ladder beds.
 #
-# The prefab is read; the Furniture menu lists the bed (shot).
+# The mod references PLib 4.8.1 without shipping it: it loads only after a mod that ships
+# PLib.dll (here Super Desalt, 3100867929, with PLib 4.22: the reference binds to the PLib loaded
+# first, whatever its version), in the original as in ours (ARCHITECTURE D15, D45). The prefab
+# is read; the Furniture menu lists the bed (shot).
 from: early-base
-mods: [2857940400]
+mods: [3100867929, 2857940400]
 steps:
   - expect_state:
       "Assets.GetPrefab(\"Stackingbed\").GetComponent<Bed>.effects": {contains: LadderBedStamina}

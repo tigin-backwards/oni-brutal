@@ -1,15 +1,20 @@
 {
  "spec": "mods/2857940400-stacking-bed.yaml",
  "mods": [
+  "3100867929",
   "2857940400"
  ],
- "verdict": "pending",
- "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
  "note": "",
  "updated": "2026-10-26",
- "commit": "b79c2cbe",
+ "commit": "f7547a45",
  "mod_dlls": {
+  "3100867929": {
+   "DesaltMachine.dll": "8202533a05ebbfbc3cad66a56b1e33957c1cbb3d6c007fb44c83d30ae4766583",
+   "PLib.dll": "9bf74a5ec6b897e2f82354c90de45c0ec89181087679c39e76b7cbc77de20fc6"
+  },
   "2857940400": {
    "Stacking bed ╡■╡■┤▓.dll": "57e5caba41f9a59b4df3ead24def96c9280e962a67ad770ad556fd95e064494c"
   }
@@ -17,17 +22,51 @@
  "runs": {
   "original": [
    {
-    "run": "20261026-155051-8ce3a25e",
+    "run": "20261026-225242-04d6e168",
     "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-26T16:13:20",
-    "lane": 17,
-    "reasons": [
-     "step start: the player exited (1) while loading"
-    ],
-    "signatures": 2
+    "verdict": "pass",
+    "date": "2026-10-26T22:52:42",
+    "lane": 34,
+    "signatures": 0
+   },
+   {
+    "run": "20261026-225242-04d6e168",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T22:57:13",
+    "lane": 34,
+    "signatures": 0
    }
   ],
-  "ours": []
+  "ours": [
+   {
+    "run": "20261026-225242-04d6e168",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T23:01:36",
+    "lane": 34,
+    "reference_run": "20261026-225242-04d6e168",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "furniture-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-225242-04d6e168",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T23:02:41",
+    "lane": 34,
+    "reference_run": "20261026-225242-04d6e168",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "furniture-menu": 0.0
+    }
+   }
+  ]
  }
 }

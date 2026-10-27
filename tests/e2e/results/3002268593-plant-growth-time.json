@@ -9,7 +9,7 @@
  "findings": [],
  "note": "loaded after Smoother Light, whose PLib it uses: its options dialog from the Mods screen, the growth rate at 5, dumps as in the original",
  "updated": "2026-10-26",
- "commit": "abb9565e",
+ "commit": "f7547a45",
  "mod_dlls": {
   "1839645620": {
    "PLib.dll": "93073fdf44dbe9fd7c0afe19e56341be862cc2d732090dee30999cf60e2e160d",
@@ -22,30 +22,30 @@
  "runs": {
   "original": [
    {
-    "run": "20261026-113731-0137ed61",
+    "run": "20261026-230400-01f31353",
     "index": 1,
     "verdict": "pass",
-    "date": "2026-10-26T11:45:40",
-    "lane": 36,
+    "date": "2026-10-26T23:04:00",
+    "lane": 34,
     "signatures": 0
    },
    {
-    "run": "20261026-113731-0137ed61",
+    "run": "20261026-230400-01f31353",
     "index": 2,
     "verdict": "pass",
-    "date": "2026-10-26T11:49:17",
-    "lane": 35,
+    "date": "2026-10-26T23:07:14",
+    "lane": 34,
     "signatures": 0
    }
   ],
   "ours": [
    {
-    "run": "20261026-113731-0137ed61",
+    "run": "20261026-230400-01f31353",
     "index": 1,
     "verdict": "pass",
-    "date": "2026-10-26T11:50:36",
-    "lane": 35,
-    "reference_run": "20261026-113731-0137ed61",
+    "date": "2026-10-26T23:10:49",
+    "lane": 34,
+    "reference_run": "20261026-230400-01f31353",
     "new_signatures": 0,
     "findings": [],
     "ui_dump": {
@@ -56,12 +56,12 @@
     "shots": {}
    },
    {
-    "run": "20261026-113731-0137ed61",
+    "run": "20261026-230400-01f31353",
     "index": 2,
     "verdict": "pass",
-    "date": "2026-10-26T11:50:36",
-    "lane": 36,
-    "reference_run": "20261026-113731-0137ed61",
+    "date": "2026-10-26T23:11:43",
+    "lane": 34,
+    "reference_run": "20261026-230400-01f31353",
     "new_signatures": 0,
     "findings": [],
     "ui_dump": {

@@ -1,0 +1,39 @@
+# [deprecated] Checkpoint Automation (2927019052), class B.
+#
+# What it does: the four checkpoints (Atmo, Jet, Lead and Oxygen Mask Suit Checkpoint) get an
+# automation input port on their bottom cell and a LogicOperationalController: a red signal
+# disables the checkpoint (it plays a "disable_automation" animation where it has one, and
+# Duplicants pass it as if it were not there), a green one or none enables it.
+# How a player reaches it: build a checkpoint and wire its port.
+# What changes: suit checkpoints can be switched by automation.
+#
+# setup builds an Atmo Suit Checkpoint in the dug-out corridor west of the printing pod, a
+# Signal Switch beside it and a logic wire between them. The switch starts on (green), so the
+# checkpoint works; the switch's side screen turns it off, and the red signal disables the
+# checkpoint.
+from: early-base
+mods: [2927019052]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SuitMarker\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LogicSwitch\")", method: Build, args: [{"$": "Grid.XYToCell(110, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LogicWire\")", method: Build, args: [{"$": "Grid.XYToCell(110, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LogicWire\")", method: Build, args: [{"$": "Grid.XYToCell(111, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LogicWire\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Game.Instance.logicCircuitSystem", method: SetConnections, args: ["Right", {"$": "Grid.XYToCell(110, 206)"}, true]}}
+  - driver: {setup.call: {target: "Game.Instance.logicCircuitSystem", method: SetConnections, args: ["Left, Right", {"$": "Grid.XYToCell(111, 206)"}, true]}}
+  - driver: {setup.call: {target: "Game.Instance.logicCircuitSystem", method: SetConnections, args: ["Left", {"$": "Grid.XYToCell(112, 206)"}, true]}}
+  - driver: {setup.call: {target: "Game.Instance.logicCircuitSystem", method: ForceRebuildNetworks}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"SuitMarker\").LogicInputPorts.Count": 1
+      "Assets.GetBuildingDef(\"JetSuitMarker\").LogicInputPorts.Count": 1
+      "Assets.GetBuildingDef(\"LeadSuitMarker\").LogicInputPorts.Count": 1
+      "Assets.GetBuildingDef(\"OxygenMaskMarker\").LogicInputPorts.Count": 1
+  - run: {seconds: 2}
+  - expect: {buildings: {SuitMarker: 1, LogicSwitch: 1, LogicWire: 3}}
+  - expect_state:
+      "all:SuitMarker::[0].GetComponent<Operational>.IsOperational": true
+  - driver: {camera.set: {cell: [111, 208], ortho: 8}}
+  - click_world: {cell: [110, 206], select: LogicSwitch}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/PlayerControlledToggleSideScreen", cond: stable}
+  - ui_dump: {name: toggle, root: "**/DetailsScreen/SideScreen/**/PlayerControlledToggleSideScreen"}

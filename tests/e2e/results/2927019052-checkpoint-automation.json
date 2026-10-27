@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2927019052-checkpoint-automation.yaml",
+ "mods": [
+  "2927019052"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the four checkpoints have a logic port; an Atmo Suit Checkpoint wired to a Signal Switch works while green, and the switch's side screen is dumped",
+ "updated": "2026-10-27",
+ "commit": "a8d2fbd1",
+ "mod_dlls": {
+  "2927019052": {
+   "CheckpointAutomation.dll": "9cfb27bd65e4eb3fb61e87d0d4f18f9a49c3beb4bbaa434c50070a0c16954685"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-042211-787cf357",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T04:45:32",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-075047-40595ca0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T07:50:47",
+    "lane": 14,
+    "reference_run": "20261027-042211-787cf357",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "toggle": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261027-075047-40595ca0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T07:51:36",
+    "lane": 14,
+    "reference_run": "20261027-042211-787cf357",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "toggle": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,25 @@
+# No Conflicting Traits (3744164922), class P.
+#
+# What it does: a postfix on MinionStartingStats.AreTraitAndAptitudesExclusive also counts a
+# trait as exclusive with an interest when the trait lowers an attribute the interest's skill
+# group uses, so a new Duplicant never gets a negative trait against its own interest (no
+# digger with a digging penalty).
+# How a player reaches it: the Printing Pod's choices, and the starting Duplicants.
+# What changes: which traits and interests are rolled together.
+#
+# The printing pod is made ready and its screen opened, which rolls the Duplicants on offer
+# through the patched check; they are offered. (Rolled content follows random numbers, which
+# differ between the players, so only the screen's structure is compared.)
+from: early-base
+mods: [3744164922]
+setup:
+  - driver: {seed: 12345}
+  - driver: {setup.call: {target: "Immigration.Instance", method: "Sim200ms", args: [100000]}}
+steps:
+  - expect_state: {"Immigration.Instance.ImmigrantsAvailable": true}
+  - call: {tool: building_control, args: {domain: side_surface, surface: facility, kind: telepad, action: open_immigrants, confirm: true}}
+  - ui_wait: {path: "**/ImmigrantScreen/Layout", cond: stable}
+  - expect_state:
+      "all:CharacterContainer::Length": ">= 1"
+  - expect_ui:
+      "**/ImmigrantScreen/Layout/Content/CharacterContainer/TitleBar/LabelGroup/Label": {active: true}

@@ -1,0 +1,25 @@
+# HOEC 电力消耗减半 Half of electricity consumption (3420943389), class P.
+#
+# What it does: postfixes on about 110 buildings' CreateBuildingDef halve (or so) their power
+# draw: the Research Station takes 30 W instead of 60, the Electrolyzer 60 instead of 120, and
+# so on; batteries lose no charge over time, the Ceiling Light gives 20000 lux, the Transit
+# Tube Access spends 5000 J a launch. Each change is logged before and after.
+# How a player reaches it: it is passive; any powered building.
+# What changes: a cheaper power budget.
+#
+# The definitions carry the mod's values (as many as the original's); the colony's research
+# station, selected, shows 30 W among its requirements.
+from: early-base
+mods: [3420943389]
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"ResearchCenter\").EnergyConsumptionWhenActive": 30
+      "Assets.GetBuildingDef(\"Electrolyzer\").EnergyConsumptionWhenActive": [60, "== original"]
+      "Assets.GetBuildingDef(\"LiquidPump\").EnergyConsumptionWhenActive": "== original"
+      "Assets.GetBuildingDef(\"CeilingLight\").EnergyConsumptionWhenActive": "== original"
+      "Assets.GetPrefab(\"Battery\").GetComponent<Battery>.joulesLostPerSecond": 0
+      "Assets.GetPrefab(\"BatteryMedium\").GetComponent<Battery>.joulesLostPerSecond": 0
+      "Assets.GetPrefab(\"CeilingLight\").GetComponent<Light2D>.Lux": 20000
+      "all:ResearchCenter::[0].GetComponent<EnergyConsumer>.WattsNeededWhenActive": 30
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

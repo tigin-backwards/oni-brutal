@@ -1,0 +1,64 @@
+{
+ "spec": "mods/2832650525-store-artifacts.yaml",
+ "mods": [
+  "2832650525"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Storage Bin's filters take artifacts and other odd pickups; a built bin's filter screen (dump matches)",
+ "updated": "2026-10-26",
+ "commit": "cbabaaf0",
+ "mod_dlls": {
+  "2832650525": {
+   "PLib.dll": "432e28fbecb2d422a46eafe489a446f946ec828acfb2b721f7fe6df19d84cd7c",
+   "StoreArtifacts.dll": "10f9db6f6c0d398ff843b7d60f7d5c65cc045374396949c9d8ce306507b89afd"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-151429-7c585a60",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T15:18:33",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T21:14:06",
+    "lane": 17,
+    "reference_run": "20261026-151429-7c585a60",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "filters": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T21:14:26",
+    "lane": 16,
+    "reference_run": "20261026-151429-7c585a60",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "filters": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,26 @@
+# Store Artifacts (2832650525), class P.
+#
+# What it does: before the database initializes, adds the Misc Pickupable, Artifact, Charmed
+# Artifact and Terrestrial Artifact tags to the game's standard storage filters (Storage Bin
+# and the like) and to the not-edible solids filters (conveyor receptacles), naming the
+# categories "Artifacts".
+# How a player reaches it: a Storage Bin's filter side screen.
+# What changes: artifacts and other odd pickups can be stored.
+#
+# The Storage Bin's filters are read; one built by setup in the dug-out corridor west of the
+# printing pod is selected and its filter screen dumped.
+from: early-base
+mods: [2832650525]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"StorageLocker\")", method: Build, args: [131129, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"StorageLocker\").GetComponent<Storage>.storageFilters": [{contains: Artifact}, {contains: MiscPickupable}, {contains: CharmedArtifact}, {contains: TerrestrialArtifact}]
+      "STORAGEFILTERS.NOT_EDIBLE_SOLIDS": {contains: Artifact}
+  - run: {seconds: 2}
+  - expect: {buildings: {StorageLocker: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: StorageLocker}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_wait: {path: "**/TreeFilterableSideScreen", cond: stable}
+  - ui_dump: {name: filters, root: "**/TreeFilterableSideScreen"}

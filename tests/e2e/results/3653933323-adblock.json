@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3653933323-adblock.yaml",
+ "mods": [
+  "3653933323"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the main menu carries the mod's controller, its news boxes hidden (shot)",
+ "updated": "2026-10-26",
+ "commit": "c7b16a61",
+ "mod_dlls": {
+  "3653933323": {
+   "AdBlock.dll": "b6f9b4dc484a28555f00503a1d7864a08c5e114045b95ac6df188ab7fe50b555"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-203918-0b6e3624",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T21:32:13",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-213856-d4539d05",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T22:18:41",
+    "lane": 14,
+    "reference_run": "20261026-203918-0b6e3624",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "main-menu": 0.000306
+    }
+   },
+   {
+    "run": "20261026-213856-d4539d05",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T22:19:11",
+    "lane": 15,
+    "reference_run": "20261026-203918-0b6e3624",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "main-menu": 0.000857
+    }
+   }
+  ]
+ }
+}

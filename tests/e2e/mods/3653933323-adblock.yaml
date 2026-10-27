@@ -1,0 +1,20 @@
+# AdBlock (3653933323), classes K, O, M.
+#
+# What it does: on the main menu, hides the expansion advert and the three news (MOTD) boxes,
+# or shows a picture and title of the player's choosing in a box (PLib options per box); a
+# DemoModeController is added to the main menu.
+# How a player reaches it: the main menu.
+# What changes: a main menu without adverts.
+#
+# At the main menu the controller is there (the game no longer has the expansion advert the
+# mod hides); the menu, its news boxes hidden, is shot (our credit tile masked).
+from: main-menu
+mods: [3653933323]
+steps:
+  - ui_wait: {path: "**/VideoScreen/CloseButton", cond: stable, frames: 3000}
+  - click: {ui: "**/VideoScreen/CloseButton"}
+  - ui_wait: {path: "**/VideoScreen", cond: gone, frames: 600}
+  - ui_wait: {path: "**/MainMenu_SpacedOut/MainMenuMenubar/MainMenuButtons", cond: stable, frames: 3000}
+  - expect_state:
+      "all:MainMenu::[0].GetComponent<DemoModeController>": exists
+  - shot: {name: main-menu, mask: [[210, 525, 60, 195]], threshold: 0.04}

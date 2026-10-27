@@ -1,0 +1,28 @@
+# 优化氧气面罩Optimize Oxygen Masks -K18 (3087504657), class P.
+#
+# What it does: gives each Oxygen Mask a slider (an ISingleSliderControl, 20 to 200 kg, 40 by
+# default) whose value is the mask's oxygen tank capacity, set each frame (its Update) and
+# copied with settings; the Oxygen Mask Dock's gas intake becomes 10 kg/s into 100 kg.
+# How a player reaches it: selecting an Oxygen Mask; an Oxygen Mask Dock.
+# What changes: masks that hold 20 to 200 kg of oxygen instead of 20.
+#
+# setup drops an Oxygen Mask in the dug-out corridor west of the printing pod and selects it:
+# its tank holds 40 kg, and 150 typed into its slider's field makes it 150.
+from: early-base
+mods: [3087504657]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131765, 0, 0, \"Oxygen_Mask\", \"Ore\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "all:K18M18GG18H1_KZQ::[0].GetComponent<KSelectable>"}]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"OxygenMaskLocker\").GetComponent<ConduitConsumer>.capacityKG": 100
+      "Assets.GetPrefab(\"OxygenMaskLocker\").GetComponent<ConduitConsumer>.consumptionRate": 10
+      "selected:SuitTank.capacity": 40
+  - ui_wait: {path: "**/SingleSliderSideScreen", cond: stable}
+  - ui_dump: {name: slider, root: "**/SingleSliderSideScreen"}
+  - type: {ui: "**/SingleSliderSideScreen/Contents/NumberInputField", text: "150", enter: true, clear: true}
+  - expect_state:
+      "selected:K18M18GG18H1_KZQ.AA": 150
+  - ui_wait: {path: "**/SingleSliderSideScreen", cond: stable}
+  - expect_state:
+      "selected:SuitTank.capacity": 150

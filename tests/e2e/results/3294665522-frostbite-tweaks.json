@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3294665522-frostbite-tweaks.yaml",
+ "mods": [
+  "3294665522"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Jet and Lead Suits are immune to cold and warm air; the colony plays on",
+ "updated": "2026-10-26",
+ "commit": "cd454e85",
+ "mod_dlls": {
+  "3294665522": {
+   "GoodByeFrostByte.dll": "2aad48b0270d3b0f2eb58c011b0501f1ec3ef66ae120f1a02db5ae4cf0870aee"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-192551-3c7cbcf2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T19:29:37",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-194527-bd4e3801",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T20:14:20",
+    "lane": 14,
+    "reference_run": "20261026-192551-3c7cbcf2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-194527-bd4e3801",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T20:15:27",
+    "lane": 14,
+    "reference_run": "20261026-192551-3c7cbcf2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

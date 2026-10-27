@@ -1,0 +1,19 @@
+# Frostbite Tweaks (3294665522), classes P, O.
+#
+# What it does: PLib options switch off parts of the reworked cold system: Duplicants' cold
+# and heat air debuffs (on by default), frostbite damage, cold sleep interruptions, the
+# frostbite threshold (-90 °C), a logarithmic movement speed debuff and the critters' old
+# temperature rules; Jet Suits and Lead Suits make their wearer immune to cold and warm air.
+# How a player reaches it: it is passive; the options pick which parts apply.
+# What changes: Duplicants shrug off cold.
+#
+# The suits' immunities are read, and the colony runs a while with the defaults.
+from: early-base
+mods: [3294665522]
+steps:
+  - expect_state:
+      "count:Assets.GetPrefab(\"Jet_Suit\").GetComponent<Equippable>.def.EffectImmunites[*] if .Id == ColdAir": 1
+      "count:Assets.GetPrefab(\"Lead_Suit\").GetComponent<Equippable>.def.EffectImmunites[*] if .Id == WarmAir": 1
+      "count:Assets.GetPrefab(\"Atmo_Suit\").GetComponent<Equippable>.def.EffectImmunites[*] if .Id == ColdAir": "== original"
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

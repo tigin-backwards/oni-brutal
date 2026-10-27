@@ -1,0 +1,22 @@
+# Old Steam Turbine (1718257423), class P.
+#
+# What it does: a postfix on SteamTurbineConfig.CreateBuildingDef clears the old Steam
+# Turbine's Deprecated flag, so the build menu offers it again beside the current one. It
+# needs no research.
+# How a player reaches it: the Power menu's generators.
+# What changes: the old Steam Turbine can be built.
+#
+# The Power menu lists the old turbine; clicked, its product info opens.
+from: early-base
+mods: [1718257423]
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"SteamTurbine\").Deprecated": false
+  - run: {seconds: 2}
+  - click: {ui: "**/PlanScreen/Toggle:Power"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/SteamTurbine Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/SteamTurbine Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - expect_state:
+      "PlanScreen.Instance.ProductInfoScreen.currentDef.PrefabID": SteamTurbine
+  - shot: {name: info, crop: "**/ProductInfoScreen", threshold: 0.04}

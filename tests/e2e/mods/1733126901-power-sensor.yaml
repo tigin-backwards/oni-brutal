@@ -1,0 +1,25 @@
+# Power Sensor (1733126901), classes B, S.
+#
+# What it does: a 1x1 Power Production Sensor (PowerSensorProduction) on a wire: its automation
+# output is green while the power produced on its circuit is above (or below) a threshold, 0 to
+# 75000 W, set on a threshold side screen.
+# How a player reaches it: the build menu (Automation); its side screen.
+# What changes: automation that follows generation.
+#
+# One built by setup in the dug-out corridor west of the printing pod is selected: its
+# threshold side screen is dumped, and 500 typed into its field sets the threshold.
+from: early-base
+mods: [1733126901]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"PowerSensorProduction\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {PowerSensorProduction: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: PowerSensorProduction}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/ThresholdSwitchSideScreen", cond: stable}
+  - ui_dump: {name: threshold, root: "**/ThresholdSwitchSideScreen"}
+  - type: {ui: "**/ThresholdSwitchSideScreen/**/NumberInputField", text: "500", clear: true, enter: true}
+  - expect_state:
+      "selected:GetComponent<PowerSensor.PowerSensorProduction>.Threshold": 500
+      "selected:GetComponent<PowerSensor.PowerSensorProduction>.ActivateAboveThreshold": true

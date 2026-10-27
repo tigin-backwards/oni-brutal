@@ -1,0 +1,63 @@
+{
+ "spec": "mods/1733126901-power-sensor.yaml",
+ "mods": [
+  "1733126901"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a power production sensor built in the corridor is selected: its threshold side screen dumped, 500 typed sets the threshold",
+ "updated": "2026-10-27",
+ "commit": "7224eee1",
+ "mod_dlls": {
+  "1733126901": {
+   "PowerSensor.dll": "a9e7c31fe6e9c2ff1aeb7eeebe5f061d45e7a74ad1a49c8016db6185d8214bf4"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-005510-07dc8c66",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T01:05:10",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-020522-511ecf12",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T02:05:22",
+    "lane": 14,
+    "reference_run": "20261027-005510-07dc8c66",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "threshold": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261027-020522-511ecf12",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T02:05:23",
+    "lane": 15,
+    "reference_run": "20261027-005510-07dc8c66",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "threshold": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

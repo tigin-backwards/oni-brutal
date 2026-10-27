@@ -1,0 +1,40 @@
+# Tiny Worlds (updated for Big Merge) (2700665718), class P,O; base game only.
+#
+# What it does: generates smaller base-game worlds: every world's size becomes the PLib
+# option's map type (Smallest 128x192 by default, up to Default 256x384, and tall variants, in
+# chunks of 32), the generic geyser rule spawns the Geyser Count option's geysers (12), the
+# overworld's feature density and avoid radius, element masses and critter densities are
+# scaled to the smaller area (by at most 2.5), small maps get thin borders and lose the large
+# boulder traits.
+# How a player reaches it: PLib options; a new game.
+# What changes: the size and density of new worlds.
+#
+# With the Medium map type (192x288) and 4 geysers, a new base-game colony on Terra at
+# SNDST-A-12345-0-0-0 is generated and embarked: its world is 192x288.
+from: main-menu
+spaced_out: false
+mods: [2700665718]
+options:
+  shelena_malk.SizeNotIncluded: {MapType: 2, GeyserCount: 4}
+steps:
+  - ui_wait: {path: "**/MainMenu/**/MainMenuButtons", cond: stable, frames: 3000}
+  - click: {text: "NEW GAME", under: "**/MainMenuButtons"}
+  - ui_wait: {path: "**/ModeSelectScreen/Panel/Content/RootToggles/StandardGame", cond: stable}
+  - click: {ui: "**/ModeSelectScreen/Panel/Content/RootToggles/StandardGame"}
+  - ui_wait: {path: "**/ClusterCategorySelectionScreen/Panel/Content/RootToggles/VanillaStyleGame", cond: stable}
+  - click: {ui: "**/ClusterCategorySelectionScreen/Panel/Content/RootToggles/VanillaStyleGame"}
+  - ui_wait: {path: "**/ColonyDestinationScreen2/Layout/Buttons/LaunchButton", cond: stable, frames: 3000}
+  - click: {ui: "**/CoordinateContainer/SeedInput"}
+  - ui_wait: {path: "**/CoordinateContainer/SeedInput", cond: stable}
+  - type: {ui: "**/CoordinateContainer/SeedInput", text: "SNDST-A-12345-0-0-0", clear: true, enter: true}
+  - ui_wait: {path: "**/CoordinateContainer/SeedInput/Text Area/Text", cond: text, value: "~SNDST-A-12345-0-0-0"}
+  - click: {ui: "**/ColonyDestinationScreen2/Layout/Buttons/LaunchButton"}
+  - ui_wait: {path: "**/MinionSelectScreen/Content/BottomContent/Buttons/ProceedButton", cond: stable, frames: 60000}
+  - click: {ui: "**/MinionSelectScreen/Content/BottomContent/Buttons/ProceedButton"}
+  - ui_wait: {path: "**/MinionSelectScreen", cond: gone, frames: 6000}
+  - expect_state:
+      "DlcManager.IsExpansion1Active()": false
+      "ClusterManager.Instance.WorldContainers.Count": 1
+      "ClusterManager.Instance.WorldContainers[0].worldSize.x": 192
+      "ClusterManager.Instance.WorldContainers[0].worldSize.y": 288
+  - expect: {duplicants: 3, buildings: {Headquarters: 1}}

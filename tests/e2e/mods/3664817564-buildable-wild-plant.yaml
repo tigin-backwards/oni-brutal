@@ -1,0 +1,28 @@
+# BuildableWildPlant (3664817564), classes B, S.
+#
+# What it does: adds a 1x1 tile (GgBuildableWildPlant, Food menu, researched with Basic
+# Farming, 400 kg of a farmable raw mineral such as dirt; a JSON setting in mods/config sets
+# the mass) on which a seed picked in its side screen is delivered and grows as a wild plant:
+# no farming needs, wild growth. Its SeedSelectorSideScreen is built from a copy of the
+# game's planter side screen (the seed list and the selection).
+# How a player reaches it: the build menu (Food), then its seed side screen.
+# What changes: wild plants grown on purpose.
+#
+# Basic Farming unlocks it; one built by setup in the dug-out corridor west of the printing
+# pod is selected: its seed side screen shows (dumped and compared in a shot).
+from: early-base
+mods: [3664817564]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"GgBuildableWildPlant\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [Dirt], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"Agriculture\").unlockedItemIDs": {contains: GgBuildableWildPlant}
+  - run: {seconds: 2}
+  - expect: {buildings: {GgBuildableWildPlant: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: GgBuildableWildPlant}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/Config Tab - body instance/PlanterSideScreen", cond: stable}
+  - expect_state:
+      "ui:**/Config Tab - body instance/PlanterSideScreen::GetComponent<GGGMod.BuildableWildPlant.SeedSelectorSideScreen>": exists
+  - ui_dump: {name: seeds, root: "**/DetailsScreen/SideScreen/**/Config Tab - body instance/PlanterSideScreen"}
+  - shot: {name: seeds, crop: "**/DetailsScreen/SideScreen/**/Config Tab - body instance/PlanterSideScreen", threshold: 0.04}

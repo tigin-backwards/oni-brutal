@@ -1,0 +1,25 @@
+# Gassy Moo Eat Flowers (3017358638), class P,O.
+#
+# What it does: after the database is post-processed, widens the Gassy Moo's and Diesel Moo's
+# diets: harvested Gas Grass, Balm Lily flowers (on by default; their dung is chlorine gas),
+# Balm Lily plants (an option), and Palmera trees and berries when a mod adds them (hydrogen);
+# the amounts eaten follow PLib options. A Critter Feeder may be set for moos.
+# How a player reaches it: Gassy Moos near Balm Lily flowers.
+# What changes: moos can live on Balm Lily flowers.
+#
+# setup releases a starving Gassy Moo in the dug-out corridor west of the printing pod with a
+# Balm Lily flower on the floor: the moo eats it.
+from: early-base
+mods: [3017358638]
+setup:
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [131764, 0, 0, Moo, Creatures]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "last:GetComponent<Modifiers>.amounts.Get(\"Calories\")", method: SetValue, args: [0.0]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131761, 0, 0, \"SwampLilyFlower\", \"Ore\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "count:all:KPrefabID::[*] if .PrefabTag.Name == SwampLilyFlower": 1
+      "count:all:KPrefabID::[*] if .PrefabTag.Name == Moo": 1
+  - run: {seconds: 300}
+  - expect_state:
+      "count:all:KPrefabID::[*] if .PrefabTag.Name == SwampLilyFlower": 0

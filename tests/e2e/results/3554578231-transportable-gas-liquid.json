@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3554578231-transportable-gas-liquid.yaml",
+ "mods": [
+  "3554578231"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Conveyor Loader takes liquids, gases and food; its filter side screen dumped",
+ "updated": "2026-10-27",
+ "commit": "23d2dc38",
+ "mod_dlls": {
+  "3554578231": {
+   "LargerRangeTransportBox.dll": "faaddb81897cf7fec4246c7236ed6371061273b8d1d3a2e8b974a008563ea3bf"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-051715-c581e5cb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T05:51:30",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-094619-93daa02a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:46:19",
+    "lane": 14,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "filter": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261027-094619-93daa02a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T09:47:09",
+    "lane": 14,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "filter": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

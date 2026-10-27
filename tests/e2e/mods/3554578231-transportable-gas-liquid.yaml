@@ -1,0 +1,26 @@
+# 可运输的气体和液体 (transportable gases and liquids) (3554578231), class P.
+#
+# What it does: the Conveyor Loader, the Supply Teleporter's sender and receiver take bottled
+# gases and liquids (and food) beside the usual solids; an Auto-Sweeper picks up anything
+# conveyable plus bottled liquids and gases (a prefix on
+# SolidTransferArm.IsPickupableRelevantToMyInterests); the receiver's conveyor dispenser no
+# longer limits itself to solids.
+# How a player reaches it: bottles near an Auto-Sweeper; a Conveyor Loader's filter.
+# What changes: bottles travel on the conveyor rail.
+#
+# The Conveyor Loader's filters include liquids and gases; one built by setup in the dug-out
+# corridor west of the printing pod, selected, lists them in its filter side screen.
+from: early-base
+mods: [3554578231]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SolidConduitInbox\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"SolidConduitInbox\").GetComponent<Storage>.storageFilters": [{contains: Liquid}, {contains: Breathable}, {contains: Edible}]
+      "Assets.GetPrefab(\"SolidConduitInbox\").GetComponent<Storage>.storageFilters.Count": "== original"
+  - run: {seconds: 2}
+  - expect: {buildings: {SolidConduitInbox: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: SolidConduitInbox}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/TreeFilterableSideScreen", cond: stable}
+  - ui_dump: {name: filter, root: "**/DetailsScreen/SideScreen/**/TreeFilterableSideScreen", mask_text: ['\d+(\.\d+)? ?kg']}

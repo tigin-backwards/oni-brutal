@@ -46,8 +46,9 @@ load at all, in both players, comes first from [Load sweeps](#load-sweeps).
 - **Memory.** Each player is counted in the machine's budget (`players.json`) for the memory its
   fixture needs: 6 GB on a small save, 11 on 2minnow, 15 on U57, or the spec's `memory_gb`. A
   player starts only while all of them stay within `E2E_MEMORY_GB` (default 40 of the machine's
-  62) and their count within `E2E_MAX_PLAYERS` (default 6); one bigger than the whole budget
-  starts alone. An entry whose process has gone is dropped.
+  62) and their count within `E2E_MAX_PLAYERS` (default 4: with more, the WSL GPU ran out of
+  hardware queues and new players failed to create a GL context; a running `qa.sh` counts as one);
+  one bigger than the whole budget starts alone. An entry whose process has gone is dropped.
 - **Memory ceiling.** Players start through `scripts/contain.sh` (as do `scripts/run.sh`,
   `qa.sh` and `check.sh`): in the systemd user slice `oni-tests.slice` (`scripts/oni-tests.slice`,
   50 GB, 4 GB of swap) and as preferred OOM victims. When players over-commit, the kernel kills

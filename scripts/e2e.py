@@ -25,7 +25,7 @@ its E2eDriver on 8801 + 10 L (E2E_DRIVER_PORT), and its display is an Xvfb on :(
 (--xvfb-run: xvfb-run -a; --displays: those). A lane holds lane-L.lock there, and is skipped
 while its ports or display are in use or reserved (the directory's `reserved` file and
 E2E_RESERVED). Each player is counted for its memory in the machine's players' budget
-(E2E_MEMORY_GB, default 40; E2E_MAX_PLAYERS, default 6). A run holds perf.lock shared, so a perf
+(E2E_MEMORY_GB, default 40; E2E_MAX_PLAYERS, default 4). A run holds perf.lock shared, so a perf
 job taking it exclusively (`flock -x -o ~/.cache/oni-brutal-e2e/perf.lock CMD`) keeps specs from
 starting; specs also wait while ps shows a perf job. Each wait says what it waits for, and
 --max-wait (or E2E_MAX_WAIT) fails the run after that many minutes.
@@ -634,7 +634,7 @@ def lane_status(lock_dir=None):
 # The players' memory budget (§6.2): the machine has 62 GB. A player on a small save takes 4-6 GB,
 # on 2minnow about 11 GB and on U57 about 15 GB.
 MEMORY_GB = 40      # E2E_MEMORY_GB: what all players on the machine may use at once
-MAX_PLAYERS = 6     # E2E_MAX_PLAYERS: how many may run at once
+MAX_PLAYERS = 4     # E2E_MAX_PLAYERS: how many may run at once (more exhaust the WSL GPU)
 FIXTURE_GB = {'U57': 15, '2minnow': 11}
 SMALL_GB, MID_GB, LATE_GB = 6, 11, 15
 

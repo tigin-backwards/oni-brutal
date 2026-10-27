@@ -1,0 +1,30 @@
+# Teleporter Buildable 传送器可建造 (2871615016), class P.
+#
+# What it does: the Supply Teleporter's input and output (WarpConduitSender and Receiver,
+# Gravitas buildings found on other asteroids) join the Base menu and can be built and
+# deconstructed.
+# How a player reaches it: the build menu (Base).
+# What changes: supply teleporters wherever a player wants them.
+#
+# The Base menu lists both (shot); a Supply Teleporter Output built by setup in the dug-out
+# corridor west of the printing pod is selected, and it can be deconstructed.
+from: early-base
+mods: [2871615016]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"WarpConduitReceiver\")", method: Build, args: [131128, Neutral, null, [Steel], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"WarpConduitSender\").ShowInBuildMenu": true
+      "Assets.GetBuildingDef(\"WarpConduitReceiver\").ShowInBuildMenu": true
+  - run: {seconds: 10}
+  - expect: {buildings: {WarpConduitReceiver: 2}}  # the one built and a Gravitas one elsewhere
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  # The build menu catches up over frames: 120 frames for all of it to settle.
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/WarpConduitReceiver Group*", cond: stable, stable: 120, frames: 600}
+  - shot: {name: base-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: WarpConduitReceiver}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:Deconstructable.allowDeconstruction": true

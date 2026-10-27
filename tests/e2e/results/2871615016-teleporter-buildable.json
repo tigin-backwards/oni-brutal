@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2871615016-teleporter-buildable.yaml",
+ "mods": [
+  "2871615016"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Base menu lists both teleporter ends (shot); a built output can be deconstructed",
+ "updated": "2026-10-26",
+ "commit": "5f21e9e9",
+ "mod_dlls": {
+  "2871615016": {
+   "WarpConduitReceiverMod.dll": "f18c0c3f0a0108a1f24b16d6d66c914b3751f19ded11b629a1f6d8291b1df7aa"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-203918-0b6e3624",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T21:42:26",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-220918-ee97ca43",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T22:25:10",
+    "lane": 15,
+    "reference_run": "20261026-203918-0b6e3624",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "base-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-220918-ee97ca43",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T22:26:51",
+    "lane": 15,
+    "reference_run": "20261026-203918-0b6e3624",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "base-menu": 0.0
+    }
+   }
+  ]
+ }
+}

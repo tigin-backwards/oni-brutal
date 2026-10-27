@@ -1,0 +1,31 @@
+# Controlled Power (3673526385), classes B, S, P.
+#
+# What it does: adds the Power Diode (2x1, raw metal, Power menu after the Power Transformer,
+# researched with Advanced Power Regulation): power flows one way through it, up to 4 kW, as
+# through a large transformer. Patches on the CircuitManager let logic readouts (power
+# sensors, the circuit details) upstream count the demand downstream of linked diodes, and a
+# side screen (Power Diode Logic) has the checkbox "Enable backward logic sharing", on by
+# default.
+# How a player reaches it: the build menu (Power), then its side screen.
+# What changes: one-way power links, and sensors that see through them.
+#
+# Advanced Power Regulation unlocks it; one built by setup in the dug-out corridor west of
+# the printing pod is selected: its side screen shows the checkbox on, and a click turns the
+# sharing off.
+from: early-base
+mods: [3673526385]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"PowerDiode\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"AdvancedPowerRegulation\").unlockedItemIDs": {contains: PowerDiode}
+      "Assets.GetBuildingDef(\"PowerDiode\").GeneratorWattageRating": 4000
+  - run: {seconds: 2}
+  - expect: {buildings: {PowerDiode: 1}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [112, 206], select: PowerDiode}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/PowerDiodeLinkSideScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<ControlledPower.Components.PowerDiodeLogicLink>.IsLogicLinkEnabled": true
+  - ui_dump: {name: side, root: "**/DetailsScreen/SideScreen/**/PowerDiodeLinkSideScreen"}
+  - shot: {name: side, crop: "**/DetailsScreen/SideScreen/**/PowerDiodeLinkSideScreen", threshold: 0.04}

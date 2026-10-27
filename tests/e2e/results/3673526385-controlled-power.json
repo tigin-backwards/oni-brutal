@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3673526385-controlled-power.yaml",
+ "mods": [
+  "3673526385"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Power Diode's side screen (dumped and shot) shows backward logic sharing on",
+ "updated": "2026-10-27",
+ "commit": "011e5033",
+ "mod_dlls": {
+  "3673526385": {
+   "ControlledPower.dll": "35b7bfd2095abc89aa6a8d61a56381e3e23bafe2794c75e3e997d06aff763385"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-051715-c581e5cb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T06:07:49",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-093317-ed1ad600",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:33:17",
+    "lane": 14,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "side": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "side": 0.0
+    }
+   },
+   {
+    "run": "20261027-093317-ed1ad600",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T09:34:12",
+    "lane": 14,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "side": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "side": 0.0
+    }
+   }
+  ]
+ }
+}

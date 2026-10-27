@@ -1,0 +1,24 @@
+# 农业砖无需固态肥料 (Farm tiles need no solid fertilizer) (2996623294), class P.
+#
+# What it does: the Farm Tile and the Hydroponic Farm accept no fertilizer (their
+# PlantablePlot fertilization flags; the hydroponic farm keeps its pipe input), so plants on
+# them are not asked for fertilizer.
+# How a player reaches it: those tiles, in the build menu as before.
+# What changes: farm tiles that need no dirt or fertilizer deliveries.
+#
+# The prefabs hold the mod's flags, and a Farm Tile built by setup in the dug-out corridor
+# west of the printing pod has them.
+from: early-base
+mods: [2996623294]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"FarmTile\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"FarmTile\").GetComponent<PlantablePlot>.accepts_fertilizer": [false, "== original"]
+      "Assets.GetPrefab(\"FarmTile\").GetComponent<PlantablePlot>.has_liquid_pipe_input": false
+      "Assets.GetPrefab(\"HydroponicFarm\").GetComponent<PlantablePlot>.accepts_fertilizer": false
+      "Assets.GetPrefab(\"HydroponicFarm\").GetComponent<PlantablePlot>.has_liquid_pipe_input": true
+  - run: {seconds: 2}
+  - expect: {buildings: {FarmTile: 1}}
+  - expect_state:
+      "all:PlantablePlot::[0].accepts_fertilizer": false

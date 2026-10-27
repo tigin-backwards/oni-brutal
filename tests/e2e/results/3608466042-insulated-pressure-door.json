@@ -1,0 +1,33 @@
+{
+ "spec": "mods/3608466042-insulated-pressure-door.yaml",
+ "mods": [
+  "3608466042"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-26",
+ "commit": "b79c2cbe",
+ "mod_dlls": {
+  "3608466042": {
+   "InsulatedPressureDoor.dll": "308ae9fc8f23d03249db57a353b864af81118e831a3d4f4268b8e846eb773025"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-155051-8ce3a25e",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-26T17:13:08",
+    "lane": 17,
+    "reasons": [
+     "step 5: no InsulatedPressureDoor selected at [113, 207] after 5 clicks (last: None)"
+    ],
+    "signatures": 3
+   }
+  ],
+  "ours": []
+ }
+}

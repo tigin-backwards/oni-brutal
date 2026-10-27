@@ -1,0 +1,33 @@
+{
+ "spec": "mods/2857940400-stacking-bed.yaml",
+ "mods": [
+  "2857940400"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-26",
+ "commit": "b79c2cbe",
+ "mod_dlls": {
+  "2857940400": {
+   "Stacking bed ╡■╡■┤▓.dll": "57e5caba41f9a59b4df3ead24def96c9280e962a67ad770ad556fd95e064494c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-155051-8ce3a25e",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-26T16:13:20",
+    "lane": 17,
+    "reasons": [
+     "step start: the player exited (1) while loading"
+    ],
+    "signatures": 2
+   }
+  ],
+  "ours": []
+ }
+}

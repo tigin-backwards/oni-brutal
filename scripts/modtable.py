@@ -341,6 +341,11 @@ broken.update({
     '928441385': 'broken on Linux (a case-sensitive file system): its translation is Strings.po, the game opens strings.po, misses it (GetLanguageFile: ... missing, then a NullReferenceException in `LanguageOptionsScreen.GetLanguageFilename` opens the error dialog), keeps English, and loading a colony quits the game; Windows finds the file (spec tests/e2e/mods/928441385-korean-language.yaml)',
     '3669382915': 'broken on Linux (a case-sensitive file system): its translation is Strings.po, the game opens strings.po, misses it (GetLanguageFile: ... missing, then a NullReferenceException in `LanguageOptionsScreen.GetLanguageFilename` opens the error dialog), keeps English, and loading a colony quits the game; Windows finds the file (spec tests/e2e/mods/3669382915-thai-mary.yaml)',
 })
+# Found by the e2e specs of ranks 1216 to 1300: the spec fails the same way in the original.
+broken.update({
+    '2857940400': 'broken upstream: its DLL references PLib 4.8.1 but ships without it, so its `OnLoad` (`PUtil.InitLibrary`) throws a FileNotFoundException and the game quits while loading; it loads only beside another mod that ships PLib (spec tests/e2e/mods/2857940400-stacking-bed.yaml)',
+    '3608466042': 'broken upstream: its door\'s OnSpawn and Sim200ms call `SimMessages.SetCellProperties(int, byte)`, which the game no longer has (MissingMethodException), so a built Insulated Pressure Door opens the crash screen (spec tests/e2e/mods/3608466042-insulated-pressure-door.yaml)',
+})
 # Broken in the original only: ours happens to load it, so its note says how the original fails
 # and why ours does not (no "same in the original").
 broken.update({

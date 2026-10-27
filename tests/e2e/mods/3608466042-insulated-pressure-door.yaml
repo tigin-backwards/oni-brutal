@@ -1,0 +1,37 @@
+# Insulated Pressure Door (3608466042), class B.
+#
+# What it does: adds the Insulated Pressure Door, a 1x2 metal door (the Mechanized Airlock's
+# look, 400 kg, no power by default) with a thermal conductivity of 0.01 and an Insulator,
+# whose cells stay gas- and liquid-impermeable while it is open as long as its pressure seal
+# is on: an ICheckboxControl side screen toggles the seal, and each 200 ms (Sim200ms) it sets
+# the cells' properties. Its options are a config.json beside the mod.
+# How a player reaches it: the build menu; the door's side screens.
+# What changes: an open door that lets Duplicants through but no gas or liquid.
+#
+# A door built by setup in the dug-out corridor west of the printing pod is selected; its seal
+# checkbox screen is dumped, its Open button clicked, and once open its cells are still gas-
+# and liquid-impermeable.
+from: early-base
+mods: [3608466042]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"InsulatedPressureDoor\")", method: Build, args: [131765, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"InsulatedPressureDoor\").ThermalConductivity": 0.01
+      "Assets.GetPrefab(\"InsulatedPressureDoor\").GetComponent<Insulator>": exists
+  - run: {seconds: 2}
+  - expect: {buildings: {InsulatedPressureDoor: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: InsulatedPressureDoor}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/DoorToggleSideScreen", cond: stable}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/CheckboxSideScreen", cond: stable}
+  - ui_dump: {name: seal, root: "**/CheckboxSideScreen"}
+  - click: {ui: "**/DoorToggleSideScreen/Contents/Buttons/Openbutton"}
+  - expect_state:
+      "selected:GetComponent<Door>.RequestedState": Opened
+  - key: {code: Escape}
+  - run: {seconds: 20}
+  - expect_state:
+      "all:InsulatedPressureDoor::[0].IsOpen()": true
+      "Grid.Properties.get_Item(131765)": ">= 3"
+      "Grid.Properties.get_Item(132401)": ">= 3"

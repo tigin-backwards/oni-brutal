@@ -1,0 +1,36 @@
+# ACGN二次元之魂 (2863350317), class B,S.
+#
+# What it does: adds four anime-style decorations to the Furniture menu (MM20230610XZ, …KZ,
+# …YS and …TF; the 3x3 base KZ, +24 decor in 24 tiles, takes the YS piece on top). Each is a
+# SelectableSign with several looks (01, 02, 03), meant to be picked in the mod's side screen,
+# a clone of the Monument's; the game no longer offers that screen to clone, so a selected
+# decoration shows the details screen's "no configuration" panel, in the original as here.
+# How a player reaches it: the build menu (Furniture); selecting one.
+# What changes: decorations.
+#
+# The Furniture menu lists the four (shot). A base built by setup in the dug-out corridor west
+# of the printing pod is selected: it has its three looks, and its config panel is the
+# "no configuration" one.
+from: early-base
+mods: [2863350317]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"MM20230610KZ\")", method: Build, args: [131765, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 10}
+  - expect: {buildings: {MM20230610KZ: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Furniture"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/MM20230610KZ Group*", cond: stable, stable: 120, frames: 600}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/MM20230610XZ Group*": {active: true}
+      "**/BuildingGroups/**/Grid/MM20230610YS Group*": {active: true}
+      "**/BuildingGroups/**/Grid/MM20230610TF Group*": {active: true}
+  - shot: {name: furniture-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: MM20230610KZ}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:SelectableSign.AnimationNames": [{contains: "01"}, {contains: "03"}]
+      "selected:SelectableSign.selectedIndex": 0
+  - expect_ui:
+      "**/DetailsScreen/SideScreen/**/ScreensParent/NoConfigSideScreen": {active: true}

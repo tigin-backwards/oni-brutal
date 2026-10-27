@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2863350317-acgn-soul.yaml",
+ "mods": [
+  "2863350317"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Furniture menu lists the four decorations (shot); a built one has its three looks and shows the no-configuration panel, as in the original (the Monument screen it clones is gone)",
+ "updated": "2026-10-26",
+ "commit": "d993ae76",
+ "mod_dlls": {
+  "2863350317": {
+   "ACGN╢■┤╬╘¬╓«╗Ω╨▐╕┤░µ.dll": "1ad673ecfdae5ed378d9a83f591981e2730092e1b0e707515f1f8d8cc50dc408"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-204725-183685a4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T20:47:25",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-224702-ec1abe8c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T22:47:03",
+    "lane": 17,
+    "reference_run": "20261026-204725-183685a4",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "furniture-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-224702-ec1abe8c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T22:47:02",
+    "lane": 16,
+    "reference_run": "20261026-204725-183685a4",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "furniture-menu": 0.0
+    }
+   }
+  ]
+ }
+}

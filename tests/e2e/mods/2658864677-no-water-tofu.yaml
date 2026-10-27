@@ -1,0 +1,24 @@
+# No-Water Tofu (2658864677), class P.
+#
+# What it does: a postfix on MicrobeMusherConfig.ConfigureBuildingTemplate drops the water
+# from the Tofu recipe: six Nosh Beans alone make it.
+# How a player reaches it: a Microbe Musher's recipe list.
+# What changes: tofu without water.
+#
+# The recipe is read; a Microbe Musher built by setup in the dug-out corridor west of the
+# printing pod is selected and its recipe list dumped.
+from: early-base
+mods: [2658864677]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"MicrobeMusher\")", method: Build, args: [131765, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "TofuConfig.recipe.ingredients.Length": 1
+      "TofuConfig.recipe.ingredients[0].material.Name": BeanPlantSeed
+      "TofuConfig.recipe.ingredients[0].amount": 6
+  - run: {seconds: 2}
+  - expect: {buildings: {MicrobeMusher: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: MicrobeMusher}
+  - ui_wait: {path: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView", cond: stable}
+  - ui_dump: {name: recipes, root: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView"}

@@ -8,7 +8,9 @@
 # What changes: one-click full-colony screenshots.
 #
 # With a 1024x1024 PNG set in its options, the button is pressed: a file appears in
-# HD_Screenshots/, and the dialog (dumped, the path masked) says where.
+# HD_Screenshots/, and the dialog (dumped) says where. The path is under the run's folder, which
+# is named after the player, so it is masked, with the sizes that follow its length (the text's
+# character counts, the dialog's unwrapped width).
 from: early-base
 mods: [3098068395]
 options:
@@ -24,4 +26,4 @@ steps:
   - ui_wait: {path: "**/ConfirmDialog*", cond: stable, frames: 600}
   - expect_state:
       "file:HD_Screenshots": ">= 1"
-  - ui_dump: {name: dialog, root: "**/ConfirmDialog*", mask_text: ['HD_Screenshots\S*']}
+  - ui_dump: {name: dialog, root: "**/ConfirmDialog*", mask_text: ['<color=#cdf0bb>[^<]*'], ignore_fields: [textInfo, preferredWidth]}

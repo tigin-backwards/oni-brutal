@@ -3,12 +3,12 @@
  "mods": [
   "3098068395"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "the pause menu's Take a HD Screenshot writes the file and opens its dialog in the original; ours lacks ImageConversion.EncodeToJPG, so the writing method fails (MissingMethodException) and no dialog opens",
+ "note": "the pause menu's Take a HD Screenshot writes the file to HD_Screenshots and opens its dialog naming it",
  "updated": "2026-10-26",
- "commit": "cbabaaf0",
+ "commit": "1d875e4d",
  "mod_dlls": {
   "3098068395": {
    "HDScreenShot.dll": "bf0d533f71e2fff41195a6ca531314b22c6388c90524032f3a605606990aa556",
@@ -18,50 +18,56 @@
  "runs": {
   "original": [
    {
-    "run": "20261026-155051-8ce3a25e",
+    "run": "20261026-233453-2a8334fb",
     "index": 1,
     "verdict": "pass",
-    "date": "2026-10-26T16:33:20",
+    "date": "2026-10-26T23:34:53",
+    "lane": 16,
+    "signatures": 0
+   },
+   {
+    "run": "20261026-233453-2a8334fb",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T23:51:28",
     "lane": 16,
     "signatures": 0
    }
   ],
   "ours": [
    {
-    "run": "20261026-204743-febfde17",
+    "run": "20261026-233453-2a8334fb",
     "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-26T21:37:34",
-    "lane": 17,
-    "reasons": [
-     "step 7: E2eDriver ui.wait {\"path\": \"**/ConfirmDialog*\", \"cond\": \"stable\", \"frames\": 600}: timeout: stable not met within 600 frames",
-     "1 log signature(s) the original lacks"
-    ],
-    "reference_run": "20261026-155051-8ce3a25e",
-    "new_signatures": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T23:54:46",
+    "lane": 16,
+    "reference_run": "20261026-233453-2a8334fb",
+    "new_signatures": 0,
     "findings": [],
     "ui_dump": {
      "pause": {
+      "differences": 0
+     },
+     "dialog": {
       "differences": 0
      }
     },
     "shots": {}
    },
    {
-    "run": "20261026-204743-febfde17",
+    "run": "20261026-233453-2a8334fb",
     "index": 2,
-    "verdict": "fail",
-    "date": "2026-10-26T21:37:44",
+    "verdict": "pass",
+    "date": "2026-10-26T23:55:40",
     "lane": 16,
-    "reasons": [
-     "step 7: E2eDriver ui.wait {\"path\": \"**/ConfirmDialog*\", \"cond\": \"stable\", \"frames\": 600}: timeout: stable not met within 600 frames",
-     "1 log signature(s) the original lacks"
-    ],
-    "reference_run": "20261026-155051-8ce3a25e",
-    "new_signatures": 1,
+    "reference_run": "20261026-233453-2a8334fb",
+    "new_signatures": 0,
     "findings": [],
     "ui_dump": {
      "pause": {
+      "differences": 0
+     },
+     "dialog": {
       "differences": 0
      }
     },

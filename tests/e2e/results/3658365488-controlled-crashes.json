@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3658365488-controlled-crashes.yaml",
+ "mods": [
+  "3658365488"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the build menu opens (shot), and the colony plays on",
+ "updated": "2026-10-27",
+ "commit": "437ec043",
+ "mod_dlls": {
+  "3658365488": {
+   "ControlledCrashes.dll": "70021a61d6a5f251d68b3742e2a63f18bb6e60e85345a38e1ab164bf28b160ae"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-030200-7c6f97e5",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T03:05:01",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-033939-62785650",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T03:39:39",
+    "lane": 14,
+    "reference_run": "20261027-030200-7c6f97e5",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "base-menu": 0.0
+    }
+   },
+   {
+    "run": "20261027-033939-62785650",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T03:39:40",
+    "lane": 15,
+    "reference_run": "20261027-030200-7c6f97e5",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "base-menu": 0.0
+    }
+   }
+  ]
+ }
+}

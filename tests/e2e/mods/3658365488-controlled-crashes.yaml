@@ -1,0 +1,22 @@
+# Controlled Crashes (3658365488), class P.
+#
+# What it does: finalizers and guards on about twenty game methods known to crash with other
+# mods (the codex's entries and recipe panels, the build menu's button list, fetch chores,
+# growing plants, critters' food search, storage consumption, electrobank chargers, the
+# Duplicant to-do side screen and others) catch their exceptions and log what was involved
+# ([ControlledCrashes] lines) instead of crashing the game.
+# How a player reaches it: it is passive.
+# What changes: some crashes become log warnings.
+#
+# The guarded paths run without anything to catch: the build menu (Base) opens (shot), and
+# the colony plays on.
+from: early-base
+mods: [3658365488]
+steps:
+  - run: {seconds: 2}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/Tile Group*", cond: stable, stable: 120, frames: 600}
+  - shot: {name: base-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - run: {seconds: 20}
+  - expect: {duplicants: 3}

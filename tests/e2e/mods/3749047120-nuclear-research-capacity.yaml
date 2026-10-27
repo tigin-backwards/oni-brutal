@@ -1,0 +1,28 @@
+# 大容量材料研究终端 (large-capacity Materials Study Terminal) (3749047120), classes B, S.
+#
+# What it does: the Materials Study Terminal (NuclearResearchCenter, Spaced Out) gets a
+# single-slider side screen for its radbolt storage capacity, 100 to 9999 radbolts (the game's
+# is a fixed 100); setting it resizes the HighEnergyParticleStorage, and copying settings
+# carries it over. Its slider title and tooltip name string keys the mod never registers.
+# How a player reaches it: select a Materials Study Terminal.
+# What changes: the terminal stores more radbolts for research.
+#
+# setup builds one in the dug-out corridor west of the printing pod. Selected, it shows the
+# slider at 100; 5000 typed into its field sets the capacity.
+from: early-base
+mods: [3749047120]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"NuclearResearchCenter\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {NuclearResearchCenter: 1}}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [114, 207], select: NuclearResearchCenter}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/SingleSliderSideScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<HighEnergyParticleStorage>.capacity": 100
+  - ui_dump: {name: slider, root: "**/Config Tab - body instance/SingleSliderSideScreen"}
+  - shot: {name: slider, crop: "**/Config Tab - body instance/SingleSliderSideScreen", threshold: 0.04}
+  - type: {ui: "**/SingleSliderSideScreen/Contents/NumberInputField", text: "5000", enter: true, clear: true}
+  - expect_state:
+      "selected:GetComponent<HighEnergyParticleStorage>.capacity": 5000

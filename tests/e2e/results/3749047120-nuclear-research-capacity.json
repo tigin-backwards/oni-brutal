@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3749047120-nuclear-research-capacity.yaml",
+ "mods": [
+  "3749047120"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Materials Study Terminal's radbolt slider (dumped and shot) set to 5000 by typing",
+ "updated": "2026-10-27",
+ "commit": "239af599",
+ "mod_dlls": {
+  "3749047120": {
+   "NuclearResearch.dll": "0cfbfd683659beb07a71ed99ba2321809f5851f63a2a8a5a5c15c335f552e4e9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-042211-787cf357",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T05:08:07",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-083439-286d4214",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T08:34:39",
+    "lane": 14,
+    "reference_run": "20261027-042211-787cf357",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "slider": 0.0
+    }
+   },
+   {
+    "run": "20261027-083439-286d4214",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T08:35:30",
+    "lane": 14,
+    "reference_run": "20261027-042211-787cf357",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "slider": 0.0
+    }
+   }
+  ]
+ }
+}

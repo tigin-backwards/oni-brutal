@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3080879491-no-free-idle-chore.yaml",
+ "mods": [
+  "3080879491"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a suit dock built in the corridor keeps its urgent return-suit chore and not the idle one",
+ "updated": "2026-10-27",
+ "commit": "7a56f5f6",
+ "mod_dlls": {
+  "3080879491": {
+   "DeleteFreeChoreMod.dll": "5a8e4edf2b1c6488ae97fb7bb0e96b84c9123e990bc0785fe24ae1d77d97c358"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-021227-f470d6f8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T02:27:13",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-032607-3ccd161e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T03:26:07",
+    "lane": 14,
+    "reference_run": "20261027-021227-f470d6f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-032607-3ccd161e",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T03:26:08",
+    "lane": 15,
+    "reference_run": "20261027-021227-f470d6f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

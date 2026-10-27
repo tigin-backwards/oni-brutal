@@ -1,0 +1,21 @@
+# No Free Idle Chore 删除太空服空闲任务 (3080879491), class P.
+#
+# What it does: whenever an Atmo Suit Dock creates its return-suit chores
+# (ReturnSuitWorkable.CreateChore), the idle one is cancelled at once, so idle Duplicants no
+# longer walk to a dock to hand in their suit; the urgent one stays.
+# How a player reaches it: it is passive; suit docks.
+# What changes: no idle suit returns.
+#
+# A dock built by setup in the dug-out corridor west of the printing pod plays a while: it
+# made its return-suit chores on entering its empty state, and only the urgent one is left
+# among the world's chores.
+from: early-base
+mods: [3080879491]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SuitLocker\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 5}
+  - expect: {buildings: {SuitLocker: 1}}
+  - expect_state:
+      "count:GlobalChoreProvider.Instance.choreWorldMap.get_Item(0)[*] if .choreType.Id == ReturnSuitUrgent": 1
+      "count:GlobalChoreProvider.Instance.choreWorldMap.get_Item(0)[*] if .choreType.Id == ReturnSuitIdle": 0

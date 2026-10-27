@@ -1,0 +1,28 @@
+# 调整藻类蒸馏器 Adjust Algae Distillery (3033510103), class P.
+#
+# What it does: a postfix on AlgaeDistilleryConfig.ConfigureBuildingTemplate rewrites the
+# Algae Distiller's converter: 600 g/s of slime in, 400 g/s of algae and 200 g/s of polluted
+# water out (the base game makes 200 g/s of algae and 400 g/s of polluted water).
+# How a player reaches it: build an Algae Distiller.
+# What changes: twice the algae per slime.
+#
+# setup builds an Algae Distiller in the corridor west of the printing pod; selected, its
+# converter makes 400 g/s of algae.
+from: early-base
+mods: [3033510103]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"AlgaeDistillery\")", method: Build, args: [131765, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"AlgaeDistillery\").GetComponent<ElementConverter>.outputElements[0].elementHash": "== 'Algae'"
+      "Assets.GetPrefab(\"AlgaeDistillery\").GetComponent<ElementConverter>.outputElements[0].massGenerationRate": 0.4
+      "Assets.GetPrefab(\"AlgaeDistillery\").GetComponent<ElementConverter>.outputElements[1].elementHash": "== 'DirtyWater'"
+  - run: {seconds: 2}
+  - expect: {buildings: {AlgaeDistillery: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: AlgaeDistillery}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<ElementConverter>.outputElements[0].massGenerationRate": 0.4
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Algae Distiller"}

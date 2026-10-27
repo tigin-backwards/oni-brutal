@@ -1,0 +1,25 @@
+# Mouse Edge Scroll (2744013381), classes V, K.
+#
+# What it does: the camera pans while the pointer rests within 15 pixels of a screen edge
+# (CameraController.Update's pan flags), at the pan speed of its config.json (1 by default,
+# also the keys' pan speed), which it reloads when the file changes.
+# How a player reaches it: moving the pointer to an edge in a colony.
+# What changes: edge panning, as in other strategy games.
+#
+# The pointer is left at the left edge of the screen (a click there, on the world): the
+# camera moves left; the pan speed is the config's.
+from: early-base
+mods: [2744013381]
+steps:
+  # Xvfb runs no window manager: a key press (Shift) gives the player's window the focus the
+  # mod requires, as a player's window has.
+  - key: {code: LeftShift}
+  - expect_state:
+      "CameraController.Instance.keyPanningSpeed": 1
+      "UnityEngine.Application.isFocused": true
+  - driver: {camera.set: {cell: [124, 208], ortho: 12}}
+  - expect_state: {"Camera.main.transform.position.x": {save_as: x0}}
+  - click: {at: [3, 400]}
+  - run: {seconds: 1, speed: 1}
+  - expect_state: {"KInputManager.GetMousePos().x": "< 15"}
+  - expect_state: {"Camera.main.transform.position.x": "< x0 - 1"}

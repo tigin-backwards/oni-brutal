@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2744013381-mouse-edge-scroll.yaml",
+ "mods": [
+  "2744013381"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the pointer at the left screen edge pans the camera left",
+ "updated": "2026-10-27",
+ "commit": "437ec043",
+ "mod_dlls": {
+  "2744013381": {
+   "EdgeScroll.dll": "075b32f521267becb103eed0269438a1883be20dbdf241a11d87152a8e06b308"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-030200-7c6f97e5",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T03:02:01",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-033850-07951c0c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T03:38:50",
+    "lane": 14,
+    "reference_run": "20261027-030200-7c6f97e5",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-033850-07951c0c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T03:38:51",
+    "lane": 15,
+    "reference_run": "20261027-030200-7c6f97e5",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

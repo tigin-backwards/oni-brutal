@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3248219744-trapped-monitor-tool.yaml",
+ "mods": [
+  "3248219744"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the toolbar's checkpoint tool places a checkpoint in the corridor, and a second click removes it",
+ "updated": "2026-10-27",
+ "commit": "77aef08d",
+ "mod_dlls": {
+  "3248219744": {
+   "PiapiTrappedMonitor.dll": "f3b0d171a640a97a00bd0e8b4f42256ef67a221b4a3f665e7b5b8440250c7826"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-235258-afb42cfe",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T00:02:18",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-012357-2e021b9a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T01:23:57",
+    "lane": 14,
+    "reference_run": "20261026-235258-afb42cfe",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-012357-2e021b9a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T01:23:58",
+    "lane": 15,
+    "reference_run": "20261026-235258-afb42cfe",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

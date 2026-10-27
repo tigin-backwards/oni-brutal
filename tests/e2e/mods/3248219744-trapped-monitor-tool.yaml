@@ -1,0 +1,25 @@
+# 受困检测工具（Trapped Monitor Tool） (3248219744), class T.
+#
+# What it does: a Create/Remove Checkpoint tool in the bottom toolbar; a click places a
+# checkpoint (NotMonitor, a 1x1 marker on its own object layer) on the cell, or removes the one
+# there. Every 4 s a checkpoint lists the Duplicants of its world that cannot reach it, in a
+# message with a warning sound.
+# How a player reaches it: the toolbar.
+# What changes: a warning when Duplicants are trapped away from a point.
+#
+# The tool places a checkpoint in the dug-out corridor west of the printing pod, and a second
+# click there removes it.
+from: early-base
+mods: [3248219744]
+steps:
+  - run: {seconds: 1}
+  - driver: {camera.set: {cell: [112, 208], ortho: 10}}
+  - tool: {toolbar: "Create/Remove Checkpoint"}
+  - expect_state: {"PlayerController.Instance.ActiveTool.name": TrappedMonitorTool}
+  - drag: {from: [112, 208], to: [112, 208]}
+  - run: {seconds: 1}
+  - expect: {buildings: {NotMonitor: 1}}
+  - drag: {from: [112, 208], to: [112, 208]}
+  - run: {seconds: 1}
+  - expect: {buildings: {NotMonitor: 0}}
+  - key: {code: Escape}

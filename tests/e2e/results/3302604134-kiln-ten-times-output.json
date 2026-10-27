@@ -1,0 +1,75 @@
+{
+ "spec": "mods/3302604134-kiln-ten-times-output.yaml",
+ "mods": [
+  "3302604134"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "a Kiln built in the corridor runs unoperated with the mod's recipes; its recipe side screen dumped",
+ "updated": "2026-10-27",
+ "commit": "001b6e27",
+ "mod_dlls": {
+  "3302604134": {
+   "╥ñ┬»10▒╢▓·┴┐_─╛═╖│÷├║╠┐╥∞╣╣╩≈╓¼.dll": "b4d0161b2076cddc49d300afde8b9edcaa0767b06a2240454d8964c1e3ade895"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-233206-67d878d6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T23:35:31",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-002212-eea956fe",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-27T00:22:12",
+    "lane": 14,
+    "reference_run": "20261026-233206-67d878d6",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261027-002212-eea956fe",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-27T00:22:13",
+    "lane": 15,
+    "reference_run": "20261026-233206-67d878d6",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

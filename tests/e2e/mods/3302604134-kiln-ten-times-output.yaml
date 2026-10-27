@@ -1,0 +1,28 @@
+# 窑炉10倍产量_木头出煤炭异构树脂 (Kiln ten times output) (3302604134), class P.
+#
+# What it does: the Kiln needs no operator, has +100 decor in a radius of 10, and its recipes
+# are replaced: clay and sand make ten times the ceramic (1000 kg), and others make refined
+# carbon from coal and from wood, and resin from wood.
+# How a player reaches it: the Kiln, in the build menu as before; its recipe side screen.
+# What changes: a Kiln that runs by itself and makes much more.
+#
+# One built by setup in the dug-out corridor west of the printing pod is selected: it is not
+# operated, its recipes are the mod's (their list dumped).
+from: early-base
+mods: [3302604134]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Kiln\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"Kiln\").BaseDecor": 100
+      "Assets.GetBuildingDef(\"Kiln\").BaseDecorRadius": 10
+      "Assets.GetPrefab(\"Kiln\").GetComponent<ComplexFabricator>.duplicantOperated": false
+  - run: {seconds: 2}
+  - expect: {buildings: {Kiln: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: Kiln}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<ComplexFabricator>.GetRecipes().Length": [">= 4", "== original"]
+  - ui_wait: {path: "**/DetailsScreen/**/ComplexFabricatorSideScreen", cond: stable}
+  - ui_dump: {name: recipes, root: "**/ComplexFabricatorSideScreen"}

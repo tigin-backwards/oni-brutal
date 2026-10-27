@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2903353773-backlight.yaml",
+ "mods": [
+  "2903353773"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Back Light built and selected gives 100 lux and shows its slider (dump); the Furniture menu lists it",
+ "updated": "2026-10-27",
+ "commit": "b8e90d44",
+ "mod_dlls": {
+  "2903353773": {
+   "▒│╛░╡╞Backlight.dll": "6364e6582136b30f7aa660da66b830c726cfa593bfff4f4e5f36c4372b6dbf52"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-063313-07ba5b84",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T07:01:52",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-070541-c1e82ff0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T07:46:13",
+    "lane": 16,
+    "reference_run": "20261027-063313-07ba5b84",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261027-070541-c1e82ff0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T07:47:03",
+    "lane": 16,
+    "reference_run": "20261027-063313-07ba5b84",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

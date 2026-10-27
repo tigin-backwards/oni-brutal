@@ -1,0 +1,32 @@
+# Backlight (2903353773), class B.
+#
+# What it does: adds the Back Light (BACKLIGHT) to the Furniture menu: a 1x1 powered light
+# built in the back layer, behind other buildings. Its side screen has a slider (0 to 1000
+# lux, default 100) that sets its lux and its power draw (0.01 W per lux).
+# How a player reaches it: the build menu (Furniture), then selecting the built light.
+# What changes: a dimmable light that does not take a building's place.
+#
+# setup builds a Back Light in the corridor west of the printing pod and selects it (a click
+# there picks the room behind it): its slider side screen shows, and it gives 100 lux. The
+# Back Light shows in the Furniture menu.
+from: early-base
+mods: [2903353773]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"BACKLIGHT\")", method: Build, args: [131765, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "Grid.Objects.get_Item(131765, 30).GetComponent<KSelectable>"}]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {BACKLIGHT: 1}}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Light2D>.Lux": 100
+      "selected:GetComponent<EnergyConsumer>.BaseWattageRating": 1
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Back Light"}
+      "**/DetailsScreen/**/SingleSliderSideScreen*": {active: true}
+  - ui_dump: {name: slider, root: "**/DetailsScreen/**/SingleSliderSideScreen*"}
+  - key: {code: Escape}
+  - click: {ui: "**/PlanScreen/Toggle:Furniture"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/BACKLIGHT Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/BACKLIGHT Group*": {active: true}

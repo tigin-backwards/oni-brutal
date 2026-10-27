@@ -1,0 +1,24 @@
+# Arknights Operators / 明日方舟干员 [0.3.3] (3765340857), classes V, S, K, O.
+#
+# What it does: draws Duplicants as Arknights operators: every Duplicant gets an
+# OperatorDuplicantOverlay that renders a Spine model of an operator (Amiya by default) over
+# it, its animations mapped from the Duplicant's; the models and thumbnails are fetched on
+# demand from the PRTS wiki (or a GitHub fallback) into a local cache (PLib options: retention
+# policy, cache size, default operator, skin and model, scale). Ctrl+F8 opens a picker for
+# the selected Duplicant, Ctrl+Shift+F8 a global dialog; an action wheel switches poses.
+# How a player reaches it: any colony; the hotkeys; the options on the Mods screen.
+# What changes: the Duplicants' looks.
+#
+# The mod loads (logged); every Duplicant carries the overlay and the game the hotkey and
+# action wheel controllers; the colony plays on. Its looks are not compared, nor the model's
+# load required: the models come from the network, on their own schedule.
+from: early-base
+mods: [3765340857]
+require_log: ['\[ArknightsOperatorsMod\] Loaded from']
+steps:
+  - expect_state:
+      "count:Components.LiveMinionIdentities.Items[*] if .GetComponent<ArknightsOperatorsMod.OperatorDuplicantOverlay>.enabled == true": 3
+      "Game.Instance.GetComponent<ArknightsOperatorsMod.AppearanceOptionsHotkey>": exists
+      "Game.Instance.GetComponent<ArknightsOperatorsMod.OperatorActionWheelController>": exists
+  - run: {seconds: 20}
+  - expect: {duplicants: 3}

@@ -1,0 +1,56 @@
+{
+ "spec": "mods/3765340857-arknights-operators.yaml",
+ "mods": [
+  "3765340857"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the mod loads; every Duplicant carries the overlay and the game the hotkey controllers; Amiya's Spine model, which needs UnityEngine.Rendering.BlendMode (now in the engine), loaded in one of the two runs (network); looks not compared",
+ "updated": "2026-10-27",
+ "commit": "c09f0844",
+ "mod_dlls": {
+  "3765340857": {
+   "ArknightsOperatorsMod.dll": "16afbb3d370475449855111a39488c75d9b9375b5f0a49b9e8964460e5694d8a",
+   "PLib.dll": "55ce409618e6d102a1bcd0298911f3df49dda9a94ee153d02403035a1d6101d6"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-051715-c581e5cb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T06:18:19",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-100622-d6faa43a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T10:06:22",
+    "lane": 14,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-100622-d6faa43a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T10:07:35",
+    "lane": 14,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

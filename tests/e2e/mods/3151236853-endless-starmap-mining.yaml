@@ -1,0 +1,22 @@
+# Endless Starmap Mining (3151236853), classes P, O.
+#
+# What it does: every harvestable space POI holds the PLib option's multiple (10) of its
+# capacity (a postfix on HarvestablePOIConfig.GenerateConfigs, patched from the RoboMiner's
+# CreateBuildingDef), and the drillcone stores the drillcone multiple (2) of its 1,000 kg.
+# How a player reaches it: mining space POIs with a drillcone rocket.
+# What changes: POIs last ten times longer, drillcones carry twice as much.
+#
+# options set the drillcone to three times; the POI types' capacities and the drillcone's
+# storage are read.
+from: early-base
+mods: [3151236853]
+options:
+  "3151236853": {drillconeMultiplier: 3}
+steps:
+  - expect_state:
+      "sum:type:HarvestablePOIConfigurator::_poiTypes[*].poiCapacityMin if .id == CarbonAsteroidField": ">= 300000"
+      "sum:type:HarvestablePOIConfigurator::_poiTypes[*].poiCapacityMax if .id == CarbonAsteroidField": ">= 450000"
+      "Assets.GetPrefab(\"NoseconeHarvest\").GetComponent<Storage>.capacityKg": 3000
+      "Assets.GetPrefab(\"NoseconeHarvest\").GetComponent<ManualDeliveryKG>.capacity": 3000
+  - run: {seconds: 2}
+  - expect: {duplicants: 3}

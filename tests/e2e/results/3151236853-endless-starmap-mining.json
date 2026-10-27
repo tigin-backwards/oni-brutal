@@ -1,0 +1,56 @@
+{
+ "spec": "mods/3151236853-endless-starmap-mining.yaml",
+ "mods": [
+  "3151236853"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "POI capacities are ten times the game's, and options set the drillcone's storage",
+ "updated": "2026-10-26",
+ "commit": "f4f72218",
+ "mod_dlls": {
+  "3151236853": {
+   "EndlessStarmapMining.dll": "3fe9303a8e7e12c61f462fc772c8651e050560bfeac2f188032add6f1508450c",
+   "PLib.dll": "d87814a7d5d74fa0e94bc5435cd770d3746438f494208b6f356a2ab999169c52"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-224716-becf6f37",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T22:47:17",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-230700-62df17b6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T23:15:32",
+    "lane": 14,
+    "reference_run": "20261026-224716-becf6f37",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-230700-62df17b6",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T23:15:35",
+    "lane": 15,
+    "reference_run": "20261026-224716-becf6f37",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

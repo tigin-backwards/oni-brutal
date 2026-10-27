@@ -1,0 +1,18 @@
+# Bionic Oil Threshold/ 仿生人9天一补油 (3520927380), class P.
+#
+# What it does: after Db.Initialize it patches BionicOilMonitor by hand: a Bionic Duplicant
+# wants an oil change only below 30 % of its oil and outside work time, counts as well oiled
+# above that, and the lubricant effects last 5,400 s (nine cycles).
+# How a player reaches it: it is passive, on Bionic Duplicants.
+# What changes: fewer trips to refill oil.
+#
+# The lubricant effects' durations are read: the game fills that table after Db.Initialize, so
+# the mod finds it empty and leaves them as they are, in the original too. The colony, whose
+# first Duplicant is Bionic, runs a while with the oil patches.
+from: early-base
+mods: [3520927380]
+steps:
+  - expect_state:
+      "count:BionicOilMonitor.LUBRICANT_TYPE_EFFECT[*] if .Value.duration == 5400": "== original"
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

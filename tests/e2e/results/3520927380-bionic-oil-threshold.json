@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3520927380-bionic-oil-threshold.yaml",
+ "mods": [
+  "3520927380"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the oil patches apply as the colony plays; the lubricant durations stay the game's, in the original too",
+ "updated": "2026-10-26",
+ "commit": "c7b16a61",
+ "mod_dlls": {
+  "3520927380": {
+   "BionicOilThreshold.dll": "19091fccd70742b0c8380d32a8dbb2f4d13e5d5769305f3ab779da437b9f499f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-203918-0b6e3624",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T21:34:48",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-213856-d4539d05",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T22:19:22",
+    "lane": 14,
+    "reference_run": "20261026-203918-0b6e3624",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-213856-d4539d05",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T22:20:04",
+    "lane": 15,
+    "reference_run": "20261026-203918-0b6e3624",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

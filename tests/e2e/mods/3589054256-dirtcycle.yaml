@@ -1,0 +1,27 @@
+# ElementsCycle (DirtCycle, 3589054256), class P.
+#
+# What it does: a postfix on RockCrusherConfig.ConfigureBuildingTemplate adds Rock Granulator
+# recipes that turn 10 kg of one element into 10 kg of the next along six cycles starting
+# from dirt (Dirt -> Sandstone -> Granite -> ... -> Dirt, Dirt -> Clay -> Sand -> Dirt, ores,
+# minerals, fuels, others).
+# How a player reaches it: a Rock Granulator's recipe list.
+# What changes: any listed element can be made from dirt.
+#
+# setup builds a Rock Granulator in the corridor west of the printing pod; selected, its
+# recipe list holds the cycle's recipes.
+from: early-base
+mods: [3589054256]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"RockCrusher\")", method: Build, args: [131765, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "ComplexRecipeManager.Get().GetRecipe(\"RockCrusher_I_Dirt_O_SandStone\").results[0].amount": 10
+      "ComplexRecipeManager.Get().GetRecipe(\"RockCrusher_I_Dirt_O_Cuprite\").results[0].amount": 10
+      "ComplexRecipeManager.Get().GetRecipe(\"RockCrusher_I_Fossil_O_Dirt\").ingredients[0].amount": 10
+      "count:ComplexRecipeManager.Get().recipes[*] if .id.StartsWith(\"RockCrusher_I_Dirt_O_\") == true": 6
+  - run: {seconds: 2}
+  - expect: {buildings: {RockCrusher: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: RockCrusher}
+  - ui_wait: {path: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView", cond: stable}
+  - ui_dump: {name: recipes, root: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView"}

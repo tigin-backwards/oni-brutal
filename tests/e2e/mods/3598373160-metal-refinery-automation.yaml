@@ -1,0 +1,25 @@
+# M 金属精炼器自动化Metal Refinery Automation 1.0 (3598373160), class P.
+#
+# What it does: a postfix on MetalRefineryConfig.ConfigureBuildingTemplate makes the Metal
+# Refinery work without a Duplicant: its BuildingComplete is not manually operated and its
+# LiquidCooledRefinery is not Duplicant-operated.
+# How a player reaches it: build a Metal Refinery.
+# What changes: refining without an operator.
+#
+# The Metal Refinery's prefab carries the flags; one built by setup in the dug-out corridor
+# west of the printing pod, selected, shows its recipes and needs no operator.
+from: early-base
+mods: [3598373160]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"MetalRefinery\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"MetalRefinery\").GetComponent<LiquidCooledRefinery>.duplicantOperated": false
+      "Assets.GetPrefab(\"MetalRefinery\").GetComponent<BuildingComplete>.isManuallyOperated": false
+  - run: {seconds: 2}
+  - expect: {buildings: {MetalRefinery: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: MetalRefinery}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/ComplexFabricatorSideScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<LiquidCooledRefinery>.duplicantOperated": false

@@ -1,0 +1,22 @@
+# 植物相关 (3019685469), class P,O.
+#
+# What it does: a broad plant overhaul. Two PLib options (config.json, 5 by default) multiply
+# every crop's yield (CROPS.CROP_TYPES is rebuilt with the multiplier) and plants' growth
+# rates (a transpiler on Growing's constants, wild and domestic); some twenty-five plants'
+# prefabs are reworked (more seeds, +200 decor in 20 tiles, their temperature, pressure,
+# light, blight and drowning vulnerabilities removed, other irrigation), and mutations and
+# seed drops are made likelier.
+# How a player reaches it: PLib options; farming.
+# What changes: plants grow faster, yield more and survive anywhere.
+#
+# The crop table and a Mealwood's growth rate are read: five times the game's.
+from: early-base
+mods: [3019685469]
+steps:
+  - expect_state:
+      "count:CROPS.CROP_TYPES[*] if .cropId == BasicPlantFood and .numProduced == 5": 1
+      "count:CROPS.CROP_TYPES[*] if .cropId == SwampLilyFlower and .numProduced == 10": 1
+      "Assets.GetPrefab(\"BasicSingleHarvestPlant\").GetComponent<Growing>.GROWTH_RATE": [">= 0.0083", "<= 0.0084"]
+      "Assets.GetPrefab(\"BasicSingleHarvestPlant\").GetComponent<DecorProvider>.baseDecor": "== original"
+  - run: {seconds: 2}
+  - expect: {duplicants: 3}

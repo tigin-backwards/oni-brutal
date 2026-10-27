@@ -1,0 +1,56 @@
+# Moonlet Cluster - Superconductive (3418019940), class P (a worldgen mod).
+#
+# What it does: a Spaced Out cluster (coordinate prefix M-NIM-C, difficulty 6), the game's
+# moonlet cluster with a 64 x 96 Superconductive start asteroid (NiobiumMoonletStart: the
+# sandstone start, a water pocket, magma, a niobium patch and space), the Flipped asteroid
+# moved among the inner worlds, and the usual moonlets and outer worlds; its code registers
+# the cluster's name and description (PLib localization).
+# How a player reaches it: the main menu, New Game, Survival, Spaced Out; the carousel lists
+# Moonlet Cluster - Superconductive.
+# What changes: the cluster a new game generates.
+#
+# From a colony: the pause menu's Main Menu, Quit Without Saving, New Game, Survival, Spaced
+# Out. The cluster is chosen by typing its coordinate (fixed seed), launched and embarked.
+# Functional expectations (mod-play-testing.md, "Worldgen mods"): the start world's name and
+# size, its niobium and magma subworlds, as many asteroids as in the original, POIs on the
+# starmap.
+from: early-base
+mods: [3418019940]
+memory_gb: 8
+require_log: ['NiobiumMoonletStart InitStrings']
+steps:
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/Main MenuButton", cond: stable}
+  - click: {ui: "**/PauseScreen/**/Main MenuButton"}
+  - ui_wait: {path: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton", cond: stable}
+  - click: {ui: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton"}   # Quit Without Saving
+  - ui_wait: {path: "**/MainMenu_SpacedOut/MainMenuMenubar/MainMenuButtons", cond: stable, frames: 3000}
+  - click: {text: "NEW GAME", under: "**/MainMenuButtons"}
+  - ui_wait: {path: "**/ModeSelectScreen/Panel/Content/RootToggles/StandardGame", cond: stable}
+  - click: {ui: "**/ModeSelectScreen/Panel/Content/RootToggles/StandardGame"}
+  - ui_wait: {path: "**/ClusterCategorySelectionScreen/Panel/Content/RootToggles/SpacedOutGame", cond: stable}
+  - click: {ui: "**/ClusterCategorySelectionScreen/Panel/Content/RootToggles/SpacedOutGame"}
+  - ui_wait: {path: "**/ColonyDestinationScreen2/Layout/Buttons/LaunchButton", cond: stable, frames: 3000}
+  - expect_state:
+      "all:DestinationSelectPanel::[0].clusterKeys": {contains: clusters/MiniClusterNiobium}
+  - click: {ui: "**/CoordinateContainer/SeedInput"}
+  - ui_wait: {path: "**/CoordinateContainer/SeedInput", cond: stable}
+  - type: {ui: "**/CoordinateContainer/SeedInput", text: "M-NIM-C-12345-0-0-0", clear: true, enter: true}
+  - ui_wait: {path: "**/Section - Destination/DestinationDetailsHeader/ClusterName", cond: text, value: "~Superconductive"}
+  - expect_state:
+      "CustomGameSettings.Instance.GetCurrentQualitySetting(\"ClusterLayout\").id": clusters/MiniClusterNiobium
+  - ui_dump: {name: asteroids, root: "**/Section - Destination/World Scoll (Rect Size Set By Screen Code!)/Content/Details"}
+  - click: {ui: "**/ColonyDestinationScreen2/Layout/Buttons/LaunchButton"}
+  - ui_wait: {path: "**/MinionSelectScreen/Content/BottomContent/Buttons/ProceedButton", cond: stable, frames: 60000}
+  - click: {ui: "**/MinionSelectScreen/Content/BottomContent/Buttons/ProceedButton"}
+  - ui_wait: {path: "**/MinionSelectScreen", cond: gone, frames: 6000}
+  - expect_state:
+      "ClusterManager.Instance.WorldContainers.Count": [">= 8", "== original"]
+      "ClusterManager.Instance.GetStartWorld().worldName": {contains: NiobiumMoonletStart}
+      "ClusterManager.Instance.GetStartWorld().worldSize.x": 64
+      "ClusterManager.Instance.GetStartWorld().worldSize.y": 96
+      "Components.LiveMinionIdentities.Count": 3
+      "ClusterManager.Instance.GetStartWorld().m_generatedSubworlds": {contains: "expansion1::subworlds/niobium/NiobiumPatch"}
+      "all:HarvestablePOIClusterGridEntity::Length": ">= 5"
+  - expect_state:
+      "ClusterManager.Instance.GetStartWorld().m_generatedSubworlds": {contains: "expansion1::subworlds/magma/MagmaSurface"}

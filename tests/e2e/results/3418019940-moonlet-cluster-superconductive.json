@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3418019940-moonlet-cluster-superconductive.yaml",
+ "mods": [
+  "3418019940"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a new game of the cluster by its coordinate: the 64 x 96 Superconductive start world with its niobium and magma subworlds; the asteroid list dumped",
+ "updated": "2026-10-27",
+ "commit": "20348026",
+ "mod_dlls": {
+  "3418019940": {
+   "NiobiumMoonletStart.dll": "fb34675de75d2dce2678a011625a2f0781e33945233a9fd9e62ab1ae4e106c35"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-051715-c581e5cb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T05:45:53",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-093151-652ec462",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:31:51",
+    "lane": 15,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261027-093151-652ec462",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T09:33:08",
+    "lane": 15,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

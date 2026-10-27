@@ -1,0 +1,23 @@
+# 一格宽的饮水机 (One-tile-wide water cooler) (2861096848), class B.
+#
+# What it does: a transpiler on WaterCoolerConfig.CreateBuildingDef makes the Water Cooler one
+# cell wide and draws it with the mod's own water_kanim.
+# How a player reaches it: the Water Cooler, in the build menu as before.
+# What changes: a narrower water cooler.
+#
+# The def is one cell wide with the mod's animation; one built by setup in the dug-out
+# corridor west of the printing pod is selected (its title dumped).
+from: early-base
+mods: [2861096848]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"WaterCooler\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"WaterCooler\").WidthInCells": 1
+      "Assets.GetBuildingDef(\"WaterCooler\").AnimFiles[0].name": water_kanim
+  - run: {seconds: 2}
+  - expect: {buildings: {WaterCooler: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: WaterCooler}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}

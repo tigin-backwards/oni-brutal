@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3593359023-easy-achievements.yaml",
+ "mods": [
+  "3593359023"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "five colony achievements need far less: 50 cycles and 6 Duplicants for Home Sweet Home, 4,000 kcal for Carnivore and Locavore",
+ "updated": "2026-10-26",
+ "commit": "9fec3604",
+ "mod_dlls": {
+  "3593359023": {
+   "Easy Achievements.dll": "d9fe548bd53d44013ee87c72e8e34577361c62cda545bdc83cd6d7885961ef1d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-155051-8ce3a25e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T17:12:15",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-221719-7019b91c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T22:17:19",
+    "lane": 17,
+    "reference_run": "20261026-155051-8ce3a25e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-221719-7019b91c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T22:21:44",
+    "lane": 17,
+    "reference_run": "20261026-155051-8ce3a25e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

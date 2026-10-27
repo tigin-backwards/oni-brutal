@@ -1,0 +1,23 @@
+# Easy Achievements (3593359023), class P.
+#
+# What it does: a postfix on Db.Initialize lowers five colony achievements' requirements by
+# reflection: Carnivore and Locavore need 4,000 kcal (not 400,000), Super Sustainable less
+# clean power, Job Suitability three cycles in Exosuits (not ten), and Home Sweet Home 50
+# cycles, 6 Duplicants and a morale of 8 (not 200 cycles and 12 Duplicants).
+# How a player reaches it: the colony achievements (Colony Summary); playing.
+# What changes: those achievements come much sooner.
+#
+# The requirements are read from the database.
+from: early-base
+mods: [3593359023]
+steps:
+  - expect_state:
+      "Db.Get().ColonyAchievements.Thriving.requirementChecklist[0].cycleNumber": 50
+      "Db.Get().ColonyAchievements.Thriving.requirementChecklist[1].minimumMorale": 8
+      "Db.Get().ColonyAchievements.Thriving.requirementChecklist[2].numDupes": 6
+      "Db.Get().ColonyAchievements.EatkCalFromMeatByCycle100.requirementChecklist[1].numCalories": 4000
+      "Db.Get().ColonyAchievements.NoFarmTilesAndKCal.requirementChecklist[1].numCalories": 4000
+      "Db.Get().ColonyAchievements.ExosuitCycles.requirementChecklist[0].numCycles": 3
+      "Db.Get().ColonyAchievements.Generate240000kJClean.requirementChecklist[0].amountToProduce": ["< 240000", "== original"]
+  - run: {seconds: 2}
+  - expect: {duplicants: 3}

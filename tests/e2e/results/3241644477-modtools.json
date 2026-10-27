@@ -1,0 +1,65 @@
+{
+ "spec": "mods/3241644477-modtools.yaml",
+ "mods": [
+  "3241644477"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "the Runtime Console IMGUI window shows at start in both, but its GUILayout differs in ours: the toolbar sits a pixel lower, the Count label wraps after Count: (the original breaks it mid-word, Coun/t:), the Clear button and the filter field have other widths, and long log labels do not wrap, so the scroll view grows a horizontal scrollbar (10 % of the frame differs)",
+ "updated": "2026-10-27",
+ "commit": "54829504",
+ "mod_dlls": {
+  "3241644477": {
+   "ONIModTools.dll": "8d50021f98ee754068c1022c5d2afe753fc7a4d8561854e91b6ab742847a610e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-114113-564df08f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T13:09:58",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-152851-18dfe3e2",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-27T15:28:51",
+    "lane": 15,
+    "reasons": [
+     "shot console: 10.09% of pixels differ (> 4%)"
+    ],
+    "reference_run": "20261027-114113-564df08f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "console": 0.100938
+    }
+   },
+   {
+    "run": "20261027-152851-18dfe3e2",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-27T15:29:43",
+    "lane": 15,
+    "reasons": [
+     "shot console: 10.12% of pixels differ (> 4%)"
+    ],
+    "reference_run": "20261027-114113-564df08f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "console": 0.101181
+    }
+   }
+  ]
+ }
+}

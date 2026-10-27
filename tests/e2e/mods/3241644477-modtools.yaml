@@ -1,0 +1,23 @@
+# ModTools (3241644477), classes S (IMGUI), P.
+#
+# What it does: runtime tools for modders. A Runtime Console, an IMGUI window ("Runtime
+# Console", 650x500 at 620,120) listing the game's log with level filters, a text filter, copy
+# buttons and auto scroll, opens at start (its "Show when Start" box) and whenever an error is
+# logged. A ModTools button the mod inserts into the pause menu would also offer a Scene
+# Explorer (an IMGUI window browsing the GameObject tree), but the button, added to
+# PauseScreen's buttons in a PauseScreen.OnPrefabInit postfix, does not show in this game build,
+# in the original either.
+# How a player reaches it: the console shows by itself.
+# What changes: the log on screen.
+#
+# After the early base loads the console window is shown; its title and toolbar match the
+# original's (a shot, the log lines and the count masked). A click on "X - Close Window" hides
+# it.
+from: early-base
+mods: [3241644477]
+steps:
+  - run: {seconds: 1}
+  - expect_state: {"all:OxygenNotIncluded.Mods.ONIModTools.RuntimeConsole::[0].windowShow": true}
+  - shot: {name: console, threshold: 0.04, mask: [[0, 0, 1280, 118], [0, 118, 618, 602], [1272, 118, 8, 602], [618, 166, 654, 554], [790, 136, 45, 28], [832, 136, 196, 28]]}
+  - click: {at: [688, 149]}
+  - expect_state: {"all:OxygenNotIncluded.Mods.ONIModTools.RuntimeConsole::[0].windowShow": false}

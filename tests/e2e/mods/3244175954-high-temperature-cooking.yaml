@@ -1,0 +1,31 @@
+# High-temperature Cooking 高温烹饪 (3244175954), class P.
+#
+# What it does: postfixes, patched in at EntityConfigManager.LoadGeneratedEntities, add a
+# TemperatureCookable to Mush Bar, Shellfish Meat, Grubfruit, Raw Fish, Mushroom, Meat and
+# Bristle Berry: above 71 °C each turns into its cooked food, as raw eggs do in the game.
+# How a player reaches it: heat such food, as in a hot room.
+# What changes: food cooks by heat, with no cooking station.
+#
+# setup drops a mushroom in the corridor west of the printing pod, heated to 90 °C. It is
+# selected while the game is paused; a few seconds later it has become a Fried Mushroom, and
+# the selection has followed it.
+from: early-base
+mods: [3244175954]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131128, 0, 0, \"Mushroom\", \"Ore\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "all:TemperatureCookable::[0].GetComponent<PrimaryElement>", method: set_Temperature, args: [363.15]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"Mushroom\").GetComponent<TemperatureCookable>.cookedID": FriedMushroom
+      "Assets.GetPrefab(\"Meat\").GetComponent<TemperatureCookable>.cookedID": CookedMeat
+      "count:all:KPrefabID::[*] if .PrefabTag.Name == FriedMushroom": 0
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {pos: [112.5, 206.2], select: Mushroom}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - run: {seconds: 3, speed: 1}
+  - expect_state:
+      "count:all:KPrefabID::[*] if .PrefabTag.Name == FriedMushroom": 1
+      "count:all:KPrefabID::[*] if .PrefabTag.Name == Mushroom": 0
+      "selected:GetComponent<KPrefabID>.PrefabTag.Name": FriedMushroom
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Fried Mushroom"}

@@ -1,0 +1,40 @@
+# LongReach: Advanced Duplicant Reach Extension (3689543178), classes P, O.
+#
+# What it does: a postfix on Game.OnPrefabInit appends paths to the game's reach tables
+# (OffsetGroups.InvertedStandardTable and ...WithCorners): straight up and sideways, and
+# diagonally, out to the PLib option Total Reach Distance (4 to 20 cells, the game's reach is
+# 4; the mod ships LongReachOptions.json with 20). It logs the distance applied.
+# How a player reaches it: errands on cells beyond the game's reach; the options on the Mods
+# screen (shown as QoLCore).
+# What changes: how far Duplicants build and dig from where they stand.
+#
+# The distance is set to 8: the reach tables grow to as many paths as in the original; the
+# colony runs. Then the options dialog opens from the main menu's Mods screen, shows the
+# setting, and Cancel closes it.
+from: early-base
+mods: [3689543178]
+options:
+  "3689543178": {$file: LongReachOptions.json, TotalReachDistance: 8}
+require_log: ['\[LongReach\] Applied total reach distance: 8']
+steps:
+  - expect_state:
+      "OffsetGroups.InvertedStandardTable.Length": "== original"
+      "OffsetGroups.InvertedStandardTableWithCorners.Length": "== original"
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/Main MenuButton", cond: stable}
+  - click: {ui: "**/PauseScreen/**/Main MenuButton"}
+  - ui_wait: {path: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton", cond: stable}
+  - click: {ui: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton"}   # Quit Without Saving
+  - ui_wait: {path: "**/MainMenu_SpacedOut/MainMenuMenubar/MainMenuButtons", cond: stable, frames: 3000}
+  - click: {text: "MODS", under: "**/MainMenuButtons"}
+  - ui_wait: {path: "**/ModsScreen/Panel", cond: stable}
+  - click: {ui: "**/ModsScreen/**/Content/QoLCore/ModSettingsButton"}
+  - ui_wait: {path: "**/ModOptions", cond: stable}
+  - expect_ui:
+      "**/ModOptions/Body/**/Entries/Label/Text": {any_text: "Total Reach Distance"}
+  - ui_dump: {name: options, root: "**/ModOptions"}
+  - shot: {name: options, crop: "**/ModOptions"}
+  - click: {text: "CANCEL", under: "**/ModOptions"}
+  - ui_wait: {path: "**/ModOptions", cond: gone}

@@ -1,0 +1,70 @@
+{
+ "spec": "mods/3689543178-longreach.yaml",
+ "mods": [
+  "3689543178"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "reach set to 8: the reach tables grow as in the original; the options dialog from the Mods screen dumped and shot",
+ "updated": "2026-10-27",
+ "commit": "02d2fb93",
+ "mod_dlls": {
+  "3689543178": {
+   "PLibCore.dll": "f2127c9fa9fd24e9631035d0157be71e3eebfdd2425f58cd2d0f1dc5f7e4f177",
+   "PLibOptions.dll": "024f5c0d18dc15bd93e9112434456ac930f35ab97b1769b160ba4097f49964e1",
+   "PLibUI.dll": "c9665407dcad35ef695b91396d2fc5edd62716f2aa11aa6934b22363ef537390",
+   "QoLCore.dll": "7afcd65044976eac689e7e7e1dd9502934f22a84c7afcf85ee3156825e59e842"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-040543-ba0699f4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T04:14:53",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-081343-e9667d24",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T08:13:43",
+    "lane": 14,
+    "reference_run": "20261027-040543-ba0699f4",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "options": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "options": 0.0
+    }
+   },
+   {
+    "run": "20261027-081343-e9667d24",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T08:14:45",
+    "lane": 14,
+    "reference_run": "20261027-040543-ba0699f4",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "options": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "options": 0.0
+    }
+   }
+  ]
+ }
+}

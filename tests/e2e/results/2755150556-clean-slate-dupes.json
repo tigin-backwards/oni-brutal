@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2755150556-clean-slate-dupes.yaml",
+ "mods": [
+  "2755150556"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "starting level 7: the printing pod's Duplicants start at 7 in their interests",
+ "updated": "2026-10-27",
+ "commit": "4fe1978d",
+ "mod_dlls": {
+  "2755150556": {
+   "CleanSlateDupes.dll": "d2a545245727ea6dfd53da3084c57a3b048c635c413f3d409043289b5c1b222f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-051715-c581e5cb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T06:25:05",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-091935-a045a564",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:19:35",
+    "lane": 14,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-091935-a045a564",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T09:20:22",
+    "lane": 14,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

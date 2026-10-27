@@ -1,0 +1,27 @@
+# Clean Slate Dupes (2755150556), classes P, O.
+#
+# What it does: a postfix on CharacterContainer.GenerateCharacter sets every new Duplicant's
+# starting level in the attributes of its interests to a fixed level (PLib option, 1 by
+# default; the game rolls them) and refreshes the card. Options (some needing a restart) also
+# change the +3 attribute traits, drop the "Skilled:" traits, or drop or change Early Bird and
+# Night Owl.
+# How a player reaches it: the printing pod's immigrant screen and new games' Duplicant
+# selection; the options on the Mods screen.
+# What changes: Duplicants on offer start at a set level in their interests.
+#
+# The level is set to 7 explicitly. The printing pod's immigrant screen deals four cards: the
+# Duplicants on it start at 7 in each of their interests' attributes, and the card shows it.
+from: early-base
+mods: [2755150556]
+options:
+  "2755150556": {StartingLevel: 7}
+setup:
+  - driver: {seed: 12345}
+  - driver: {setup.call: {target: "Immigration.Instance", method: "Sim200ms", args: [100000]}}   # Duplicants on offer now
+steps:
+  - expect_state: {"Immigration.Instance.ImmigrantsAvailable": true}
+  - call: {tool: building_control, args: {domain: side_surface, surface: facility, kind: telepad, action: open_immigrants, confirm: true}}
+  - ui_wait: {path: "**/ImmigrantScreen/Layout", cond: stable}
+  - expect_state:
+      "all:CharacterContainer::Length": ">= 1"
+      "count:all:CharacterContainer::[0].Stats.StartingLevels[*] if .Value == 7": [">= 1", "== original"]

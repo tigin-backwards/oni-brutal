@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2161936214-the-last-legacy.yaml",
+ "mods": [
+  "2161936214"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Duplicant that dies leaves nine pieces of meat",
+ "updated": "2026-10-26",
+ "commit": "cbabaaf0",
+ "mod_dlls": {
+  "2161936214": {
+   "LastLegacy.dll": "bdc7602075eef831d2521355d6d2f4b2aafa15863bed759a8f699f68a64ad12f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-151429-7c585a60",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T15:14:29",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T20:59:04",
+    "lane": 17,
+    "reference_run": "20261026-151429-7c585a60",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T20:59:28",
+    "lane": 16,
+    "reference_run": "20261026-151429-7c585a60",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

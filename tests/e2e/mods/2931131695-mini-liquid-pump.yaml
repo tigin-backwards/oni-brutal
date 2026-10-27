@@ -1,0 +1,51 @@
+# 迷你液泵 Mini Liquid Pump (2931131695), class B.
+#
+# What it does: adds the Mini Liquid Pump (MINILIQUIDPUMP20230210) to the Plumbing menu: a 1x1
+# Liquid Pump of any metal, 120 W, that takes 5 kg/s of liquid within 2 cells into a 10 kg
+# store and dispenses it into a liquid pipe on its own cell; an automation port enables it.
+# No research is needed.
+# How a player reaches it: the build menu (Plumbing).
+# What changes: a small, cheap liquid pump.
+#
+# setup builds one in the dug-out corridor west of the printing pod, powered by a charged
+# battery, with a short liquid pipe on its output, and pours water beside it. The pump takes
+# the water off the floor into the pipe; selected, its details show it.
+from: early-base
+mods: [2931131695]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"MINILIQUIDPUMP20230210\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Battery\")", method: Build, args: [{"$": "Grid.XYToCell(109, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "last:GetComponent<Battery>", method: AddEnergy, args: [10000.0]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [{"$": "Grid.XYToCell(109, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [{"$": "Grid.XYToCell(110, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [{"$": "Grid.XYToCell(111, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Right", {"$": "Grid.XYToCell(109, 206)"}, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Left, Right", {"$": "Grid.XYToCell(110, 206)"}, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Left, Right", {"$": "Grid.XYToCell(111, 206)"}, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Left", {"$": "Grid.XYToCell(112, 206)"}, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: ForceRebuildNetworks}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidConduit\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidConduit\")", method: Build, args: [{"$": "Grid.XYToCell(111, 206)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Game.Instance.liquidConduitSystem", method: SetConnections, args: ["Left", {"$": "Grid.XYToCell(112, 206)"}, true]}}
+  - driver: {setup.call: {target: "Game.Instance.liquidConduitSystem", method: SetConnections, args: ["Right", {"$": "Grid.XYToCell(111, 206)"}, true]}}
+  - driver: {setup.call: {target: "Game.Instance.liquidConduitSystem", method: ForceRebuildNetworks}}
+  - driver: {setup.call: {type: SimMessages, method: AddRemoveSubstance, args: [{"$": "Grid.XYToCell(113, 206)"}, Water, null, 40, 300, 255, 0]}}
+  - driver: {setup.call: {type: SimMessages, method: AddRemoveSubstance, args: [{"$": "Grid.XYToCell(114, 206)"}, Water, null, 40, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"MINILIQUIDPUMP20230210\").EnergyConsumptionWhenActive": 120
+      "Assets.GetPrefab(\"MINILIQUIDPUMP20230210\").GetComponent<ElementConsumer>.consumptionRate": 5
+  - run: {seconds: 1}
+  - expect_state:
+      "cells:108,206..118,207::Grid.Mass.get_Item({cell})": {save_as: before}
+  - run: {seconds: 30}
+  - expect: {buildings: {MINILIQUIDPUMP20230210: 1}}
+  - expect_state:
+      "Game.Instance.liquidConduitFlow.GetContents(131128).mass": "> 5"   # the pipe is full: the pump stops, blocked
+      "cells:108,206..118,207::Grid.Mass.get_Item({cell})": "<= before - 10"
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: MINILIQUIDPUMP20230210}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Mini"}

@@ -1,0 +1,24 @@
+# The FoodOverhaul Mod (3747771996), classes P, S.
+#
+# What it does: after Db.Initialize it gives the game's foods new effects when eaten (speed,
+# reach, no CO2 breathed out, attribute boosts...; the game's Warm Touch and Good Eats are
+# replaced), each a timed Effect of its own, and adds favourite-food traits (FF_ plus a food):
+# a Duplicant eating its favourite gets a Personal Favorite effect with +3 in its interests.
+# Patches on OxygenBreather and the biped transition layer apply the no-CO2 and speed effects;
+# the Duplicant cards show the favourite food.
+# How a player reaches it: Duplicants eating; the trait on new Duplicants' cards.
+# What changes: what each meal does.
+#
+# The mod initialises (logged); the favourite-food traits and the foods' effects are as many
+# as in the original; the colony plays on and eats.
+from: early-base
+mods: [3747771996]
+require_log: ['\[FoodOverhaul\] SetFoodEffects completed']
+steps:
+  - expect_state:
+      "count:Db.Get().traits.resources[*] if .Id.StartsWith(\"FF_\") == true": [">= 5", "== original"]
+      "TUNING.FOOD.FOOD_TYPES.MUSHBAR.Effects.Count": "== original"
+      "TUNING.FOOD.FOOD_TYPES.COOKED_MEAT.Effects.Count": "== original"
+      "Db.Get().effects.resources.Count": "== original"
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

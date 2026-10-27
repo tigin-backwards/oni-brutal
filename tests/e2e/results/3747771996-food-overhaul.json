@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3747771996-food-overhaul.yaml",
+ "mods": [
+  "3747771996"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the mod initialises; its traits and food effects as in the original; the colony eats",
+ "updated": "2026-10-27",
+ "commit": "f2251e40",
+ "mod_dlls": {
+  "3747771996": {
+   "FoodOverhaul.dll": "5f883d64c75e7b599c93f5976f0ee5188b985c43d768993840caf94e336db893"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-051715-c581e5cb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T06:14:26",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-093020-b53c1f27",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:30:20",
+    "lane": 14,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-093020-b53c1f27",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T09:31:46",
+    "lane": 14,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

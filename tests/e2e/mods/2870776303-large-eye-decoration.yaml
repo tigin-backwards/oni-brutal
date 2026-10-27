@@ -1,0 +1,25 @@
+# Large eye decoration大眼睛装饰 (2870776303), class P.
+#
+# What it does: postfixes on the Crown Moulding's and Corner Moulding's CreateBuildingDef move
+# them to the building-front scene layer and the plants object layer, so they no longer take a
+# building's place: they can share cells with other buildings and are drawn in front of them.
+# How a player reaches it: building mouldings (Decor menu).
+# What changes: mouldings over or behind other buildings.
+#
+# The definitions are read; a Crown Moulding built by setup at the ceiling of the dug-out
+# corridor west of the printing pod sits on the plants layer.
+from: early-base
+mods: [2870776303]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"CrownMoulding\")", method: Build, args: [{"$": "Grid.XYToCell(112, 208)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"CrownMoulding\").SceneLayer": "== 'BuildingFront'"
+      "Assets.GetBuildingDef(\"CrownMoulding\").ObjectLayer": "== 'Plants'"
+      "Assets.GetBuildingDef(\"CornerMoulding\").SceneLayer": "== 'BuildingFront'"
+      "Assets.GetBuildingDef(\"CornerMoulding\").ObjectLayer": "== 'Plants'"
+  - run: {seconds: 2}
+  - expect: {buildings: {CrownMoulding: 1}}
+  - expect_state:
+      "Grid.Objects.get_Item(132400, 5)": exists
+      "Grid.Objects.get_Item(132400, 1)": missing

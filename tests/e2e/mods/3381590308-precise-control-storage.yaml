@@ -1,0 +1,32 @@
+# U&F-Precise Control Storage 精准控制存储 (3381590308), classes S, P.
+#
+# What it does: the Storage Bin, Ration Box and Refrigerator get a PreciselyFilteredStorageController:
+# a user-menu button 开启精准数量控制 (turn on precise amounts) opens a secondary side screen
+# (数量配置, loaded from the mod's own UI asset) where each allowed item gets an amount; a
+# prefix on FilteredStorage.OnFilterChanged then fetches those amounts instead of filling the
+# bin. The button turns to 禁用精准数量控制 to go back.
+# How a player reaches it: select a Storage Bin; its user menu, then the secondary side
+# screen.
+# What changes: storage that keeps set amounts of each item.
+#
+# setup builds a Storage Bin in the dug-out corridor west of the printing pod. Selected, its
+# user menu has the button; a click turns precise control on and opens the amounts screen
+# (dumped and compared in a shot).
+from: early-base
+mods: [3381590308]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"StorageLocker\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {StorageLocker: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: StorageLocker}
+  - ui_wait: {path: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons/开启精准数量控制Button", cond: stable}
+  - expect_state:
+      "selected:GetComponent<PreciselyControlled.PreciselyFilteredStorageController>.NeedPrecisely": false
+  - click: {ui: "**/UserMenuScreen/Buttons/开启精准数量控制Button"}
+  - expect_state:
+      "selected:GetComponent<PreciselyControlled.PreciselyFilteredStorageController>.NeedPrecisely": true
+  - ui_wait: {path: "**/DetailsScreen/SideScreen2/Body/PreciselyFilteredSideScreen", cond: stable}
+  - ui_dump: {name: amounts, root: "**/DetailsScreen/SideScreen2/Body/PreciselyFilteredSideScreen"}
+  - shot: {name: amounts, crop: "**/DetailsScreen/SideScreen2/Body/PreciselyFilteredSideScreen", threshold: 0.04}

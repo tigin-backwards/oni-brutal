@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3381590308-precise-control-storage.yaml",
+ "mods": [
+  "3381590308"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Storage Bin's precise-control button opens the amounts screen from the mod's asset (dumped and shot)",
+ "updated": "2026-10-27",
+ "commit": "ddd9980e",
+ "mod_dlls": {
+  "3381590308": {
+   "PreciseControlStorage.dll": "b1472dea0522c62970b0750fe0248766e0c5e8ffc14b92e934bd2799dec12cbc"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-063948-e1660148",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T07:13:43",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-091259-eaa7d81a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:12:59",
+    "lane": 15,
+    "reference_run": "20261027-063948-e1660148",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "amounts": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "amounts": 0.0
+    }
+   },
+   {
+    "run": "20261027-091259-eaa7d81a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T09:29:23",
+    "lane": 15,
+    "reference_run": "20261027-063948-e1660148",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "amounts": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "amounts": 0.0
+    }
+   }
+  ]
+ }
+}

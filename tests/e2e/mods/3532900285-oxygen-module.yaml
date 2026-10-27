@@ -1,0 +1,31 @@
+# 氧气模块 Oxygen module (3532900285), class B.
+#
+# What it does: a 3x3 oxygen maker (YangqiMokuai) in the Oxygen menu, researched with
+# Distillation: drawn with the Electrolyzer's anim, it takes piped water (240 W) and pipes out
+# 0.888 of its mass as 70 °C oxygen through a gas output, switchable by automation.
+# How a player reaches it: the build menu (Oxygen), after Distillation.
+# What changes: piped oxygen without hydrogen.
+#
+# setup researches Distillation; the Oxygen menu lists the module (shot), and one built by
+# setup in the dug-out corridor west of the printing pod is selected.
+from: early-base
+mods: [3532900285]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"Distillation\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"YangqiMokuai\")", method: Build, args: [131128, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"Distillation\").unlockedItemIDs": {contains: YangqiMokuai}
+      "Assets.GetBuildingDef(\"YangqiMokuai\").EnergyConsumptionWhenActive": 240
+  - run: {seconds: 10}
+  - expect: {buildings: {YangqiMokuai: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Oxygen"}
+  # The build menu catches up over frames: 120 frames for all of it to settle.
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/YangqiMokuai Group*", cond: stable, stable: 120, frames: 600}
+  - shot: {name: oxygen-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: YangqiMokuai}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}

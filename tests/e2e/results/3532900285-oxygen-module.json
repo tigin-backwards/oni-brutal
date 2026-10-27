@@ -1,0 +1,68 @@
+{
+ "spec": "mods/3532900285-oxygen-module.yaml",
+ "mods": [
+  "3532900285"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "after Distillation the Oxygen menu lists the module (shot); a built one is selected (dumped)",
+ "updated": "2026-10-26",
+ "commit": "73711f65",
+ "mod_dlls": {
+  "3532900285": {
+   "PLib.dll": "93073fdf44dbe9fd7c0afe19e56341be862cc2d732090dee30999cf60e2e160d",
+   "yangqimokuai.dll": "e922843857f6a8d5c61954170f76db97f6150c7db0ac4005e0235bbd29c9564f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-193322-8c93fed4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T19:50:53",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-202022-adf95e2b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T20:39:18",
+    "lane": 15,
+    "reference_run": "20261026-193322-8c93fed4",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "oxygen-menu": 0.0
+    }
+   },
+   {
+    "run": "20261026-202022-adf95e2b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T20:37:37",
+    "lane": 14,
+    "reference_run": "20261026-193322-8c93fed4",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "oxygen-menu": 0.0
+    }
+   }
+  ]
+ }
+}

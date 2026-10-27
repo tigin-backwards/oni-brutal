@@ -1,0 +1,17 @@
+# Vitals Display Rads (3235954752), class S.
+#
+# What it does: with radiation on, a transpiler on VitalsTableScreen.OnActivate adds a
+# Radiation column (RadTarakan) after Health in the Vitals screen, each Duplicant's radiation
+# balance, sortable; postfixes on LabelTableColumn's widgets keep the label columns narrow.
+# How a player reaches it: the Vitals screen (V).
+# What changes: Duplicants' radiation exposure at a glance.
+#
+# The Vitals screen opens with the Radiation column; its header row is dumped.
+from: early-base
+mods: [3235954752]
+steps:
+  - open: {management: vitals}
+  - ui_wait: {path: "**/VitalsTableScreen", cond: stable}
+  - expect_state:
+      "ui:**/VitalsTableScreen::GetComponent<VitalsTableScreen>.columns.ContainsKey(\"RadTarakan\")": true
+  - ui_dump: {name: header, root: "**/VitalsTableScreen/**/Header*", mask_text: ['\d']}

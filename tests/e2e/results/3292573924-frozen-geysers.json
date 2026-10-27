@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3292573924-frozen-geysers.yaml",
+ "mods": [
+  "3292573924"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the geyser types hold the mod's temperatures",
+ "updated": "2026-10-27",
+ "commit": "1ae06b70",
+ "mod_dlls": {
+  "3292573924": {
+   "GesysersModified.dll": "0c2e0497233f5d361e8f44cd08c86dc15ffea3f90b84d3b2eee3d061f1168c59"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-013141-9697dcd2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T01:57:15",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-030012-23264dd6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T03:00:12",
+    "lane": 14,
+    "reference_run": "20261027-013141-9697dcd2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-030012-23264dd6",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T03:00:13",
+    "lane": 15,
+    "reference_run": "20261027-013141-9697dcd2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

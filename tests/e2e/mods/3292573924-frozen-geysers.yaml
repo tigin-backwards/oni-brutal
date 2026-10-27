@@ -1,0 +1,18 @@
+# Frozen Geysers (3292573924), class P.
+#
+# What it does: the game's geyser, vent and volcano types are replaced by copies with much
+# lower output temperatures: steam vents at 60 °C, hot steam at 90 °C, water geysers at 5 °C,
+# polluted water at -15 °C, volcanoes and metal volcanoes at 150 °C, natural gas at -160 °C
+# and so on (the DLC ones only when their DLC is active).
+# How a player reaches it: it is passive; geysers in new and loaded worlds.
+# What changes: cold geysers.
+#
+# The geyser types hold the mod's temperatures, as many types as in the original.
+from: early-base
+mods: [3292573924]
+steps:
+  - expect_state:
+      "count:GeyserConfigurator.geyserTypes[*] if .id == steam and .temperature == 333.15": 1
+      "count:GeyserConfigurator.geyserTypes[*] if .id == hot_water and .temperature == 278.15": 1
+      "count:GeyserConfigurator.geyserTypes[*] if .id == small_volcano and .temperature == 423.15": 1
+      "GeyserConfigurator.geyserTypes.Count": "== original"

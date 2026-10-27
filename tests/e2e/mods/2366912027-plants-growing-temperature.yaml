@@ -1,0 +1,22 @@
+# 植物生长温度修改(Plants Growing's Temperature Set) (2366912027), class P.
+#
+# What it does: lets a player set each plant's temperature range by hand. As plant prefabs are
+# made (EntityTemplates.ExtendEntityToBasicPlant, the Oxyfern and the Wheezewort), it records
+# their game ranges in mods/HuangConfigs/TemperatureForPlants.josn; on a later start it writes
+# TemperatureForPlants.config.josn from that file (with every range reset to the values of
+# its TemperatureForPlants.reset.josn, 10 K to 1,000 K), and once that file exists the plants
+# take its ranges (and the Wheezewort its cooling).
+# How a player reaches it: starting the game two or three times; editing the config file.
+# What changes: plants' comfortable and lethal temperatures.
+#
+# On a first start the mod only records the game's ranges: the data file is written, and the
+# plants keep the game's ranges.
+from: early-base
+mods: [2366912027]
+steps:
+  - expect_state:
+      "file:mods/HuangConfigs/TemperatureForPlants.josn": exists
+      "Assets.GetPrefab(\"PrickleFlower\").GetComponent<TemperatureVulnerable>.TemperatureLethalHigh": "== original"
+      "Assets.GetPrefab(\"ColdBreather\").GetComponent<ColdBreather>.deltaEmitTemperature": "== original"
+  - run: {seconds: 2}
+  - expect: {duplicants: 3}

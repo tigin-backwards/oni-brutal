@@ -8,6 +8,10 @@ steps:
   - click: {ui: "**/PlanScreen/Toggle:Base"}
   - expect_ui:
       "**/BuildingGroups/Searchbar/FilterInputField": {active: true}
+  # The panel grows for a few tenths of a second (ExpandRevealUIContent), moving the field up.
+  # Clicked before that ends, the pointer stays where the field was, which the results then
+  # cover (Gas Pump's button, hovered); clicked after, it rests on the field.
+  - ui_wait: {path: "**/BuildingGroups/Searchbar/FilterInputField", cond: stable}
   - click: {ui: "**/BuildingGroups/Searchbar/FilterInputField"}
   - type: {ui: "**/BuildingGroups/Searchbar/FilterInputField", text: "pump"}
   # The field refreshes the search 0.2 s after the last edit (KInputTextField).

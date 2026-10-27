@@ -1,0 +1,20 @@
+# Custom Print Timer (2977493575), class P.
+#
+# What it does: adds a game setting, "Print timer (in cycle)" (CustomCycleTimerInGame, a seed
+# setting whose number is the cycles between prints, 3 when rolled), to the custom game
+# settings; the Printing Pod's interval follows it (prefixes on Immigration.OnPrefabInit and a
+# postfix on CustomGameSettings.OnDeserialized set Immigration.spawnInterval).
+# How a player reaches it: New Game, the custom game settings.
+# What changes: how often the printing pod prints.
+#
+# The setting is registered with the game's custom settings; in early-base, whose save
+# predates the mod, the printing pod keeps its interval.
+from: early-base
+mods: [2977493575]
+steps:
+  - expect_state:
+      "CustomGameSettings.Instance.QualitySettings.ContainsKey(\"CustomCycleTimerInGame\")": true
+      "CustomGameSettings.Instance.GetCurrentQualitySetting(\"CustomCycleTimerInGame\").id": "== original"
+      "Immigration.Instance.spawnInterval[0]": "== original"
+      "Immigration.Instance.spawnInterval[1]": "== original"
+  - run: {seconds: 5}

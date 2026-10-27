@@ -1,0 +1,29 @@
+# Idle Notification Tweaks (2943021953), classes P, S, O.
+#
+# What it does: Idle (and Idle in Rockets) status items raise notifications; every Duplicant
+# gets a SuppressIdleButton: a user-menu button "Suppress Idle" (then "Clear Suppressed") that
+# hides that Duplicant's Idle notifications (a prefix on NotificationScreen.AddNotification
+# keeps them back, a Render200ms postfix shows them again once cleared). PLib options: hide
+# Idle from Duplicants in busy rockets (on), pause the game on Idle (off), its minimum idle
+# time and cooldown.
+# How a player reaches it: select a Duplicant; its user menu. The options on the Mods screen.
+# What changes: which Idle notifications the player sees, and optionally a pause.
+#
+# setup selects a Duplicant; its user menu has Suppress Idle, and a click suppresses its Idle
+# notifications; selected again, the button reads Clear Suppressed.
+from: early-base
+mods: [2943021953]
+setup:
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "Components.LiveMinionIdentities.Items[1].GetComponent<KSelectable>"}]}}
+steps:
+  - expect_state:
+      "Db.Get().DuplicantStatusItems.IdleInRockets.shouldNotify": true
+      "selected:GetComponent<IdleNotificationTweaks.SuppressIdleButton>.IsIdleSuppressed": false
+  - ui_wait: {path: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons/Suppress IdleButton", cond: stable}
+  - ui_dump: {name: menu, root: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons/Suppress IdleButton"}
+  - click: {ui: "**/UserMenuScreen/Buttons/Suppress IdleButton"}
+  - expect_state:
+      "selected:GetComponent<IdleNotificationTweaks.SuppressIdleButton>.IsIdleSuppressed": true
+  - run: {seconds: 10}
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[1].GetComponent<IdleNotificationTweaks.SuppressIdleButton>.IsIdleSuppressed": true

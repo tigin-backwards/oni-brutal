@@ -1,0 +1,39 @@
+# Errand Notifier (3479125383), classes T, S, O; touches_ui; PLib options.
+#
+# What it does: adds a Notifier tool to the toolbar. Dragged over errands (dig, build,
+# deconstruct, mop, empty pipe, move-to orders), it groups them into a notification; once
+# every errand of it is done, the notification fires in the notification list (its name, by
+# default "Errand is completed", a tooltip, a type, and optionally pausing the game or zooming
+# to the errand). Its tool menu (a PLib panel) creates or edits notifications and adds or
+# removes errands; an overlay marks the errands that carry one.
+# How a player reaches it: the toolbar's Notifier button (or its key), then dragging.
+# What changes: a player learns when chosen errands are done.
+#
+# Options DefaultPause and DefaultZoom are off, PersistentNotifications on. Three dig orders
+# are placed in the sandstone east of the dug-out room east of the printing pod; the Notifier
+# tool is picked from the toolbar, and a drag over them makes a notification. Once the
+# Duplicants have dug them out, the notification has fired, staying in the notification list,
+# and left the container.
+from: early-base
+mods: [3479125383]
+options:
+  ErrandNotifier: {DefaultPause: false, DefaultZoom: false, PersistentNotifications: true}
+steps:
+  - dig: [136, 207, 136, 209]
+  - expect: {pending_digs: 3}
+  - driver: {camera.set: {cell: [134, 208], ortho: 8}}
+  - tool: {toolbar: Notifier}
+  - ui_wait: {path: "**/NotifierToolMenu", cond: stable}
+  - expect_ui:
+      "**/NotifierToolMenu/Title/Text/Text": {text: "~Errand Notifier"}
+  - ui_dump: {name: menu, root: "**/NotifierToolMenu"}
+  - drag: {from: [136, 207], to: [136, 209]}
+  - expect_state:
+      "type:ErrandNotifier.NotificationsHierarchy.NotificationsContainer::NotificationsCount": 1
+  - key: {code: Escape}
+  - run: {seconds: 900, until: {pending_digs: 0}}
+  - run: {seconds: 2}
+  - expect_state:
+      "type:ErrandNotifier.NotificationsHierarchy.NotificationsContainer::NotificationsCount": 0
+  - expect_ui:
+      "**/NotificationScreen/**": {any_text: "~is completed"}

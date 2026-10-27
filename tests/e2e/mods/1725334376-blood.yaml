@@ -1,0 +1,25 @@
+# Blood (1725334376), class P.
+#
+# What it does: two new elements, Blood (a liquid at 310 K that freezes at 272.5 K and boils
+# into steam and iron at 372.5 K) and Frozen Blood, from its elements/blood.yaml, with SimHash
+# names of their own; whenever a Duplicant or critter loses health, 0.024 kg of blood per hit
+# point lost is added to its cell.
+# How a player reaches it: it is passive; anything that takes damage bleeds.
+# What changes: blood on the floor.
+#
+# The elements load with the mod's properties and names (as in the original), and the
+# Duplicant damaged by setup (10 hit points) stays alive.
+from: early-base
+mods: [1725334376]
+setup:
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<Health>", method: Damage, args: [10]}}
+steps:
+  - expect_state:
+      "ElementLoader.FindElementByName(\"Blood\").IsLiquid": true
+      "ElementLoader.FindElementByName(\"Blood\").highTemp": 372.5
+      "ElementLoader.FindElementByName(\"Blood\").lowTempTransitionTarget": "== 'FrozenBlood'"
+      "ElementLoader.FindElementByName(\"FrozenBlood\").IsSolid": true
+      "ElementLoader.FindElementByName(\"Blood\").name": "== original"
+      "Components.LiveMinionIdentities.Items[1].GetComponent<Health>.hitPoints": "== original"
+  - run: {seconds: 5}
+  - expect: {duplicants: 3}

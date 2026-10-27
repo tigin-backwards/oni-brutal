@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1725334376-blood.yaml",
+ "mods": [
+  "1725334376"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Blood elements load with the mod's properties; a damaged Duplicant plays on",
+ "updated": "2026-10-27",
+ "commit": "1ae06b70",
+ "mod_dlls": {
+  "1725334376": {
+   "Blood.dll": "1e75f2e3e3d52cb53860c9e014319891d1c7e0ea790636beee0ac41d70b040d4"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-013141-9697dcd2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T01:48:15",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-025631-d04c3147",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T02:56:31",
+    "lane": 14,
+    "reference_run": "20261027-013141-9697dcd2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-025631-d04c3147",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T02:56:32",
+    "lane": 15,
+    "reference_run": "20261027-013141-9697dcd2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

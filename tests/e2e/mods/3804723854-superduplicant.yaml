@@ -1,0 +1,46 @@
+# 超级小人（Superduplicant） (3804723854), classes S, M.
+#
+# What it does: on the immigrant screen and the new game's Duplicant selection every Duplicant
+# card gets a preset card (PresetCard): a searchable list (pinyin too) of preset super
+# Duplicants that, picked, applies its traits, interests and attributes to the card
+# (PresetApplier); its reshuffle stays available; care package cards get a panel to pick a
+# package, kept for the next printing.
+# How a player reaches it: the printing pod's immigrant screen; a new game's Duplicant
+# selection.
+# What changes: hand-picked Duplicants.
+#
+# The cards are random (seeded): on the printing pod's immigrant screen the first Duplicant
+# card carries the mod's preset card, the archetype dropdown taken over by its three presets,
+# the default one (超级小人游泳版, the swimming super Duplicant) already applied: its traits
+# and joy trait are the preset's. The dropdown, opened by a click, lists the presets (dumped
+# and shot); 超级小人 picked applies that preset.
+from: early-base
+mods: [3804723854]
+setup:
+  - driver: {seed: 12345}
+  - driver: {setup.call: {target: "Immigration.Instance", method: "Sim200ms", args: [100000]}}   # Duplicants on offer now
+steps:
+  - expect_state:
+      "Immigration.Instance.ImmigrantsAvailable": true
+      "type:超级小人.PresetLibrary::Visible().Count": 3
+  - call: {tool: building_control, args: {domain: side_surface, surface: facility, kind: telepad, action: open_immigrants, confirm: true}}
+  - ui_wait: {path: "**/ImmigrantScreen/Layout", cond: stable}
+  - expect_ui:
+      "**/ImmigrantScreen/Layout/Content/*Container": {count: 4}
+  - expect_state:
+      "ui:**/Content/CharacterContainer[0]::GetComponent<超级小人.PresetCard>": exists
+      "ui:**/Content/CharacterContainer[0]::GetComponent<CharacterContainer>.archetypeDropDown.entries.Count": 3
+      "ui:**/Content/CharacterContainer[0]::GetComponent<CharacterContainer>.Stats.joyTrait.Id": SuperProductive
+      "ui:**/Content/CharacterContainer[0]::GetComponent<CharacterContainer>.Stats.Traits.Count": [">= 30", "== original"]
+  - click: {ui: "**/ImmigrantScreen/Layout/Content/CharacterContainer[0]/ArchetypeSelect"}
+  - ui_wait: {path: "**/Content/CharacterContainer[0]/ScrollRect/Content", cond: stable}
+  - ui_dump: {name: presets, root: "**/Content/CharacterContainer[0]/ScrollRect"}
+  - shot: {name: presets, crop: "**/Content/CharacterContainer[0]/ScrollRect", threshold: 0.04}
+  - expect_ui:
+      "**/Content/CharacterContainer[0]/ScrollRect/Content/EntryPrefab[0]/ArchetypeName": {text: "超级小人"}
+  - click: {ui: "**/Content/CharacterContainer[0]/ScrollRect/Content/EntryPrefab[0]"}
+  - ui_wait: {path: "**/ImmigrantScreen/Layout/Content", cond: stable}
+  - expect_state:
+      "ui:**/Content/CharacterContainer[0]::GetComponent<超级小人.PresetCard>._index": 0
+      "ui:**/Content/CharacterContainer[0]::GetComponent<CharacterContainer>.Stats.Traits.Count": "== original"
+      "ui:**/Content/CharacterContainer[0]::GetComponent<CharacterContainer>.Stats.stressTrait.Id": UglyCrier

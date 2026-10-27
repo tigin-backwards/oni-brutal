@@ -1,0 +1,23 @@
+# Twitch Integration (2983351482), class B,T,S,V,M.
+#
+# What it does: lets a Twitch chat vote on events in the colony (spawning critters, elements,
+# disasters, …). On the main menu it makes layer 21 ignore physics collisions with the other
+# layers (Physics2D.IgnoreLayerCollision), creates a TwitchVoteController with the saved
+# credentials (a toast warns when they are missing), and flags the Mods button for its new
+# settings; in a colony the pause menu gets Start Voting, which starts a vote over the chat.
+# How a player reaches it: the Mods screen's settings; the pause menu (Escape).
+# What changes: chat-driven events.
+#
+# With no credentials, the colony loads with the vote controller in place, and the pause menu
+# (dumped) offers Start Voting.
+from: early-base
+mods: [2983351482]
+steps:
+  - expect_state:
+      "all:VoteController::Length": 1
+      "UnityEngine.Physics2D.GetIgnoreLayerCollision(21, 0)": true
+      "UnityEngine.Physics2D.GetIgnoreLayerCollision(21, 21)": false
+  - run: {seconds: 2}
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/Start VotingButton", cond: stable}
+  - ui_dump: {name: pause, root: "**/PauseScreen"}

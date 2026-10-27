@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2983351482-twitch-integration.yaml",
+ "mods": [
+  "2983351482"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "the colony loads with the vote controller in place and the pause menu offers Start Voting in the original; ours fails to load the mod: its DLL carries copies of Unity input and text types whose internal binding attributes (UnityEngine.Bindings.NativeHeaderAttribute and others) and Physics2D.IgnoreLayerCollision ours lacks",
+ "updated": "2026-10-26",
+ "commit": "cbabaaf0",
+ "mod_dlls": {
+  "2983351482": {
+   "ONITwitch.dll": "f6d76dd6495d65da47ccbfaaad72522c1b2641a2da0266f79efd7e717d5e0caa"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-155051-8ce3a25e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T16:22:30",
+    "lane": 17,
+    "signatures": 2
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-26T21:23:27",
+    "lane": 17,
+    "reasons": [
+     "step start: <urlopen error [Errno 111] Connection refused>",
+     "6 log signature(s) the original lacks"
+    ],
+    "reference_run": "20261026-155051-8ce3a25e",
+    "new_signatures": 6,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-26T21:23:41",
+    "lane": 16,
+    "reasons": [
+     "step start: the player exited (1) while loading",
+     "6 log signature(s) the original lacks"
+    ],
+    "reference_run": "20261026-155051-8ce3a25e",
+    "new_signatures": 6,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,75 @@
+{
+ "spec": "mods/3669083158-infinite-sources-sinks.yaml",
+ "mods": [
+  "3669083158"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "an Infinite Liquid Source's element filter side screen dumped",
+ "updated": "2026-10-27",
+ "commit": "f27e811a",
+ "mod_dlls": {
+  "3669083158": {
+   "InfiniteSourceSink.dll": "e2224f79cad5993e303a2c9c1002c7a1b13163f1051c66dc70577a4d76e323fa"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-051715-c581e5cb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T06:04:22",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-094335-cc5a8dbf",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-27T09:43:35",
+    "lane": 15,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "filter": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261027-094335-cc5a8dbf",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-27T09:44:25",
+    "lane": 15,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "filter": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

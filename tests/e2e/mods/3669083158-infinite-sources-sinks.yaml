@@ -1,0 +1,27 @@
+# Infinite Sources/Sinks – Fixed (3669083158), classes B, S.
+#
+# What it does: adds four 1x2 buildings of any metal, with no research: the Infinite Liquid
+# Source and Sink (Plumbing menu) and the Infinite Gas Source and Sink (Ventilation): a source
+# puts the element picked in its filter side screen into its output pipe without end, at a
+# temperature set in a side screen, unless a red automation signal stops it; a sink voids
+# whatever its pipe brings. Old saves' type names are mapped to the new ones.
+# How a player reaches it: the build menu, then the source's filter and temperature side
+# screens.
+# What changes: free liquids and gases, and a drain for them.
+#
+# setup builds an Infinite Liquid Source in the dug-out corridor west of the printing pod.
+# Selected, it shows the element filter side screen with the liquids (dumped).
+from: early-base
+mods: [3669083158]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidSource\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"LiquidSink\").InputConduitType": Liquid
+      "Assets.GetBuildingDef(\"GasSource\").OutputConduitType": Gas
+  - run: {seconds: 2}
+  - expect: {buildings: {LiquidSource: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: LiquidSource}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/FilterSideScreen", cond: stable}
+  - ui_dump: {name: filter, root: "**/DetailsScreen/SideScreen/**/FilterSideScreen"}

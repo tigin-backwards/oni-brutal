@@ -1,0 +1,28 @@
+# Booster Animation Begone! (3438530909), class P.
+#
+# What it does: a prefix on BionicUpgrade_SkilledWorker.CreateFX skips it, and one on ClearFX
+# skips it when there is no effect, so a bionic Duplicant working with a skill booster no
+# longer shows the floating booster animation over its head.
+# How a player reaches it: a bionic Duplicant with a skill booster at work.
+# What changes: no floating booster animation.
+#
+# early-base's bionic Duplicant, Gizmo, has a Ranching booster installed: only Gizmo may
+# wrangle critters. setup drops a Hatch in the corridor west of the printing pod; the Wrangle
+# tool is dragged over it, and Gizmo, working with the booster's attribute, bags it with no
+# booster animation left behind.
+from: early-base
+mods: [3438530909]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131764, 0, 0, \"Hatch\", \"Creatures\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[0].name": Gizmo
+      "all:BionicUpgradeComponent::[0].GetComponent<KPrefabID>.PrefabTag.Name": Booster_Ranch1
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - tool: {toolbar: Wrangle}
+  - drag: {from: [111, 207], to: [113, 208]}
+  - key: {code: Escape}
+  - run: {seconds: 120}
+  - expect_state:
+      "all:Capturable::[0].GetComponent<KPrefabID>.Tags": {contains: Bagged}
+      "count:all:KBatchedAnimController::[*] if .name == bionic_upgrade_active_fx_kanim": 0

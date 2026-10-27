@@ -1,0 +1,16 @@
+# Always Joy Behaviour (2543933197), class P.
+#
+# What it does: a postfix on JoyBehaviourMonitor.Instance.ShouldBeOverjoyed returns true, so
+# at every schedule block a Duplicant turns overjoyed (its joy reaction: the Overjoyed tag,
+# happy expression and walk), whatever its morale.
+# How a player reaches it: play; Duplicants are overjoyed all the time.
+# What changes: permanent joy behaviours.
+#
+# After a minute of play every Duplicant is overjoyed.
+from: early-base
+mods: [2543933197]
+steps:
+  - expect: {duplicants: 3}
+  - run: {seconds: 60}
+  - expect_state:
+      "count:Components.LiveMinionIdentities.Items[*] if .GetComponent<KPrefabID>.HasTag(\"Overjoyed\") == true": 3

@@ -1,0 +1,31 @@
+# Emptiable Rocketry (2688793227), class B.
+#
+# What it does: the Interplanetary Launcher (RailGun) and the rocket ports (the gas, liquid
+# and solid loaders and unloaders, every BaseModularLaunchpadPortConfig) get a DropAllWorkable:
+# the user-menu Empty Storage button, which has a Duplicant come and drop what they hold (90 s
+# of work at the launcher, 20 s at a port).
+# How a player reaches it: select a rocket port or launcher holding something; its user menu.
+# What changes: rocket ports and launchers can be emptied by hand.
+#
+# setup builds a Rocket Port Solid Loader in the dug-out corridor west of the printing pod and
+# puts sand in it. Selected, its user menu has Empty Storage; a click orders the errand, and
+# the button turns to its cancel form.
+from: early-base
+mods: [2688793227]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"ModularLaunchpadPortSolid\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "last:GetComponent<Storage>", method: AddOre, args: [Sand, 50.0, 300.0, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"ModularLaunchpadPortSolid\").GetComponent<DropAllWorkable>.dropWorkTime": 20
+      "Assets.GetPrefab(\"RailGun\").GetComponent<DropAllWorkable>.dropWorkTime": 90
+  - run: {seconds: 2}
+  - expect: {buildings: {ModularLaunchpadPortSolid: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: ModularLaunchpadPortSolid}
+  - ui_wait: {path: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons/Empty StorageButton", cond: stable}
+  - ui_dump: {name: menu, root: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons"}
+  - click: {ui: "**/UserMenuScreen/Buttons/Empty StorageButton"}
+  - expect_state:
+      "selected:GetComponent<DropAllWorkable>.Chore": exists
+  - ui_wait: {path: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons/Cancel EmptyButton", cond: stable}

@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2688793227-emptiable-rocketry.yaml",
+ "mods": [
+  "2688793227"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Rocket Port Solid Loader holding sand gets Empty Storage; a click orders the errand (Cancel Empty)",
+ "updated": "2026-10-27",
+ "commit": "01af69cb",
+ "mod_dlls": {
+  "2688793227": {
+   "emptiableRocketry.dll": "e73452c6e8bebcd4b0f47ec4818717c8115624564a6c7527f53e9a02896278e7"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-051715-c581e5cb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T05:32:21",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-081547-54a358c5",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T08:15:47",
+    "lane": 14,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261027-081547-54a358c5",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T08:16:36",
+    "lane": 14,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

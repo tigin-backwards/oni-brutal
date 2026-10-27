@@ -1,0 +1,67 @@
+{
+ "spec": "mods/2126597863-schedule-sensor.yaml",
+ "mods": [
+  "2126597863"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Schedule Sensor's side screen (uGUI dropdowns) dumped and shot; picking Work shows it but changes nothing (the mod never connects its dropdowns), as in the original",
+ "updated": "2026-10-27",
+ "commit": "a7207261",
+ "mod_dlls": {
+  "2126597863": {
+   "LogicScheduleSensor.dll": "23a188216a7b7fd174f7120b652a2055f62802943c17f9fc305988ce287c81e3"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-063948-e1660148",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T06:39:48",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-080708-ae8abdcd",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T08:07:08",
+    "lane": 14,
+    "reference_run": "20261027-063948-e1660148",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "side": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "side": 0.0
+    }
+   },
+   {
+    "run": "20261027-080708-ae8abdcd",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T08:07:59",
+    "lane": 14,
+    "reference_run": "20261027-063948-e1660148",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "side": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "side": 0.0
+    }
+   }
+  ]
+ }
+}

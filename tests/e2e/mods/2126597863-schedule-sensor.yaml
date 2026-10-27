@@ -1,0 +1,39 @@
+# Schedule Sensor (2126597863), classes B, S.
+#
+# What it does: adds the Logic Schedule Sensor (1x1, refined metal, Automation menu, researched
+# with Generic Sensors): it sends a green signal while the schedule it watches is in the shift
+# it watches. Its side screen (built from uGUI) has two dropdowns: the schedule, from the
+# colony's schedules, and the shift (Bathtime, Work, Downtime, Bedtime), which are meant to set
+# them but are never connected to the sensor (so it watches the first schedule's Bathtime).
+# Its meter shows the time of day tinted with the current block's colour.
+# How a player reaches it: the build menu (Automation), then its side screen.
+# What changes: automation in step with the colony's schedule.
+#
+# setup builds one in the dug-out corridor west of the printing pod. Selected, its side screen
+# lists the schedule and the shifts (Bathtime first); its shift dropdown shows Work once
+# picked, but the sensor keeps watching Bathtime (the mod never connects its dropdowns), and
+# its signal follows the schedule's current block as in the original.
+from: early-base
+mods: [2126597863]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LogicScheduleSensor\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"GenericSensors\").unlockedItemIDs": {contains: LogicScheduleSensor}
+  - run: {seconds: 2}
+  - expect: {buildings: {LogicScheduleSensor: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 206], select: LogicScheduleSensor}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/LogicScheduleSensorSideScreen*", cond: stable}
+  - ui_dump: {name: side, root: "**/DetailsScreen/SideScreen/**/LogicScheduleSensorSideScreen*"}
+  - shot: {name: side, crop: "**/DetailsScreen/SideScreen/**/LogicScheduleSensorSideScreen*"}
+  - dropdown: {ui: "**/LogicScheduleSensorSideScreen/New Game Object/Dropdown[1]", option: "Work"}
+  # The mod's dropdown factory never hooks up its callback: the shift shown changes, the
+  # sensor's does not (as in the original).
+  - expect_state:
+      "ui:**/LogicScheduleSensorSideScreen/New Game Object/Dropdown[1]::GetComponent<UnityEngine.UI.Dropdown>.value": 1
+      "selected:GetComponent<RomenH.LogicScheduleSensor.LogicScheduleSensor>.blockTypeIndex": [0, "== original"]
+  - run: {seconds: 1}
+  - expect_state:
+      "ScheduleManager.Instance.GetSchedules()[0].GetCurrentScheduleBlock().GroupId": "== original"
+      "selected:GetComponent<RomenH.LogicScheduleSensor.LogicScheduleSensor>.IsSwitchedOn": "== original"

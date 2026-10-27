@@ -1,0 +1,29 @@
+# Controlled Extraction (3648996222), classes P, S; PLib options.
+#
+# What it does: the Oil Well's side screen slider no longer sets its pressure release but its
+# water input, 0.01 to 100 kg/s (options; 1 kg/s by default), with the oil output scaled to
+# match (prefixes on the OilWellCap slider methods and an ExtractionRateController); options
+# add gas and liquid output ports to the well, and pipe or conveyor ports to the Oil Refinery,
+# Ethanol Distiller, Coal Generator, Wood Burner and Petroleum Generator; the Ice Kettle gets
+# a side screen for what it melts.
+# How a player reaches it: select an Oil Well; the options in the mod's PLib dialog.
+# What changes: a player sets how fast each oil well works.
+#
+# setup builds an Oil Well in the corridor west of the printing pod and selects it: its slider
+# reads 1 kg/s between 0.01 and 100.
+from: early-base
+mods: [3648996222]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"OilWellCap\")", method: Build, args: [131764, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "all:OilWellCap::[0].GetComponent<KSelectable>"}]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {OilWellCap: 1}}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<OilWellCap>.GetSliderMax(0)": 100
+      "selected:GetComponent<OilWellCap>.GetSliderMin(0)": 0.01
+      "selected:GetComponent<OilWellCap>.GetSliderValue(0)": 1
+      "selected:GetComponent<ControlledExtraction.Components.ExtractionRateController>": exists
+  - ui_dump: {name: side-screen, root: "**/DetailsScreen/SideScreen"}
+  - shot: {name: side-screen, crop: "**/DetailsScreen/SideScreen", threshold: 0.04}

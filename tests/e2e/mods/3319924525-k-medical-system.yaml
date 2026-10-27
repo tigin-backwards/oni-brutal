@@ -1,0 +1,39 @@
+# K 医疗系统 Medical System 1.4 (3319924525), class B,O.
+#
+# What it does: medical additions, each behind a PLib option (K000GG0.json): three buildings in
+# the Medicine menu, the dancing cow K004GG1 (跳舞牛, a blessing for a gift),
+# the medical waste bin K005GG1 (医废桶, 10 kg of medical supplies, deleted each second) and
+# the medical kit K006GG1 (医疗箱, 100 kg); the Massage Table relieves stress at
+# a multiple of -30 (-60 in a room), twice by default; the Dev Life Support becomes buildable;
+# and Rad Pills are refused below a radiation threshold (200).
+# How a player reaches it: PLib options; the build menu (Medicine).
+# What changes: medical buildings and tweaks.
+#
+# The definitions are read; the Medicine menu lists the three buildings (shot). setup builds a
+# waste bin in the dug-out corridor west of the printing pod and stores a Curative Tablet in
+# it: a second later the tablet is gone.
+from: early-base
+mods: [3319924525]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"K005GG1\")", method: Build, args: [{"$": "Grid.XYToCell(113, 207)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [{"$": "Grid.XYToCell(111, 207)"}, 0, 0, BasicCure, Ore]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "all:K005GG1K1::[0].storage", method: Store, args: [{"$": "last:"}]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"MassageTable\").GetComponent<MassageTable>.stressModificationValue": -60
+      "Assets.GetPrefab(\"MassageTable\").GetComponent<MassageTable>.roomStressModificationValue": -120
+      "Assets.GetBuildingDef(\"DevLifeSupport\").DebugOnly": false
+      "all:K005GG1K1::[0].storage.items.Count": 1
+  - run: {seconds: 3}
+  - expect: {buildings: {K005GG1: 1}}
+  - expect_state:
+      "all:K005GG1K1::[0].storage.items.Count": 0
+      "count:all:KPrefabID::[*] if .PrefabTag.Name == BasicCure": 0
+  - run: {seconds: 7}
+  - click: {ui: "**/PlanScreen/Toggle:Medicine"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/K006GG1 Group*", cond: stable, stable: 120, frames: 600}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/K004GG1 Group*": {active: true}
+      "**/BuildingGroups/**/Grid/K005GG1 Group*": {active: true}
+  - shot: {name: medicine-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}

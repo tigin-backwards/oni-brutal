@@ -1,0 +1,23 @@
+# 火箭舱外空间64x64_墙窗可拆可替换, rocket interior 64x64 (3308085465), class P.
+#
+# What it does: a postfix on KMonoBehaviour.OnPrefabInit sets ROCKETRY.ROCKET_INTERIOR_SIZE to
+# 64x64 (the game's 32x32), so new rocket interiors are bigger; postfixes on the Rocket Wall
+# Tile and Rocket Window make them deconstructable and replaceable, shown in the build menu,
+# +50 decor in a radius of 6, near-indestructible (1000x strength, never destroyed by
+# damage) and faster to walk on.
+# How a player reaches it: build a habitat module; its interior walls.
+# What changes: roomier rockets with walls a player can change.
+#
+# The interior size and the walls' defs carry the changes.
+from: early-base
+mods: [3308085465]
+steps:
+  - run: {seconds: 2}
+  - expect_state:
+      "TUNING.ROCKETRY.ROCKET_INTERIOR_SIZE.x": 64
+      "TUNING.ROCKETRY.ROCKET_INTERIOR_SIZE.y": 64
+      "Assets.GetBuildingDef(\"RocketWallTile\").BaseDecor": 50
+      "Assets.GetBuildingDef(\"RocketWallTile\").Replaceable": true
+      "Assets.GetBuildingDef(\"RocketWallTile\").ShowInBuildMenu": true
+      "Assets.GetPrefab(\"RocketWallTile\").GetComponent<Deconstructable>.allowDeconstruction": true
+      "Assets.GetPrefab(\"RocketEnvelopeWindowTile\").GetComponent<SimCellOccupier>.strengthMultiplier": 1000

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3308085465-rocket-interior-64x64.yaml",
+ "mods": [
+  "3308085465"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "rocket interiors are 64x64; the rocket walls carry the changes",
+ "updated": "2026-10-27",
+ "commit": "e100c86e",
+ "mod_dlls": {
+  "3308085465": {
+   "╗≡╝²▓╒═Γ┐╒╝Σ64x64_╟╜┤░┐╔▓≡┐╔╠µ╗╗.dll": "7df53e281e8006f043aeff7fadbe2752b31ba4c36127d0f44560a4312a1b0533"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-074831-45ab7067",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T07:56:26",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-090819-f38336a7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:16:23",
+    "lane": 17,
+    "reference_run": "20261027-074831-45ab7067",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-090819-f38336a7",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T09:17:10",
+    "lane": 17,
+    "reference_run": "20261027-074831-45ab7067",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

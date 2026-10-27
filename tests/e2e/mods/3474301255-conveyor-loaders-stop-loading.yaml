@@ -1,0 +1,52 @@
+# Conveyor Loaders Stop Loading with Disabled Automation Signal (3474301255), class K.
+#
+# What it does: a Conveyor Loader (SolidConduitInbox) whose automation input is on a network
+# carrying a red signal stops taking items: a ZeroOutStorageWhenAutomationOff added on spawn
+# sets its storage capacity to -1 and drops what it holds when it spawns or its operational
+# state changes while the signal is red, and restores the capacity when it is green. Its
+# filtered storage also follows the loader's operational state (FilteredStorage.IsFunctional).
+# How a player reaches it: an automation wire to a Conveyor Loader's input.
+# What changes: a disabled loader no longer fills up.
+#
+# setup builds, in the dug-out corridor west of the printing pod, a Conveyor Loader with a rail
+# on its output, powered by a charged battery, and a Signal Switch (on) wired to its input. The
+# loader runs with its 1,000 kg; the switch's toggle is clicked, and once the signal is red the
+# loader stops and its capacity reads -1.
+from: early-base
+mods: [3474301255]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SolidConduitInbox\")", method: Build, args: [131765, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SolidConduit\")", method: Build, args: [131765, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Battery\")", method: Build, args: [131767, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [132401, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [132402, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [131766, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [131767, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Right", 132401, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Left, Down", 132402, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Up, Right", 131766, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Left", 131767, true]}}
+  - driver: {setup.call: {target: "all:Battery::[0]", method: AddEnergy, args: [10000.0]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LogicSwitch\")", method: Build, args: [132400, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LogicWire\")", method: Build, args: [132400, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LogicWire\")", method: Build, args: [132401, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Game.Instance.logicCircuitSystem", method: SetConnections, args: ["Right", 132400, true]}}
+  - driver: {setup.call: {target: "Game.Instance.logicCircuitSystem", method: SetConnections, args: ["Left", 132401, true]}}
+steps:
+  - run: {seconds: 4}
+  - expect: {buildings: {SolidConduitInbox: 1, LogicSwitch: 1}}
+  - expect_state:
+      "all:SolidConduitInbox::[0].GetComponent<ZeroOutStorageWhenAutomationOff>": exists
+      "Game.Instance.logicCircuitManager.GetNetworkForCell(132401).OutputValue": 1
+      "all:SolidConduitInbox::[0].GetComponent<Operational>.IsOperational": true
+      "all:SolidConduitInbox::[0].GetComponent<Storage>.capacityKg": 1000
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [112, 208], select: LogicSwitch}
+  - ui_wait: {path: "**/PlayerControlledToggleSideScreen/Contents/Button", cond: stable}
+  - click: {ui: "**/PlayerControlledToggleSideScreen/Contents/Button"}
+  - key: {code: Escape}
+  - run: {seconds: 20}
+  - expect_state:
+      "Game.Instance.logicCircuitManager.GetNetworkForCell(132401).OutputValue": 0
+      "all:SolidConduitInbox::[0].GetComponent<Operational>.IsOperational": false
+      "all:SolidConduitInbox::[0].GetComponent<Storage>.capacityKg": -1

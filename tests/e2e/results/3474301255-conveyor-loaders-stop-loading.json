@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3474301255-conveyor-loaders-stop-loading.yaml",
+ "mods": [
+  "3474301255"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a powered Conveyor Loader wired to a Signal Switch: the switch's toggle turns the signal red and the loader's capacity to -1",
+ "updated": "2026-10-26",
+ "commit": "d993ae76",
+ "mod_dlls": {
+  "3474301255": {
+   "ConveyorLoadGate.dll": "6422fe453fc8467e268d62a877ae06c379e67c12b49f2db7689866e519b364dc"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-203631-6eaffaae",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T20:36:31",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-224702-ec1abe8c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T22:48:25",
+    "lane": 17,
+    "reference_run": "20261026-203631-6eaffaae",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261026-224702-ec1abe8c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T22:48:26",
+    "lane": 16,
+    "reference_run": "20261026-203631-6eaffaae",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

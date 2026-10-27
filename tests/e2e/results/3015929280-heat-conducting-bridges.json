@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3015929280-heat-conducting-bridges.yaml",
+ "mods": [
+  "3015929280"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the research unlocks both bridges; a liquid one built in the corridor conducts heat and is a liquid conduit bridge",
+ "updated": "2026-10-27",
+ "commit": "7224eee1",
+ "mod_dlls": {
+  "3015929280": {
+   "╡╝╚╚╣▄╟┼.dll": "8f7f1817c25d38ef2b31f13d5fc50012d08fc0aa6e7f31bd66ff7c9f0ff4c33b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-005510-07dc8c66",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T01:11:31",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-020739-b05ec844",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T02:07:39",
+    "lane": 14,
+    "reference_run": "20261027-005510-07dc8c66",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-020739-b05ec844",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T02:07:40",
+    "lane": 15,
+    "reference_run": "20261027-005510-07dc8c66",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

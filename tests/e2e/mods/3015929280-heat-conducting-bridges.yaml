@@ -1,0 +1,26 @@
+# 导热管桥 (Heat conducting bridges) (3015929280), class B.
+#
+# What it does: a Heat Conducting Liquid Bridge (MM20230806GG1, Plumbing, Liquid Tuning) and a
+# Heat Conducting Gas Bridge (MM20230806GG2, Ventilation, HVAC): 3x1 refined-metal bridges
+# with a thermal conductivity of 2, so what flows over them exchanges heat with their
+# surroundings.
+# How a player reaches it: the build menu (Plumbing, Ventilation), after the research.
+# What changes: pipe bridges that act as heat exchangers.
+#
+# The research unlocks them and the liquid bridge conducts heat; one built by setup in the
+# dug-out corridor west of the printing pod is selected (its title dumped): it is a liquid
+# conduit bridge.
+from: early-base
+mods: [3015929280]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"MM20230806GG1\")", method: Build, args: [{"$": "Grid.XYToCell(112, 208)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"LiquidTemperature\").unlockedItemIDs": {contains: MM20230806GG1}
+      "Db.Get().Techs.Get(\"HVAC\").unlockedItemIDs": {contains: MM20230806GG2}
+      "Assets.GetBuildingDef(\"MM20230806GG1\").ThermalConductivity": 2
+      "Assets.GetBuildingDef(\"MM20230806GG2\").WidthInCells": 3
+  - run: {seconds: 2}
+  - expect: {buildings: {MM20230806GG1: 1}}
+  - expect_state:
+      "all:ConduitBridge::[0].type": "== 'Liquid'"

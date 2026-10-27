@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3100888062-liquid-bottler.yaml",
+ "mods": [
+  "3100888062"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Liquid Bottle Filler holding 300 kg of water: its user menu (dump matches) Disable auto drop drops the water as a bottle",
+ "updated": "2026-10-26",
+ "commit": "cbabaaf0",
+ "mod_dlls": {
+  "3100888062": {
+   "LiquidBottler.dll": "1f8d6846f4d5630af08e15170c7f9b67a948ac202c8512a7d10fc8e822ef6219"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-151429-7c585a60",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T15:31:41",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T21:38:56",
+    "lane": 17,
+    "reference_run": "20261026-151429-7c585a60",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "usermenu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T21:39:08",
+    "lane": 16,
+    "reference_run": "20261026-151429-7c585a60",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "usermenu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

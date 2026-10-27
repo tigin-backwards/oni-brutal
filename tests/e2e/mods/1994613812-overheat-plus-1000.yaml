@@ -1,0 +1,30 @@
+# OverHeat+1000[Vanilla+DLC] (1994613812), class P.
+#
+# What it does: postfixes on six buildings' CreateBuildingDef raise their overheat
+# temperatures: the Robo-Miner, Conveyor Loader and Auto-Sweeper to 2,000 °C, the Liquid
+# Aquatuner to 1,000 °C, the Bunker Door and the Gantry to 3,000 °C; the Gantry also draws
+# 1 W.
+# How a player reaches it: building any of them somewhere hot.
+# What changes: those buildings no longer overheat in hot biomes.
+#
+# The definitions are read; an Auto-Sweeper built by setup at 1,200 K in the dug-out corridor
+# west of the printing pod (the game's would overheat at 75 °C) stays at a safe temperature.
+from: early-base
+mods: [1994613812]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SolidTransferArm\")", method: Build, args: [131765, Neutral, null, [Copper], 1200.0, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"AutoMiner\").OverheatTemperature": 2273.15
+      "Assets.GetBuildingDef(\"SolidConduitInbox\").OverheatTemperature": 2273.15
+      "Assets.GetBuildingDef(\"SolidTransferArm\").OverheatTemperature": 2273.15
+      "Assets.GetBuildingDef(\"LiquidConditioner\").OverheatTemperature": 1273.15
+      "Assets.GetBuildingDef(\"BunkerDoor\").OverheatTemperature": 3273.15
+      "Assets.GetBuildingDef(\"Gantry\").OverheatTemperature": 3273.15
+      "Assets.GetBuildingDef(\"Gantry\").EnergyConsumptionWhenActive": 1
+  - run: {seconds: 10}
+  - expect: {buildings: {SolidTransferArm: 1}}
+  - expect_state:
+      "all:SolidTransferArm::[0].GetComponent<PrimaryElement>.Temperature": ">= 400"
+      "all:SolidTransferArm::[0].GetComponent<Overheatable>.OverheatTemperature": ">= 2273"
+      "all:SolidTransferArm::[0].GetComponent<Overheatable>.smi.GetCurrentState().name": root.safeTemperature

@@ -1,0 +1,32 @@
+# 低温高压制氧 (High pressure cold oxygen) (3002566087), classes P, O.
+#
+# What it does: the Oxygen Diffuser, Sublimation Station, Rust Deoxidizer and Algae Terrarium
+# give off no heat and stop at an overpressure of the player's choosing (1.8 to 1000 kg, PLib
+# options in Controler.json, which the mod ships set to 1800), and the Gas Vent's
+# overpressure too (in g, 2000).
+# How a player reaches it: the Mods screen's options; the buildings as before.
+# What changes: oxygen makers that pressurise rooms without heating them.
+#
+# With the diffuser's limit set to 5 kg in the options, the diffuser's def gives off no heat,
+# and one built by setup in the dug-out corridor west of the printing pod stops at 5 kg (its
+# title dumped).
+from: early-base
+mods: [3002566087]
+options:
+  "3002566087": {$file: Controler.json, yqksq: 5}
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"MineralDeoxidizer\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"MineralDeoxidizer\").SelfHeatKilowattsWhenActive": 0
+      "Assets.GetBuildingDef(\"MineralDeoxidizer\").ExhaustKilowattsWhenActive": 0
+      "Assets.GetBuildingDef(\"SublimationStation\").SelfHeatKilowattsWhenActive": 0
+      "Assets.GetPrefab(\"SublimationStation\").GetComponent<Electrolyzer>.maxMass": "== original"
+  - run: {seconds: 2}
+  - expect: {buildings: {MineralDeoxidizer: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: MineralDeoxidizer}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}
+  - expect_state:
+      "selected:GetComponent<Electrolyzer>.maxMass": 5

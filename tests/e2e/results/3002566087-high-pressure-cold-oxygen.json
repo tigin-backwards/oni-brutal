@@ -1,0 +1,64 @@
+{
+ "spec": "mods/3002566087-high-pressure-cold-oxygen.yaml",
+ "mods": [
+  "3002566087"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with the diffuser's option at 5 kg, a diffuser built in the corridor stops at 5 kg and gives off no heat (title dumped)",
+ "updated": "2026-10-27",
+ "commit": "7a56f5f6",
+ "mod_dlls": {
+  "3002566087": {
+   "High pressure oxygen.dll": "3e8421321fde05a80c858e8ec4b0dabb59d265cb17089094c903c523e6a4fa4f",
+   "PLib.dll": "5d6a8ef9d87143b90113548016180078efaf112d69afe0cdf1073a6125b33773"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-021227-f470d6f8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T02:12:27",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-032003-668eb7c9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T03:20:03",
+    "lane": 14,
+    "reference_run": "20261027-021227-f470d6f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261027-032003-668eb7c9",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T03:20:04",
+    "lane": 15,
+    "reference_run": "20261027-021227-f470d6f8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,28 @@
+# Greater radiation rocket/accumulator capacity (2946478258), class P,O.
+#
+# What it does: sets the Radbolt Engine's radbolt fuel tank and storage (4,000 to 8,000) and
+# the Radbolt Chamber's storage (1,000 to 4,000) from PLib options (Number.json beside the
+# mod), at the game's values by default.
+# How a player reaches it: PLib options; the Radbolt Engine and Radbolt Chamber.
+# What changes: how many radbolts they hold.
+#
+# The options are set to 6,000 and 2,500. The prefabs are read; a Radbolt Chamber built by
+# setup in the dug-out corridor west of the printing pod is selected and holds 2,500.
+from: early-base
+mods: [2946478258]
+options:
+  "2946478258": {$file: Number.json, Engine_Number: 6000, Accumulators_Number: 2500}
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"HEPBattery\")", method: Build, args: [131765, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"HEPEngine\").GetComponent<HighEnergyParticleStorage>.capacity": 6000
+      "Assets.GetPrefab(\"HEPEngine\").GetComponent<HEPFuelTank>.physicalFuelCapacity": 6000
+      "Assets.GetPrefab(\"HEPBattery\").GetComponent<HighEnergyParticleStorage>.capacity": 2500
+  - run: {seconds: 2}
+  - expect: {buildings: {HEPBattery: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: HEPBattery}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:HighEnergyParticleStorage.capacity": 2500

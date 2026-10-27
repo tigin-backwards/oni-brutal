@@ -1,0 +1,101 @@
+{
+ "spec": "mods/1516818219-talk-like-a-pirate.yaml",
+ "mods": [
+  "1516818219"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "in pirate speech, a colony's research and priorities screens and pause menu, then the main menu, options and Game options screens (dumps and shots match)",
+ "updated": "2026-10-26",
+ "commit": "cbabaaf0",
+ "mod_dlls": {
+  "1516818219": {}
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-155051-8ce3a25e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T15:50:51",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T20:54:24",
+    "lane": 17,
+    "reference_run": "20261026-155051-8ce3a25e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "research": {
+      "differences": 0
+     },
+     "priorities": {
+      "differences": 0
+     },
+     "pause": {
+      "differences": 0
+     },
+     "menu": {
+      "differences": 0
+     },
+     "options": {
+      "differences": 0
+     },
+     "game-options": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "priorities": 5e-06,
+     "pause": 0.0,
+     "menu": 0.000482,
+     "game-options": 0.0
+    }
+   },
+   {
+    "run": "20261026-204743-febfde17",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-26T20:55:41",
+    "lane": 17,
+    "reference_run": "20261026-155051-8ce3a25e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "research": {
+      "differences": 0
+     },
+     "priorities": {
+      "differences": 0
+     },
+     "pause": {
+      "differences": 0
+     },
+     "menu": {
+      "differences": 0
+     },
+     "options": {
+      "differences": 0
+     },
+     "game-options": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "priorities": 5e-06,
+     "pause": 0.0,
+     "menu": 0.0,
+     "game-options": 0.0
+    }
+   }
+  ]
+ }
+}

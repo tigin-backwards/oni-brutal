@@ -1,0 +1,46 @@
+# Vaccum freezer (3635020106), class B.
+#
+# What it does: adds the Vaccum freezer (VaccumFreezer, 2x4, refined metal, glass and plastic,
+# 480 W, 10 W in power saver, Food menu): a refrigerator for 650 kg of food that keeps it at
+# -30 C (243.15 K), with a Full/Not Full automation port; and a postfix on
+# Rottable.AtmosphereQuality makes the atmosphere of food stored in a working one Sterilizing,
+# so the food stops spoiling. (Its research entry names another ID, so it needs no research.)
+# How a player reaches it: the build menu (Food), then its side screen (the food filter).
+# What changes: a colder fridge with a sterile atmosphere.
+#
+# setup builds one in the dug-out corridor west of the printing pod, powered by a charged
+# battery, and puts a Mush Bar in it. It runs: the food in it reads a sterile atmosphere; selected,
+# its side screen shows the food filter.
+from: early-base
+mods: [3635020106]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"VaccumFreezer\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [Copper, Glass, Polypropylene], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Battery\")", method: Build, args: [{"$": "Grid.XYToCell(109, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "last:GetComponent<Battery>", method: AddEnergy, args: [20000.0]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [{"$": "Grid.XYToCell(109, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [{"$": "Grid.XYToCell(110, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [{"$": "Grid.XYToCell(111, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Right", {"$": "Grid.XYToCell(109, 206)"}, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Left, Right", {"$": "Grid.XYToCell(110, 206)"}, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Left, Right", {"$": "Grid.XYToCell(111, 206)"}, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Left", {"$": "Grid.XYToCell(112, 206)"}, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: ForceRebuildNetworks}}
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [0, 114, 206, MushBar, Ore]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "all:MyWisGen.VaccumFreezer.VaccumFreezer::[0].GetComponent<Storage>", method: Store, args: [{"$": "last:"}]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"VaccumFreezer\").GetComponent<Storage>.capacityKg": 650
+  - run: {seconds: 4}
+  - expect: {buildings: {VaccumFreezer: 1}}
+  - driver: {camera.set: {cell: [112, 209], ortho: 8}}
+  - click_world: {cell: [112, 207], select: VaccumFreezer}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Operational>.IsOperational": true
+      "selected:GetComponent<Storage>.items.Count": 1
+      "count:selected:GetComponent<Storage>.items[0].GetComponent<Modifiers>.amounts.Get(\"Rot\").deltaAttribute.Modifiers.elements[*] if .Description == 'Sterile Atmosphere'": 1
+      "count:selected:GetComponent<Storage>.items[0].GetComponent<Modifiers>.amounts.Get(\"Rot\").deltaAttribute.Modifiers.elements[*] if .Description == 'Normal Atmosphere'": 0
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/TreeFilterableSideScreen", cond: stable}
+  - ui_dump: {name: filter, root: "**/DetailsScreen/SideScreen/**/TreeFilterableSideScreen", mask_text: ['\d+(\.\d+)? ?kg']}

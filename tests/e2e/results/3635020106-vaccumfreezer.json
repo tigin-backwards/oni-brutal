@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3635020106-vaccumfreezer.yaml",
+ "mods": [
+  "3635020106"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a powered Vaccum freezer holding a Mush Bar gives it a Sterile Atmosphere; selected, its food filter dumped",
+ "updated": "2026-10-27",
+ "commit": "a8d2fbd1",
+ "mod_dlls": {
+  "3635020106": {
+   "VaccumRefrigerator.dll": "bacadf24e5a0bdac26bb3c086d3f62208f87dc361fd69da8c62e02014d431bed"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-051715-c581e5cb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T06:34:57",
+    "lane": 14,
+    "signatures": 1
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-074905-6c1f7170",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T07:49:05",
+    "lane": 14,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "filter": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261027-074905-6c1f7170",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T07:49:55",
+    "lane": 14,
+    "reference_run": "20261027-051715-c581e5cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "filter": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

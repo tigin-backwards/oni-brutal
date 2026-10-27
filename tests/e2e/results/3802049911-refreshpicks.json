@@ -1,0 +1,64 @@
+{
+ "spec": "mods/3802049911-refreshpicks.yaml",
+ "mods": [
+  "3802049911"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the immigrant screen shows REROLL on every Duplicant card and 自选物品 on care packages; one reroll deals that card anew (bottom buttons dumped)",
+ "updated": "2026-10-27",
+ "commit": "8e829dc3",
+ "mod_dlls": {
+  "3802049911": {
+   "PLib.dll": "55ce409618e6d102a1bcd0298911f3df49dda9a94ee153d02403035a1d6101d6",
+   "Refreshpicks.dll": "8b5cd2cd7cf38c4bcccac599cd3994fc11b7a48e6f67fd903ffb9c2400978969"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-074905-a58fe31e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T07:49:05",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-090926-17ad0c63",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:09:26",
+    "lane": 15,
+    "reference_run": "20261027-074905-a58fe31e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "buttons": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261027-090926-17ad0c63",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T09:10:12",
+    "lane": 15,
+    "reference_run": "20261027-074905-a58fe31e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "buttons": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

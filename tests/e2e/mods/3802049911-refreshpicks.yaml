@@ -1,0 +1,43 @@
+# 刷新选人久霜版 (Refreshpicks) (3802049911), classes S, P (on a vanilla screen).
+#
+# What it does: on the printing pod's immigrant screen every Duplicant card gets its reshuffle
+# button (as at the start of a game), care package cards get a "select item" button and a
+# panel to pick the package, a button row is added under the title, and the Reject All button
+# becomes Reroll/Shuffle. A reshuffled card replaces only itself; a care package picked in the
+# panel is offered again next time.
+# How a player reaches it: the printing pod's immigrant screen.
+# What changes: the player can reroll each card, or pick a care package.
+#
+# The cards are random (seeded): the screen opens with the reshuffle buttons shown on the
+# Duplicant cards; one click on the first card's reshuffle deals it a new Duplicant and leaves
+# the others.
+from: early-base
+mods: [3802049911]
+setup:
+  - driver: {seed: 12345}
+  - driver: {setup.call: {target: "Immigration.Instance", method: "Sim200ms", args: [100000]}}   # Duplicants on offer now
+steps:
+  - expect_state: {"Immigration.Instance.ImmigrantsAvailable": true}
+  - call: {tool: building_control, args: {domain: side_surface, surface: facility, kind: telepad, action: open_immigrants, confirm: true}}
+  - ui_wait: {path: "**/ImmigrantScreen/Layout", cond: stable}
+  # Every card shows its button: REROLL on the Duplicants, 自选物品 (pick an item) on the care
+  # packages; the bottom Reject All reads REROLL too.
+  - expect_ui:
+      "**/ImmigrantScreen/Layout/TopButtonmodify": {active: true}
+      "**/ImmigrantScreen/Layout/Content/*Container": {count: 4}
+      "**/ImmigrantScreen/Layout/Content/*Container/ShuffleDupeButton": {count: 4}
+      "**/ImmigrantScreen/Layout/Content/CharacterContainer/ShuffleDupeButton/Text": {text: "REROLL"}
+      "**/ImmigrantScreen/Layout/BottomButtons/RejectButton/Label": {text: "REROLL"}
+  - ui_dump: {name: buttons, root: "**/ImmigrantScreen/Layout/BottomButtons"}
+  - expect_state:
+      "ui:**/Content/CharacterContainer[0]::GetComponent<CharacterContainer>.Stats.GetHashCode()": {save_as: first}
+      "ui:**/Content/*Container[3]::GetInstanceID()": {save_as: last}
+  - click: {ui: "**/ImmigrantScreen/Layout/Content/CharacterContainer[0]/ShuffleDupeButton"}
+  - ui_wait: {path: "**/ImmigrantScreen/Layout/Content", cond: stable}
+  # The first Duplicant card is dealt a new Duplicant; the screen and the other cards stay.
+  - expect_ui:
+      "**/ImmigrantScreen/Layout/Content/*Container": {count: 4}
+  - expect_state:
+      "ui:**/Content/CharacterContainer[0]::GetComponent<CharacterContainer>.Stats.GetHashCode()": "!= first"
+      "ui:**/Content/*Container[3]::GetInstanceID()": "== last"
+      "Immigration.Instance.ImmigrantsAvailable": true

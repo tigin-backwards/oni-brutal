@@ -1,0 +1,25 @@
+# Meep (2062103370), class P.
+#
+# What it does: a postfix on the Personalities database disables every personality but
+# Meep's and marks Meep as a starting Duplicant, so the printing pod and a new colony offer
+# only Meeps.
+# How a player reaches it: the Printing Pod's choices and the starting Duplicants.
+# What changes: every new Duplicant is a Meep.
+#
+# The printing pod is made ready and its screen opened: every Duplicant offered is Meep.
+from: early-base
+mods: [2062103370]
+setup:
+  - driver: {seed: 12345}
+  - driver: {setup.call: {target: "Immigration.Instance", method: "Sim200ms", args: [100000]}}
+steps:
+  - expect_state:
+      "Db.Get().Personalities.Get(\"MEEP\").Disabled": false
+      "Db.Get().Personalities.Get(\"MEEP\").startingMinion": true
+      "Db.Get().Personalities.Get(\"HASSAN\").Disabled": true
+      "Immigration.Instance.ImmigrantsAvailable": true
+  - call: {tool: building_control, args: {domain: side_surface, surface: facility, kind: telepad, action: open_immigrants, confirm: true}}
+  - ui_wait: {path: "**/ImmigrantScreen/Layout", cond: stable}
+  - expect_state: {"all:CharacterContainer::Length": [">= 1", {save_as: dupes}]}
+  - expect_state:
+      "count:all:CharacterContainer::[*] if .stats.personality.Id == MEEP": "== dupes"

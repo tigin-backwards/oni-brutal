@@ -1,0 +1,26 @@
+# Sweepy Dock Output Ports (3785413427), class B.
+#
+# What it does: the Sweepy Dock gets two optional outputs: a liquid output port at (0, 1) and
+# a conveyor output port at (1, 1), which dispense what the sweeper brought back to the dock's
+# storage; their port icons show while placing it.
+# How a player reaches it: the Sweepy Dock, in the build menu as before.
+# What changes: a dock that can be piped and railed out.
+#
+# One built by setup in the dug-out corridor west of the printing pod is selected: it has the
+# mod's outputs component, a liquid and a conveyor dispenser on its sweep storage.
+from: early-base
+mods: [3785413427]
+require_log: ['Sweepy Dock shipping: sweep storage found']
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SweepBotStation\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {SweepBotStation: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: SweepBotStation}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<ModsNotIncluded.Content.SweepyDockPorts.SweepyDockPortsOutputs>": exists
+      "selected:GetComponent<ConduitDispenser>.useSecondaryOutput": true
+      "selected:GetComponent<ConduitDispenser>.alwaysDispense": true
+      "selected:GetComponent<SolidConduitDispenser>.alwaysDispense": true

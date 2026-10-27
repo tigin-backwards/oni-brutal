@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3785413427-sweepy-dock-output-ports.yaml",
+ "mods": [
+  "3785413427"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Sweepy Dock built in the corridor has the mod's liquid and conveyor dispensers on its sweep storage",
+ "updated": "2026-10-27",
+ "commit": "758d9944",
+ "mod_dlls": {
+  "3785413427": {
+   "SweepyDockPorts.dll": "60cad95e6ad829e8415af2f8c2222ea92b79911eb0fceb8ec790e7bd7f3a5046"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261026-233206-67d878d6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-26T23:41:23",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-002410-837dc322",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T00:24:10",
+    "lane": 14,
+    "reference_run": "20261026-233206-67d878d6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-002410-837dc322",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T00:24:11",
+    "lane": 15,
+    "reference_run": "20261026-233206-67d878d6",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

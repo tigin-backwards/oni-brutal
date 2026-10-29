@@ -18,12 +18,13 @@ namespace TMPro
             this = default;
             this.mesh = mesh ?? new Mesh();
             Allocate(size);
+            // The mesh is emptied first: one that holds the triangles of more quads than the new
+            // buffer would refuse the fewer positions. Only positions, normals, tangents and
+            // triangles go to the mesh; uv and colours wait for the first upload.
+            this.mesh.Clear();
             this.mesh.vertices = vertices;
             this.mesh.normals = normals;
             this.mesh.tangents = tangents;
-            this.mesh.SetUVs(0, uvs0);
-            this.mesh.uv2 = uvs2;
-            this.mesh.colors32 = colors32;
             this.mesh.triangles = triangles;
             this.mesh.bounds = new Bounds();
         }

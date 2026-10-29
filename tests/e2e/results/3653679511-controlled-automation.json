@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3653679511-controlled-automation.yaml",
+ "mods": [
+  "3653679511"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Smart Battery's inversion side screen (dump, shot) inverts its signal",
+ "updated": "2026-10-29",
+ "commit": "2d4aca2a",
+ "mod_dlls": {
+  "3653679511": {
+   "ControlledAutomation.dll": "6c6a6b86297664a965dc7e43c54276d4c50e6beaac7f2977c06c57875b854fda"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-134140-71c6d6eb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T13:56:57",
+    "lane": 1,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-143747-9481627a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T15:36:03",
+    "lane": 1,
+    "reference_run": "20261029-134140-71c6d6eb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "inversion": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "details": 4.1e-05
+    }
+   },
+   {
+    "run": "20261029-143747-9481627a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T15:36:54",
+    "lane": 1,
+    "reference_run": "20261029-134140-71c6d6eb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "inversion": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "details": 4.1e-05
+    }
+   }
+  ]
+ }
+}

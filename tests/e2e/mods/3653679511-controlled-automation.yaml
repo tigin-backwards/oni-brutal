@@ -1,0 +1,34 @@
+# Controlled Automation (3653679511), classes B, S, O.
+#
+# What it does: adds side screens (PLib panels) to automation buildings: "Invert Automation
+# Signal" on sensors, smart batteries, valves, reservoirs and others (a SensorInverter flips
+# their output); high/low thresholds on smart storage (lockers, fridges, reservoirs); rocket
+# platform output inversion; and an "Adv. Thermo Sensor" that is green within a temperature
+# range. PLib options turn the thresholds and the inversion off.
+# How a player reaches it: select such a building; its side screen.
+# What changes: automation outputs can be inverted and storage thresholds set.
+#
+# A Smart Battery is built in the east corridor and selected in setup. Its Automation Settings
+# side screen is dumped and shot; clicking its checkbox inverts the battery's signal: the
+# inverter is on and, after a moment, the logic output is the opposite of before.
+from: early-base
+mods: [3653679511]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"BatterySmart\")", method: Build, args: [131786, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "all:BatterySmart::[0]"}]}}
+steps:
+  - run: {seconds: 2}
+  - expect_state:
+      "selected:KPrefabID.PrefabTag.Name": BatterySmart
+      "selected:SensorInverter.InvertSignal": false
+      "selected:LogicPorts.GetOutputValue(\"BatterySmartLogicPort\")": {save_as: before}
+  - driver: {camera.set: {cell: [134, 208], ortho: 8}}
+  - ui_wait: {path: "**/DetailsScreen/**/ControlledAutomationInversionSideScreen", cond: stable}
+  - ui_dump: {name: inversion, root: "**/DetailsScreen/**/ControlledAutomationInversionSideScreen"}
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}
+  - click: {ui: "**/ControlledAutomationInversionSideScreen/**/InvertCheckbox"}
+  - expect_state:
+      "selected:SensorInverter.InvertSignal": true
+  - run: {seconds: 2}
+  - expect_state:
+      "selected:LogicPorts.GetOutputValue(\"BatterySmartLogicPort\")": "== 1 - before"

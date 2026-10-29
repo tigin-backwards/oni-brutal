@@ -1,0 +1,23 @@
+# Improved Wood Tuning (3292488355), classes P, O.
+#
+# What it does: rebalances wood after the Frosty Planet Pack: the Wood Burner holds and burns
+# 300 kg a cycle (the game's 600), the Ethanol Distiller needs 60 W (240), an Oakshell's wood
+# weighs 120 kg a unit (100), Flox and the Bonbon Tree drop more and an Arbor Tree branch less
+# (200); each is a PLib option.
+# How a player reaches it: the Mods screen's options; those buildings, critters and plants.
+# What changes: wood yields and the power made from it.
+#
+# Options here: Ethanol Distiller 90 W, the rest default. The prefabs and defs carry the values,
+# and the Arbor Tree's crop yields 200 per branch (the mod adds that entry twice, once by
+# tag and once by element name).
+from: early-base
+mods: [3292488355]
+options:
+  TheWoodening: {EtOHDistillerPowerReq: 90}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"EthanolDistillery\").EnergyConsumptionWhenActive": 90
+      "Assets.GetPrefab(\"WoodGasGenerator\").GetComponent<Storage>.capacityKg": 300
+      "Assets.GetPrefab(\"WoodGasGenerator\").GetComponent<ManualDeliveryKG>.capacity": 300
+      "Assets.GetPrefab(\"CrabWoodShell\").GetComponent<PrimaryElement>.MassPerUnit": 120
+      "count:TUNING.CROPS.CROP_TYPES[*] if .cropId == WoodLog and .numProduced == 200": 2

@@ -1,0 +1,22 @@
+# Remote Worker Errands Expanded (3473019759), class P (needs The Bionic Booster Pack).
+#
+# What it does: adds a RemoteWorkable to digging, building, deconstructing, harvesting,
+# capturing, emptying (DropAllWorkable) and the errands of the Geotuner, Mission Control, Milk
+# Separator and Radbolt research station, each handing its chore to a Remote Worker dock, so
+# Remote Workers can do those errands too.
+# How a player reaches it: a Remote Worker Dock assigned to such a target; dig and build orders.
+# What changes: Remote Workers take far more kinds of errands.
+#
+# A dig order and a tile blueprint are placed in the corridors: the dig marker and the
+# blueprint carry the mod's remote workables, with their chores; existing buildings carry the
+# deconstruct one.
+from: early-base
+mods: [3473019759]
+steps:
+  - dig: [131, 210, 131, 210]
+  - build: {prefab: Tile, cells: [[114, 209]], material: SandStone}
+  - run: {seconds: 1, speed: 1}
+  - expect_state:
+      "all:Remote_Worker_Errands_Expanded.DiggableRemote::Length": ">= 1"
+      "all:Remote_Worker_Errands_Expanded.ConstructableRemote::Length": ">= 1"
+      "all:Remote_Worker_Errands_Expanded.DeconstructableRemote::Length": [">= 4", "== original"]

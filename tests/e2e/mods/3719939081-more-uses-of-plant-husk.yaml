@@ -1,0 +1,27 @@
+# 植物外壳更多用途 More Uses of Plant Husk (3719939081), classes P, O; PLib options.
+#
+# What it does: plant fiber (plant husks) becomes a fuel and a feedstock: a prefix replaces
+# the Kiln's recipes so ceramic (clay with wood) and refined carbon (wood) also take plant
+# fiber, and the Rock Granulator gets a recipe that presses 100 kg of plant fiber into wood
+# (50 kg, an option).
+# How a player reaches it: the Kiln's and Rock Granulator's recipe side screens.
+# What changes: plant fiber turns into wood, ceramic and carbon.
+#
+# The Rock Granulator's new recipe exists and the Kiln's take plant fiber; a Rock Granulator
+# built by setup in the corridor west of the printing pod lists the recipe.
+from: early-base
+mods: [3719939081]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"RockCrusher\")", method: Build, args: [{"$": "Grid.XYToCell(113, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0].Name == RockCrusher and .ingredients[0].material.Name == PlantFiber and .results[0].material.Name == WoodLog": 1
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0].Name == Kiln": "== original"
+      "sum:ComplexRecipeManager.Get().recipes[*].results[0].amount if .fabricators[0].Name == RockCrusher and .ingredients[0].material.Name == PlantFiber": 50
+  - run: {seconds: 2}
+  - expect: {buildings: {RockCrusher: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: RockCrusher}
+  - ui_wait: {path: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView", cond: stable}
+  - ui_dump: {name: recipes, root: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView"}
+  - shot: {name: recipes, crop: "**/DetailsScreen", threshold: 0.04}

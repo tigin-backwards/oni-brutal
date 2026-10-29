@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3642179304-liquid-auto-ejector.yaml",
+ "mods": [
+  "3642179304"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "its user-menu button turns auto eject on and a full filler drops its water",
+ "updated": "2026-10-29",
+ "commit": "2d4aca2a",
+ "mod_dlls": {
+  "3642179304": {
+   "AutoEjectMod.dll": "db8f3fedf6183006c19e4b081ec0e4c2c875f81a6c90c2c08ad217530e3613d4"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-070935-7f670b10",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T07:40:15",
+    "lane": 2,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-143747-9481627a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T15:34:22",
+    "lane": 1,
+    "reference_run": "20261029-070935-7f670b10",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-143747-9481627a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T15:35:13",
+    "lane": 1,
+    "reference_run": "20261029-070935-7f670b10",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

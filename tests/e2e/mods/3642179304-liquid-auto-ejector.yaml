@@ -1,0 +1,34 @@
+# Liquid Auto-Ejector 液桶自动弹出器 (3642179304), classes P, user menu.
+#
+# What it does: adds an AutoEjectController to the Bottle Filler (LiquidBottler). Its user-menu
+# button "自动弹出: 已关闭/已开启" (auto eject off/on) toggles it; while on, every second a filler
+# holding its set capacity drops the whole bottle on the floor instead of waiting for a
+# Duplicant to fetch it.
+# How a player reaches it: select a Bottle Filler; its user-menu button.
+# What changes: full bottles fall out of the filler on their own.
+#
+# A Bottle Filler is built in the west corridor holding 200 kg of water (its capacity) and
+# selected in setup. The button reads off; a click turns it on (the label turns to 已开启), and
+# after a few seconds the water lies on the floor and the filler is empty.
+from: early-base
+mods: [3642179304]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidBottler\")", method: Build, args: [131763, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "all:Bottler::[0].GetComponent<Storage>", method: AddLiquid, args: [Water, 200, 300, 255, 0, false, true]}}
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "all:Bottler::[0]"}]}}
+steps:
+  - driver: {camera.set: {cell: [111, 208], ortho: 8}}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:KPrefabID.PrefabTag.Name": LiquidBottler
+      "selected:AutoEjectController._isAutoEjectEnabled": false
+      "selected:Storage.MassStored()": ">= 199.9"
+  - click: {text: "~已关闭", under: "**/DetailsScreen"}
+  - expect_state:
+      "selected:AutoEjectController._isAutoEjectEnabled": true
+  - expect_ui:
+      "**/DetailsScreen/**/UserMenuScreen/**": {any_text: "~已开启"}
+  - run: {seconds: 5}
+  - expect_state:
+      "all:Bottler::[0].GetComponent<Storage>.MassStored()": "< 0.1"
+      "sum:all:Pickupable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == Water": ">= 199"

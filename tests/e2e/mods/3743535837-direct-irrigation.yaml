@@ -1,0 +1,22 @@
+# Direct Irrigation (3743535837), class P.
+#
+# What it does: gives every irrigated plant (Bristle Blossom, Mealwood's kin: Sleet Wheat,
+# Nosh Sprout, Thimble Reed, Pincha Pepper, Arbor Tree, Oxyfern, Waterweed and the others) a
+# PassiveElementConsumer for its irrigation liquid, which the irrigation monitor switches on and
+# uses as the plant's store: a planted plant standing in that liquid drinks it from the world
+# (0.5 kg/s within one cell, up to 100 kg) instead of needing a planter delivery.
+# How a player reaches it: plant a crop where its liquid pools.
+# What changes: plants irrigate themselves from surrounding liquid.
+#
+# The plants' prefabs carry the mod's consumers, for their liquids, switched off until planted.
+from: early-base
+mods: [3743535837]
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"PrickleFlower\").GetComponent<PassiveElementConsumer>.elementToConsume": "== 'Water'"
+      "Assets.GetPrefab(\"PrickleFlower\").GetComponent<PassiveElementConsumer>.consumptionRate": 0.5
+      "Assets.GetPrefab(\"PrickleFlower\").GetComponent<PassiveElementConsumer>.enabled": false
+      "Assets.GetPrefab(\"ColdWheat\").GetComponent<PassiveElementConsumer>.elementToConsume": "== original"
+      "Assets.GetPrefab(\"SpiceVine\").GetComponent<PassiveElementConsumer>.capacityKG": 100
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

@@ -1,0 +1,65 @@
+{
+ "spec": "mods/3594192836-wood-heater-automated.yaml",
+ "mods": [
+  "3594192836"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "spec fails in ours: the Wood Heater's card from the Utilities menu shows only its title and material row, as the Christmas Tree's does; the logic port and controller match",
+ "updated": "2026-10-29",
+ "commit": "96f94050",
+ "mod_dlls": {
+  "3594192836": {
+   "WoodHeaderAutoPorts.dll": "6ed2e116d9cf858cde81b67da7282b71d32729c0fc93f35bdb24486e026dac17"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-130335-d1da02eb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T13:53:12",
+    "lane": 4,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-150057-db480465",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-29T15:02:58",
+    "lane": 4,
+    "reasons": [
+     "shot product: 100.00% of pixels differ (> 4%)"
+    ],
+    "reference_run": "20261029-130335-d1da02eb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 1.0
+    }
+   },
+   {
+    "run": "20261029-150057-db480465",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-29T15:03:49",
+    "lane": 4,
+    "reasons": [
+     "shot product: 100.00% of pixels differ (> 4%)"
+    ],
+    "reference_run": "20261029-130335-d1da02eb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 1.0
+    }
+   }
+  ]
+ }
+}

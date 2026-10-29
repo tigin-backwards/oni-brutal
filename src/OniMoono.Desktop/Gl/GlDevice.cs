@@ -835,9 +835,21 @@ namespace OniMoono.Desktop.Gl
                         foreach (var pass in sub.Passes)
                         {
                             if (pass.Type != 0) continue;
-                            foreach (var variant in pass.Variants) GlPrograms.Get(shader, variant.BlobIndex);
+                            foreach (var variant in pass.Variants)
+                                if (!StereoOnly(variant.Keywords)) GlPrograms.Get(shader, variant.BlobIndex);
                         }
             });
+        }
+
+        /// A variant for XR stereo rendering, which only an XR session selects (never this player).
+        /// The warm-up leaves them out: AMD's Windows driver lists GL_AMD_vertex_shader_layer, which
+        /// STEREO_INSTANCING_ON requires, but its compiler rejects it, and the failure was logged
+        /// as an error on every start (issue #20). Should one be selected, it compiles then.
+        internal static bool StereoOnly(IEnumerable<string> keywords)
+        {
+            foreach (var k in keywords)
+                if (k is "STEREO_INSTANCING_ON" or "STEREO_MULTIVIEW_ON" or "UNITY_SINGLE_PASS_STEREO") return true;
+            return false;
         }
 
         public override void FlushRecorded() => worker.Submit();

@@ -22,6 +22,7 @@ namespace OniMoono.Host
             {
                 GameTweakNames.SplashRow => (effective.Splash == "moo", effective.SplashSource == OptionSource.CommandLine, EffectiveOptions.DefaultSplash == "moo"),
                 GameTweakNames.FrameStatsRow => (effective.FrameStats, effective.FrameStatsSource == OptionSource.CommandLine, false),
+                GameTweakNames.LogPathsRow => (effective.HideLogPaths, effective.LogPathsSource == OptionSource.CommandLine, EffectiveOptions.DefaultLogPaths == "hidden"),
                 var name => (effective.Tweaks[name].On, effective.Tweaks[name].Source == OptionSource.CommandLine,
                     EffectiveOptions.DefaultOn(name, GameTweakNames.ChangingBehaviour)),
             };
@@ -36,19 +37,21 @@ namespace OniMoono.Host
             foreach (var value in effective.CommandLineTweaks) locked.Add("--game-tweak " + value);
             if (effective.SplashSource == OptionSource.CommandLine) locked.Add("--splash " + effective.Splash);
             if (effective.FrameStatsSource == OptionSource.CommandLine) locked.Add("--frame-stats");
+            if (effective.LogPathsSource == OptionSource.CommandLine) locked.Add("--log-paths " + effective.LogPaths);
 
             var saved = file;
             Func<string[], bool[], string?> save = (ids, values) =>
             {
                 var tweaks = new Dictionary<string, bool>(StringComparer.Ordinal);
-                bool? splash = null, frameStats = null;
+                bool? splash = null, frameStats = null, hideLogPaths = null;
                 for (int i = 0; i < ids.Length; i++)
                 {
                     if (ids[i] == GameTweakNames.SplashRow) splash = values[i];
                     else if (ids[i] == GameTweakNames.FrameStatsRow) frameStats = values[i];
+                    else if (ids[i] == GameTweakNames.LogPathsRow) hideLogPaths = values[i];
                     else tweaks[ids[i]] = values[i];
                 }
-                var next = EffectiveOptions.Apply(saved, GameTweakNames.ChangingBehaviour, tweaks, splash, frameStats);
+                var next = EffectiveOptions.Apply(saved, GameTweakNames.ChangingBehaviour, tweaks, splash, frameStats, hideLogPaths);
                 try
                 {
                     next.Write(settingsPath);

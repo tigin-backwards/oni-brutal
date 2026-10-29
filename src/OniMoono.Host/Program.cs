@@ -38,7 +38,16 @@ namespace OniMoono.Host
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
             Paths.Configure(layout, options);
-            EngineLog.Open(options.LogPath ?? EngineConfig.ConsoleLogPath, keepPrevious: options.LogPath == null);
+            // The options the main menu's Moono Tweaks screen sets: defaults, then its settings
+            // file in the per-user folder, then the command line. Read before the log opens, which
+            // needs to know whether to hide personal paths from its first line; logged after.
+            var settingsPath = PlayerSettings.PathIn(EngineConfig.PersistentDataPath);
+            var migrated = PlayerSettings.MigrateIn(EngineConfig.PersistentDataPath, out var migrateProblem);
+            var settings = PlayerSettings.Read(settingsPath, out var settingsProblem);
+            var effective = EffectiveOptions.Resolve(GameTweaks.GameTweakNames.All, GameTweaks.GameTweakNames.ChangingBehaviour,
+                options.GameTweaks, options.Splash, options.FrameStats, settings, options.LogPaths);
+            EngineLog.Open(options.LogPath ?? EngineConfig.ConsoleLogPath, keepPrevious: options.LogPath == null,
+                effective.HideLogPaths ? LogScrubber.ForThisMachine() : null);
             // Which build this is (the commit the SDK stamps into the informational version) and
             // where it runs from, so a log tells which release, or which stray copy, wrote it.
             var built = typeof(Program).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
@@ -46,17 +55,10 @@ namespace OniMoono.Host
             EngineLog.Engine($"Moono starting: commit={commit} exe={Environment.ProcessPath} game={options.GameDir} .NET={Environment.Version}");
             StartupStats.Mark("host starts (runtime up)");
             UnhandledExceptions.Install();
-            // The options the main menu's Moono Tweaks screen sets: defaults, then its settings
-            // file in the per-user folder, then the command line.
-            var settingsPath = PlayerSettings.PathIn(EngineConfig.PersistentDataPath);
-            var migrated = PlayerSettings.MigrateIn(EngineConfig.PersistentDataPath, out var migrateProblem);
             if (migrated != null) EngineLog.Engine($"settings: copied {migrated} (from before the Moono name) to {settingsPath}");
             if (migrateProblem != null) EngineLog.Engine($"settings: could not copy {PlayerSettings.OldPathIn(EngineConfig.PersistentDataPath)} to {settingsPath}: {migrateProblem}");
-            var settings = PlayerSettings.Read(settingsPath, out var settingsProblem);
             EngineLog.Engine(settingsProblem != null ? $"settings: {settingsPath} could not be read, so defaults apply: {settingsProblem}"
                 : File.Exists(settingsPath) ? $"settings: {settingsPath}" : $"settings: {settingsPath} (none; defaults apply)");
-            var effective = EffectiveOptions.Resolve(GameTweaks.GameTweakNames.All, GameTweaks.GameTweakNames.ChangingBehaviour,
-                options.GameTweaks, options.Splash, options.FrameStats, settings);
             foreach (var line in effective.Describe()) EngineLog.Engine("option " + line);
             if (effective.UnknownTweaks.Count > 0) EngineLog.Engine($"settings: not tweaks of this player, ignored: {string.Join(", ", effective.UnknownTweaks)}");
             options.Splash = effective.Splash;
@@ -2070,6 +2072,9 @@ namespace OniMoono.Host
         /// --frame-stats: average frame phase times in the log (PlayerLoop.FrameStats), over the
         /// Moono Tweaks settings.
         public bool FrameStats;
+        /// --log-paths hidden|full: personal paths in Player.log and the console replaced, or as
+        /// logged (LogScrubber), over the Moono Tweaks settings; null when not given.
+        public string? LogPaths;
         /// --no-tweaks-menu: the main menu without our Moono Tweaks button, as the original's (test
         /// runs compared with the original game: scripts/e2e.py).
         public bool NoTweaksMenu;
@@ -2169,6 +2174,14 @@ namespace OniMoono.Host
                             return null;
                         }
                         break;
+                    case "--log-paths":
+                        o.LogPaths = args[++i];
+                        if (!PlayerSettings.IsLogPaths(o.LogPaths))
+                        {
+                            Console.Error.WriteLine($"Unknown log paths {o.LogPaths}; known: hidden, full");
+                            return null;
+                        }
+                        break;
                     case "--log-pointer-hits": o.LogPointerHits = true; break;
                     case "--vsync-count": o.VSyncCount = int.Parse(args[++i]); break;
                     case "--gpu-profile": o.GpuProfile = true; break;
@@ -2252,7 +2265,7 @@ namespace OniMoono.Host
                     }
                     default:
                         Console.Error.WriteLine($"Unknown option {args[i]}");
-                        Console.Error.WriteLine("usage: OniMoono [--game DIR] [--log FILE] [--run-home DIR] [--audio-wav DIR] [--headless] [--batchmode] [--frames N] [--native-override NAME=PATH] [--trace-exceptions] [--gl-debug] [--background] [--splash moo|none] [--log-pointer-hits] [--vsync-count N] [--gpu-profile] [--no-bindless] [--input FRAME:ACTION[:ARGS]] [--input-file PATH] [--frame-stats] [--no-tweaks-menu] [--max-frame-rate N[:FRAMES]] [--dump-render-textures FRAME:DIR] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [-monitor N] [--check-types] [--game-tweak NAME|-NAME|all|exact|none] [--check-assets [--list-data-scripts FILE]] [--check-bind] [--check-shaders] [--check-natives [--native-arch x86_64|arm64] [--native-dir DIR]] [--dump-shader NAME:DIR] [--capture FRAME:PATH[:SCALE]] [--probe-ui FRAME:X,Y] [--dump-ui FRAME:PATH] [--dump-ui-vertices PATH-SUBSTRING] [--dump-hierarchy FRAME:PATH] [--report-builtin-assets FILE] [--dump-component FRAME:PATH|TYPE] [-- STEAM-COMMAND]");
+                        Console.Error.WriteLine("usage: OniMoono [--game DIR] [--log FILE] [--run-home DIR] [--audio-wav DIR] [--headless] [--batchmode] [--frames N] [--native-override NAME=PATH] [--trace-exceptions] [--gl-debug] [--background] [--splash moo|none] [--log-pointer-hits] [--vsync-count N] [--gpu-profile] [--no-bindless] [--input FRAME:ACTION[:ARGS]] [--input-file PATH] [--frame-stats] [--log-paths hidden|full] [--no-tweaks-menu] [--max-frame-rate N[:FRAMES]] [--dump-render-textures FRAME:DIR] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [-monitor N] [--check-types] [--game-tweak NAME|-NAME|all|exact|none] [--check-assets [--list-data-scripts FILE]] [--check-bind] [--check-shaders] [--check-natives [--native-arch x86_64|arm64] [--native-dir DIR]] [--dump-shader NAME:DIR] [--capture FRAME:PATH[:SCALE]] [--probe-ui FRAME:X,Y] [--dump-ui FRAME:PATH] [--dump-ui-vertices PATH-SUBSTRING] [--dump-hierarchy FRAME:PATH] [--report-builtin-assets FILE] [--dump-component FRAME:PATH|TYPE] [-- STEAM-COMMAND]");
                         return null;
                 }
             }

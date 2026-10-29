@@ -19,7 +19,7 @@ namespace OniMoono.Host
     /// defaults, so a default that changes in an update (a new tweak among them) reaches every user
     /// who has not chosen otherwise:
     ///
-    ///     { "gameTweaks": { "slow-reachability": true, "fast-jobs": false }, "splash": "moo", "frameStats": true }
+    ///     { "gameTweaks": { "slow-reachability": true, "fast-jobs": false }, "splash": "moo", "frameStats": true, "logPaths": "full" }
     ///
     /// Tweaks no longer known (one removed in an update) are ignored and kept.
     internal sealed class PlayerSettings
@@ -29,6 +29,8 @@ namespace OniMoono.Host
         /// "moo" or "none"; null when not chosen.
         public string? Splash;
         public bool? FrameStats;
+        /// "hidden" or "full"; null when not chosen.
+        public string? LogPaths;
 
         public static string PathIn(string persistentDataPath) => Path.Combine(persistentDataPath, "oni-moono", "settings.json");
         /// Where players from before the Moono name (oni-brutal) kept the file.
@@ -88,6 +90,11 @@ namespace OniMoono.Host
                 settings.Splash = IsSplash(value) ? value : throw new FormatException($"splash \"{value}\" is not one of: moo, none");
             }
             if (root["frameStats"] is JsonNode frameStats) settings.FrameStats = frameStats.GetValue<bool>();
+            if (root["logPaths"] is JsonNode logPaths)
+            {
+                var value = logPaths.GetValue<string>();
+                settings.LogPaths = IsLogPaths(value) ? value : throw new FormatException($"logPaths \"{value}\" is not one of: hidden, full");
+            }
             return settings;
         }
 
@@ -103,6 +110,7 @@ namespace OniMoono.Host
             }
             if (Splash != null) root["splash"] = Splash;
             if (FrameStats != null) root["frameStats"] = FrameStats;
+            if (LogPaths != null) root["logPaths"] = LogPaths;
             return indented ? root.ToJsonString(new JsonSerializerOptions { WriteIndented = true }) + "\n" : root.ToJsonString();
         }
 
@@ -117,12 +125,14 @@ namespace OniMoono.Host
         }
 
         public static bool IsSplash(string value) => value is "moo" or "none";
+        public static bool IsLogPaths(string value) => value is "hidden" or "full";
     }
 
     /// The options the Moono Tweaks screen sets, as this run has them: built-in defaults, then the
     /// settings file, then the command line. A command line naming any game tweak
     /// (`--game-tweak NAME|-NAME|all|exact|none`, repeatable) sets the whole set of tweaks for the
-    /// run, as before the settings file existed; `--splash` and `--frame-stats` set theirs.
+    /// run, as before the settings file existed; `--splash`, `--frame-stats` and `--log-paths`
+    /// set theirs.
     internal sealed class EffectiveOptions
     {
         public readonly IReadOnlyList<string> AllTweaks;
@@ -133,6 +143,12 @@ namespace OniMoono.Host
         public OptionSource SplashSource;
         public bool FrameStats;
         public OptionSource FrameStatsSource;
+        /// Personal paths in Player.log and the console: "hidden" (LogScrubber) unless chosen
+        /// otherwise, or "full".
+        public const string DefaultLogPaths = "hidden";
+        public string LogPaths = DefaultLogPaths;
+        public OptionSource LogPathsSource;
+        public bool HideLogPaths => LogPaths == "hidden";
         /// The command line's `--game-tweak` values, in order (empty when it names none).
         public readonly IReadOnlyList<string> CommandLineTweaks;
         /// Names in the settings file that are not tweaks of this player.
@@ -154,7 +170,8 @@ namespace OniMoono.Host
             => !values.Contains("-" + name) && (values.Contains(name) || values.Contains("all") || values.Contains("exact") && !changing.Contains(name));
 
         public static EffectiveOptions Resolve(IReadOnlyList<string> allTweaks, IReadOnlyCollection<string> changing,
-            IReadOnlyList<string> commandLineTweaks, string? commandLineSplash, bool commandLineFrameStats, PlayerSettings file)
+            IReadOnlyList<string> commandLineTweaks, string? commandLineSplash, bool commandLineFrameStats, PlayerSettings file,
+            string? commandLineLogPaths = null)
         {
             var options = new EffectiveOptions(allTweaks, commandLineTweaks);
             foreach (var name in allTweaks)
@@ -169,6 +186,8 @@ namespace OniMoono.Host
             else if (file.Splash != null) (options.Splash, options.SplashSource) = (file.Splash, OptionSource.SettingsFile);
             if (commandLineFrameStats) (options.FrameStats, options.FrameStatsSource) = (true, OptionSource.CommandLine);
             else if (file.FrameStats != null) (options.FrameStats, options.FrameStatsSource) = (file.FrameStats.Value, OptionSource.SettingsFile);
+            if (commandLineLogPaths != null) (options.LogPaths, options.LogPathsSource) = (commandLineLogPaths, OptionSource.CommandLine);
+            else if (file.LogPaths != null) (options.LogPaths, options.LogPathsSource) = (file.LogPaths, OptionSource.SettingsFile);
             return options;
         }
 
@@ -178,9 +197,9 @@ namespace OniMoono.Host
         /// dropped from the file, any other recorded; options not chosen (those the command line
         /// set, shown but not changeable) keep what the file had.
         public static PlayerSettings Apply(PlayerSettings file, IReadOnlyCollection<string> changing,
-            IReadOnlyDictionary<string, bool> tweaks, bool? splashMoo, bool? frameStats)
+            IReadOnlyDictionary<string, bool> tweaks, bool? splashMoo, bool? frameStats, bool? hideLogPaths = null)
         {
-            var result = new PlayerSettings { Splash = file.Splash, FrameStats = file.FrameStats };
+            var result = new PlayerSettings { Splash = file.Splash, FrameStats = file.FrameStats, LogPaths = file.LogPaths };
             foreach (var (name, on) in file.GameTweaks) result.GameTweaks[name] = on;
             foreach (var (name, on) in tweaks)
             {
@@ -189,6 +208,7 @@ namespace OniMoono.Host
             }
             if (splashMoo != null) result.Splash = (splashMoo.Value ? "moo" : "none") is var splash && splash == DefaultSplash ? null : splash;
             if (frameStats != null) result.FrameStats = frameStats.Value ? true : null;
+            if (hideLogPaths != null) result.LogPaths = (hideLogPaths.Value ? "hidden" : "full") is var logPaths && logPaths == DefaultLogPaths ? null : logPaths;
             return result;
         }
 
@@ -215,6 +235,7 @@ namespace OniMoono.Host
             }
             yield return $"splash {Splash} ({From(SplashSource)})";
             yield return $"frame stats {(FrameStats ? "on" : "off")} ({From(FrameStatsSource)})";
+            yield return $"log paths {LogPaths} ({From(LogPathsSource)})";
         }
     }
 }

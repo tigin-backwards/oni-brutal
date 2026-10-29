@@ -14,8 +14,8 @@ namespace OniMoono.Tests
         static readonly string[] All = ["fast-a", "fast-b", "slow-c", "off-d"];
         static readonly string[] Changing = ["slow-c", "off-d"];
 
-        static EffectiveOptions Resolve(PlayerSettings file, string[] tweaks = null, string splash = null, bool frameStats = false)
-            => EffectiveOptions.Resolve(All, Changing, tweaks ?? [], splash, frameStats, file);
+        static EffectiveOptions Resolve(PlayerSettings file, string[] tweaks = null, string splash = null, bool frameStats = false, string logPaths = null)
+            => EffectiveOptions.Resolve(All, Changing, tweaks ?? [], splash, frameStats, file, logPaths);
 
         [Fact]
         public void DefaultsAreExactWithTheSplashAndNoFrameStats()
@@ -25,6 +25,26 @@ namespace OniMoono.Tests
             Assert.All(All, n => Assert.Equal(OptionSource.Default, o.Tweaks[n].Source));
             Assert.Equal(("moo", OptionSource.Default), (o.Splash, o.SplashSource));
             Assert.Equal((false, OptionSource.Default), (o.FrameStats, o.FrameStatsSource));
+            Assert.Equal(("hidden", OptionSource.Default), (o.LogPaths, o.LogPathsSource));
+            Assert.True(o.HideLogPaths);
+        }
+
+        [Fact]
+        public void LogPathsComeFromTheFileThenTheCommandLine()
+        {
+            var file = PlayerSettings.Parse("""{ "logPaths": "full" }""");
+            var o = Resolve(file);
+            Assert.Equal(("full", OptionSource.SettingsFile), (o.LogPaths, o.LogPathsSource));
+            Assert.False(o.HideLogPaths);
+            o = Resolve(file, logPaths: "hidden");
+            Assert.Equal(("hidden", OptionSource.CommandLine), (o.LogPaths, o.LogPathsSource));
+            o = Resolve(new PlayerSettings(), logPaths: "full");
+            Assert.Equal(("full", OptionSource.CommandLine), (o.LogPaths, o.LogPathsSource));
+            // The screen records only "full"; hidden again is the default, so the file drops it.
+            var saved = EffectiveOptions.Apply(new PlayerSettings(), Changing, new Dictionary<string, bool>(), null, null, hideLogPaths: false);
+            Assert.Equal("{\"logPaths\":\"full\"}", saved.ToJson(indented: false));
+            Assert.Null(EffectiveOptions.Apply(saved, Changing, new Dictionary<string, bool>(), null, null, hideLogPaths: true).LogPaths);
+            Assert.Equal("full", EffectiveOptions.Apply(saved, Changing, new Dictionary<string, bool>(), true, null).LogPaths);
         }
 
         [Fact]
@@ -183,6 +203,7 @@ namespace OniMoono.Tests
         [InlineData("[1, 2]")]
         [InlineData("""{ "gameTweaks": { "fast-a": "yes" } }""")]
         [InlineData("""{ "splash": "cows" }""")]
+        [InlineData("""{ "logPaths": "some" }""")]
         public void AnUnreadableFileCountsAsEmpty(string content)
         {
             var dir = Path.Combine(Path.GetTempPath(), "oni-moono-settings-" + Guid.NewGuid().ToString("N"));
@@ -209,9 +230,10 @@ namespace OniMoono.Tests
             var file = new PlayerSettings();
             file.GameTweaks["fast-b"] = false;
             Assert.Equal(["game tweaks on (default): fast-a", "game tweaks off (default): slow-c, off-d", "game tweaks off (the settings file): fast-b",
-                          "splash moo (default)", "frame stats off (default)"], Resolve(file).Describe().ToArray());
-            Assert.Equal(["game tweaks from the command line (--game-tweak none): none", "splash none (the command line)", "frame stats on (the command line)"],
-                Resolve(file, ["none"], "none", true).Describe().ToArray());
+                          "splash moo (default)", "frame stats off (default)", "log paths hidden (default)"], Resolve(file).Describe().ToArray());
+            Assert.Equal(["game tweaks from the command line (--game-tweak none): none", "splash none (the command line)", "frame stats on (the command line)",
+                           "log paths full (the command line)"],
+                Resolve(file, ["none"], "none", true, "full").Describe().ToArray());
         }
     }
 }

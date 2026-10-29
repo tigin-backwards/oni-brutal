@@ -54,13 +54,13 @@ Unity's `-screen-width`, `-screen-height` and `-window-mode` work too. An unknow
 The player's options come from built-in defaults, then the settings file
 `<persistentDataPath>/oni-moono/settings.json` that the main menu's Moono Tweaks screen writes,
 then the command line: `--game-tweak exact|all|none|NAME|-NAME` (repeatable; any of them sets the
-whole set), `--splash moo|none` and `--frame-stats`. `--no-tweaks-menu` leaves the Moono Tweaks
-button off the main menu, as in the original. [TWEAKS.md](TWEAKS.md) lists the tweaks and their
+whole set), `--splash moo|none`, `--frame-stats` and `--log-paths hidden|full`.
+`--no-tweaks-menu` leaves the Moono Tweaks button off the main menu, as in the original. [TWEAKS.md](TWEAKS.md) lists the tweaks and their
 verify mode (`ONI_TWEAK_VERIFY=1`).
 
-These runs have no game tweaks and no splash unless they name some: the scripts pass
-`--game-tweak none --splash none` first, so neither the player's defaults nor a settings file in
-the run home changes what a test measures. `ONI_TWEAK_SETTINGS=1` leaves that out, to try the
+These runs have no game tweaks and no splash, and log full paths, unless they name otherwise:
+the scripts pass `--game-tweak none --splash none --log-paths full` first, so neither the
+player's defaults nor a settings file in the run home changes what a test measures. `ONI_TWEAK_SETTINGS=1` leaves that out, to try the
 Moono Tweaks screen as a player has it.
 
 `Player.log` keeps its first 20 MB and its last 20 MB or so, cut with a banner between them;

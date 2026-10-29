@@ -7,7 +7,9 @@
 # Test runs measure and compare the game without tweaks unless they name some: `--game-tweak none`
 # comes first, so the player's default tweaks and any Moono Tweaks settings file in the run home
 # play no part, and a run's own `--game-tweak` arguments (e.g. `exact`) are its whole set. Likewise
-# `--splash none`: the default loading splash stays out of test runs unless one asks for it.
+# `--splash none`: the default loading splash stays out of test runs unless one asks for it, and
+# `--log-paths full`: the log keeps its paths as logged, as the original's (the test tools read
+# them).
 # ONI_TWEAK_SETTINGS=1 leaves that out: the run home's settings and the defaults apply, as in a
 # user's launch (for trying the main menu's Moono Tweaks screen).
 set -euo pipefail
@@ -15,6 +17,6 @@ source "$(dirname "$0")/env.sh"
 home="${ONI_RUN_HOME:-$root/out/run-home}"
 mkdir -p "$home/config" "$home/cache"
 export XDG_CONFIG_HOME="$home/config" XDG_CACHE_HOME="$home/cache"
-tweaks=(--game-tweak none --splash none)
+tweaks=(--game-tweak none --splash none --log-paths full)
 [ "${ONI_TWEAK_SETTINGS:-}" = 1 ] && tweaks=()
 exec "$root/scripts/contain.sh" "$root/out/bin/OniMoono.Host/${ONI_CONFIG:-debug}/OniMoono" --game "$game" "${tweaks[@]}" "$@"

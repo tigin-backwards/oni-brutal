@@ -1479,25 +1479,27 @@ path and quits. Ours waits for the player to exit and starts it again with the a
 started with (recorded by the host in `ONI_MOONO_RESTART_ARGS`, shell-quoted, and
 `ONI_MOONO_RESTART_ARGV`, JSON, with `ONI_MOONO_RESTART_PID`).
 
-**Player options (Moono Tweaks).** The game tweaks (`GameTweakNames`), the loading splash and
-frame stats come from three places, later ones winning: built-in defaults (every tweak but
-`ChangingBehaviour`'s, as `--game-tweak exact`; the moo splash; no frame stats), the settings file
-`<persistentDataPath>/oni-moono/settings.json` (`PlayerSettings`: only the choices that differ
-from the defaults, so a default changed by an update reaches everyone who has not chosen
-otherwise; a run home has its own), and the command line (`EffectiveOptions`). A command line
-with any `--game-tweak` value sets the whole set of tweaks for the run (`exact`, `all`, `none`,
-names, `-NAME`), `--splash moo|none` the splash, `--frame-stats` the frame stats. The start of the
-log names the file and each option with where it came from. The main menu's **Moono Tweaks**
-button, directly below Mods, opens a screen (`src/OniMoono.GameTweaks/MoonoTweaksMenu.cs`) made
-of the game's own UI: the Mods screen's prefab instantiated inactive, its `ModsScreen` swapped for
-`MoonoTweaksScreen` before it wakes, and the menu's button prefab and style for the button. It
-lists every option from that list with a toggle and a line on what it does, the tweaks that
-change gameplay labelled so, and rows the command line set dimmed and fixed; "Restart to apply"
-writes the file and restarts through `App.Restart` (the Restarter above), and the restarted player
-reads it with the same command line. `--no-tweaks-menu` leaves the button out, as in the
-original's menu (e2e runs compared with it). Test runs pin the options: `scripts/run.sh` and
-`scripts/run-windows.sh` pass `--game-tweak none --splash none` first, so a run has exactly the
-tweaks and splash its own arguments name.
+**Player options (Moono Tweaks).** The game tweaks (`GameTweakNames`), the loading splash, frame
+stats and the log's paths come from three places, later ones winning: built-in defaults (every tweak
+but `ChangingBehaviour`'s, as `--game-tweak exact`; the moo splash; no frame stats; personal paths
+hidden in the log), the settings file `<persistentDataPath>/oni-moono/settings.json`
+(`PlayerSettings`: only the choices that differ from the defaults, so a default changed by an update
+reaches everyone who has not chosen otherwise; a run home has its own), and the command line
+(`EffectiveOptions`). A command line with any `--game-tweak` value sets the whole set of tweaks for
+the run (`exact`, `all`, `none`, names, `-NAME`), `--splash moo|none` the splash, `--frame-stats`
+the frame stats, `--log-paths hidden|full` the log's paths. They are read before the log opens,
+which needs the last; the start of the log names the file and each option with where it came from.
+The main menu's **Moono Tweaks** button, directly below Mods, opens a screen
+(`src/OniMoono.GameTweaks/MoonoTweaksMenu.cs`) made of the game's own UI: the Mods screen's prefab
+instantiated inactive, its `ModsScreen` swapped for `MoonoTweaksScreen` before it wakes, and the
+menu's button prefab and style for the button. It lists every option from that list with a toggle
+and a line on what it does, the tweaks that change gameplay labelled so, and rows the command line
+set dimmed and fixed; "Restart to apply" writes the file and restarts through `App.Restart` (the
+Restarter above), and the restarted player reads it with the same command line. `--no-tweaks-menu`
+leaves the button out, as in the original's menu (e2e runs compared with it). Test runs pin the
+options: `scripts/run.sh` and `scripts/run-windows.sh` pass `--game-tweak none --splash none
+--log-paths full` first, so a run has exactly the tweaks, splash and log paths its own arguments
+name (`--log-paths full`: the test tools read the run home's paths in log lines).
 
 Test runs (not the product): `--run-home DIR` keeps a run's per-user data under DIR (Unity's
 paths, and on Windows the Documents and local application data folders the game asks .NET for),
@@ -1517,6 +1519,20 @@ reports ScriptOnly for each type. An exception gets its own frames, innermost ex
 Mono's format (`  at A.B (System.String s) [0x0001f] in <mvid>:0`), then the managed frames of the
 `LogException` call in Unity's (`A:B(String)`), the engine's frames left out where the original's
 are native (`Engine/LogTraces.cs`). Unlike Unity's, the file is capped at about 60 MB (D36).
+
+Personal paths (`--log-paths hidden`, the default; `LogScrubber`): what goes to Player.log and to
+stdout has the profile folder replaced by `%USERPROFILE%` (Windows, any case and slash) or `~`,
+the Documents folder outside it by `%DOCUMENTS%`, a SteamID64 path segment (cloud_save_files) by
+`<steam id>`, and the user name as a path segment by `<user>`. The rules are built at start-up
+from those known values (~2 ms; a Regex of them cost ~10 ms), and a line is scanned only when it
+has a slash and one of their words (vectorized searches: ~5 ns a line without a slash, ~35 ns
+one with a path that names no one, ~450 ns one with a save path replaced). The
+log callbacks (`Application.logMessageReceived*`) get the text as logged: mods and the game's
+crash reporter read it there. The console writer holds a partial line until its line break (or a
+flush, or other output, which writes it first, so the order stays), so a path written in pieces
+is replaced too. The settings are read before the log opens, so its first lines are covered.
+The platform layer has no logged-in Steam ID at that point, so Steam IDs are replaced as path
+segments only.
 
 Development diagnostics (host options, never needed by players): `--trace-exceptions` logs every
 first-chance exception with per-frame IL offsets (the game ships without symbols; the offset

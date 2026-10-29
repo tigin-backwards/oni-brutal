@@ -23,8 +23,10 @@ namespace OniMoono.Engine
         /// logger writes its [INFO] lines with Console.WriteLine. With `keepPrevious` (the
         /// player's default log, not one named on the command line), the last session's log is
         /// kept beside it as NAME-prev.EXT (Player-prev.log), replacing the one before, as
-        /// Unity's player does.
-        public static void Open(string path, bool keepPrevious = false)
+        /// Unity's player does. With a `scrubber` (`--log-paths hidden`), the file and the console
+        /// get each line with personal paths replaced; the log callbacks still get the text as
+        /// logged (mods and the game's crash reporter read it there).
+        public static void Open(string path, bool keepPrevious = false, LogScrubber scrubber = null)
         {
             Directory.CreateDirectory(Path.GetDirectoryName(path)!);
             if (keepPrevious && File.Exists(path))
@@ -37,6 +39,8 @@ namespace OniMoono.Engine
             }
             lock (fileLock)
             {
+                EngineLog.scrubber = scrubber;
+                pending.Clear();
                 file = new CappedLogFile(path);
                 console ??= Console.Out;
                 Console.SetOut(new LogWriter(console));
@@ -47,11 +51,59 @@ namespace OniMoono.Engine
         {
             lock (fileLock)
             {
+                if (console != null) WritePending();
                 if (console != null) Console.SetOut(console);
                 console = null;
                 file?.Dispose();
                 file = null;
+                scrubber = null;
             }
+        }
+
+        /// Replaces personal paths in what is written (null: written as logged).
+        static LogScrubber scrubber;
+
+        /// With a scrubber, console text not yet ended by a line break: a path written in pieces
+        /// (Write(char), Write(string) without one) is replaced once its line is whole. Written
+        /// as it is before any other output, on Flush and on Close, so the order stays as
+        /// written; past PendingMost characters without a line break it is written too.
+        static readonly StringBuilder pending = new();
+        const int PendingMost = 16 << 10;
+
+        static string Scrub(string text) => scrubber == null ? text : scrubber.Scrub(text);
+
+        /// Under fileLock: text to the original console and the file, as given.
+        static void Out(string text)
+        {
+            console.Write(text);
+            file?.Write(text);
+        }
+
+        /// Under fileLock: the pending text, scrubbed.
+        static void WritePending()
+        {
+            if (pending.Length == 0) return;
+            var text = pending.ToString();
+            pending.Clear();
+            Out(Scrub(text));
+        }
+
+        /// Under fileLock, with a scrubber: the pending text through its last line break (all of
+        /// it once it is too long).
+        static void WritePendingLines()
+        {
+            if (pending.Length >= PendingMost)
+            {
+                WritePending();
+                return;
+            }
+            int end = -1;
+            for (int i = pending.Length - 1; i >= 0; i--)
+                if (pending[i] == '\n') { end = i; break; }
+            if (end < 0) return;
+            var text = pending.ToString(0, end + 1);
+            pending.Remove(0, end + 1);
+            Out(scrubber.Scrub(text));
         }
 
         /// The console's writer while the log is open: each write goes to the original console and
@@ -64,6 +116,12 @@ namespace OniMoono.Engine
             {
                 lock (fileLock)
                 {
+                    if (scrubber != null)
+                    {
+                        pending.Append(value);
+                        if (value == '\n' || pending.Length >= PendingMost) WritePendingLines();
+                        return;
+                    }
                     console.Write(value);
                     file?.Write(value);
                 }
@@ -71,8 +129,15 @@ namespace OniMoono.Engine
 
             public override void Write(string value)
             {
+                if (value == null) return;
                 lock (fileLock)
                 {
+                    if (scrubber != null)
+                    {
+                        pending.Append(value);
+                        if (value.Contains('\n') || pending.Length >= PendingMost) WritePendingLines();
+                        return;
+                    }
                     console.Write(value);
                     file?.Write(value);
                 }
@@ -83,10 +148,18 @@ namespace OniMoono.Engine
                 // The game's own log lines (Klei's Debug writes them here) mark its start-up.
                 if (!StartupProgress.Done && Threads.IsMainThread) StartupProgress.LogLine(value);
                 Platform.MainThreadPump.Maybe();
+                // Scrubbed before taking the lock, unless a piece of the line is pending.
+                string scrubbed = Scrub(value);
                 lock (fileLock)
                 {
-                    console.WriteLine(value);
-                    file?.WriteLine(value);
+                    if (pending.Length > 0)
+                    {
+                        pending.Append(value);
+                        scrubbed = Scrub(pending.ToString());
+                        pending.Clear();
+                    }
+                    console.WriteLine(scrubbed);
+                    file?.WriteLine(scrubbed);
                 }
             }
 
@@ -94,6 +167,7 @@ namespace OniMoono.Engine
             {
                 lock (fileLock)
                 {
+                    WritePending();
                     console.Flush();
                     file?.Flush();
                 }
@@ -105,11 +179,13 @@ namespace OniMoono.Engine
 
         static void WriteRaw(string text)
         {
+            text = Scrub(text);
             // To the original console and the log file while the log is open.
             lock (fileLock)
             {
                 if (file != null && console != null)
                 {
+                    WritePending();
                     console.WriteLine(text);
                     file.WriteLine(text);
                 }

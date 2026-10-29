@@ -17,7 +17,7 @@ namespace OniMoono.Host.GameTweaks
     /// One row of the Moono Tweaks screen and of docs/TWEAKS.md: `Title` in sentence case,
     /// `Effect` one short line on what a player gets from it, `Detail` (optional) how it does it,
     /// for the row's tooltip and the docs. `IsTweak` is false for the player's own options (the
-    /// splash and frame stats), which are rows but not `--game-tweak` names.
+    /// splash, frame stats and log paths), which are rows but not `--game-tweak` names.
     internal sealed record TweakInfo(string Id, TweakGroup Group, string Title, string Effect, string Detail = "", TweakGain? Gain = null, bool IsTweak = true)
     {
         /// The launch option that sets this row (shown in its tooltip).
@@ -25,6 +25,7 @@ namespace OniMoono.Host.GameTweaks
         {
             GameTweakNames.SplashRow => "--splash moo",
             GameTweakNames.FrameStatsRow => "--frame-stats",
+            GameTweakNames.LogPathsRow => "--log-paths hidden",
             _ => "--game-tweak " + Id,
         };
     }
@@ -36,7 +37,7 @@ namespace OniMoono.Host.GameTweaks
     /// before the game's assemblies (Harmony among them) can be resolved, and the tests compile it in.
     internal static class GameTweakNames
     {
-        public const string SplashRow = "splash", FrameStatsRow = "frame-stats";
+        public const string SplashRow = "splash", FrameStatsRow = "frame-stats", LogPathsRow = "log-paths";
         public const string FastSaveCompression = "fast-save-compression", BackgroundSave = "background-save", NoSaveGc = "no-save-gc",
             FastSerialization = "fast-serialization", FastParticleCollision = "fast-particle-collision";
 
@@ -68,6 +69,8 @@ namespace OniMoono.Host.GameTweaks
             new(SplashRow, General, "Gassy Moo loading splash", "Gassy Moos rain over the window while the game starts, with a progress bar.", IsTweak: false),
             new(FrameStatsRow, General, "Frame stats in the log", "Notes where the frame time goes in Player.log, for reporting slowness.",
                 "Every 60 frames.", IsTweak: false),
+            new(LogPathsRow, General, "Hide personal paths in the log", "Your user folder reads %USERPROFILE% or ~ in Player.log, and your Steam ID is hidden.",
+                "Mods still get the full text.", IsTweak: false),
 
             new(FastSerialization, Saving, "Faster save writing", "Autosaves take less time; the save file is the same.",
                 "Writes the colony's numbers without boxing each one in an object."),

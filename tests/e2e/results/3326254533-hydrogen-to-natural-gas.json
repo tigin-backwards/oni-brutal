@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3326254533-hydrogen-to-natural-gas.yaml",
+ "mods": [
+  "3326254533"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the converter is in the Utilities menu (shot matches); one built out of copper ore asks for refined carbon and waits for power",
+ "updated": "2026-10-29",
+ "commit": "2b93021d",
+ "mod_dlls": {
+  "3326254533": {
+   "╟Γ╞°╠∞╚╗╞°╫¬╗»╞≈.dll": "6ddd59f87d0e9f16c12a553abf451c72b20da6cd415acd922658f4d374646ad6"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-132508-335cbefc",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T14:28:20",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-021631-cdc8e4e8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T02:16:31",
+    "lane": 14,
+    "reference_run": "20261027-132508-335cbefc",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "utilities-menu": 0.0
+    }
+   },
+   {
+    "run": "20261029-021631-cdc8e4e8",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T02:18:27",
+    "lane": 14,
+    "reference_run": "20261027-132508-335cbefc",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "utilities-menu": 0.0
+    }
+   }
+  ]
+ }
+}

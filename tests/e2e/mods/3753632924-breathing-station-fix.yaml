@@ -1,0 +1,31 @@
+# Breathing Station Fix (3753632924), class P; PLib options.
+#
+# What it does: the Breathing Station (UnderwaterBreathingStation) gains a CustomOxygenSlider:
+# an activation range side screen with a low and a high threshold (20 % and 40 % by default,
+# options). Below the low one the station closes to recharge and offers no breath until it
+# is back above the high one, so Duplicants stop looping on an empty station; its capacity is
+# an option (25 to 100 kg); its pipe consumer reports satisfied while it holds oxygen, and
+# copying settings copies the thresholds.
+# How a player reaches it: build a Breathing Station and select it.
+# What changes: breathing stations recharge before serving again.
+#
+# setup builds a Breathing Station in the corridor west of the printing pod; selected, it
+# shows the thresholds' side screen with the defaults.
+from: early-base
+mods: [3753632924]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"UnderwaterBreathingStation\")", method: Build, args: [131765, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"UnderwaterBreathingStation\").GetComponent<BreathingStationFix.CustomOxygenSlider>": exists
+      "Assets.GetPrefab(\"UnderwaterBreathingStation\").GetComponent<Storage>.capacityKg": 25
+  - run: {seconds: 2}
+  - expect: {buildings: {UnderwaterBreathingStation: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: UnderwaterBreathingStation}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/ActivationRangeSideScreen", cond: stable}
+  - ui_dump: {name: range, root: "**/DetailsScreen/SideScreen/**/ActivationRangeSideScreen"}
+  - shot: {name: range, crop: "**/DetailsScreen/SideScreen/**/ActivationRangeSideScreen", threshold: 0.04}
+  - expect_state:
+      "selected:GetComponent<BreathingStationFix.CustomOxygenSlider>.MinPercentage": 20
+      "selected:GetComponent<BreathingStationFix.CustomOxygenSlider>.TargetPercentage": 40

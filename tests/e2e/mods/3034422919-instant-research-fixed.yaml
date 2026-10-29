@@ -1,0 +1,25 @@
+# Instant Research Fixed (3034422919), classes P, O.
+#
+# What it does: a postfix on ResearchEntry.OnResearchClicked completes the research queue at
+# once, so a tech clicked on the research screen (and every tech queued before it) is researched
+# without a research station. Its PLib option "Only in sandbox" (on by default) limits that to
+# sandbox games.
+# How a player reaches it: the research screen (R), a click on a tech.
+# What changes: research costs nothing.
+#
+# The option is turned off. On the research screen a click on Power Regulation queues it (with
+# anything it needs first) and researches it at once; the queue is empty after it.
+from: early-base
+mods: [3034422919]
+options:
+  "3034422919": {OnlyInSandbox: false}
+steps:
+  - expect_state:
+      "Research.Instance.GetTechInstance(\"PowerRegulation\").IsComplete()": false
+  - open: {management: research}
+  - ui_wait: {path: "**/ResearchScreen/**/ScrollContent/*\"POWERREGULATION\"* Panel", cond: stable, frames: 600}
+  - click: {ui: "**/ResearchScreen/**/ScrollContent/*\"POWERREGULATION\"* Panel"}
+  - expect_state:
+      "Research.Instance.GetTechInstance(\"PowerRegulation\").IsComplete()": true
+      "Research.Instance.queuedTech.Count": 0
+  - ui_dump: {name: tech, root: "**/ResearchScreen/**/ScrollContent/*\"POWERREGULATION\"* Panel"}

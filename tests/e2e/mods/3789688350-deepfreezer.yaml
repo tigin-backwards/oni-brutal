@@ -1,0 +1,34 @@
+# DeepFreezer (3789688350), classes B, O; PLib options.
+#
+# What it does: adds the Deep Freezer (DeepFreezer, 2x2, refined metal, Food menu beside the
+# Refrigerator): a powered refrigerator (240 W, 40 W saving) that keeps food at -20 °C; food
+# in it below -18 °C is preserved outright (DeepFreezerPreserver), and a gas input takes
+# chlorine that kills the food's germs (DeepFreezerSterilizer, 20000 germs/s at 5 g/s).
+# Capacity, power, heat and the chlorine figures are PLib options.
+# How a player reaches it: the Food menu; the freezer's side screens.
+# What changes: food that never spoils.
+#
+# Options here: 300 kg. A freezer built by setup in the corridor west of the printing pod
+# holds 300 kg; the Food menu offers it (its card is shot).
+from: early-base
+mods: [3789688350]
+options:
+  "3789688350": {CapacityKg: 300.0}
+require_log: ['\[DeepFreezer\] capacity 300 kg, power 240 W / 40 W saver']
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"DeepFreezer\")", method: Build, args: [{"$": "Grid.XYToCell(113, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"DeepFreezer\").EnergyConsumptionWhenActive": 240
+      "Assets.GetPrefab(\"DeepFreezer\").GetComponent<ConduitConsumer>.capacityTag.Name": ChlorineGas
+  - run: {seconds: 3}
+  - expect: {buildings: {DeepFreezer: 1}}
+  - expect_state:
+      "all:DeepFreezer.DeepFreezerPreserver::[0].GetComponent<Storage>.capacityKg": 300
+      "all:DeepFreezer.DeepFreezerSterilizer::[0]": exists
+  - driver: {camera.set: {cell: [113, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Food"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/DeepFreezer Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/DeepFreezer Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}

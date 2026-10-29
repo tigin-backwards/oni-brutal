@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3789688350-deepfreezer.yaml",
+ "mods": [
+  "3789688350"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with 300 kg in its options a built freezer holds 300 kg; its Food card matches the original's",
+ "updated": "2026-10-29",
+ "commit": "1785bc2f",
+ "mod_dlls": {
+  "3789688350": {
+   "DeepFreezer.dll": "48ad4a7faa817e9fe7e36c9173a0ccc6e2658be59d966c7b8f15ffed9e1a5cbb"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-090559-e1e62f9e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T12:07:58",
+    "lane": 4,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-121806-2d41950c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T13:01:39",
+    "lane": 4,
+    "reference_run": "20261029-090559-e1e62f9e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.0
+    }
+   },
+   {
+    "run": "20261029-121806-2d41950c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T13:02:30",
+    "lane": 4,
+    "reference_run": "20261029-090559-e1e62f9e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.0
+    }
+   }
+  ]
+ }
+}

@@ -721,6 +721,221 @@ namespace OniMoono.Host
                 }
                 return raised == 1 ? "the process goes on; the thread's raised UnhandledException, the pool's did not" : throw new InvalidOperationException($"UnhandledException raised {raised} times");
             });
+            // Waits until the thread blocks (or 5 s): an abort before it would land in its next wait.
+            static void Blocked(Thread thread)
+            {
+                var watch = System.Diagnostics.Stopwatch.StartNew();
+                while ((thread.ThreadState & ThreadState.WaitSleepJoin) == 0 && watch.ElapsedMilliseconds < 5000) Thread.Sleep(5);
+                Thread.Sleep(50);
+            }
+            Check("Thread.Abort of a thread waiting in Sleep, a wait handle, Monitor.Wait, Join, a task and an HTTP request (MonoThreadAbort)", () =>
+            {
+                UnhandledExceptions.Install();
+                int raised = 0;
+                UnhandledExceptionEventHandler count = (_, _) => Interlocked.Increment(ref raised);
+                AppDomain.CurrentDomain.UnhandledException += count;
+                var never = new ManualResetEvent(false);
+                var gate = new object();
+                // A server that takes connections and never answers, as a proxy that has stopped.
+                var listener = new System.Net.Sockets.TcpListener(System.Net.IPAddress.Loopback, 0);
+                listener.Start();
+                int port = ((System.Net.IPEndPoint)listener.LocalEndpoint).Port;
+                var accepted = new List<System.Net.Sockets.Socket>();
+                _ = System.Threading.Tasks.Task.Run(async () =>
+                {
+                    while (true) { var socket = await listener.AcceptSocketAsync(); lock (accepted) accepted.Add(socket); }
+                });
+                var http = new System.Net.Http.HttpClient(new System.Net.Http.SocketsHttpHandler { UseProxy = false });
+                var blocker = new Thread(() => never.WaitOne()) { IsBackground = true };
+                blocker.Start();
+                var waits = new (string, ThreadStart)[]
+                {
+                    ("Sleep", () => Thread.Sleep(Timeout.Infinite)),
+                    ("WaitOne", () => never.WaitOne()),
+                    ("Monitor.Wait", () => { lock (gate) Monitor.Wait(gate); }),
+                    ("Join", () => blocker.Join()),
+                    ("Task.Result", () => _ = new System.Threading.Tasks.TaskCompletionSource<int>().Task.Result),
+                    ("an HTTP request's Result", () => _ = http.GetAsync($"http://127.0.0.1:{port}/").Result),
+                };
+                var times = new List<string>();
+                try
+                {
+                    foreach (var (name, wait) in waits)
+                    {
+                        var thread = new Thread(wait) { IsBackground = true };
+                        thread.Start();
+                        Blocked(thread);
+                        var watch = System.Diagnostics.Stopwatch.StartNew();
+                        MonoThreadAbort.Abort(thread);
+                        long returned = watch.ElapsedMilliseconds;
+                        if (!thread.Join(5000)) throw new InvalidOperationException($"the thread waiting in {name} still runs 5 s after the abort");
+                        times.Add($"{name} {watch.ElapsedMilliseconds} ms (the call {returned} ms)");
+                    }
+                    // A system call is not a wait CoreCLR interrupts: a socket's read goes on until
+                    // the socket closes (Mono's abort interrupts the call). Measured, not required.
+                    var client = new System.Net.Sockets.Socket(System.Net.Sockets.SocketType.Stream, System.Net.Sockets.ProtocolType.Tcp);
+                    client.Connect(System.Net.IPAddress.Loopback, port);
+                    int read = -1;
+                    var reader = new Thread(() =>
+                    {
+                        try { read = client.Receive(new byte[16]); }
+                        catch (System.Net.Sockets.SocketException) { read = -2; }
+                    }) { IsBackground = true };
+                    reader.Start();
+                    Blocked(reader);
+                    MonoThreadAbort.Abort(reader);
+                    bool stillReading = !reader.Join(1000);
+                    lock (accepted) foreach (var socket in accepted) socket.Close();
+                    if (!reader.Join(5000)) throw new InvalidOperationException("the socket's reader did not end when its socket closed");
+                    times.Add(stillReading ? $"a socket's Receive goes on until the socket closes (then {read})" : "a socket's Receive ended at the abort");
+                    client.Close();
+                }
+                finally
+                {
+                    never.Set();
+                    listener.Stop();
+                    http.Dispose();
+                    AppDomain.CurrentDomain.UnhandledException -= count;
+                }
+                if (raised != 0) throw new InvalidOperationException($"UnhandledException raised {raised} times");
+                return "the caller goes on and each thread ends quietly: " + string.Join("; ", times);
+            });
+            Check("Thread.Abort of the current thread, of one that has ended and of one not started (MonoThreadAbort)", () =>
+            {
+                string? self = null;
+                bool reset = false;
+                var thread = new Thread(() =>
+                {
+                    try
+                    {
+                        MonoThreadAbort.Abort(Thread.CurrentThread);
+                        self = "the call returned";
+                    }
+                    catch (ThreadAbortException e)
+                    {
+                        self = e.Message;
+                        MonoThreadAbort.ResetAbort();
+                        reset = true;
+                    }
+                });
+                thread.Start();
+                thread.Join();
+                if (self != "Thread was being aborted" || !reset) throw new InvalidOperationException($"the current thread's abort: {self}, reset {reset}");
+                MonoThreadAbort.Abort(thread);
+                // Mono marks a thread not started as aborted, and its Start then does not run it;
+                // here its first wait is interrupted.
+                string? first = null;
+                var unstarted = new Thread(() =>
+                {
+                    try { Thread.Sleep(10); first = "slept"; }
+                    catch (ThreadInterruptedException) { first = "interrupted"; }
+                });
+                MonoThreadAbort.Abort(unstarted);
+                unstarted.Start();
+                if (!unstarted.Join(5000)) throw new InvalidOperationException("the thread aborted before it started did not end");
+                try
+                {
+                    MonoThreadAbort.ResetAbort();
+                    throw new InvalidOperationException("ResetAbort without an abort did not throw");
+                }
+                catch (ThreadStateException)
+                {
+                }
+                return $"the current thread's throws at the call (\"{self}\", ResetAbort takes it back), an ended thread's does nothing, a thread aborted before its start: its first wait {first}";
+            });
+            Check("A mod's retry loop and ResetAbort when its thread is aborted (MonoThreadAbort)", () =>
+            {
+                UnhandledExceptions.Install();
+                ModAccess.Install();
+                int raised = 0;
+                UnhandledExceptionEventHandler count = (_, _) => Interlocked.Increment(ref raised);
+                AppDomain.CurrentDomain.UnhandledException += count;
+                var dir = Directory.CreateTempSubdirectory("oni-moono-check-").FullName;
+                try
+                {
+                    // ThreadedHttps.Send's loop: a catch of Exception that goes back to try again.
+                    var mod = new System.Reflection.Emit.PersistedAssemblyBuilder(new AssemblyName("OniMoonoCheckAborts"), typeof(object).Assembly);
+                    var type = mod.DefineDynamicModule("OniMoonoCheckAborts").DefineType("Aborts", TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed);
+                    var gateField = type.DefineField("Gate", typeof(ManualResetEventSlim), FieldAttributes.Public | FieldAttributes.Static);
+                    var catches = type.DefineField("Catches", typeof(int), FieldAttributes.Public | FieldAttributes.Static);
+                    var after = type.DefineField("After", typeof(int), FieldAttributes.Public | FieldAttributes.Static);
+                    var wait = typeof(ManualResetEventSlim).GetMethod(nameof(ManualResetEventSlim.Wait), Type.EmptyTypes)!;
+                    void Count(System.Reflection.Emit.ILGenerator il, System.Reflection.Emit.FieldBuilder field, int by)
+                    {
+                        il.Emit(System.Reflection.Emit.OpCodes.Ldsfld, field);
+                        il.Emit(System.Reflection.Emit.OpCodes.Ldc_I4, by);
+                        il.Emit(System.Reflection.Emit.OpCodes.Add);
+                        il.Emit(System.Reflection.Emit.OpCodes.Stsfld, field);
+                    }
+                    var retry = type.DefineMethod("Retry", MethodAttributes.Public | MethodAttributes.Static, typeof(void), Type.EmptyTypes).GetILGenerator();
+                    var loop = retry.DefineLabel();
+                    var done = retry.DefineLabel();
+                    retry.MarkLabel(loop);
+                    retry.BeginExceptionBlock();
+                    retry.Emit(System.Reflection.Emit.OpCodes.Ldsfld, gateField);
+                    retry.Emit(System.Reflection.Emit.OpCodes.Callvirt, wait);
+                    retry.Emit(System.Reflection.Emit.OpCodes.Leave, done);
+                    retry.BeginCatchBlock(typeof(Exception));
+                    retry.Emit(System.Reflection.Emit.OpCodes.Pop);
+                    Count(retry, catches, 1);
+                    retry.Emit(System.Reflection.Emit.OpCodes.Leave, loop);
+                    retry.EndExceptionBlock();
+                    retry.MarkLabel(done);
+                    retry.Emit(System.Reflection.Emit.OpCodes.Ret);
+                    // A catch that resets the abort: the thread goes on, and waits again.
+                    var keep = type.DefineMethod("Keep", MethodAttributes.Public | MethodAttributes.Static, typeof(void), Type.EmptyTypes).GetILGenerator();
+                    keep.BeginExceptionBlock();
+                    keep.Emit(System.Reflection.Emit.OpCodes.Ldsfld, gateField);
+                    keep.Emit(System.Reflection.Emit.OpCodes.Callvirt, wait);
+                    keep.BeginCatchBlock(typeof(Exception));
+                    keep.Emit(System.Reflection.Emit.OpCodes.Pop);
+                    keep.Emit(System.Reflection.Emit.OpCodes.Call, typeof(Thread).GetMethod("ResetAbort", Type.EmptyTypes)!);
+                    keep.EndExceptionBlock();
+                    keep.Emit(System.Reflection.Emit.OpCodes.Ldc_I4, 20);
+                    keep.Emit(System.Reflection.Emit.OpCodes.Call, typeof(Thread).GetMethod(nameof(Thread.Sleep), [typeof(int)])!);
+                    Count(keep, after, 1);
+                    keep.Emit(System.Reflection.Emit.OpCodes.Ret);
+#pragma warning disable SYSLIB0006 // Thread.Abort: the call the rewrite replaces
+                    var stop = type.DefineMethod("Stop", MethodAttributes.Public | MethodAttributes.Static, typeof(void), [typeof(Thread)]).GetILGenerator();
+                    stop.Emit(System.Reflection.Emit.OpCodes.Ldarg_0);
+                    stop.Emit(System.Reflection.Emit.OpCodes.Callvirt, typeof(Thread).GetMethod(nameof(Thread.Abort), Type.EmptyTypes)!);
+                    stop.Emit(System.Reflection.Emit.OpCodes.Ret);
+#pragma warning restore SYSLIB0006
+                    type.CreateType();
+                    var modPath = Path.Combine(dir, "OniMoonoCheckAborts.dll");
+                    mod.Save(modPath);
+                    var aborts = ModAccess.LoadFrom(modPath).GetType("Aborts")!;
+                    var gate = new ManualResetEventSlim(false);
+                    aborts.GetField("Gate")!.SetValue(null, gate);
+                    string Run(string method)
+                    {
+                        var thread = new Thread(aborts.GetMethod(method)!.CreateDelegate<ThreadStart>()) { IsBackground = true };
+                        thread.Start();
+                        Blocked(thread);
+                        var watch = System.Diagnostics.Stopwatch.StartNew();
+                        aborts.GetMethod("Stop")!.Invoke(null, [thread]);
+                        if (!thread.Join(5000)) throw new InvalidOperationException($"{method}'s thread still runs 5 s after the abort");
+                        return $"{watch.ElapsedMilliseconds} ms";
+                    }
+                    string retried = Run("Retry");
+                    int caught = (int)aborts.GetField("Catches")!.GetValue(null)!;
+                    if (caught != 1) throw new InvalidOperationException($"the retry loop's catch ran {caught} times");
+                    // Keep's thread resets the abort in its catch, then sleeps and returns.
+                    var keeper = new Thread(aborts.GetMethod("Keep")!.CreateDelegate<ThreadStart>()) { IsBackground = true };
+                    keeper.Start();
+                    Blocked(keeper);
+                    aborts.GetMethod("Stop")!.Invoke(null, [keeper]);
+                    if (!keeper.Join(5000)) throw new InvalidOperationException("Keep's thread did not end after ResetAbort");
+                    if ((int)aborts.GetField("After")!.GetValue(null)! != 1) throw new InvalidOperationException("Keep's thread did not go on past its catch");
+                    if (raised != 0) throw new InvalidOperationException($"UnhandledException raised {raised} times");
+                    return $"the retry loop's catch ran once and its thread ended quietly ({retried}); after ResetAbort the thread went on and slept";
+                }
+                finally
+                {
+                    AppDomain.CurrentDomain.UnhandledException -= count;
+                    try { Directory.Delete(dir, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+                }
+            });
             Check("A mod's copy of a library, and references to it, when another version is loaded (ModAccess)", () =>
             {
                 ModAccess.Install();

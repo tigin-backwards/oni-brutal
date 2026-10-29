@@ -16,7 +16,8 @@ namespace OniMoono.Host
     /// operand is a float32 or float64, found by following the IL's stack types) call these
     /// instead, which convert as Mono does (OniMoono.Engine.MonoConvert). An assembly that cannot
     /// be rewritten loads unchanged. The same pass sends the assembly's directory listings to
-    /// MonoDirectoryListing (D30), and the game's rewritten images are cached with both.
+    /// MonoDirectoryListing (D30) and its calls of Thread.Abort to MonoThreadAbort (D47), and the
+    /// game's rewritten images are cached with them.
     public static class MonoConversions
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)] public static sbyte ToSByte(double x) => MonoConvert.ToSByte(x);
@@ -43,7 +44,7 @@ namespace OniMoono.Host
         /// `symbols` (portable PDB bytes or null) are rewritten to match.
         internal static byte[]? Adjust(byte[] image, ref byte[]? symbols, string path)
         {
-            if (!MayConvertFloats(image) && !MonoDirectoryListing.MayList(image) && !MonoModHelperDrop.MayDrop(image)) return null;
+            if (!MayConvertFloats(image) && !MonoDirectoryListing.MayList(image) && !MonoModHelperDrop.MayDrop(image) && !MonoThreadAbort.MayAbort(image)) return null;
             try
             {
                 return Rewrite(image, ref symbols, path);
@@ -76,7 +77,7 @@ namespace OniMoono.Host
         /// the player's cache folder, under the image's hash and this host build's.
         internal static byte[]? AdjustGame(byte[] image, string path)
         {
-            if (!MayConvertFloats(image) && !MonoDirectoryListing.MayList(image) && !MonoModHelperDrop.MayDrop(image)) return null;
+            if (!MayConvertFloats(image) && !MonoDirectoryListing.MayList(image) && !MonoModHelperDrop.MayDrop(image) && !MonoThreadAbort.MayAbort(image)) return null;
             string? cached = null;
             try
             {
@@ -158,7 +159,9 @@ namespace OniMoono.Host
             int listings = MonoDirectoryListing.RewriteModule(module);
             // And MonoMod's native helper is written through a descriptor closed once (D31).
             int drops = MonoModHelperDrop.RewriteModule(module);
-            if (converted == 0 && listings == 0 && drops == 0) return null;
+            // And its calls of Thread.Abort abort as Mono's do (D47).
+            int aborts = MonoThreadAbort.RewriteModule(module, out int catchEnds);
+            if (converted == 0 && listings == 0 && drops == 0 && aborts == 0) return null;
             using var output = new MemoryStream();
             using var symbolOutput = new MemoryStream();
             module.Write(output, new Cecil.WriterParameters { WriteSymbols = withSymbols, SymbolStream = withSymbols ? symbolOutput : null, SymbolWriterProvider = withSymbols ? new Cil.PortablePdbWriterProvider() : null });
@@ -169,6 +172,9 @@ namespace OniMoono.Host
                 EngineLog.Engine($"{what.Replace("conversions", "listings")}: {Path.GetFileName(path)}: {listings} directory listing(s) in Mono's order");
             if (drops > 0)
                 EngineLog.Engine($"{what.Replace("conversions", "fixes")}: {Path.GetFileName(path)}: MonoMod's native helper file is closed once");
+            if (aborts > 0)
+                EngineLog.Engine($"{what.Replace("conversions", "aborts")}: {Path.GetFileName(path)}: {aborts} call(s) of Thread.Abort or ResetAbort abort as on Mono"
+                                 + (catchEnds > 0 ? $"; {catchEnds} catch exit(s) raise the abort again" : ""));
             return output.ToArray();
         }
 
@@ -205,7 +211,7 @@ namespace OniMoono.Host
         }
 
         /// Short branches that the longer calls put out of reach become long ones.
-        static void WidenBranches(Cil.MethodBody body)
+        internal static void WidenBranches(Cil.MethodBody body)
         {
             bool changed = true;
             while (changed)

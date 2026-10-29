@@ -24,6 +24,7 @@ namespace OniMoono.Host
             if (installed) return;
             installed = true;
             int mainThread = Environment.CurrentManagedThreadId;
+            MonoThreadAbort.SetMainThread();
             // AppContext.OnUnhandledException raises AppDomain.UnhandledException as the runtime does.
             var raise = typeof(AppContext).GetMethod("OnUnhandledException", BindingFlags.NonPublic | BindingFlags.Static)
                 ?? throw new MissingMethodException(nameof(AppContext), "OnUnhandledException");
@@ -35,6 +36,8 @@ namespace OniMoono.Host
             ExceptionHandling.SetUnhandledExceptionHandler(exception =>
             {
                 if (Environment.CurrentManagedThreadId == mainThread) return false;
+                // A thread an abort ends ends quietly, as on Mono (MonoThreadAbort, D47).
+                if (MonoThreadAbort.EndsQuietly(exception)) return true;
                 if (!Thread.CurrentThread.IsThreadPoolThread) raise.Invoke(null, [exception]);
                 return true;
             });

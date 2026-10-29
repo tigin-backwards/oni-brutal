@@ -1,0 +1,28 @@
+# [Vanilla + DLC] Research Requirements (2405919736), classes S, P.
+#
+# What it does: most techs get a requirement the colony must meet before they can be
+# researched (Basic Farming: a Duplicant with Improved Farming I; Meal Preparation: one with
+# Grilling; Plumbing: a hundred cycles of oxygen; ...). A prefix on
+# Research.SetActiveResearch drops a tech whose requirement is unmet; continuous ones stop
+# research when they lapse (ResearchCenter.OnWorkTick); the research screen's tooltips (set as
+# it opens, ManagementMenu.ToggleScreen) list each requirement and its progress.
+# How a player reaches it: the research screen.
+# What changes: research is gated by what the colony has done.
+#
+# Power Regulation needs ten batteries, and the fixture has none: a click on it in the
+# research screen queues nothing.
+from: early-base
+mods: [2405919736]
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"PowerRegulation\").IsComplete()": false
+      "Research.Instance.GetResearchQueue().Count": 0
+  - open: {management: research}
+  - ui_wait: {path: "**/FullScreenUICanvases/ResearchScreen", cond: stable}
+  - ui_wait: {path: "**/ResearchScreen/Content/ScrollRectRoot/ScrollContent", cond: stable, frames: 600}
+  - ui_dump: {name: power-regulation, root: "**/ScrollContent/*\"POWERREGULATION\"* Panel", ignore_fields: [world, screen]}
+  - click: {ui: "**/ScrollContent/*\"POWERREGULATION\"* Panel"}
+  - expect_state:
+      "Research.Instance.GetResearchQueue().Count": 0
+  - expect_state:
+      "Research.Instance.GetResearchQueue().Count": "== original"

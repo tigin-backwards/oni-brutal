@@ -1,0 +1,60 @@
+{
+ "spec": "mods/2853421859-heating-element.yaml",
+ "mods": [
+  "2853421859"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Utilities menu card (shot); a built Heating Element with its wattage and heat",
+ "updated": "2026-10-29",
+ "commit": "2d4aca2a",
+ "mod_dlls": {
+  "2853421859": {
+   "HeatingElement.dll": "63565f8309b283c7b9b8356ef4e1d5df7e76f3b2bdf50035fd1d9ab97d3fa55b",
+   "PLib.dll": "d87814a7d5d74fa0e94bc5435cd770d3746438f494208b6f356a2ab999169c52"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-074432-9668621b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T08:04:11",
+    "lane": 3,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-143747-9481627a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T14:56:07",
+    "lane": 1,
+    "reference_run": "20261029-074432-9668621b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.0
+    }
+   },
+   {
+    "run": "20261029-143747-9481627a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T14:57:01",
+    "lane": 1,
+    "reference_run": "20261029-074432-9668621b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.0
+    }
+   }
+  ]
+ }
+}

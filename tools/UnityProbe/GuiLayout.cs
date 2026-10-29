@@ -1,5 +1,6 @@
 // GUILayout ("PROBE ... GL ..."), at the main menu. With PROBE_SCENARIO=guilayout only this
-// probe runs. Four parts, in this order (PROBE_GL_PART=size, wsize, order or mm runs one):
+// probe runs. Four parts, in this order (PROBE_GL_PART=size, wsize, order or mm runs one;
+// PROBE_GL_PART=wrap runs a fifth, GuiLayoutWrap.cs, which a full run leaves out):
 //
 // - size: the rects GUILayout gives with the default skin. Every control kind with one and
 //   several lines, style copies with other font sizes, padding and margins, sequences of
@@ -57,6 +58,7 @@ namespace SemanticsProbe
         {
             gameObject.AddComponent<GlGui>();
             gameObject.AddComponent<GlGui2>();
+            gameObject.AddComponent<GlWrap>();
             Application.logMessageReceived += OnLog;
         }
 
@@ -160,6 +162,7 @@ namespace SemanticsProbe
             if (part == "" || part == "wsize") yield return WindowSizes();
             if (x && (part == "" || part == "order")) yield return Order();
             if (x && (part == "" || part == "mm")) yield return Mismatch();
+            if (part == "wrap") yield return Wraps();
             Phase = "none";
             L("done");
         }
@@ -175,6 +178,21 @@ namespace SemanticsProbe
             yield return Frames(1);
             GlGui.SizeLog = false;
             yield return Frames(1);
+            Recording = false;
+            Phase = "none";
+            yield return Frames(2);
+        }
+
+        // ----- wrap (GuiLayoutWrap.cs) -----
+
+        IEnumerator Wraps()
+        {
+            Phase = "wrap";
+            yield return Frames(3);
+            Recording = true;
+            GlWrap.Log = true;
+            yield return Frames(1);
+            GlWrap.Log = false;
             Recording = false;
             Phase = "none";
             yield return Frames(2);

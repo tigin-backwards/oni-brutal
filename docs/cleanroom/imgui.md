@@ -425,8 +425,9 @@ own size.
   - "Hello Hello" is more than 1.5 × "Hello" wide, at the same height.
   - Two lines are more than one line plus 8 tall.
 - `CalcHeight(content, width)` wraps at `width` minus the padding when `wordWrap` is set.
-- `CalcMinMaxWidth(content, out min, out max)`: `max` is `CalcSize(content).x`; `min` is the
-  widest word when wrapping.
+- `CalcMinMaxWidth(content, out min, out max)`: `max` is `CalcSize(content).x`. With
+  `wordWrap`, `min` is the smaller of 32 and `max`, not the widest word: see "GUILayout,
+  measured", part 5.
 - `lineHeight` is the font's line height.
 - `GetCursorPixelPosition` and `GetCursorStringIndex` map between string indices and positions,
   through the same layout as drawing.
@@ -852,7 +853,7 @@ is 0), one line of text is `s + 0.01` high and each further line adds `1.1 × s`
 - **Width:** an entry stretches to the group's width when its style stretches (all of the
   skin's text styles do). Otherwise, and as its minimum, it is `ceil(CalcSize.x)` ("x" in a
   label: 7; in a button: 19). `Width(w)` fixes it. A word-wrapping style takes
-  `CalcMinMaxWidth` (min the widest word, max the whole text).
+  `CalcMinMaxWidth` (min the smaller of 32 and the whole text, max the whole text; part 5).
 - **Height, styles without word wrap** (button, toggle, textField, box):
   `ceil(CalcSize.y)`: button 20, 34, 48 for one to three lines; toggle 17; box 22.
 - **Height, word-wrapping styles** (label, textArea): `CalcHeight(content, width)` at the
@@ -978,6 +979,98 @@ reordered. The rule settles "GUI.tooltip" rule 6.
    behaviours). Called during Repaint, they take effect from the next frame. Called outside
    OnGUI (in Update), `BringWindowToFront` neither throws nor changes anything.
 4. **`GUI.FocusWindow(id)` and `GUI.UnfocusWindow()`** do not change the order.
+
+#### 5. Too little width, and word wrap (measured 2026-10-29)
+
+Found by ModTools (Workshop 3241644477, `tests/e2e/mods/3241644477-modtools.yaml`). Its Runtime
+Console is a `GUI.Window` (620, 120, 650 × 500) whose function lays out, in a `BeginVertical()`,
+a `BeginHorizontal()` toolbar ("X - Close Window" and "Clear" buttons, a label "Count: N", a
+`TextField(MinWidth(220))`, five toggles and two `Space(10)`), then a
+`BeginScrollView(Width(650 - 30))` of rows, each a `BeginHorizontal()` of a "Copy" button
+(`Width(44), Height(24)`) and a `Label(line, Height(24))` of a log line. In the original the toolbar
+is wider than the window and runs off its right edge, "Count: 59" breaks inside the word
+("Coun" / "t: 59"), and long log lines wrap inside the scroll view, which has no horizontal
+scrollbar.
+
+**Measured** with `PROBE_SCENARIO=guilayout PROBE_GL_PART=wrap` (`tools/UnityProbe/GuiLayoutWrap.cs`,
+lines `GL wrap …`; a full run leaves this part out). Each entry's rect is logged as
+`GetLastRect` gives it, and a label's line breaks as the character indices where
+`GetCursorPixelPosition` moves to a new line (`brk=`). A scroll view is given the scroll
+position (100000, 100000); the position it returns is how far its content overflows the view.
+The window part draws the mod's window with six fixed log lines. Skin and coordinates are those
+of the parts above.
+
+1. **`CalcMinMaxWidth` with `wordWrap`:** `max` is `CalcSize(content).x`; `min` is 32, or `max`
+   when that is smaller. It does not depend on the words: "Count: 59" 32 and 54.72; "Count:"
+   32 and 37.02 (wider than 32); "X - Close Window" 32 and 100.55; "Show when Start" 32 and
+   96.06; a 92-character log line 32 and 535.33; "Clear" 30.31 and 30.31.
+2. **Where wrapped text breaks** (label, padding 0 across): at a space when the line's text up
+   to it fits; a word wider than the whole line is broken after its last character that fits,
+   and the rest goes on the next line. "Count: 59" at width 60 and more is one line (19.01
+   high); at 45 and 50 it breaks before "59" (index 7; 33.31 high); at 40, at index 6; at 35,
+   after "Count" (index 5); at 32, after "Coun" (index 4: "Coun" / "t: 59"); at 25 and 30,
+   "Cou" / "nt: " / "59" (indices 3 and 7, 47.61 high); at 20, indices 2, 5, 7; at 10, every
+   character but one. "X - Close Window" at 60 and 80: one break, before "Window" (index 10).
+   The 92-character line at 400: one break, at index 59; at 564 (the console's label width):
+   none. The probe's `measure` lines give the breaks at 15 widths for seven texts.
+3. **A horizontal group narrower than its entries' minimum widths** gives every entry its
+   minimum width and lays them out from its left edge with the usual gaps; the entries run past
+   the group's right edge and nothing is shrunk further or clipped by the layout. The group's
+   own rect keeps the width it was given; its height is the tallest entry, rounded. In a
+   120- or 200-wide area: "X - Close Window" button 113, "Clear" 43, the label "Count: 59" 32
+   (two lines, 33.31 high, broken as in rule 2), a `TextField(MinWidth(80))` 80, at x 0, 117,
+   164 and 200 (the field ends at 280). Six buttons "button N" are 58 wide each at x 0, 62, …,
+   310. The mod's toolbar in a 630- or 400-wide area: 113, 43, 32, 220 (the field's
+   `MinWidth`), the toggles 112, 161, 75, 44, 63, 37, the spaces 10, ending at x 956; the row
+   reads (0, 0, 630 × 33) or (0, 0, 400 × 33).
+4. **With room to spare** the rule of "Layout along the group's axis" holds, the label's range
+   being 32 to its `max`: in a 400-wide area the same four entries (minimums 113 + 43 + 32 + 80
+   and three gaps of 4, 280 in all) get 137, 67, 79 and 104: the label first grows to 54.72,
+   then the remaining 97.28 is shared equally (24.32 each), positions and widths rounded. In a
+   1000-wide area the toolbar's entries each get about 2 more than their `max` (close 115,
+   label 57 on one line, field 222).
+5. **A scroll view with a fixed width** lays its content out at that width: wrapping labels
+   take the width that is left and wrap in it, so the content is no wider than the view and the
+   returned horizontal position is 0. In a `BeginScrollView(Width(380), Height(150))`, a row of
+   the Copy button and a log line gives the button (4, 4, 44 × 24) and the label (52, 4, 324 ×
+   24), the line broken at index 51; a label alone is (4, 32, 372 × 33). With eight such rows
+   in a view 120 high, the labels are 308 wide (the vertical scrollbar takes 16) and the
+   returned position is (0, 108). Without options in a 400 × 300 area: the view is 400 × 300 and
+   the label 344 wide.
+6. **`Height(h)` on a wrapping label** fixes its height whatever the lines: a log line broken
+   in two in a `Height(24)` label is 24 high, and the next row starts 28 lower.
+7. **The console window** (`GUI.Window`, 650 × 500): the vertical group is (10, 20, 630 × 470);
+   the toolbar row (14, 20, 622 × 33) holds "X - Close Window" (14, 20, 113 × 20), "Clear" (131,
+   20, 43 × 20), "Count: 59" (178, 20, 32 × 33.31, broken after "Coun"), the field (214, 20, 220
+   × 20) and the toggles from x 438 to 970 (y 20, 17 high); the scroll view (10, 57, 620 × 433);
+   in it each row is (4, y, 612 × 24), y = 4, 32, 60, …, with the Copy button (4, y, 44 × 24)
+   and the label (52, y, 564 × 24); the lines of 92 to 110 characters wrap once (indices 63 and
+   91) and the returned horizontal position is 0. The insets follow "Edges of a group without
+   a style" and "with a style" above (the scroll view's margin 0 makes the vertical group's
+   left margin 0, so the toolbar is inset by its 4).
+
+**This implementation** (the same probe, `gl-wrap` lines of both players compared line by line):
+
+| Case | original | this implementation |
+|---|---|---|
+| `CalcMinMaxWidth` min, word wrap | `min(32, max)`: "Count: 59" 32, "X - Close Window" 32, the log lines 32 | the widest word: 37, 45, 130 and 80 |
+| text widths (`CalcSize.x`) | fractional: "Count: 59" 54.72, "X - Close Window" 100.55, "Clear" 30.31, a log line 535.33 and 639.7 | whole numbers, and smaller: 54, 99, 30, 535, 632 |
+| a word wider than the line | broken inside the word: "Count: 59" at 32 is "Coun" / "t: 59" | moved whole to the next line and left overflowing: at 37, "Count: " / "59"; at 30, "Coun" / "t: 59" only once the word alone is wider |
+| a horizontal group with too little room | every entry at its minimum, the rest runs past the edge (labels "label N" at 32 in a 120-wide area) | labels squeezed below their minimum (30 at 200, 27 at 120) |
+| the console's toolbar | close 113, Clear 43, "Count: 59" 32 wide on two lines | 111, 42, 37 |
+
+The rects of the scroll view and its rows, the window insets (toolbar at (14, 20)) and the row
+heights agree. In the mod's own console the log holds lines with long unbroken words (paths and
+long identifiers), so this implementation's minimum of the widest word makes the scroll
+content wider than its view: lines no longer wrap and a horizontal scrollbar appears, where the
+original's minimum of 32 keeps the content at the view's width. The toolbar's 1-pixel offset
+seen in the e2e shot is not in the layout (the rects agree); it was not measured further.
+
+**Requirement:** rules 1 to 3 and 5 above: a word-wrapping style's minimum width is the smaller
+of 32 and its full width; wrapping breaks inside a word that is wider than the line; a
+horizontal group never gives an entry less than its minimum; text widths are not rounded to
+whole pixels. Check them by diffing the two players' `GL wrap` lines (the `measure` lines'
+`mm=`, `calc=` and breaks, then every rect) and with the ModTools spec.
 
 #### Where this implementation deviates
 

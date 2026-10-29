@@ -514,7 +514,11 @@ in OnGUI, scroll views and windows; during Repaint, MouseDown, MouseUp and `Used
 button's handler as Customize Duplicant traits' SAVE and DEL), and logs each call's rect or
 exception and what the player logs. Check the rules with `tools/UnityProbe/gl-check.py rule
 LOG`, and compare the players with `gl-check.py diff ORIG OURS`. `docs/cleanroom/imgui.md`
-("GUILayout, measured") records what it measured.
+("GUILayout, measured") records what it measured. `PROBE_GL_PART=wrap` runs a fifth part,
+which a full run leaves out (`GuiLayoutWrap.cs`, lines `GL wrap …`): word-wrapping labels'
+`CalcMinMaxWidth`, heights and line breaks at 15 widths, horizontal groups narrower than their
+entries, wrapping labels in scroll views of a fixed width, and ModTools' Runtime Console window
+as the mod lays it out; diff the players' lines (part 5 of "GUILayout, measured").
 
 With `PROBE_SCENARIO=legacytext` only the legacy-text probe runs (`LegacyText.cs`, lines `LX …`,
 10 s into the main menu, about a minute; `PROBE_LX_PART` takes a comma list of `raster`, `ci`,

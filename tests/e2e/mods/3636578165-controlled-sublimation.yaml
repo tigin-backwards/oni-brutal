@@ -1,0 +1,38 @@
+# Controlled Sublimation (3636578165), classes B, O; PLib options.
+#
+# What it does: a prefix on Sublimates.Sim200ms lets the options decide, per element (bleach
+# stone, oxylite, polluted dirt, slime, polluted water, polluted mud), whether it sublimates
+# lying as debris and in storage, and how fast (a rate multiplier, 0 stops it); sconces keep
+# working. It also adds the Bleach Stone Sconce (Oxygen menu, Portable Gases or else Improved Gas Piping), a holder that
+# lets bleach stone off-gas chlorine.
+# How a player reaches it: the PLib options; the Oxygen menu.
+# What changes: which loose materials off-gas.
+#
+# The sconce's tech (Improved Gas Piping, as this game has no Portable Gases) is researched in
+# setup. Options here: oxylite does not sublimate as debris. 20 kg of oxylite spawned by setup in the
+# corridor west of the printing pod keeps its mass through half a minute of play. The Oxygen
+# menu offers the sconce (its card is shot).
+from: early-base
+mods: [3636578165]
+options:
+  "3636578165": {OxyliteDebris: false}
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.TryGetTechForTechItem(\"Bleach Stone Sconce\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"OxyRock\").substance", method: SpawnResource, args: [[110.5, 206.5, -12], 20, 293.15, 255, 0]}}
+steps:
+  - expect_state:
+      "type:ControlledSublimation.ControlledSublimationOptions::Instance.OxyliteDebris": false
+      "Db.Get().Techs.TryGetTechForTechItem(\"Bleach Stone Sconce\").Id": ImprovedGasPiping
+      "sum:all:Pickupable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == OxyRock": {save_as: before}
+  - run: {seconds: 30}
+  - expect_state:
+      "sum:all:Pickupable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == OxyRock": [">= before", ">= 20"]
+  - driver: {camera.set: {cell: [113, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Oxygen"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/Bleach Stone Sconce Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/Bleach Stone Sconce Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}

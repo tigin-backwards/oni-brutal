@@ -1,0 +1,74 @@
+{
+ "spec": "mods/3509238377-classified-storage.yaml",
+ "mods": [
+  "3509238377"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Storage Bin's control-panel user-menu button turns quotas on and opens the asset-bundle secondary side screen, matching the original's",
+ "updated": "2026-10-29",
+ "commit": "1785bc2f",
+ "mod_dlls": {
+  "3509238377": {
+   "ClassifiedStorage.dll": "54fbff234141e5a193b388a158a1a65f39e844ec4b9baf07a564e668af5d240f",
+   "PLib.dll": "bdd637dbef718cdd52e61c0a7177bd297864a50bac1583d2837a36ff3edf07db"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-090559-e1e62f9e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T10:48:13",
+    "lane": 4,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-121806-2d41950c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T12:37:33",
+    "lane": 4,
+    "reference_run": "20261029-090559-e1e62f9e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     },
+     "panel": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "panel": 0.0
+    }
+   },
+   {
+    "run": "20261029-121806-2d41950c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T12:38:25",
+    "lane": 4,
+    "reference_run": "20261029-090559-e1e62f9e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     },
+     "panel": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "panel": 0.0
+    }
+   }
+  ]
+ }
+}

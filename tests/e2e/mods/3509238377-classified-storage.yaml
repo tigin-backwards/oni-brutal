@@ -1,0 +1,34 @@
+# 可调节数量的分类存储箱 (adjustable classified storage, 3509238377), classes S, B.
+#
+# What it does: every storage locker (StorageLocker, StorageLockerSmart and mods' lockers)
+# gets a PerItemFilteredStorageLocker: a user-menu button, 开启控制面板 ("open the control
+# panel"), turns on per-item quotas and opens a secondary side screen (from the mod's asset
+# bundle) where a player sets how much of each filtered item the locker fetches; a prefix on
+# FilteredStorage.OnFilterChanged then fetches those amounts only.
+# How a player reaches it: select a Storage Bin; its user menu; the side screen beside it.
+# What changes: storage bins that keep set amounts of each item.
+#
+# setup builds a Storage Bin in the corridor west of the printing pod. Selected, its user
+# menu has the button; a click turns quotas on and opens the panel.
+from: early-base
+mods: [3509238377]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"StorageLocker\")", method: Build, args: [{"$": "Grid.XYToCell(114, 206)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"StorageLocker\").GetComponent<ClassifiedStorage.component.PerItemFilteredStorageLocker>": exists
+      "Assets.GetPrefab(\"StorageLockerSmart\").GetComponent<ClassifiedStorage.component.PerItemFilteredStorageLocker>": exists
+  - run: {seconds: 2}
+  - expect: {buildings: {StorageLocker: 1}}
+  - driver: {camera.set: {cell: [114, 207], ortho: 8}}
+  - click_world: {cell: [114, 206], select: StorageLocker}
+  - ui_wait: {path: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons", cond: stable}
+  - expect_state:
+      "selected:GetComponent<ClassifiedStorage.component.PerItemFilteredStorageLocker>.NeedPrecisely": false
+  - ui_dump: {name: user-menu, root: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons"}
+  - click: {ui: "**/UserMenuScreen/Buttons/开启控制面板Button"}
+  - expect_state:
+      "selected:GetComponent<ClassifiedStorage.component.PerItemFilteredStorageLocker>.NeedPrecisely": true
+  - ui_wait: {path: "**/DetailsScreen/SideScreen2/Body/PreciselyFilteredSideScreen", cond: stable}
+  - ui_dump: {name: panel, root: "**/DetailsScreen/SideScreen2"}
+  - shot: {name: panel, crop: "**/DetailsScreen/SideScreen2", threshold: 0.04}

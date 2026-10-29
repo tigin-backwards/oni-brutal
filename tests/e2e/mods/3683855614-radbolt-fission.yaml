@@ -1,0 +1,33 @@
+# RadBolt Fission! (3683855614), classes P, O.
+#
+# What it does: a radbolt that hits a natural tile of a listed element converts part of the
+# tile (prefixes on the radbolt's EmitRemainingPayload and a postfix on Collide): for copper
+# and cuprite, payload x 0.001 x 500 kg (x the Fission Strength option) leaves the tile and
+# comes out as nickel (93 %) and nuclear waste (7 %), with an impact effect and sound, and
+# loose things nearby are thrown about; uranium ore enriches, gold turns to tungsten (or
+# iridium, an option), and so on.
+# How a player reaches it: aiming a Radbolt Generator or Chamber at a natural tile.
+# What changes: radbolts become a way to transmute metals.
+#
+# setup turns the corridor's west wall cell at (109, 208) into 1000 kg of cuprite and fires a
+# radbolt of payload 50 west from (112, 208) (a radbolt instantiated, its payload set through
+# Harmony's Traverse, its direction Left). Played for a few seconds, the radbolt hits the wall:
+# the cell has lost about 25 kg (payload 50 x 0.001 x 500).
+from: early-base
+mods: [3683855614]
+setup:
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(109, 208)"}, Cuprite, {"$": "CellEventLogger.Instance.DebugTool"}, 1000, 300]}}
+  - driver: {setup.call: {type: GameUtil, method: KInstantiate, args: [{"$": "Assets.GetPrefab(\"HighEnergyParticle\")"}, [112.5, 208.5, -10], FXFront2]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {type: HarmonyLib.Traverse, method: Create, args: [{"$": "all:HighEnergyParticle::[0]"}]}}
+  - driver: {setup.call: {target: "last:", method: Field, args: [payload]}}
+  - driver: {setup.call: {target: "last:", method: SetValue, args: [{"$": "TUNING.FOOD.RECIPES.STANDARD_COOK_TIME"}]}}
+  - driver: {setup.call: {target: "all:HighEnergyParticle::[0]", method: SetDirection, args: [Left]}}
+steps:
+  - expect_state:
+      "all:HighEnergyParticle::[0].payload": 50
+      "Grid.Element[132397].id": Cuprite
+  - run: {seconds: 8, speed: 1}
+  - expect_state:
+      "all:HighEnergyParticle::": {equals: []}
+      "cells:109,208..109,208::Grid.Mass.get_Item({cell})": ["< 990", "> 960"]

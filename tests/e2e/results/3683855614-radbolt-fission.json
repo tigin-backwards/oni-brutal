@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3683855614-radbolt-fission.yaml",
+ "mods": [
+  "3683855614"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a radbolt fired at a cuprite wall converts about 25 kg of it",
+ "updated": "2026-10-29",
+ "commit": "3a16bdcc",
+ "mod_dlls": {
+  "3683855614": {
+   "RadBoltFission.dll": "b0df0e544a40d4a427a6a6de652870624614ac70a0f4fb08bbae2334d2811045"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-183838-f50df555",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T18:46:18",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-191745-d8e9ae1b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T19:17:45",
+    "lane": 7,
+    "reference_run": "20261029-183838-f50df555",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-191745-d8e9ae1b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T19:18:37",
+    "lane": 7,
+    "reference_run": "20261029-183838-f50df555",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

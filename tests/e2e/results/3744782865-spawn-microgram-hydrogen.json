@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3744782865-spawn-microgram-hydrogen.yaml",
+ "mods": [
+  "3744782865"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Ctrl + = over a cell replaces it with the mod's hydrogen (logged for that cell)",
+ "updated": "2026-10-29",
+ "commit": "3a16bdcc",
+ "mod_dlls": {
+  "3744782865": {
+   "SpawnMicrogramHydrogen.dll": "e312d848a7646fdfc27d771e781f2afa315949db7d48848004c7177a200c4b8e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-183838-f50df555",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T18:49:35",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-191931-91476b60",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T19:19:31",
+    "lane": 7,
+    "reference_run": "20261029-183838-f50df555",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-191931-91476b60",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T19:20:12",
+    "lane": 7,
+    "reference_run": "20261029-183838-f50df555",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

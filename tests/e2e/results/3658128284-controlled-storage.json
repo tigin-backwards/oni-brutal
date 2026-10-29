@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3658128284-controlled-storage.yaml",
+ "mods": [
+  "3658128284"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Storage Bin's Delivery Control side screen dump and shot match; its Duplicants Deposit box forbids deliveries",
+ "updated": "2026-10-29",
+ "commit": "3a16bdcc",
+ "mod_dlls": {
+  "3658128284": {
+   "ControlledStorage.dll": "a96321f511ba1c9f7bb9b7242f71805f429a0b9d544df6fee0fd517c16c2a657"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-183838-f50df555",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T18:42:57",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-191605-89db4c24",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T19:16:05",
+    "lane": 7,
+    "reference_run": "20261029-183838-f50df555",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "delivery": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "delivery": 0.0
+    }
+   },
+   {
+    "run": "20261029-191605-89db4c24",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T19:16:56",
+    "lane": 7,
+    "reference_run": "20261029-183838-f50df555",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "delivery": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "delivery": 0.0
+    }
+   }
+  ]
+ }
+}

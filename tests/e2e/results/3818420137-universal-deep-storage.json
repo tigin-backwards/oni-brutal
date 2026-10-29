@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3818420137-universal-deep-storage.yaml",
+ "mods": [
+  "3818420137"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "unpowered, a Deep Item Storage is locked (no capacity); with its filter ticked nothing is delivered, as in the original",
+ "updated": "2026-10-29",
+ "commit": "3a16bdcc",
+ "mod_dlls": {
+  "3818420137": {
+   "UniversalDeepStorage.dll": "97269e335ccb3aff209166486f12972da5c4dfc48465b7f5f6d58933041590b0"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-192236-80e8bc69",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T19:22:36",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-193414-6fe74b8f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T19:34:14",
+    "lane": 7,
+    "reference_run": "20261029-192236-80e8bc69",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261029-193414-6fe74b8f",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T19:37:58",
+    "lane": 7,
+    "reference_run": "20261029-192236-80e8bc69",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,29 @@
+# Sweep Zones Redux (3804026640), classes T, S.
+#
+# What it does: a Sweep Zones tool in the tool menu (a postfix on ToolMenu.CreateBasicTools)
+# paints persistent zones, at a priority, in four modes chosen in its parameter menu: sweep,
+# clear sweep, mop, clear mop. Every second the zone store (ZoneStore.Sim1000ms) marks debris
+# lying in a sweep zone for sweeping and places mop errands on puddles in a mop zone; the
+# zones are saved with the colony and shown while the tool is active.
+# How a player reaches it: the tool menu's Sweep Zones button, then a drag over the floor.
+# What changes: debris in the zone is swept without the player ordering it each time.
+#
+# Nothing is marked for sweeping in early-base. The tool (its parameter menu offering the four modes, sweep chosen) paints a
+# sweep zone over the corridors on both sides of the printing pod; played a few seconds, the
+# debris lying there is marked for sweeping, as much as in the original.
+from: early-base
+mods: [3804026640]
+steps:
+  - expect_state:
+      "count:all:Clearable::[*] if .isMarkedForClear == true": 0
+  - tool: {toolbar: "Sweep Zones"}
+  - expect_state:
+      "ToolMenu.Instance.toolParameterMenu.widgets.Count": 4
+      "ToolMenu.Instance.toolParameterMenu.widgets[\"SWEEPZONES_SWEEP\"].data.state": "== 'On'"
+  - driver: {camera.set: {cell: [122, 208], ortho: 12}}
+  - drag: {from: [106, 207], to: [136, 210]}
+  - expect_state:
+      "type:SweepZones.ZoneStore::Instance.SweepCells.Count": [">= 10", "== original"]
+  - run: {seconds: 3}
+  - expect_state:
+      "count:all:Clearable::[*] if .isMarkedForClear == true": [">= 1", "== original"]

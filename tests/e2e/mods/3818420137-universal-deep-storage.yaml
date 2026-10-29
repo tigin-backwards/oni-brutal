@@ -1,0 +1,40 @@
+# Universal Deep Storage (3818420137), classes B, S.
+#
+# What it does: four powered storages placed next to their vanilla counterparts and researched
+# with them: Deep Item Storage (a 1x2 storage locker of practically unlimited capacity, 25 W,
+# which holds what it is given in a deep store beyond a 20 t working buffer, and locks it all
+# while unpowered), a Deep Refrigerator, and Deep Gas and Liquid Storage (one pipe input, five
+# selectable outputs with automation level signals, in a side screen of the mod's). Their
+# totals count in the resources screen and pinned resources.
+# How a player reaches it: the build menu (Base, Food, ...), after the vanilla building's
+# research; the storage's filter and side screens.
+# What changes: storage without a capacity limit, at a power cost.
+#
+# A Deep Item Storage built by setup in the corridor west of the printing pod, unpowered, is
+# selected: it is locked (not operational, no capacity). Its filter's "all standard items" box
+# is ticked; played a while, nothing is delivered to it, as in the original.
+from: early-base
+mods: [3818420137]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"DeepItemStorage\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"SmartStorage\").unlockedItemIDs": "== original"
+      "Assets.GetBuildingDef(\"DeepItemStorage\").EnergyConsumptionWhenActive": 25
+  - run: {seconds: 3}
+  - expect: {buildings: {DeepItemStorage: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 208], select: DeepItemStorage}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}
+  - expect_state:
+      "selected:GetComponent<UniversalDeepStorage.DeepItemStorage>": exists
+      "selected:GetComponent<Operational>.IsOperational": false
+      "selected:GetComponent<Storage>.capacityKg": 0
+  - ui_wait: {path: "**/TreeFilterableSideScreen/**/AllStandardItemsRowHeader/HorizontalContent/CheckBox", cond: stable}
+  - click: {ui: "**/TreeFilterableSideScreen/**/AllStandardItemsRowHeader/HorizontalContent/CheckBox"}
+  - expect_state:
+      "selected:TreeFilterable.AcceptedTags": {contains: SandStone}
+  - run: {seconds: 120}
+  - expect_state:
+      "all:UniversalDeepStorage.DeepItemStorage::[0].GetComponent<Storage>.MassStored()": "== original"

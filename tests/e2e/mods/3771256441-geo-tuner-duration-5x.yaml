@@ -1,0 +1,44 @@
+# 地质调谐5 倍时长 Geo Tuner Duration 5x (3771256441), class P.
+#
+# What it does: a postfix on GeoTuner's ResetExpirationTimer (run when a tuner switches to a
+# geyser, when its tuning expires, and when a researcher's tuning starts) multiplies the
+# remaining tuning time by five, through the state machine's own timer methods, and logs it.
+# How a player reaches it: a Geotuner aimed at a geyser and tuned by a researcher.
+# What changes: tuning lasts five times as long.
+#
+# setup places a steam geyser beside the printing pod (seeded), and builds
+# a Geotuner in the corridor west of it, powered from a dev generator through four joined wire
+# cells. The geyser is picked in the tuner's side screen (dumped): the switch resets the timer,
+# which the mod stretches to five times the geyser's tuning duration.
+#
+# Does not pass in the original yet: the click on the geyser's row assigns no geyser (the
+# tuner may not be operational on the dev generator's wiring), so the timer is never reset.
+from: early-base
+mods: [3771256441]
+require_log: ['\[GeoTunerDuration5x\] Extended Geo Tuner duration to']
+setup:
+  - driver: {seed: 12345}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131124, 0, 0, \"GeyserGeneric_steam\", \"BuildingBack\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"GeoTuner\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"DevGenerator\")", method: Build, args: [{"$": "Grid.XYToCell(115, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [{"$": "Grid.XYToCell(113, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [{"$": "Grid.XYToCell(114, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [{"$": "Grid.XYToCell(115, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: [Right, {"$": "Grid.XYToCell(112, 207)"}, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Left, Right", {"$": "Grid.XYToCell(113, 207)"}, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Left, Right", {"$": "Grid.XYToCell(114, 207)"}, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: [Left, {"$": "Grid.XYToCell(115, 207)"}, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: ForceRebuildNetworks}}
+steps:
+  - run: {seconds: 3}
+  - expect: {buildings: {GeoTuner: 1, DevGenerator: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 208], select: GeoTuner}
+  - ui_wait: {path: "**/GeoTunerSideScreen", cond: stable}
+  - ui_dump: {name: geysers, root: "**/GeoTunerSideScreen", mask_text: ['.+']}
+  - click: {ui: "**/GeoTunerSideScreen/**/Rows/RowPrefab", index: 1}
+  - run: {seconds: 3}
+  - expect_state:
+      "Components.GeoTuners.GetItems(0)[0].GetFutureGeyser()": exists
+      "Components.GeoTuners.GetItems(0)[0].GetAssignedGeyser()": exists

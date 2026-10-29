@@ -1,0 +1,33 @@
+{
+ "spec": "mods/3771256441-geo-tuner-duration-5x.yaml",
+ "mods": [
+  "3771256441"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-29",
+ "commit": "3a16bdcc",
+ "mod_dlls": {
+  "3771256441": {
+   "GeoTunerDuration5x.dll": "633b4ec4eaa7694803dbcbae49a849e8466b38e4edffdcdfb42b044bcf820e3a"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-192236-80e8bc69",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-29T19:30:21",
+    "lane": 7,
+    "reasons": [
+     "step 9: Components.GeoTuners.GetItems(0)[0].GetFutureGeyser() is null, wanted exists; Components.GeoTuners.GetItems(0)[0].GetAssignedGeyser() is null, wanted exists"
+    ],
+    "signatures": 0
+   }
+  ],
+  "ours": []
+ }
+}

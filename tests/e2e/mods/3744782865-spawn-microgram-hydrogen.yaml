@@ -1,0 +1,21 @@
+# 直接生成微克氢气 - Spawn Microgram Hydrogen DIRECTLY (3744782865), class K (a hotkey).
+#
+# What it does: a postfix on Game.Update watches Unity's Input for Left Ctrl + "=" and replaces
+# the cell under the mouse with 50 µg of hydrogen at -50 °C (SimMessages.ReplaceElement), for
+# filling cells with a negligible gas.
+# How a player reaches it: Left Ctrl + = over a cell.
+# What changes: that cell's contents.
+#
+# Ctrl + = with the pointer over a corridor cell west of the printing pod (paused): the mod logs
+# its replacement of that cell (132402), as in the original. (The microgram does not last: the
+# simulation merges it into the neighbouring gas within a second, in the original too.)
+from: early-base
+mods: [3744782865]
+require_log: ['\[HydrogenMod\] .*132402']
+steps:
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - expect_state:
+      "Grid.Element[132402].id": "!= 'Hydrogen'"
+  - key: {code: LeftControl, down: true, at: [114, 208]}
+  - key: {code: Equals, at: [114, 208]}
+  - key: {code: LeftControl, up: true}

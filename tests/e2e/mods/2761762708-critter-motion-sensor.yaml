@@ -1,0 +1,31 @@
+# Critter Motion Sensor (updated for Big Merge) (2761762708), class B.
+#
+# What it does: a 1x1 Creature Motion Sensor (LogicCreatureSensor) in the Automation menu's
+# sensors, researched with Critter Ranching (AnimalControl): it sends a green signal while a
+# critter is within its range, a box reaching up to 5 cells above it and 2 to each side; a
+# slider side screen sets the range.
+# How a player reaches it: the build menu (Automation), after the research; its side screen.
+# What changes: automation that reacts to critters.
+#
+# The research lists it. One built by setup on the corridor's floor west of the printing pod,
+# with a Hatch dropped beside it, plays 30 s and reads as in the original (red there: the
+# sensor gathers critters only on a change in its area); it is selected (its title dumped).
+from: early-base
+mods: [2761762708]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LogicCreatureSensor\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(0, 113, 207, \"Hatch\", \"Creatures\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"AnimalControl\").unlockedItemIDs": {contains: LogicCreatureSensor}
+  - run: {seconds: 30}
+  - expect: {buildings: {LogicCreatureSensor: 1}}
+  - expect_state:
+      "all:Creature_Motion_Sensor.LogicCreatureSensor::[0].IsSwitchedOn": "== original"
+      "count:all:CreatureBrain::[*] if .name == Hatch": ">= 1"
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: LogicCreatureSensor}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}
+  - expect_state:
+      "selected:GetComponent<Creature_Motion_Sensor.LogicCreatureSensor>.GetSliderValue(0)": "== original"

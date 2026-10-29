@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3804026640-sweep-zones-redux.yaml",
+ "mods": [
+  "3804026640"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Sweep Zones tool paints a zone over the corridors; the debris there is marked for sweeping as in the original",
+ "updated": "2026-10-29",
+ "commit": "3a16bdcc",
+ "mod_dlls": {
+  "3804026640": {
+   "SweepZones.dll": "fc0ba9da6d51c34293b7e3bedbf12350e43d11a7c2ddf4e94d303551c4aa38d9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-183838-f50df555",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T18:59:26",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-192100-e89243fd",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T19:21:00",
+    "lane": 7,
+    "reference_run": "20261029-183838-f50df555",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-192100-e89243fd",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T19:21:49",
+    "lane": 7,
+    "reference_run": "20261029-183838-f50df555",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

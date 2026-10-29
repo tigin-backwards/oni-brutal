@@ -1,0 +1,34 @@
+# Controlled Storage (3658128284), classes P, S (PLib UI).
+#
+# What it does: storage controls. Storage bins, fridges, ration boxes and conveyor loaders get
+# a Delivery Control side screen (PLib, ordered after the filter screen) with four checkboxes:
+# whether Duplicants and Auto-Sweepers may deposit into or extract from it, and a button to
+# copy those settings; an "Empty Storage" user-menu button drops (or, as an errand, empties)
+# the contents; capacity inputs take more digits; clothing, eggs and sublimating items move to
+# the filters' non-standard section; and a No-Sweep Zone tool marks areas Duplicants do not
+# sweep from.
+# How a player reaches it: selecting a storage building; the tool menu.
+# What changes: which errands may use a storage.
+#
+# A Storage Bin built by setup west of the printing pod is selected: the Delivery Control side
+# screen is shown (dumped and shot) with everything allowed, and a click on "Duplicants
+# Deposit" forbids Duplicants' deliveries.
+from: early-base
+mods: [3658128284]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"StorageLocker\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {StorageLocker: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 208], select: StorageLocker}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<ControlledStorage.StorageDeliveryControl>.AllowDupeDeposit": true
+  - ui_wait: {path: "**/DeliveryControlSideScreen", cond: stable}
+  - ui_dump: {name: delivery, root: "**/DeliveryControlSideScreen"}
+  - shot: {name: delivery, crop: "**/DeliveryControlSideScreen", threshold: 0.04}
+  - click: {ui: "**/DeliveryControlSideScreen/**/DeliveryControl_DupeDeposit/AlignmentWrapper/CheckBox"}
+  - expect_state:
+      "selected:GetComponent<ControlledStorage.StorageDeliveryControl>.AllowDupeDeposit": false
+      "selected:GetComponent<ControlledStorage.StorageDeliveryControl>.AllowDupeExtract": true

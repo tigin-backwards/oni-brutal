@@ -1,0 +1,33 @@
+{
+ "spec": "mods/3613508049-rename-asteroids-u59.yaml",
+ "mods": [
+  "3613508049"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-29",
+ "commit": "6d2d76a8",
+ "mod_dlls": {
+  "3613508049": {
+   "RenameAsteroids.dll": "08956e047c44cdd05d6c9b26cfb4bcccfb1b97c5380a64f3707a345830ad1166"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-171506-7be95722",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-29T17:53:27",
+    "lane": 7,
+    "reasons": [
+     "step 4: E2eDriver ui.wait {\"path\": \"**/WorldSelector/Cluster/Worlds/Row/**/Label/*\", \"cond\": \"stable\", \"frames\": 300}: timeout: stable not met within 300 frames"
+    ],
+    "signatures": 0
+   }
+  ],
+  "ours": []
+ }
+}

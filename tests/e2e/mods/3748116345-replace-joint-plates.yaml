@@ -1,0 +1,45 @@
+# Replace Joint Plates (3748116345), class P.
+#
+# What it does: a joint plate (a HighWattBridgeTile building, such as the Heavi-Watt Joint
+# Plate) can be built over an existing one: a postfix on BuildingDef.IsValidHighWattBridgeLocation
+# accepts the place the game rejects as "connectors overlap" when the plate there is of that
+# kind and its two ends are free or its own, and a prefix/postfix pair on MarkArea keeps the
+# old plate's end cells while the replacement is under construction. The replacement is an
+# ordinary construction errand, as for tiles.
+# How a player reaches it: the build menu (Power), placing a joint plate over another, for
+# instance in another material.
+# What changes: no deconstruction needed to swap a joint plate.
+#
+# setup grants Power Regulation and Advanced Power Regulation, spawns cuprite and builds a
+# Heavi-Watt Joint Plate of refined copper in the corridor west of the printing pod. Another
+# joint plate placed over it through the build menu (Power), in the menu's default material,
+# is accepted as a replacement and built: the plate is no longer copper.
+#
+# Does not pass in the original yet: the build menu's click over the plate leaves no
+# replacement blueprint (OniMcp's build refuses a replacement in another material).
+from: early-base
+mods: [3748116345]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"AdvancedPowerRegulation\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Cuprite\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 400, 300, 255, 0]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"WireBridgeHighWattage\")", method: Build, args: [{"$": "Grid.XYToCell(112, 208)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {WireBridgeHighWattage: 1}}
+  - expect_state:
+      "Grid.Objects.get_Item(132400, 1).GetComponent<PrimaryElement>.ElementID": Copper
+  # OniMcp places no replacement of another material: the plate goes through the build menu,
+  # the target kept right of the menu's info card.
+  - driver: {camera.set: {cell: [103, 208], ortho: 8}}
+  - click: {ui: "**/PlanScreen/Toggle:Power"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/WireBridgeHighWattage Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/WireBridgeHighWattage Group*"}
+  - expect_state: {"PlayerController.Instance.ActiveTool.name": BuildTool}
+  - click_world: {cell: [112, 208]}
+  - key: {code: Escape}
+  - expect: {blueprints: {WireBridgeHighWattage: 1}}
+  - run: {seconds: 900, until: {pending_construction: 0}}
+  - expect: {buildings: {WireBridgeHighWattage: 1}}
+  - expect_state:
+      "Grid.Objects.get_Item(132400, 1).GetComponent<PrimaryElement>.ElementID": ["!= 'Copper'", "== original"]

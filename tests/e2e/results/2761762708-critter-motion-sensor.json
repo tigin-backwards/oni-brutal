@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2761762708-critter-motion-sensor.yaml",
+ "mods": [
+  "2761762708"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "one built beside a dropped Hatch reads as in the original after 30 s; title dump matches",
+ "updated": "2026-10-29",
+ "commit": "3a16bdcc",
+ "mod_dlls": {
+  "2761762708": {
+   "Creature_Motion_Sensor.dll": "dbb7363e01bb8a04a041818fa58eafca0e8a83c5b936c675120ae43641c8d86a"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-183838-f50df555",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T18:38:38",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-191253-1549b342",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T19:12:53",
+    "lane": 7,
+    "reference_run": "20261029-183838-f50df555",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261029-191253-1549b342",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T19:14:25",
+    "lane": 7,
+    "reference_run": "20261029-183838-f50df555",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

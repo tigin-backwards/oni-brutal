@@ -1,0 +1,33 @@
+{
+ "spec": "mods/3748116345-replace-joint-plates.yaml",
+ "mods": [
+  "3748116345"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-29",
+ "commit": "2e861a10",
+ "mod_dlls": {
+  "3748116345": {
+   "ReplaceJointPlates.dll": "6f910c47bf613ff07dd4e7f19bc0f96dcc067f985b75976418aa489a04e5c93a"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-183838-f50df555",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-29T18:52:35",
+    "lane": 7,
+    "reasons": [
+     "step 11: blueprints.WireBridgeHighWattage is 0, wanted 1"
+    ],
+    "signatures": 0
+   }
+  ],
+  "ours": []
+ }
+}

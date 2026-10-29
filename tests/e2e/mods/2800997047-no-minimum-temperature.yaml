@@ -1,0 +1,22 @@
+# No Minimum Temperature (2800997047), class P.
+#
+# What it does: a postfix on the ElementConverter.OutputElement constructor looks two stack
+# frames up (new StackTrace(2)) and, when the caller is a building config's
+# ConfigureBuildingTemplate, sets a minimum output temperature between 0 and 350 K to 0,
+# logging each one ([NoMinimumTemp] Reverted ...). The Electrolyzer, the Oxygen Diffuser and
+# others then output at their input's temperature.
+# How a player reaches it: the converters' outputs.
+# What changes: no 70 °C oxygen from the Electrolyzer.
+#
+# The Electrolyzer's oxygen and hydrogen and the Oxygen Diffuser's oxygen have no minimum
+# temperature, and the log names the configs it changed, as the original's does.
+from: early-base
+mods: [2800997047]
+require_log: ['\[NoMinimumTemp\] Reverted the minimum temperature for ElectrolyzerConfig', '\[NoMinimumTemp\] Reverted the minimum temperature for MineralDeoxidizerConfig']
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"Electrolyzer\").GetComponent<ElementConverter>.outputElements[0].minOutputTemperature": 0
+      "Assets.GetPrefab(\"Electrolyzer\").GetComponent<ElementConverter>.outputElements[1].minOutputTemperature": 0
+      "Assets.GetPrefab(\"MineralDeoxidizer\").GetComponent<ElementConverter>.outputElements[0].minOutputTemperature": 0
+  - expect_state:
+      "Assets.GetPrefab(\"AlgaeHabitat\").GetComponent<ElementConverter>.outputElements[0].minOutputTemperature": "== original"

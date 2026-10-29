@@ -1,0 +1,20 @@
+# 全能增幅块 AllBooster (3737965162), classes P, O; PLib options.
+#
+# What it does: adds a bionic booster (The Bionic Booster Pack), AllBooster, "终极全能增幅模块":
+# +17 to every skill attribute (an option, 1 to 77), athletics twice that, with every booster
+# skill perk; a postfix on BionicUpgradeComponentConfig.CreatePrefabs creates it, and a
+# prefix on the ComplexRecipe constructor makes its recipe take 64 power station tools.
+# How a player reaches it: the booster's recipe; a Bionic Duplicant's booster slots.
+# What changes: one booster that does everything.
+#
+# The booster's prefab exists and its recipe takes 64 tools, as in the original.
+from: early-base
+mods: [3737965162]
+require_log: ['\[AllBooster\] 启动成功']
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"AllBooster\")": exists
+      "count:ComplexRecipeManager.Get().recipes[*] if .results[0].material.Name == AllBooster": "== original"
+      "sum:ComplexRecipeManager.Get().recipes[*].ingredients[0].amount if .results[0].material.Name == AllBooster": "== original"
+  - run: {seconds: 5}
+  - expect: {duplicants: 3}

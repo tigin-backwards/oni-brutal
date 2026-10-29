@@ -1,0 +1,20 @@
+# 更大的燃料舱 Bigger Fuel Tanks (3519081396), class P.
+#
+# What it does: postfixes on the rocket modules' configs raise their capacities to 100 t: fuel
+# and oxidizer tanks (and the engines with built-in tanks: CO2, Sugar, Steam, small
+# Petroleum), cargo bays (their user maximum too) with matching collection speeds, the
+# radbolt engine's store; the Drillcone holds 5 t (100 kg to 100 t, set on a side control).
+# How a player reaches it: rocket modules.
+# What changes: rockets carry far more fuel, oxidizer and cargo.
+#
+# The modules' prefabs carry the new capacities.
+from: early-base
+mods: [3519081396]
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"LiquidFuelTankCluster\").GetComponent<FuelTank>.physicalFuelCapacity": 100000
+      "Assets.GetPrefab(\"LiquidFuelTankCluster\").GetComponent<Storage>.capacityKg": 100000
+      "Assets.GetPrefab(\"OxidizerTankCluster\").GetComponent<OxidizerTank>.maxFillMass": 100000
+      "Assets.GetPrefab(\"CO2Engine\").GetComponent<FuelTank>.physicalFuelCapacity": 100000
+      "Assets.GetPrefab(\"SolidCargoBaySmall\").GetComponent<Storage>.capacityKg": 100000
+      "Assets.GetPrefab(\"NoseconeHarvest\").GetComponent<Storage>.capacityKg": 5000

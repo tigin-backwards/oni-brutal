@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3519081396-bigger-fuel-tanks.yaml",
+ "mods": [
+  "3519081396"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the rocket tanks, engines and cargo bays hold 100 t",
+ "updated": "2026-10-29",
+ "commit": "2d4aca2a",
+ "mod_dlls": {
+  "3519081396": {
+   "BiggerFuelTank.dll": "efb56ba66d38885e5a99f6120c7e92232322e5fc37f10619156c1f59196c5beb"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-112259-0d44a806",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T12:08:32",
+    "lane": 1,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-143747-9481627a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T15:30:17",
+    "lane": 1,
+    "reference_run": "20261029-112259-0d44a806",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-143747-9481627a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T15:30:58",
+    "lane": 1,
+    "reference_run": "20261029-112259-0d44a806",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2845278436-carbon-skimmer-realistic.yaml",
+ "mods": [
+  "2845278436"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Carbon Skimmer takes hydrogen and carbon dioxide and makes methane and steam with gas ports and 300 W; one built asks for hydrogen",
+ "updated": "2026-10-29",
+ "commit": "7fd4d1c0",
+ "mod_dlls": {
+  "2845278436": {
+   "CarSkim.dll": "f22d248d52bb18b234b1e14fbcac0008811681c23c6c9a547131c5bc1a0b47db"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-114113-564df08f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T13:27:00",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-021317-40c382a6",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T02:13:17",
+    "lane": 14,
+    "reference_run": "20261027-114113-564df08f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-021317-40c382a6",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T02:14:05",
+    "lane": 14,
+    "reference_run": "20261027-114113-564df08f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

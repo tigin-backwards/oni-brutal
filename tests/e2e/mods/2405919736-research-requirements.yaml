@@ -11,8 +11,14 @@
 #
 # Power Regulation needs ten batteries, and the fixture has none: a click on it in the
 # research screen queues nothing.
+#
+# Where the screen opens depends on frame times (its Update zooms and pans by unscaledDeltaTime;
+# see 3034422919-instant-research-fixed), so Power Regulation could be off the screen. Setup
+# asks the screen to pan to it (ResearchScreen.ZoomToTech) before it first opens.
 from: early-base
 mods: [2405919736]
+setup:
+  - driver: {setup.call: {target: "ManagementMenu.Instance.researchScreen", method: ZoomToTech, args: [PowerRegulation, false]}}
 steps:
   - expect_state:
       "Db.Get().Techs.Get(\"PowerRegulation\").IsComplete()": false

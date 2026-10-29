@@ -17,8 +17,11 @@ namespace OniMoono.Host.GameTweaks
     /// One row of the Moono Tweaks screen and of docs/TWEAKS.md: `Title` in sentence case,
     /// `Effect` one short line on what a player gets from it, `Detail` (optional) how it does it,
     /// for the row's tooltip and the docs. `IsTweak` is false for the player's own options (the
-    /// splash, frame stats and log paths), which are rows but not `--game-tweak` names.
-    internal sealed record TweakInfo(string Id, TweakGroup Group, string Title, string Effect, string Detail = "", TweakGain? Gain = null, bool IsTweak = true)
+    /// splash, frame stats, log paths and the GPU), which are rows but not `--game-tweak` names.
+    /// `Choices`: a row with more values than on and off (the GPU's), in the order its button
+    /// steps through them; null for a toggle.
+    internal sealed record TweakInfo(string Id, TweakGroup Group, string Title, string Effect, string Detail = "", TweakGain? Gain = null, bool IsTweak = true,
+        string[]? Choices = null)
     {
         /// The launch option that sets this row (shown in its tooltip).
         public string LaunchOption => Id switch
@@ -26,6 +29,7 @@ namespace OniMoono.Host.GameTweaks
             GameTweakNames.SplashRow => "--splash moo",
             GameTweakNames.FrameStatsRow => "--frame-stats",
             GameTweakNames.LogPathsRow => "--log-paths hidden",
+            GameTweakNames.GpuRow => "--gpu " + string.Join("|", Choices!),
             _ => "--game-tweak " + Id,
         };
     }
@@ -37,7 +41,7 @@ namespace OniMoono.Host.GameTweaks
     /// before the game's assemblies (Harmony among them) can be resolved, and the tests compile it in.
     internal static class GameTweakNames
     {
-        public const string SplashRow = "splash", FrameStatsRow = "frame-stats", LogPathsRow = "log-paths";
+        public const string SplashRow = "splash", FrameStatsRow = "frame-stats", LogPathsRow = "log-paths", GpuRow = "gpu";
         public const string FastSaveCompression = "fast-save-compression", BackgroundSave = "background-save", NoSaveGc = "no-save-gc",
             FastSerialization = "fast-serialization", FastParticleCollision = "fast-particle-collision";
 
@@ -71,6 +75,11 @@ namespace OniMoono.Host.GameTweaks
                 "Every 60 frames.", IsTweak: false),
             new(LogPathsRow, General, "Hide personal paths in the log", "Your user folder reads %USERPROFILE% or ~ in Player.log, and your Steam ID is hidden.",
                 "Mods still get the full text.", IsTweak: false),
+            new(GpuRow, General, "Graphics card", "For laptops with two GPUs: which one the game draws with. Needs a restart.",
+                "Default: as the original game (on Windows the faster, discrete GPU; on Linux the system's choice). Discrete: the faster GPU. "
+                + "Integrated: the power-saving one. Windows' Graphics settings page wins over this. On Linux, on a desktop whose display is "
+                + "on the discrete card, discrete may pick the integrated GPU.",
+                IsTweak: false, Choices: [OniMoono.Host.GpuChoice.Default, OniMoono.Host.GpuChoice.Discrete, OniMoono.Host.GpuChoice.Integrated]),
 
             new(FastSerialization, Saving, "Faster save writing", "Autosaves take less time; the save file is the same.",
                 "Writes the colony's numbers without boxing each one in an object."),

@@ -230,9 +230,9 @@ namespace OniMoono.Tests
             var file = new PlayerSettings();
             file.GameTweaks["fast-b"] = false;
             Assert.Equal(["game tweaks on (default): fast-a", "game tweaks off (default): slow-c, off-d", "game tweaks off (the settings file): fast-b",
-                          "splash moo (default)", "frame stats off (default)", "log paths hidden (default)"], Resolve(file).Describe().ToArray());
+                          "splash moo (default)", "frame stats off (default)", "log paths hidden (default)", "gpu default (default)"], Resolve(file).Describe().ToArray());
             Assert.Equal(["game tweaks from the command line (--game-tweak none): none", "splash none (the command line)", "frame stats on (the command line)",
-                           "log paths full (the command line)"],
+                           "log paths full (the command line)", "gpu default (default)"],
                 Resolve(file, ["none"], "none", true, "full").Describe().ToArray());
         }
     }

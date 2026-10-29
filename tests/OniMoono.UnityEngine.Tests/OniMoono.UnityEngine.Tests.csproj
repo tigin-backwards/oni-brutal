@@ -28,6 +28,8 @@
   <ItemGroup>
     <!-- The host's settings precedence and file (PlayerSettingsTests): plain .NET, compiled in. -->
     <Compile Include="../../src/OniMoono.Host/PlayerSettings.cs" Link="Host/PlayerSettings.cs" />
+    <!-- The GPU option's decisions and its native environment (GpuChoiceTests). -->
+    <Compile Include="../../src/OniMoono.Host/GpuChoice.cs" Link="Host/GpuChoice.cs" />
     <!-- The Moono Tweaks catalog (GameTweakCatalogTests; BackgroundSave names itself from it). -->
     <Compile Include="../../src/OniMoono.Host/GameTweaks/GameTweakNames.cs" Link="Host/GameTweakNames.cs" />
     <!-- The brain-rate game tweak's allowance (BrainRateAllowanceTests). -->

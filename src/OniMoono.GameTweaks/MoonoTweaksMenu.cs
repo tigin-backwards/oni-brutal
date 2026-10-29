@@ -11,7 +11,7 @@ namespace OniMoono.GameTweaks
     /// The main menu's "Moono Tweaks" button, directly below Mods (above Options when there is no
     /// Mods button), and the screen it opens: the player's options (OniMoono.Host.MoonoTweaksMenu
     /// gives the rows, from the one catalog GameTweakNames.Rows), in sections, each with an on/off
-    /// toggle, saved to the player's settings file and applied by the game's own restart
+    /// toggle (or, for a row with choices, a button that steps through them), saved to the player's settings file and applied by the game's own restart
     /// (App.Restart, through the player's Restarter).
     ///
     /// Everything on it is the game's: the button is made as MainMenu makes its own, and the
@@ -20,19 +20,24 @@ namespace OniMoono.GameTweaks
     public static class MoonoTweaksMenu
     {
         internal static string[] Ids, Groups, Titles, Effects, Details, Gains, Notes;
-        internal static bool[] ChangesGameplay, Running, Defaults, Saved, Locked;
+        internal static bool[] ChangesGameplay, Locked;
+        /// Each row's value: 0 or 1 for a toggle, else the index in its Choices.
+        internal static int[] Running, Defaults, Saved;
+        internal static string[][] Choices;
         internal static string LockedNote, SettingsPath;
-        internal static Func<string[], bool[], string> Save;
+        internal static Func<string[], int[], string> Save;
 
         /// One entry per row, in order: its section (`groups`), title and one-line effect, and
         /// its tooltip's parts: how it works (`details`), its measured gain ("" for none) and the
-        /// lines after it (where it was measured, the launch option). `running`: each option as
-        /// this run has it; `defaults`: as Reset to defaults sets it; `locked`: set by the command
-        /// line (shown, not changeable; `lockedNote` names those arguments). `save(ids, values)`
-        /// writes the changeable rows to the settings file, returning why it could not or null.
+        /// lines after it (where it was measured, the launch option). `choices`: a row's values
+        /// when it has more than on and off (null for a toggle). `running`: each option as this
+        /// run has it (0 or 1 for a toggle, else the index in its choices); `defaults`: as Reset
+        /// to defaults sets it; `locked`: set by the command line (shown, not changeable;
+        /// `lockedNote` names those arguments). `save(ids, values)` writes the changeable rows to
+        /// the settings file, returning why it could not or null.
         public static void Install(Harmony harmony, string[] ids, string[] groups, string[] titles, string[] effects,
-            string[] details, string[] gains, string[] notes, bool[] changesGameplay, bool[] running, bool[] defaults, bool[] locked,
-            string lockedNote, string settingsPath, Func<string[], bool[], string> save)
+            string[] details, string[] gains, string[] notes, bool[] changesGameplay, string[][] choices, int[] running, int[] defaults, bool[] locked,
+            string lockedNote, string settingsPath, Func<string[], int[], string> save)
         {
             Ids = ids;
             Groups = groups;
@@ -42,9 +47,10 @@ namespace OniMoono.GameTweaks
             Gains = gains;
             Notes = notes;
             ChangesGameplay = changesGameplay;
+            Choices = choices;
             Running = running;
             Defaults = defaults;
-            Saved = (bool[])running.Clone();
+            Saved = (int[])running.Clone();
             Locked = locked;
             LockedNote = lockedNote;
             SettingsPath = settingsPath;
@@ -127,8 +133,10 @@ namespace OniMoono.GameTweaks
         GameObject entryPrefab;
         Transform entryParent;
         LocText windowTitle;
-        bool[] shown;
+        int[] shown;
         MultiToggle[] toggles;
+        /// The choice rows' buttons (null for a toggle row).
+        KButton[] choiceButtons;
 
         /// The Mods screen's serialized state: its KScreen settings and its parts.
         internal void TakeOver(ModsScreen mods)
@@ -169,8 +177,9 @@ namespace OniMoono.GameTweaks
                 list.padding = new RectOffset(list.padding.left, list.padding.right, RowSpacing, RowSpacing);
             }
             // Choices saved earlier in this run (closed with "Later") show as chosen.
-            shown = (bool[])MoonoTweaksMenu.Saved.Clone();
+            shown = (int[])MoonoTweaksMenu.Saved.Clone();
             toggles = new MultiToggle[shown.Length];
+            choiceButtons = new KButton[shown.Length];
             if (MoonoTweaksMenu.LockedNote.Length > 0)
                 Note($"Set by the launch options: {MoonoTweaksMenu.LockedNote}",
                     "Those rows can't be changed here. Remove the options from the game's launch options to choose them here.");
@@ -280,8 +289,14 @@ namespace OniMoono.GameTweaks
             }
             else label.gameObject.SetActive(false);
             var toggle = entry.GetReference<MultiToggle>("EnabledToggle");
+            if (MoonoTweaksMenu.Choices[i] != null)
+            {
+                ChoiceRow(entry, i, toggle, title, effect, locked);
+                entry.gameObject.SetActive(true);
+                return;
+            }
             toggles[i] = toggle;
-            toggle.ChangeState(shown[i] ? 1 : 0);
+            toggle.ChangeState(shown[i]);
             var tip = toggle.GetComponent<ToolTip>();
             if (locked)
             {
@@ -294,19 +309,61 @@ namespace OniMoono.GameTweaks
                 effect.gameObject.AddComponent<CanvasGroup>().alpha = 0.55f;
                 var dim = toggle.gameObject.AddComponent<CanvasGroup>();
                 dim.alpha = 0.45f;
-                if (tip != null) tip.OnToolTip = () => $"Set by the launch options ({(shown[i] ? "on" : "off")})";
+                if (tip != null) tip.OnToolTip = () => $"Set by the launch options ({(shown[i] != 0 ? "on" : "off")})";
             }
             else
             {
                 toggle.onClick += () =>
                 {
-                    shown[i] = !shown[i];
-                    toggle.ChangeState(shown[i] ? 1 : 0);
+                    shown[i] = 1 - shown[i];
+                    toggle.ChangeState(shown[i]);
                     Refresh();
                 };
-                if (tip != null) tip.OnToolTip = () => shown[i] ? UI.FRONTEND.MODS.TOOLTIPS.ENABLED : UI.FRONTEND.MODS.TOOLTIPS.DISABLED;
+                if (tip != null) tip.OnToolTip = () => shown[i] != 0 ? UI.FRONTEND.MODS.TOOLTIPS.ENABLED : UI.FRONTEND.MODS.TOOLTIPS.DISABLED;
             }
             entry.gameObject.SetActive(true);
+        }
+
+        /// A row with choices (the GPU's): the Mods rows' Manage button in the toggle's place,
+        /// labelled with the choice, stepping to the next one when clicked.
+        void ChoiceRow(HierarchyReferences entry, int i, MultiToggle toggle, LocText title, LocText effect, bool locked)
+        {
+            toggle.gameObject.SetActive(false);
+            var button = entry.GetReference<KButton>("ManageButton");
+            button.gameObject.SetActive(true);
+            choiceButtons[i] = button;
+            var rect = button.GetComponent<RectTransform>();
+            var size = button.GetComponent<LayoutElement>();
+            if (size != null) size.minWidth = size.preferredWidth = 120f;
+            else rect.sizeDelta = new Vector2(120f, rect.sizeDelta.y);
+            var tip = button.GetComponent<ToolTip>();
+            if (tip == null) tip = button.gameObject.AddComponent<ToolTip>();
+            ShowChoice(i);
+            if (locked)
+            {
+                button.isInteractable = false;
+                title.color = new Color(title.color.r, title.color.g, title.color.b, 0.55f);
+                effect.gameObject.AddComponent<CanvasGroup>().alpha = 0.55f;
+                tip.toolTip = "";
+                tip.OnToolTip = () => $"Set by the launch options ({MoonoTweaksMenu.Choices[i][shown[i]]})";
+            }
+            else
+            {
+                tip.toolTip = "";
+                tip.OnToolTip = () => "Click for the next choice: " + string.Join(", ", MoonoTweaksMenu.Choices[i]);
+                button.onClick += () =>
+                {
+                    shown[i] = (shown[i] + 1) % MoonoTweaksMenu.Choices[i].Length;
+                    ShowChoice(i);
+                    Refresh();
+                };
+            }
+        }
+
+        void ShowChoice(int i)
+        {
+            var label = choiceButtons[i].GetComponentInChildren<LocText>();
+            label.text = MoonoTweaksMenu.Choices[i][shown[i]].ToUpperInvariant();
         }
 
         /// The game's small body text (style_bodyTextWhiteSmall: NotoSans-Regular, 12 pt, white),
@@ -374,7 +431,7 @@ namespace OniMoono.GameTweaks
             label.textWrappingMode = TMPro.TextWrappingModes.NoWrap;
         }
 
-        static bool Differ(bool[] a, bool[] b)
+        static bool Differ(int[] a, int[] b)
         {
             for (int i = 0; i < a.Length; i++)
                 if (a[i] != b[i]) return true;
@@ -399,7 +456,8 @@ namespace OniMoono.GameTweaks
             {
                 if (MoonoTweaksMenu.Locked[i]) continue;
                 shown[i] = MoonoTweaksMenu.Defaults[i];
-                toggles[i].ChangeState(shown[i] ? 1 : 0);
+                if (choiceButtons[i] != null) ShowChoice(i);
+                else toggles[i].ChangeState(shown[i]);
             }
             Refresh();
         }
@@ -408,7 +466,7 @@ namespace OniMoono.GameTweaks
         bool SaveShown()
         {
             var ids = new List<string>();
-            var values = new List<bool>();
+            var values = new List<int>();
             for (int i = 0; i < shown.Length; i++)
             {
                 if (MoonoTweaksMenu.Locked[i]) continue;

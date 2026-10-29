@@ -1,0 +1,29 @@
+# Drop The Salt (2961593835), class P.
+#
+# What it does: a postfix on Desalinator.StatesInstance.IsFull: when the desalinator's salt
+# storage is full, it drops the salt on the floor at once (the empty errand's completion) and
+# reports not full, so the desalinator never stops for a Duplicant to empty it.
+# How a player reaches it: a working Desalinator.
+# What changes: salt falls out of the desalinator as debris; no "needs emptying" errand.
+#
+# A Desalinator is built in the west corridor with 1000 kg of salt in its storage (its
+# capacity) and its storage-left counter updated in setup. Its state machine asks IsFull when
+# the counter changes: here the check is read once, which reports not full and drops the salt.
+from: early-base
+mods: [2961593835]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Desalinator\")", method: Build, args: [131763, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "all:Desalinator::[0].GetComponent<Storage>", method: AddOre, args: [Salt, 1000, 300, 255, 0, false, true]}}
+  - driver: {setup.call: {target: "all:Desalinator::[0].smi", method: UpdateStorageLeft}}
+steps:
+  - expect_state:
+      "all:Desalinator::[0].SaltStorageLeft": "<= 0"
+      "all:Desalinator::[0].smi.HasSalt": true
+  - expect_state:
+      "all:Desalinator::[0].smi.IsFull()": false
+  - expect_state:
+      "all:Desalinator::[0].smi.HasSalt": false
+      "all:Desalinator::[0].GetComponent<Storage>.MassStored()": 0
+      "sum:all:Pickupable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == Salt": ">= 999"
+  - run: {seconds: 10}
+  - expect: {duplicants: 3, buildings: {Desalinator: 1}}

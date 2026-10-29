@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2961593835-drop-the-salt.yaml",
+ "mods": [
+  "2961593835"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a full desalinator drops its salt and reports not full",
+ "updated": "2026-10-29",
+ "commit": "2d4aca2a",
+ "mod_dlls": {
+  "2961593835": {
+   "Drop the Salt.dll": "4ce50e26a80bfc350e52029c489c3c7ecd8b78ef565881e166729be80f10ee4d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-070935-7f670b10",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T07:09:36",
+    "lane": 2,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-143747-9481627a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T15:02:50",
+    "lane": 1,
+    "reference_run": "20261029-070935-7f670b10",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-143747-9481627a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T15:03:47",
+    "lane": 1,
+    "reference_run": "20261029-070935-7f670b10",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

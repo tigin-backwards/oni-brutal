@@ -1,0 +1,30 @@
+# Reveal everything! 显示全星图~ (3695988693), classes K, P, O.
+#
+# What it does: hotkeys preview what the colony has not explored yet, without keeping it
+# revealed: Shift+F7 shows the whole Spaced Out starmap (every hex at full reveal level: its
+# patches on ClusterMapScreen.GetRevealLevel, ClusterMapHex.SetRevealed and the visible-entity
+# queries), Shift+F8 shows the whole live simulation of every world (fog of war off, the camera
+# free of world bounds). Pressed again, each restores the saved state. PLib options pick the
+# keys and an introductory message per save.
+# How a player reaches it: the starmap (Z) and Shift+F7; Shift+F8 anywhere.
+# What changes: a look at the unexplored map.
+#
+# The starmap opens with its fog; Shift+F7 turns the preview on and the starmap shows every hex;
+# Shift+F7 again turns it off and the fog is back.
+from: early-base
+mods: [3695988693]
+options:
+  "3695988693": {Modifier: Shift, FunctionKey: F7, CanvasModifier: Shift, CanvasFunctionKey: F8, ShowNotification: false}
+steps:
+  - run: {seconds: 1}
+  - open: {key: Z}
+  - expect_state: {"ClusterMapScreen.Instance.gameObject.activeInHierarchy": true}
+  - expect_state: {"type:RevealStarMap.Runtime.RevealSessionCoordinator::IsStarMapPreviewActive": false}
+  - shot: {name: fogged, threshold: 0.08}
+  - key: {code: "Shift+F7"}
+  - run: {seconds: 0.2, speed: 1}
+  - expect_state: {"type:RevealStarMap.Runtime.RevealSessionCoordinator::IsStarMapPreviewActive": true}
+  - shot: {name: revealed, threshold: 0.08}
+  - key: {code: "Shift+F7"}
+  - run: {seconds: 0.2, speed: 1}
+  - expect_state: {"type:RevealStarMap.Runtime.RevealSessionCoordinator::IsStarMapPreviewActive": false}

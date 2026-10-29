@@ -1,0 +1,62 @@
+{
+ "spec": "mods/3695988693-reveal-everything.yaml",
+ "mods": [
+  "3695988693"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "on the starmap Shift+F7 turns the full-reveal preview on and off; the fogged and revealed starmap shots match",
+ "updated": "2026-10-29",
+ "commit": "32883c21",
+ "mod_dlls": {
+  "3695988693": {
+   "PLib.dll": "b0144f909e00044ebd3b5880676ceb3aba756d579ea3a63aebd7a34b0777fda6",
+   "RevealStarMap.dll": "daf70935a2e801eb26ce9f3db984476f22fc23736db00548fe7b641059eb408c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-012035-7f57cd57",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T02:43:57",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-025717-8ebf492c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T02:57:17",
+    "lane": 15,
+    "reference_run": "20261029-012035-7f57cd57",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "fogged": 0.001099,
+     "revealed": 0.00036
+    }
+   },
+   {
+    "run": "20261029-025717-8ebf492c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T02:58:19",
+    "lane": 15,
+    "reference_run": "20261029-012035-7f57cd57",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "fogged": 0.001108,
+     "revealed": 0.00094
+    }
+   }
+  ]
+ }
+}

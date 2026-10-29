@@ -1,0 +1,23 @@
+# Helium Reborn (2915321826), classes P, O; PLib options.
+#
+# What it does: re-enables the game's unused Helium and Liquid Helium elements with new
+# properties (options: gas SHC 8, TC 0.56; liquid SHC 12.537, TC 14.05, boiling at 130 K) and
+# replaces HighEnergyParticle.MovingUpdate: a radbolt flying through hydrogen or liquid
+# hydrogen fuses part of it into (liquid) helium, heated and carrying radiation germs, using
+# up its payload in proportion; elsewhere it loses 0.1 a cell and leaves a few germs.
+# How a player reaches it: shoot radbolts (Radbolt Generator, Spaced Out) through hydrogen.
+# What changes: a way to make helium.
+#
+# Both helium elements are enabled with the mod's properties; the colony plays on.
+from: early-base
+mods: [2915321826]
+steps:
+  - expect_state:
+      "ElementLoader.FindElementByName(\"Helium\").disabled": false
+      "ElementLoader.FindElementByName(\"Helium\").specificHeatCapacity": 8
+      "ElementLoader.FindElementByName(\"Helium\").thermalConductivity": 0.56
+      "ElementLoader.FindElementByName(\"LiquidHelium\").disabled": false
+      "ElementLoader.FindElementByName(\"LiquidHelium\").specificHeatCapacity": 12.537
+      "ElementLoader.FindElementByName(\"LiquidHelium\").highTemp": 130
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

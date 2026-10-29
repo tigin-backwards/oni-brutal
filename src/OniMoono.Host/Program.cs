@@ -138,6 +138,8 @@ namespace OniMoono.Host
                 MonoReflectionOrder.Install();
                 // Assembly.GetType takes '/' between nested types, as Mono's does (D44).
                 MonoNestedTypeNames.Install();
+                // Type.GetType in a patched method looks where Mono's does (D49).
+                MonoTypeByName.Install();
                 GameTweaks.GameTweaks.Install(effective.EnabledTweaks.ToHashSet(StringComparer.Ordinal));
                 if (!options.NoTweaksMenu) MoonoTweaksMenu.Install(effective, settings, settingsPath);
                 StateMachineSaveNames.Install(dataDir, AppContext.BaseDirectory);
@@ -1791,6 +1793,43 @@ namespace OniMoono.Host
                 }
                 return "found as on Mono";
             });
+            Check("Type.GetType by a bare name in a patched method (MonoTypeByName)", () =>
+            {
+                MonoTypeByName.Install();
+                // As SaveLoadRoot.LoadInternal, once a mod patches it, finds an optional component.
+                var module = System.Reflection.Emit.AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("CheckTypeByNameGame"), System.Reflection.Emit.AssemblyBuilderAccess.Run).DefineDynamicModule("CheckTypeByNameGame");
+                module.DefineType("CheckPort", TypeAttributes.Public).CreateType();
+                var root = module.DefineType("CheckRoot", TypeAttributes.Public);
+                var find = root.DefineMethod("Find", MethodAttributes.Public | MethodAttributes.Static, typeof(Type), [typeof(string), typeof(bool)]);
+                var il = find.GetILGenerator();
+                il.Emit(System.Reflection.Emit.OpCodes.Ldarg_0); il.Emit(System.Reflection.Emit.OpCodes.Ldarg_1);
+                il.Emit(System.Reflection.Emit.OpCodes.Call, typeof(Type).GetMethod(nameof(Type.GetType), [typeof(string), typeof(bool)])!);
+                il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                // Load calls Find, as SaveLoadRoot.Load calls LoadInternal.
+                var load = root.DefineMethod("Load", MethodAttributes.Public | MethodAttributes.Static, typeof(Type), [typeof(string), typeof(bool)]);
+                il = load.GetILGenerator();
+                il.Emit(System.Reflection.Emit.OpCodes.Ldarg_0); il.Emit(System.Reflection.Emit.OpCodes.Ldarg_1);
+                il.Emit(System.Reflection.Emit.OpCodes.Call, find);
+                il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                var rootType = root.CreateType();
+                var method = rootType.GetMethod("Find")!;
+                if (method.CreateDelegate<Func<string, bool, Type?>>()("CheckPort", false)?.Assembly != rootType.Assembly) throw new InvalidOperationException("the unpatched method did not find its own type");
+                var Find = rootType.GetMethod("Load")!.CreateDelegate<Func<string, bool, Type?>>();
+                new HarmonyLib.Harmony("OniMoono.Host.Check").Patch(method, postfix: new HarmonyLib.HarmonyMethod(typeof(Program), nameof(NoOpPostfix)));
+                var found = new[] { Find("CheckPort", false), Find("CheckPort", true), Find("System.String", false) };
+                if (found[0]?.Assembly != rootType.Assembly || found[1] != found[0] || found[2] != typeof(string))
+                    throw new InvalidOperationException($"found {string.Join(", ", found.Select(t => t?.AssemblyQualifiedName ?? "null"))}");
+                if (Find("CheckMissing", false) != null) throw new InvalidOperationException("found a type that does not exist");
+                try
+                {
+                    Find("CheckMissing", true);
+                    throw new InvalidOperationException("a missing type did not throw");
+                }
+                catch (TypeLoadException)
+                {
+                }
+                return "the patched method finds its assembly's type, as on Mono";
+            });
             Check("Fields and properties of a class whose method a mod patches, in Mono's order (MonoReflectionOrder)", () =>
             {
                 MonoReflectionOrder.Install();
@@ -2226,6 +2265,8 @@ namespace OniMoono.Host
 
         /// CheckRuntimeServices' patch of Enum.ToString(), as element mods write theirs.
         static void NoOp() { }
+
+        static void NoOpPostfix() { }
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
         static int ReflectedTarget(int v) => v + 2;
 

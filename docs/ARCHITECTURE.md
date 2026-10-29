@@ -1139,6 +1139,27 @@ game or mod code can notice. Each says how it is resolved, or why it is kept.
   RuntimeMethodInfo (`Delegate.CreateDelegate` refuses it), and GenericArguments as strings. A MethodInfo serialized alone (not in a delegate) still throws, as
   does a delegate to a dynamic method (Mono's throws NullReferenceException, its method having no
   declaring type).
+- **D49 Type.GetType by a name without an assembly.** Both runtimes look such a name up in the
+  caller's assembly, then in CoreLib (mscorlib), but take the caller differently. Mono
+  (`type_from_parsed_name` and `get_caller_no_system_or_reflection`, `metadata/icall.c`; Unity's
+  fork, branch `unity-6000.3-mbe`) walks past unmanaged frames, wrappers (a dynamic method is one)
+  and mscorlib's `System` and `System.Reflection` namespaces to the first other frame; CoreCLR
+  takes the method that called `GetType`. In a Harmony replacement, a dynamic method owned by
+  MonoMod's `DynamicMethodDefinition`, CoreCLR therefore searches 0Harmony. The game's
+  `SaveLoadRoot.LoadInternal` finds a building's optional components with
+  `Type.GetType(name)`; Colony Cuisine and Auto Kitchen patch it, and in ours every rocket
+  interior's ports then loaded without them ("AddComponent with a null type", 15 times in the
+  2minnow colony), the rockets' doors lost their targets and the crash screen opened as the save
+  loaded (`ColonyDiagnosticUtility.GetDiagnostic`: KeyNotFoundException); the original loads
+  them. **Resolved in** `MonoTypeByName`: a finalizer of `Type.GetType(string)`,
+  `(string, bool)` and `(string, bool, bool)`, for the whole process as on Mono, looks the name up
+  in the assembly Mono's walk gives when CoreCLR's lookup found nothing (or threw a
+  TypeLoadException) and that assembly is not the caller CoreCLR searched; a stack walk is made
+  only for a failed lookup. Not covered: a name that both 0Harmony (or CoreLib) and Mono's
+  assembly define is found in the former, as CoreCLR finds it; the overloads taking resolvers.
+  `--check-types` patches a game method that calls `Type.GetType` for a type of its own assembly,
+  and calls it from that assembly: CoreCLR alone threw "Could not resolve type 'CheckPort' in
+  assembly '0Harmony'".
 
 ## 3. The engine API (`OniMoono.UnityEngine`)
 

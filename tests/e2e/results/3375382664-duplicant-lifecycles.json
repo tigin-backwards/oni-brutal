@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3375382664-duplicant-lifecycles.yaml",
+ "mods": [
+  "3375382664"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Aging trait and old-age death exist; Duplicants carry Aging",
+ "updated": "2026-10-29",
+ "commit": "2d4aca2a",
+ "mod_dlls": {
+  "3375382664": {
+   "Duplicant_Lifecycles_Updated.dll": "d5ef07f89c36f070e77f133e5599edff9eab783ca25c89874f9a5cb90af5f9dc"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-134140-71c6d6eb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T13:41:40",
+    "lane": 1,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-143747-9481627a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T15:21:22",
+    "lane": 1,
+    "reference_run": "20261029-134140-71c6d6eb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-143747-9481627a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T15:22:45",
+    "lane": 1,
+    "reference_run": "20261029-134140-71c6d6eb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

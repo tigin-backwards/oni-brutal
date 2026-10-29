@@ -1,0 +1,21 @@
+# Duplicant Lifecycles Updated (3375382664), classes P, O.
+#
+# What it does: every (non-bionic, by option) Duplicant gets an Aging trait when it spawns:
+# with the cycles it has lived it passes through Youthful, Middle Aged, Elderly and Dying eras,
+# each with an attribute multiplier, and past the elderly cutoff it may die of old age (a new
+# death, "Old Age"). An Immortal trait can come from the Neural Vacillator. PLib options set
+# the eras, multipliers and death chance.
+# How a player reaches it: the Mods screen's options; any Duplicant's traits.
+# What changes: Duplicants age, gain or lose attributes with age, and eventually die.
+#
+# The traits and the death exist, and the colony's non-bionic Duplicants carry Aging after the
+# save loads.
+from: early-base
+mods: [3375382664]
+steps:
+  - expect_state:
+      "Db.Get().traits.TryGet(\"DuplicantLifecycles.Aging\").Id": DuplicantLifecycles.Aging
+      "Db.Get().Deaths.TryGet(\"DuplicantLifecycles.Aging.OldAgeDeath\").Id": DuplicantLifecycles.Aging.OldAgeDeath
+      "count:Components.LiveMinionIdentities.Items[*] if .GetComponent<Traits>.HasTrait(\"DuplicantLifecycles.Aging\") == true and .model.Name == Minion": [">= 1", "== original"]
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

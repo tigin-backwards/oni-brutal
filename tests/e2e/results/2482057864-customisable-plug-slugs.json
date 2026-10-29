@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2482057864-customisable-plug-slugs.yaml",
+ "mods": [
+  "2482057864"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with options set, 2000 W slug generators and a refined metal diet; a slug spawned",
+ "updated": "2026-10-29",
+ "commit": "960fa78d",
+ "mod_dlls": {
+  "2482057864": {
+   "SmugSlugsMerged.dll": "9459df69de2d55a50387f28fc6e18e45c1339612f3a0c66153c02f0891fb6800"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-010732-2e8b7c55",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T02:10:34",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-024514-537d9d0f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T03:01:02",
+    "lane": 16,
+    "reference_run": "20261029-010732-2e8b7c55",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-024514-537d9d0f",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T03:01:52",
+    "lane": 16,
+    "reference_run": "20261029-010732-2e8b7c55",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

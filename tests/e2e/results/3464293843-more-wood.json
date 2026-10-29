@@ -1,0 +1,56 @@
+{
+ "spec": "mods/3464293843-more-wood.yaml",
+ "mods": [
+  "3464293843"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Wood Deer prefab's shearing drop is 900 kg of wood (the option, logged), and a deer set down carries it",
+ "updated": "2026-10-29",
+ "commit": "72b42f9f",
+ "mod_dlls": {
+  "3464293843": {
+   "PLib.dll": "93073fdf44dbe9fd7c0afe19e56341be862cc2d732090dee30999cf60e2e160d",
+   "║ⁿ┬╣-─╛▓─╟┐╗».dll": "cf96fab7c8f888cb77afc76ec0f05d1853ade4d233a0f157e3903846fe662da6"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-112540-575b1ae3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T11:45:34",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-011245-ebdbf277",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T01:12:45",
+    "lane": 14,
+    "reference_run": "20261027-112540-575b1ae3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-011245-ebdbf277",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T01:13:54",
+    "lane": 14,
+    "reference_run": "20261027-112540-575b1ae3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

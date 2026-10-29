@@ -1,0 +1,24 @@
+# Ethanol Rocket Engine Fixed (2646143900), classes B, O.
+#
+# What it does: adds an Ethanol Engine rocket module (EthanolEngineCluster in Spaced Out, 7x5,
+# the Petroleum Engine's art, burning Ethanol), unlocked by Improved Hydrocarbon Propulsion
+# and listed in the rocket's module selection after the Petroleum Engine; PLib options tint it
+# green and give it a presence port.
+# How a player reaches it: research the tech; a rocket platform's module selection.
+# What changes: a rocket engine for ethanol.
+#
+# The tech is researched in setup. The module is in the selection screen's order, and its
+# prefab burns Ethanol.
+from: early-base
+mods: [2646143900]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"BetterHydroCarbonPropulsion\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"BetterHydroCarbonPropulsion\").unlockedItemIDs": {contains: EthanolEngineCluster}
+      "SelectModuleSideScreen.moduleButtonSortOrder": {"contains": "EthanolEngineCluster"}
+      "Assets.GetPrefab(\"EthanolEngineCluster\").GetComponent<RocketEngineCluster>.fuelTag.Name": "Ethanol"
+      "Assets.GetBuildingDef(\"EthanolEngineCluster\").WidthInCells": 7

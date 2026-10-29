@@ -292,6 +292,11 @@ namespace SemanticsProbe
                 ResearchPan.Install(harmony);
                 return;
             }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "scrollgeo")
+            {
+                ScrollGeo.Install(harmony);
+                return;
+            }
             if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "vitalsopen")
             {
                 VitalsOpen.Install(harmony);

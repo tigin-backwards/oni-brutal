@@ -667,3 +667,9 @@ what it logs:
   values, every exponent, the smallest scale with an inverse, by bisection). `is-check.py diff
   ORIG OURS` compares players; `is-check.py table LOG OUT` rebuilds the engine's
   `Math/InverseScale.bin` from a `full` run.
+- `scrollgeo` (`ScrollGeo.cs`, `SG`): in any screen, after each `KScrollRect.LateUpdate` of a
+  scroll rect whose path contains `PROBE_SG_NAME` (default `SideScreen`), when anything changed:
+  its normalized position, the content's world corners, the view's matrices and every level of
+  the content and the view to the root, as float bits. Install it in a spec that opens the
+  screen, as `vitalsopen`, and diff the two players' last lines to find the first input that
+  differs.

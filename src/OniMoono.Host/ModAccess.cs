@@ -367,6 +367,7 @@ namespace OniMoono.Host
                 using var pe = new PEReader(File.OpenRead(path));
                 if (!pe.HasMetadata) return null;
                 var md = pe.GetMetadataReader();
+                HashSet<Type>? subclassed = null;
                 foreach (var handle in md.TypeReferences)
                     if (GameType(md, handle) is { } type && !type.IsVisible) return type.FullName;
                 foreach (var handle in md.MemberReferences)
@@ -386,7 +387,7 @@ namespace OniMoono.Host
                     foreach (var candidate in parent.GetMember(name, all))
                     {
                         if (parameters >= 0 && candidate is MethodBase m && m.GetParameters().Length != parameters) continue;
-                        if (!IsReachable(candidate)) return $"{parent.FullName}.{name}";
+                        if (!IsReachable(candidate, subclassed ??= Subclassed(md))) return $"{parent.FullName}.{name}";
                     }
                 }
             }
@@ -404,13 +405,44 @@ namespace OniMoono.Host
             return blob.ReadCompressedInteger();
         }
 
-        /// Public members, and protected ones (a mod's subclass reaches them as any subclass does).
-        static bool IsReachable(MemberInfo member) => member switch
+        /// Public members, and protected ones of a game class the mod derives from (a mod's
+        /// subclass reaches them as any subclass does). A protected member of a class the mod does
+        /// not derive from is unreachable: CoreCLR throws MethodAccessException or
+        /// FieldAccessException where Mono runs it (Public Cots reads the protected
+        /// StateMachine.GenericInstance.smi from a postfix).
+        static bool IsReachable(MemberInfo member, HashSet<Type> subclassed) => member switch
         {
-            FieldInfo f => f.IsPublic || f.IsFamily || f.IsFamilyOrAssembly,
-            MethodBase m => m.IsPublic || m.IsFamily || m.IsFamilyOrAssembly,
+            FieldInfo f => f.IsPublic || (f.IsFamily || f.IsFamilyOrAssembly) && Derives(f.DeclaringType, subclassed),
+            MethodBase m => m.IsPublic || (m.IsFamily || m.IsFamilyOrAssembly) && Derives(m.DeclaringType, subclassed),
             _ => true,
         };
+
+        static bool Derives(Type? declaring, HashSet<Type> subclassed) =>
+            declaring != null && subclassed.Contains(declaring.IsGenericType ? declaring.GetGenericTypeDefinition() : declaring);
+
+        /// The game classes the mod's classes derive from, directly or through others (generic
+        /// classes as their definitions).
+        static HashSet<Type> Subclassed(MetadataReader md)
+        {
+            var result = new HashSet<Type>();
+            foreach (var handle in md.TypeDefinitions)
+            {
+                var definition = md.GetTypeDefinition(handle);
+                // A base among the mod's own classes leads, through its own base, to the game's.
+                for (int depth = 0; depth < 64 && !definition.BaseType.IsNil && definition.BaseType.Kind == HandleKind.TypeDefinition; depth++)
+                    definition = md.GetTypeDefinition((TypeDefinitionHandle)definition.BaseType);
+                if (definition.BaseType.IsNil) continue;
+                var game = definition.BaseType.Kind switch
+                {
+                    HandleKind.TypeReference => GameType(md, (TypeReferenceHandle)definition.BaseType),
+                    HandleKind.TypeSpecification => GameType(md, GenericDefinition(md, (TypeSpecificationHandle)definition.BaseType)),
+                    _ => null,
+                };
+                for (var t = game; t != null; t = t.BaseType)
+                    if (!result.Add(t.IsGenericType ? t.GetGenericTypeDefinition() : t)) break;
+            }
+            return result;
+        }
 
         /// A type reference into a loaded game assembly, or null.
         static Type? GameType(MetadataReader md, TypeReferenceHandle handle)

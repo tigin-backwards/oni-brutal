@@ -1068,6 +1068,53 @@ namespace OniMoono.Host
                     try { Directory.Delete(dir, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
                 }
             });
+            Check("A mod calling a protected game method of a class it does not derive from (ModAccess)", () =>
+            {
+                ModAccess.Install();
+                var dir = Directory.CreateTempSubdirectory("oni-moono-check-").FullName;
+                try
+                {
+                    var kmb = AppDomain.CurrentDomain.GetAssemblies().Select(a => a.GetName().Name is "Assembly-CSharp" or "Assembly-CSharp-firstpass" ? a.GetType("KMonoBehaviour") : null).Single(t => t != null)!;
+                    var onSpawn = kmb.GetMethod("OnSpawn", BindingFlags.Instance | BindingFlags.NonPublic, Type.EmptyTypes) ?? throw new InvalidOperationException("KMonoBehaviour.OnSpawn is not in the game");
+                    if (!onSpawn.IsFamily) throw new InvalidOperationException("KMonoBehaviour.OnSpawn is not protected");
+                    // As Public Cots' postfix reads the protected StateMachine.GenericInstance.smi:
+                    // Outsider calls it from a class that derives from nothing of the game's;
+                    // Subclass from a KMonoBehaviour, which CoreCLR allows as it is.
+                    Assembly Mod(string name, bool subclass)
+                    {
+                        using var assembly = Cecil.AssemblyDefinition.CreateAssembly(new Cecil.AssemblyNameDefinition(name, new Version(1, 0)), name, Cecil.ModuleKind.Dll);
+                        var module = assembly.MainModule;
+                        var probe = new Cecil.TypeDefinition("", "Probe", Cecil.TypeAttributes.Public, subclass ? module.ImportReference(kmb) : module.TypeSystem.Object);
+                        module.Types.Add(probe);
+                        var call = new Cecil.MethodDefinition("Call", Cecil.MethodAttributes.Public | Cecil.MethodAttributes.Static, module.TypeSystem.Int32);
+                        call.Parameters.Add(new Cecil.ParameterDefinition(module.TypeSystem.Boolean));
+                        call.Parameters.Add(new Cecil.ParameterDefinition(subclass ? probe : module.ImportReference(kmb)));
+                        probe.Methods.Add(call);
+                        var il = call.Body.GetILProcessor();
+                        var skip = il.Create(Cecil.Cil.OpCodes.Ldc_I4_7);
+                        il.Emit(Cecil.Cil.OpCodes.Ldarg_0);
+                        il.Emit(Cecil.Cil.OpCodes.Brfalse, skip);
+                        il.Emit(Cecil.Cil.OpCodes.Ldarg_1);
+                        il.Emit(Cecil.Cil.OpCodes.Callvirt, module.ImportReference(onSpawn));
+                        il.Append(skip);
+                        il.Emit(Cecil.Cil.OpCodes.Ret);
+                        var path = Path.Combine(dir, name + ".dll");
+                        assembly.Write(path);
+                        return ModAccess.LoadFrom(path);
+                    }
+                    bool Opened(Assembly a) => a.GetCustomAttributesData().Any(d => d.AttributeType.Name == "IgnoresAccessChecksToAttribute");
+                    var outsider = Mod("OniMoonoCheckProtectedOutsider", false);
+                    var subclass = Mod("OniMoonoCheckProtectedSubclass", true);
+                    if (!Opened(outsider)) throw new InvalidOperationException("the outsider was loaded with access checks on");
+                    if (Opened(subclass)) throw new InvalidOperationException("the subclass was loaded with access checks off");
+                    var result = (int)outsider.GetType("Probe")!.GetMethod("Call")!.Invoke(null, [false, null])!;
+                    return result == 7 ? "the outsider runs, as on Mono; the subclass loads as it is" : throw new InvalidOperationException($"returned {result}");
+                }
+                finally
+                {
+                    try { Directory.Delete(dir, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+                }
+            });
             Check("Reflection writing a mod's static readonly field after its type is initialized (ModAccess)", () =>
             {
                 ModAccess.Install();

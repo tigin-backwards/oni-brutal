@@ -248,7 +248,13 @@ game or mod code can notice. Each says how it is resolved, or why it is kept.
   KSerialization saves: its default opt-out mode saves every public field and property). The mod
   still sees itself as loaded from its file: `Assembly.Location` reports the file (mods find
   their folders from it) and its folder is searched for its references. Other mods load as
-  before.
+  before. A protected member counts as reachable only when one of the mod's classes derives
+  from its class, as CoreCLR's check has it: Public Cots and Public Luxury Beds read the
+  protected `StateMachine.GenericInstance.smi` from a postfix of `SleepChoreMonitor`'s
+  `UpdateBed`, which CoreCLR refused (MethodAccessException, the crash screen as the save
+  loaded) while the original runs it. `--check-types` loads a mod calling the protected
+  `KMonoBehaviour.OnSpawn` from a class of its own (loaded with access checks off, and run) and
+  one calling it from a subclass (loaded as it is).
 - **D12 `callvirt` to a static method.** Mono compiles one as a call; CoreCLR's JIT rejects the
   method ("Method not found: '?'"). C# compilers never emit it, but Harmony transpilers that
   swap an instance call for a static helper and keep the opcode do (Mod Updater's patch of

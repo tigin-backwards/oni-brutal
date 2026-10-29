@@ -1,0 +1,33 @@
+{
+ "spec": "mods/2936219269-customize-your-wallpaper.yaml",
+ "mods": [
+  "2936219269"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-29",
+ "commit": "2d4aca2a",
+ "mod_dlls": {
+  "2936219269": {
+   "╫╘╢¿╥σ╟╜╓╜Customize your wallpaper.dll": "9d84c30f023840c776c7cb92c9af2ff4fa802ce50eb62f17a5536653d9538bf1"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-073906-4ac6cb82",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-29T08:16:50",
+    "lane": 8,
+    "reasons": [
+     "step 5: E2eDriver ui.wait {\"path\": \"**/DetailsScreen/**/Sign Side Screen\", \"cond\": \"stable\", \"frames\": 300}: timeout: stable not met within 300 frames"
+    ],
+    "signatures": 0
+   }
+  ],
+  "ours": []
+ }
+}

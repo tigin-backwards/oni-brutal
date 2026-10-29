@@ -1,0 +1,32 @@
+# 喵喵蛋 (Meow Meow Egg) (2996735249), classes B, S: the same author's sign as Flying Fantasy
+# (2883456864), with the same code.
+#
+# What it does: a 2x3 park sign, 喵喵蛋 (MM20230630GG1), in the Furniture menu, with
+# 28 pictures; a side screen cloned from the monument's lists them as buttons, and a click shows
+# that picture (SelectableSign.selectedIndex).
+# How a player reaches it: the build menu (Furniture), then the sign's side screen.
+# What changes: a decorative sign whose picture can be chosen.
+#
+# One built by setup in the dug-out corridor west of the printing pod is selected: its side
+# screen lists the pictures (dumped), and a click on the third shows picture 02.
+#
+# Broken upstream: its DetailsScreen.OnPrefabInit postfix looks for the field
+# sideScreenContentBody, which the game no longer has (it is sideScreen2ContentBody), so it
+# adds no side screen at all: the sign's Config tab reads "There is no configuration
+# available for this object" and the picture can never be chosen.
+from: early-base
+mods: [2996735249]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"MM20230630GG1\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {MM20230630GG1: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: MM20230630GG1}
+  - ui_wait: {path: "**/DetailsScreen/**/标志侧屏*", cond: stable}
+  - expect_ui:
+      "**/标志侧屏*/**/Grid/*": {count: 28}
+  - ui_dump: {name: signs, root: "**/标志侧屏*"}
+  - click: {ui: "**/标志侧屏*/**/Grid/*", index: 2}
+  - expect_state:
+      "selected:GetComponent<翻飞幻梦Flying_Fantasy.SelectableSign>.selectedIndex": 2

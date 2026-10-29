@@ -1,0 +1,33 @@
+{
+ "spec": "mods/2981889053-xia-weapons.yaml",
+ "mods": [
+  "2981889053"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-29",
+ "commit": "2d4aca2a",
+ "mod_dlls": {
+  "2981889053": {
+   "╓╨╣·▒°╞≈.dll": "2a8b6fbb7e3fb85ae282f4122eb9c8bf318edd3185a570d77f8d828b1fe1e148"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-073906-4ac6cb82",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-29T08:22:26",
+    "lane": 8,
+    "reasons": [
+     "step 5: E2eDriver ui.wait {\"path\": \"**/DetailsScreen/**/\\u6807\\u5fd7\\u4fa7\\u5c4f*\", \"cond\": \"stable\", \"frames\": 300}: timeout: stable not met within 300 frames"
+    ],
+    "signatures": 0
+   }
+  ],
+  "ours": []
+ }
+}

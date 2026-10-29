@@ -369,6 +369,12 @@ broken.update({
 broken.update({
     '3038061222': 'broken upstream: its Mars start world guarantees eight oil pocket templates that worldgen cannot place ("Guaranteed placement failure on expansion1::worlds/Mars"), so a new game of the Mars cluster fails to generate (seeds 12345 and 1); spec tests/e2e/mods/3038061222-mars.yaml',
 })
+# Found by the e2e specs of ranks 1966 to 2063: the spec fails the same way in the original.
+broken.update({
+    '2996735249': 'broken upstream: its side screen is never added (it looks for DetailsScreen.sideScreenContentBody, which the game no longer has), so the sign\'s picture cannot be chosen (spec tests/e2e/mods/2996735249-meow-meow-egg.yaml)',
+    '2936219269': 'broken upstream: its side screen is never added (it looks for DetailsScreen.sideScreenContentBody, which the game no longer has), so the wallpaper\'s picture cannot be chosen (spec tests/e2e/mods/2936219269-customize-your-wallpaper.yaml)',
+    '2981889053': 'broken upstream: its side screen is never added (it looks for DetailsScreen.sideScreenContentBody, which the game no longer has), so the weapon\'s picture cannot be chosen (spec tests/e2e/mods/2981889053-xia-weapons.yaml)',
+})
 # Broken in the original only: ours happens to load it, so its note says how the original fails
 # and why ours does not (no "same in the original").
 broken.update({

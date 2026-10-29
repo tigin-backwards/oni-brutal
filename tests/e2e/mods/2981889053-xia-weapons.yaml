@@ -1,0 +1,33 @@
+# 夏国兵器 (Xia Weapons) (2981889053), classes B, S: the same author's signs as Flying Fantasy
+# (2883456864), with the same side-screen code.
+#
+# What it does: two Furniture-menu decorations: a 2x1 weapon rack (MM20230527001) and a 1x1
+# weapon (MM20230527002) with 18 pictures; a side screen cloned from the monument's lists them
+# as buttons, and a click shows that picture (SelectableSign.selectedIndex).
+# How a player reaches it: the build menu (Furniture), then the weapon's side screen.
+# What changes: decorative weapons whose picture can be chosen.
+#
+# Both are built by setup in the dug-out corridor west of the printing pod; the weapon is
+# selected: its side screen lists the pictures (dumped), and a click on the third shows
+# picture 03.
+#
+# Broken upstream: its DetailsScreen.OnPrefabInit postfix looks for the field
+# sideScreenContentBody, which the game no longer has (it is sideScreen2ContentBody), so it
+# adds no side screen at all, and the picture can never be chosen.
+from: early-base
+mods: [2981889053]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"MM20230527001\")", method: Build, args: [{"$": "Grid.XYToCell(115, 207)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"MM20230527002\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {MM20230527001: 1, MM20230527002: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: MM20230527002}
+  - ui_wait: {path: "**/DetailsScreen/**/标志侧屏*", cond: stable}
+  - expect_ui:
+      "**/标志侧屏*/**/Grid/*": {count: 18}
+  - ui_dump: {name: signs, root: "**/标志侧屏*"}
+  - click: {ui: "**/标志侧屏*/**/Grid/*", index: 2}
+  - expect_state:
+      "selected:GetComponent<中国兵器.SelectableSign>.selectedIndex": 2

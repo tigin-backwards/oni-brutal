@@ -1,0 +1,31 @@
+# 自定义墙纸Customize your wallpaper (2936219269), classes B, S: the same author's sign code as
+# Flying Fantasy (2883456864).
+#
+# What it does: a 1x1 wallpaper (CUSTOMIZEYOURWALLAPAPER) in the Furniture menu with seven
+# pictures; a side screen cloned from the monument's lists them as buttons, and a click shows
+# that picture (SelectableSign.selectedIndex).
+# How a player reaches it: the build menu (Furniture), then the wallpaper's side screen.
+# What changes: a decorative wallpaper whose picture can be chosen.
+#
+# One built by setup in the dug-out corridor west of the printing pod is selected: its side
+# screen lists the pictures (dumped), and a click on the third shows picture 02.
+#
+# Broken upstream: its DetailsScreen.OnPrefabInit postfix looks for the field
+# sideScreenContentBody, which the game no longer has (it is sideScreen2ContentBody), so it
+# adds no side screen at all, and the picture can never be chosen.
+from: early-base
+mods: [2936219269]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"CUSTOMIZEYOURWALLAPAPER\")", method: Build, args: [{"$": "Grid.XYToCell(112, 208)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {CUSTOMIZEYOURWALLAPAPER: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 208], select: CUSTOMIZEYOURWALLAPAPER}
+  - ui_wait: {path: "**/DetailsScreen/**/Sign Side Screen", cond: stable}
+  - expect_ui:
+      "**/Sign Side Screen/**/Grid/*": {count: 7}
+  - ui_dump: {name: signs, root: "**/Sign Side Screen"}
+  - click: {ui: "**/Sign Side Screen/**/Grid/*", index: 2}
+  - expect_state:
+      "selected:GetComponent<自定义墙纸Customize_your_wallpaper.SelectableSign>.selectedIndex": 2

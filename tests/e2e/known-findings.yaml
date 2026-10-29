@@ -30,12 +30,16 @@
 - id: scroll-normalized-position
   description: >-
     A ScrollRect whose content exactly fits its viewport reports a normalizedPosition axis (and
-    its Scrollbar's value) of 1 in ours, 0 in the original: which one is decided by the
+    its Scrollbar's value) of 1 in one player and 0 in the other: which one is decided by the
     sub-ulp rounding of the transformed corners (docs/cleanroom/ugui.md, ScrollRect measured).
-    A disabled one (the Consumables screen's per-row scrollers) reads the same.
-  link: tests/e2e/mods/3468585385-blueprints-expanded.yaml
+    The engine's transforms now match the original's bit for bit, so it is left only where an
+    input differs in its last bits: the table screens (Vitals, Consumables), whose first update
+    runs under scale 0 and moves the content by that frame's time, and the details screen's side
+    screens, whose SideScreen anchoredPosition x is -6.899994 in ours, -6.8999634 in the original.
+  link: docs/cleanroom/ugui.md
   component: [ScrollRect, KScrollRect, Scrollbar, ScrollRect(off), KScrollRect(off)]
   fields: [normalizedPosition, value]
+  path: ['**/*TableScreen/**', '**/DetailsScreen/SideScreen/**']
 
 - id: unused-input-caret-layout
   description: >-

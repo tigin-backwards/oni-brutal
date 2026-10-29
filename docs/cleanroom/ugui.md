@@ -737,6 +737,11 @@ screen opened with a scrollbar of size 0.94 to 0.98 in about half of our runs, 1
   ("Transform hierarchy to the bit" below), so the grown bounds move by an ulp in ours exactly
   when they do in the original. Both remain timing-dependent: the stale size shows in the
   original too (3 runs of 12, sizes 0.995 to 0.9985), and in either player after a slow frame.
+  Of the 73 specs that cited `scroll-normalized-position`, 65 played without it after that
+  change; the rest are table screens (this timing) and the details screen's side screens, where
+  an input already differs: Better Checkpoints' AccessControlSideScreen (`scrollgeo`) has its
+  SideScreen at anchoredPosition x −6.899994 in ours and −6.8999634 in the original, so the
+  content's corners, the view's matrices and the normalized position follow from it.
 - **Schedule & Priority Screen Expander** (3774780988, measured 2026-10-26 with `vitalsopen` in
   its spec, `PROBE_VO_SCREEN=VitalsTableScreen`) opens the same Vitals screen, and its dump
   differs from one original run to the next. The screen's first update is under scale 0 in both

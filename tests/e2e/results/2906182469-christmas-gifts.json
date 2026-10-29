@@ -1,0 +1,60 @@
+{
+ "spec": "mods/2906182469-christmas-gifts.yaml",
+ "mods": [
+  "2906182469"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Furniture menu card (shot); a built gift pile",
+ "updated": "2026-10-29",
+ "commit": "2d4aca2a",
+ "mod_dlls": {
+  "2906182469": {
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
+   "R_╩Ñ╡«└±╬∩.dll": "86b178777419da77fed61995162d341c24d42cb274df64025fbe977a7a613081"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-074432-9668621b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T08:08:04",
+    "lane": 3,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-143747-9481627a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T14:59:24",
+    "lane": 1,
+    "reference_run": "20261029-074432-9668621b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.007747
+    }
+   },
+   {
+    "run": "20261029-143747-9481627a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T15:00:14",
+    "lane": 1,
+    "reference_run": "20261029-074432-9668621b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.007747
+    }
+   }
+  ]
+ }
+}

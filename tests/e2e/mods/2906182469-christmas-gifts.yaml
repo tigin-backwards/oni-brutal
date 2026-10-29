@@ -1,0 +1,24 @@
+# R_圣诞礼物_Christmas_Gifts (2906182469), classes B, S.
+#
+# What it does: adds the 圣诞礼物 Christmas Gifts (R024GG1, its own kanim, any buildable material,
+# decor +3 in 3), a decoration for the Furniture menu, available without research, with a side
+# screen of buttons that pick which of its looks it shows.
+# How a player reaches it: the Furniture menu; select a built one.
+# What changes: a decorative pile of gifts.
+#
+# The Furniture menu offers it (its card is shot); one is built in the east corridor.
+from: early-base
+mods: [2906182469]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"R024GG1\")", method: Build, args: [131786, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"R024GG1\").BaseDecor": 3
+  - run: {seconds: 3}
+  - expect: {buildings: {R024GG1: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Furniture"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/R024GG1 Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/R024GG1 Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}

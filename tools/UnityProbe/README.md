@@ -492,6 +492,22 @@ the player's (it focuses the largest mapped window). Check the rules with
 `tools/UnityProbe/tt-check.py rule LOG`, and compare the players with `tt-check.py diff ORIG
 OURS`. `docs/cleanroom/imgui.md` ("GUI.tooltip") records what it measured.
 
+With `PROBE_SCENARIO=researchpan` only the research-pan probe runs (`ResearchPan.cs`, lines `RP
+…`, in a colony): Harmony patches on `ResearchScreen.Show` and `Update` log the content's pan,
+zoom, rect and world position, the pointer and the frame time for the first 120 Updates after
+the screen opens. Run it with `SemanticsProbe.dll` in a copy of OniMcp's mod folder (as the
+canvas order probe) and a spec that opens the research screen. `PROBE_RP_SLEEP=MS` makes the
+frames around the opening that long, as the original's are in the e2e runner (about 450 ms).
+Found with Instant Research Fixed (3034422919), whose screen opened at another pan in ours: the
+pan follows the frame times (Klei's Update steps by them), not the engine.
+
+With `PROBE_SCENARIO=cardcollapse` only the card-collapse probe runs (`CardCollapse.cs`, lines
+`CC …`, in a colony): each change of `Input.mousePosition`, KScreen pointer enters and exits,
+`ProductInfoScreen.ToggleExpandedInfo` and OniMcp's screenshots, by frame. Run it as the
+research-pan probe, with a spec that opens a building's card and shoots it. Found with Christmas
+Tree (2906165124): both players collapse the card in the frame the pointer leaves the build
+menu; whether the e2e runner's shot after that move caught it depended on timing.
+
 With `PROBE_SCENARIO=meshshrink` only the mesh probe runs (`MeshShrink.cs`, lines `MS …`, 10 s
 into the main menu, a few frames). A mesh with the triangles of two quads gets fewer vertices
 (the setter, every `SetVertices` overload, after `Clear`), channels of the wrong length and

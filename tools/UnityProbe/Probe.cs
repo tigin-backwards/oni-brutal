@@ -265,6 +265,17 @@ namespace SemanticsProbe
                 ProjectionMath.Run();
                 return;
             }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "cardcollapse")
+            {
+                CardCollapse.Install(harmony);
+                go.AddComponent<CardCollapse>();
+                return;
+            }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "researchpan")
+            {
+                ResearchPan.Install(harmony);
+                return;
+            }
             if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "vitalsopen")
             {
                 VitalsOpen.Install(harmony);

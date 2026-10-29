@@ -1,0 +1,27 @@
+# Mutations: Cross-Pollinated (3767758558), classes P, S, O, M, user menu.
+#
+# What it does: adds five plant mutations (Fibrous, Cryophilic, Thermophilic, Stabilized and a
+# light-band one, MutEx_*), a Receptive mutation that the first mutant seed gets and that
+# crosses with pollinators' donors into named hybrids (MutEx_Hyb_A_B, registered at start-up;
+# a user-menu pair "Donor A/B" on Receptive plants), Receptive care packages and starting pod
+# picks, and underwater pollination by Pacu and Kelpoles. A PLib option prepares saves for
+# uninstalling.
+# How a player reaches it: mutant seeds, pollinators, the printing pod; a Receptive plant's
+# user menu.
+# What changes: more mutations and breedable hybrids.
+#
+# The mutations and the hybrids exist (as many as in the original), with the Receptive one and
+# the cross-pollination effect; its start-up line is in the log.
+from: early-base
+mods: [3767758558]
+require_log: ['\[Mutations: Cross-Pollinated\] Version']
+steps:
+  - expect_state:
+      "Db.Get().PlantMutations.TryGet(\"MutEx_Fibrous\").Id": MutEx_Fibrous
+      "Db.Get().PlantMutations.TryGet(\"MutEx_Receptive\").Id": MutEx_Receptive
+      "Db.Get().PlantMutations.TryGet(\"MutEx_Cryophilic\").Id": MutEx_Cryophilic
+      "Db.Get().effects.TryGet(\"MutEx_CrossPollinated\").Id": MutEx_CrossPollinated
+      "count:Db.Get().PlantMutations.resources[*] if .Id.StartsWith(\"MutEx_Hyb_\") == true": [">= 1", "== original"]
+      "Db.Get().PlantMutations.Count": "== original"
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

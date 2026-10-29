@@ -1,0 +1,56 @@
+{
+ "spec": "mods/3767758558-mutations-cross-pollinated.yaml",
+ "mods": [
+  "3767758558"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the new mutations, hybrids and cross-pollination effect exist",
+ "updated": "2026-10-29",
+ "commit": "2d4aca2a",
+ "mod_dlls": {
+  "3767758558": {
+   "MutationExpansion.dll": "c35cfdd80b2b7080582e8c568cceb33ff22bea1b71c84af5543b9b5a10591928",
+   "PLib.dll": "28d17ee798b06211d08688402a2d710ae6f73b55f9734e599b305732dcab9d70"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-112259-0d44a806",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T12:53:47",
+    "lane": 1,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-143747-9481627a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T15:49:15",
+    "lane": 1,
+    "reference_run": "20261029-112259-0d44a806",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-143747-9481627a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T15:50:19",
+    "lane": 1,
+    "reference_run": "20261029-112259-0d44a806",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

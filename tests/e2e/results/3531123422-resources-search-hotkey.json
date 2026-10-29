@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3531123422-resources-search-hotkey.yaml",
+ "mods": [
+  "3531123422"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Ctrl+F opens All Resources; a typed search filters it (shot); its auto-focus loses to the build menu search in both players",
+ "updated": "2026-10-29",
+ "commit": "e5cbc118",
+ "mod_dlls": {
+  "3531123422": {
+   "ResourcesSearchHotkey.dll": "87b854a1d2e41bc5a08118e336df910b65b2e77b9ed56d5422192ecad73ab07c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-162658-66f2263e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T16:44:13",
+    "lane": 1,
+    "signatures": 1
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-164749-3dfc6f64",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T16:54:11",
+    "lane": 1,
+    "reference_run": "20261029-162658-66f2263e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "resources": 0.000199
+    }
+   },
+   {
+    "run": "20261029-164749-3dfc6f64",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T16:55:03",
+    "lane": 1,
+    "reference_run": "20261029-162658-66f2263e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "resources": 0.000199
+    }
+   }
+  ]
+ }
+}

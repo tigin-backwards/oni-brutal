@@ -1,0 +1,25 @@
+# Resources Search Hotkey (3531123422), classes K, S, O.
+#
+# What it does: two PLib key bindings, Ctrl+F (Manage Resources) and Ctrl+D (Manage
+# Diagnostics), open the All Resources and All Diagnostics screens; those screens and the
+# Database select their search field when shown and remember the last search across closing
+# (PLib options turn each part off).
+# How a player reaches it: the hotkeys; the screens' search fields.
+# What changes: the resource list opens from the keyboard, with the last filter kept.
+#
+# Ctrl+F opens All Resources. Its search field does not end up focused in either player: Ctrl+F
+# also focuses the build menu's own search field, which takes the selection. "sand" is typed
+# into the field and the filtered list is shot. (Closing the screen again was not reached by a
+# click or Escape here, so the remembered search is not checked.)
+from: early-base
+mods: [3531123422]
+steps:
+  - key: {code: "Ctrl+F"}
+  - ui_wait: {path: "**/AllResourcesScreen", cond: stable}
+  - expect_state:
+      "AllResourcesScreen.Instance.isActiveAndEnabled": true
+  - type: {ui: "**/AllResourcesScreen/Search/Search/LocTextInputField", text: "sand", clear: true}
+  - expect_state:
+      "AllResourcesScreen.Instance.searchInputField.text": sand
+  - ui_wait: {path: "**/AllResourcesScreen", cond: stable}
+  - shot: {name: resources, crop: "**/AllResourcesScreen", threshold: 0.04}

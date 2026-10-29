@@ -1,0 +1,21 @@
+# Neural Vacillator Assignment Precondition (3361635195), class P.
+#
+# What it does: a postfix on GeneShuffler.OnPrefabInit adds an assignment precondition to the
+# Neural Vacillator: a Duplicant who already has every Neural Vacillator trait cannot be
+# assigned to it.
+# How a player reaches it: a Neural Vacillator (a Gravitas building found in the world); its
+# assignment side screen.
+# What changes: fully vacillated Duplicants are not offered.
+#
+# A Neural Vacillator is placed in the west corridor in setup. It has the mod's precondition
+# beside the game's world check (two).
+from: early-base
+mods: [3361635195]
+setup:
+  - driver: {setup.call: {type: GameUtil, method: KInstantiate, args: [{"$": "Assets.GetPrefab(\"GeneShuffler\")"}, [111.5, 207.01, -19.5], Building]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+steps:
+  - run: {seconds: 2}
+  - expect_state:
+      "all:GeneShuffler::Length": 1
+      "all:GeneShuffler::[0].assignable.assignmentPreconditions.Count": [2, "== original"]

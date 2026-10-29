@@ -1,0 +1,30 @@
+# Controlled Overlay (3636600859), classes P, S.
+#
+# What it does: a postfix on TemperatureOverlayThresholdAdjustmentWidget.OnSpawn replaces the
+# Temperature Overlay's range centre label with a TMP input field (80x24, 8 digits): typing a
+# temperature (in the player's unit) and leaving the field moves the adjustable range's
+# scrollbar to centre on it (clamped to 100..800 K); dragging the scrollbar updates the field.
+# How a player reaches it: the Temperature Overlay's legend, its adjustable range.
+# What changes: the overlay's range is set by typing a value.
+#
+# The Temperature Overlay is opened in its Relative Temperature mode; the field shows the range
+# centre (the legend is dumped and shot). Typing 5 and Enter
+# moves the scrollbar to (278.15 K - 100 K) / 700 K.
+from: early-base
+mods: [3636600859]
+steps:
+  - click: {ui: "**/OverlaysBarHolder/OverlaysBar/Toggle:Temperature Overlay"}
+  - ui_wait: {path: "**/OverlayParamaterMenu/Content/List/toggleEntry/Toggle", cond: stable}
+  - click: {ui: "**/OverlayParamaterMenu/Content/List/toggleEntry/Toggle", index: 1}   # Relative Temperature
+  - ui_wait: {path: "**/TemperatureInputField", cond: stable}
+  - expect_state:
+      "ui:**/TemperatureInputField::GetComponent<TMPro.TMP_InputField>.text": exists
+  - ui_dump: {name: legend, root: "**/OverlayLegend"}
+  - shot: {name: legend, crop: "**/OverlayLegend", threshold: 0.04}
+  # The patch runs twice here, in both players: two fields lie on top of each other, and the
+  # later one is the one on top.
+  - expect_ui:
+      "**/LabelIndicator/TemperatureInputField": {count: 2}
+  - type: {ui: "**/LabelIndicator/TemperatureInputField", index: 1, text: "5", clear: true, enter: true}
+  - expect_state:
+      "all:TemperatureOverlayThresholdAdjustmentWidget::[0].scrollbar.value": [">= 0.2543", "<= 0.2547"]

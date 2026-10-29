@@ -1,0 +1,80 @@
+{
+ "spec": "mods/3636600859-controlled-overlay.yaml",
+ "mods": [
+  "3636600859"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "the Temperature Overlay's typed range centre moves its scrollbar (legend dump, shot)",
+ "updated": "2026-10-29",
+ "commit": "e5cbc118",
+ "mod_dlls": {
+  "3636600859": {
+   "ControlledOverlay.dll": "d6fa974fba4c0f7bdc3c1eaa5b979fba09f9abbf982e7ad2c79754d6531fcc8e",
+   "PLib.dll": "48c63fd4654b6fbb390afdac71a3d29194eeb9405eca4290cba6e4fbf60805ce"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-162658-66f2263e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T16:26:58",
+    "lane": 1,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-164749-3dfc6f64",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-29T16:52:31",
+    "lane": 1,
+    "reference_run": "20261029-162658-66f2263e",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "legend": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "legend": 0.003242
+    }
+   },
+   {
+    "run": "20261029-164749-3dfc6f64",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-29T16:53:21",
+    "lane": 1,
+    "reference_run": "20261029-162658-66f2263e",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "legend": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "legend": 0.003242
+    }
+   }
+  ]
+ }
+}

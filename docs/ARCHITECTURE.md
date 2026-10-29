@@ -1504,6 +1504,12 @@ and scroll, hardware cursors from `Texture2D`, clipboard, focus events. Legacy I
 axes/buttons come from `globalgamemanagers` `InputManager` settings, with Unity's gravity /
 sensitivity / dead-zone smoothing.
 
+On X11 a hardware cursor keeps its texture's size, as in Unity's Linux player: with Klei's 32x32
+`cursor_arrow`, XFixes read the shown cursor in both players as 32x32 with its hotspot at (2, 2),
+the same pixels, with `XCURSOR_SIZE` unset, 48 or 64 and with `Xcursor.size: 48` in the display's
+resources (on Xvfb). On Windows `Win32Cursor` scales it with the pointer size, as the original
+does (issue #18); Wayland compositors are unmeasured.
+
 On Windows the window takes IME input only when `Input.imeCompositionMode` asks for it
 (`ImeInput`): `On`, which a focused TextMeshPro or uGUI field sets, or `Auto` with an IMGUI text
 field focused. Otherwise its input context is taken away, so an IME such as Microsoft Pinyin

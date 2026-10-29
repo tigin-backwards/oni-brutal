@@ -1,0 +1,39 @@
+# AnimalFarm (GGAnimalFarm, 3664816241), classes B, U.
+#
+# What it does: adds three Food buildings unlocked by Animal Control: the Animal Farm (5x3)
+# and the Fishpod store bagged critters (a tree filter picks which) and simulate them in a
+# creature pen, producing their eggs and drops each day without the critters roaming; the
+# Farm Transfer moves critters between farms (a side screen copied from the broadcast
+# channel one). Settings come from the mod's JSON.
+# How a player reaches it: research Animal Control; the Food menu.
+# What changes: critters farmed inside a building.
+#
+# Animal Control is researched in setup and an Animal Farm built in the corridor west of the
+# printing pod. The Food menu offers it (its card); selected, the built one is a farm that
+# takes bagged critters.
+from: early-base
+mods: [3664816241]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"AnimalControl\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"GgAnimalFarm\")", method: Build, args: [131765, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"AnimalControl\").unlockedItemIDs": [{contains: GgAnimalFarm}, {contains: GgFishpod}, {contains: GgFarmTransfer}]
+      "Assets.GetPrefab(\"GgAnimalFarm\").GetComponent<GGGMod.AnimalFarm.AnimalFarm>": exists
+  - run: {seconds: 3}
+  - driver: {camera.set: {cell: [113, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Food"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/GgAnimalFarm Group*", cond: stable}
+  - scroll: {at: "**/PlanBuildingSelectionPanel/BuildingGroups", notches: -10}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/GgAnimalFarm Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/GgAnimalFarm Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - key: {code: Escape}
+  - click_world: {cell: [113, 208], select: GgAnimalFarm}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Animal Farm"}

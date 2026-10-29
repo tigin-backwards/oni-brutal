@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3670573352-controlled-framerate.yaml",
+ "mods": [
+  "3670573352"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with a fast speed of 5 in its options the fast button's tooltip reads 5.0x; its top-left button opens the popup menu, which matches the original's",
+ "updated": "2026-10-29",
+ "commit": "d2f947dc",
+ "mod_dlls": {
+  "3670573352": {
+   "ControlledFramerate.dll": "2bb85fc32421d7e46d7a0cab4c5cb17903b3ab2d685fab7061d21f4f2250bea7"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-154336-121a5419",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T15:43:36",
+    "lane": 4,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-154707-8a0f8cb0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T15:47:07",
+    "lane": 4,
+    "reference_run": "20261029-154336-121a5419",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "popup": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "popup": 0.0
+    }
+   },
+   {
+    "run": "20261029-154707-8a0f8cb0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T15:48:05",
+    "lane": 4,
+    "reference_run": "20261029-154336-121a5419",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "popup": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "popup": 0.0
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,31 @@
+# Controlled Framerate (3670573352), classes S, K, O; PLib options.
+#
+# What it does: the three speed buttons run the game at speeds set in its options (1, 2 and 3
+# by default; a postfix on SpeedControlScreen.OnChanged sets Time.timeScale), their tooltips
+# say so, and an adaptive mode lowers the speed to keep a target framerate. A button cloned
+# from the sandbox toggle in the top-left panel opens a popup menu (fixed or adaptive speed, a
+# benchmark that ramps the speed down and charts the framerate); a status panel by the pinned
+# resources shows the adaptive state.
+# How a player reaches it: the top-left button; the speed buttons; the PLib options.
+# What changes: what the speed buttons mean.
+#
+# Options here: the fast speed is 5. The fast button's tooltip reads 5.0x; the top-left
+# button (a clone of the sandbox toggle, which this colony hides) opens the popup.
+from: early-base
+mods: [3670573352]
+options:
+  "3670573352": {FastSpeed: 5.0}
+steps:
+  - run: {seconds: 2}
+  - expect_state:
+      "type:ControlledFramerate.Options.ControlledFramerateOptions::Instance.FastSpeed": 5
+      "SpeedControlScreen.Instance.speedButtonWidget_fast.GetComponent<ToolTip>.multiStringToolTips[0]": {contains: "5.0x"}
+      "SpeedControlScreen.Instance.speedButtonWidget_slow.GetComponent<ToolTip>.multiStringToolTips[0]": {contains: "1.0x"}
+  - expect_state:
+      "type:ControlledFramerate.UI.TopBarButtons::menuGO": exists
+  - click: {ui: "**/TopLeftControlPanel(Clone)/SecondaryRow/SandboxToggle"}
+  - ui_wait: {path: "**/ToolbarPopupMenu/**/Panel", cond: stable}
+  - expect_state:
+      "type:ControlledFramerate.UI.ToolbarPopupMenu::IsOpen": true
+  - ui_dump: {name: popup, root: "**/ToolbarPopupMenu/**/Panel"}
+  - shot: {name: popup, crop: "**/ToolbarPopupMenu/**/Panel", threshold: 0.04}

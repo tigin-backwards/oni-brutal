@@ -98,6 +98,13 @@ namespace UnityEngine
             set => Data.PixelPerfect = value;
         }
 
+        /// Whether a nested canvas uses its own pixelPerfect instead of its root's.
+        public bool overridePixelPerfect
+        {
+            get => Data.OverridePixelPerfect;
+            set => Data.OverridePixelPerfect = value;
+        }
+
         public bool overrideSorting
         {
             get => Data.OverrideSorting;

@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3656635556-achievements-tracker.yaml",
+ "mods": [
+  "3656635556"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the TRACK button opens the floating achievements panel (dump matches) and closes it",
+ "updated": "2026-10-29",
+ "commit": "a6cc8d6c",
+ "mod_dlls": {
+  "3656635556": {
+   "AchievementTracker.dll": "408bb2460a982bd89aca97a05b7d26ec4fb547ac0427dab264f7ae5bf8542d2b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-132508-335cbefc",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T14:45:55",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-022706-abb8a209",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T02:27:06",
+    "lane": 14,
+    "reference_run": "20261027-132508-335cbefc",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "panel": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261029-022706-abb8a209",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T02:27:54",
+    "lane": 14,
+    "reference_run": "20261027-132508-335cbefc",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "panel": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

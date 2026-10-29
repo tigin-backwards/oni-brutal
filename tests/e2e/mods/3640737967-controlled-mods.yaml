@@ -1,0 +1,32 @@
+# Controlled Mods (3640737967), classes S, O, P.
+#
+# What it does: overrides settings of other mods (Resource Sensor, Free Resource Buildings,
+# Customize Plants, KIN Underground Conduit, ...) from its options, each only when that mod is
+# loaded; on its own it adds a RESTART button to the main menu (above Quit) and a Restart button
+# to the pause menu. The pause menu's opens a confirm dialog, "Should I restart? All unsaved
+# progress will be lost.", with SAVE AND RESTART, RESTART WITHOUT SAVING and CANCEL, and a
+# "Restart into this save" check box (a uGUI Toggle the mod builds in code).
+# How a player reaches it: the pause menu (Escape), Restart; the main menu's RESTART.
+# What changes: a quick restart of the game.
+#
+# With no supported mod loaded: Escape opens the pause menu with its Restart button; Restart
+# opens the dialog with its check box; a click on the box ticks it; CANCEL closes the dialog and
+# the game goes on.
+from: early-base
+mods: [3640737967]
+steps:
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/RestartButton", cond: stable}
+  - ui_dump: {name: pause, root: "**/PauseScreen/LayoutContent/ButtonContent"}
+  - click: {ui: "**/PauseScreen/**/RestartButton"}
+  - ui_wait: {path: "**/RestartIntoSaveRow/Toggle", cond: stable}
+  - expect_ui:
+      "**/RestartIntoSaveRow/Label": {text: "Restart into this save"}
+      "**/RestartIntoSaveRow/Toggle": {isOn: false}
+  - toggle: {ui: "**/RestartIntoSaveRow/Toggle", to: true}
+  - expect_ui:
+      "**/RestartIntoSaveRow/Toggle": {isOn: true}
+  - shot: {name: dialog, threshold: 0.04}
+  - click: {text: "CANCEL", under: "**/ConfirmDialog*"}
+  - ui_wait: {path: "**/RestartIntoSaveRow", cond: gone}
+  - expect_state: {"SaveGame.Instance": exists}

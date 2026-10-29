@@ -1,0 +1,24 @@
+# Lumos Maxima (1793933820), class P.
+#
+# What it does: a postfix on BaseLightBugConfig.BaseLightBug sets each Shine Bug's light to 900
+# lux plus 300 per tier (its LumosMaxima.json, or these defaults): the baby Shine Bug 900, the
+# Shine Bug 1200, the Sun Bug 1500 ... the Radiant Bug 3000.
+# How a player reaches it: any Shine Bug.
+# What changes: how brightly Shine Bugs light their surroundings.
+#
+# The prefabs carry the new lux; a Shine Bug set down in setup in the corridor west of the
+# printing pod gives 1200 lux, as do the base's wild ones.
+from: early-base
+mods: [1793933820]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131762, 0, 0, \"LightBug\", \"Creatures\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"LightBugBaby\").GetComponent<Light2D>.Lux": 900
+      "Assets.GetPrefab(\"LightBug\").GetComponent<Light2D>.Lux": 1200
+      "Assets.GetPrefab(\"LightBugBlue\").GetComponent<Light2D>.Lux": 2400
+      "Assets.GetPrefab(\"LightBugCrystal\").GetComponent<Light2D>.Lux": 3000
+  - run: {seconds: 2}
+  - expect_state:
+      "count:all:Light2D::[*] if .Lux == 1200 and .gameObject.GetComponent<KPrefabID>.PrefabTag.Name == LightBug": [">= 1", "== original"]
+      "count:all:Light2D::[*] if .Lux != 1200 and .gameObject.GetComponent<KPrefabID>.PrefabTag.Name == LightBug": 0

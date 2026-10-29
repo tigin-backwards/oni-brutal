@@ -1,0 +1,23 @@
+# Coal World Trait (3473481199), classes W, O.
+#
+# What it does: adds two world traits from its worldgen/traits folder, Coal Rich (coal bands
+# x1.2 wide, their mass x2) and Coal Poor (x0.8), exclusive with each other. When a new world
+# rolls one of them, PLib options (config.json) set the mass multiplier, and with AffectFeatures
+# and AffectTemplates the coal in features (coal deposits) and templates is scaled too.
+# How a player reaches it: a new game whose asteroid rolls one of the traits.
+# What changes: how much coal new worlds hold.
+#
+# The traits are loaded into the game's worldgen settings beside the game's own, with their
+# names, exclusivity and coal band modifiers, and their strings are registered. A world rolling
+# them depends on the seed; this spec checks the settings worldgen reads.
+from: early-base
+mods: [3473481199]
+steps:
+  - expect_state:
+      "ProcGen.SettingsCache.worldTraits.Count": "== original"
+      "ProcGen.SettingsCache.worldTraits[\"traits/CoalRich\"].name": "== 'STRINGS.WORLD_TRAITS.NID_TRAITS_COAL_RICH.NAME'"
+      "ProcGen.SettingsCache.worldTraits[\"traits/CoalRich\"].elementBandModifiers[0].element": "== 'Carbon'"
+      "ProcGen.SettingsCache.worldTraits[\"traits/CoalRich\"].elementBandModifiers[0].massMultiplier": 2
+      "ProcGen.SettingsCache.worldTraits[\"traits/CoalPoor\"].name": "== 'STRINGS.WORLD_TRAITS.NID_TRAITS_COAL_POOR.NAME'"
+      "Strings.Get(\"STRINGS.WORLD_TRAITS.NID_TRAITS_COAL_RICH.NAME\").String": "== 'Coal Rich'"
+      "type:CoalRichPoor.Options::Instance.CoalPoorMultiplier": 0.8

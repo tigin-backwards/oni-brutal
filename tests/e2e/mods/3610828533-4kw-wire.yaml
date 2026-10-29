@@ -1,0 +1,29 @@
+# 4kw导线(4kw Wire) (3610828533), class P.
+#
+# What it does: a postfix on Wire.GetMaxWattageAsFloat makes the 2 kW rating (Max2000, the
+# Conductive Wire's) carry 4000 W, and a postfix on WireRefinedConfig.CreateBuildingDef makes
+# the Conductive Wire take 50 kg (CONSTRUCTION_MASS_KG.TIER1) and 4 s to build.
+# How a player reaches it: Conductive Wire (Power menu, after Power Regulation).
+# What changes: how much load one conductive wire circuit takes before it overloads.
+#
+# The 2 kW rating reads 4000 W (the 1 kW one stays); setup researches Power Regulation, and the
+# Conductive Wire's build card in the Power menu and its def show the new mass and time.
+from: early-base
+mods: [3610828533]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.TryGetTechForTechItem(\"WireRefined\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - expect_state:
+      "Wire.GetMaxWattageAsFloat(\"Max2000\")": 4000
+      "Wire.GetMaxWattageAsFloat(\"Max1000\")": 1000
+      "Assets.GetBuildingDef(\"WireRefined\").ConstructionTime": 4
+      "Assets.GetBuildingDef(\"WireRefined\").Mass[0]": 50
+      "Assets.GetBuildingDef(\"WireRefined\").BuildingComplete.GetComponent<Wire>.MaxWattageRating": Max2000
+  - run: {seconds: 5}
+  - click: {ui: "**/PlanScreen/Toggle:Power"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/WireRefined Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/WireRefined Group*"}
+  - ui_wait: {path: "**/PlanBuildingSelectionPanel/ProductInfoScreen", cond: stable}
+  - ui_dump: {name: card, root: "**/PlanBuildingSelectionPanel/ProductInfoScreen"}
+  - key: {code: Escape}

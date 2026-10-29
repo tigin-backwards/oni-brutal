@@ -1,0 +1,26 @@
+# Achievements Tracker (3656635556), classes S, P.
+#
+# What it does: adds a TRACK button to the top right management bar that opens a floating panel
+# (its own canvas, uGUI Text and Images built in code, draggable): a header ("Achievements", a
+# collapse triangle, + to pick achievements from a scrolled list, ✓ for completed ones, ×) over
+# the tracked achievements with their requirements' progress, computed from the colony and saved
+# per save.
+# How a player reaches it: the TRACK button (top right).
+# What changes: achievement progress on screen.
+#
+# The panel shows from the start with its header and an empty list, laid out as in the original
+# (dump); the TRACK button closes it and opens it again. The panel opens over the top left
+# status bar, whose canvas sorts in front of the panel's (-10), so its header buttons cannot be
+# clicked where it opens, in the original too.
+from: early-base
+mods: [3656635556]
+steps:
+  - run: {seconds: 2}
+  - ui_wait: {path: "AchievementSideScreen/AchievementTrackerCanvas/AchievementTrackerFloating/Header", cond: stable}
+  - expect_ui:
+      "AchievementSideScreen/AchievementTrackerCanvas/AchievementTrackerFloating/Header/Title": {text: "Achievements"}
+  - ui_dump: {name: panel, root: "AchievementSideScreen/AchievementTrackerCanvas/AchievementTrackerFloating"}
+  - click: {ui: "**/TopRightInfoPanelButtons/TrackButton"}
+  - ui_wait: {path: "AchievementSideScreen/AchievementTrackerCanvas/AchievementTrackerFloating/Header", cond: gone}
+  - click: {ui: "**/TopRightInfoPanelButtons/TrackButton"}
+  - ui_wait: {path: "AchievementSideScreen/AchievementTrackerCanvas/AchievementTrackerFloating/Header", cond: stable}

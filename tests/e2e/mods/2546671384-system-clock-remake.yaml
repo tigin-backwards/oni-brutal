@@ -1,0 +1,20 @@
+# System Clock Remake (2546671384), classes P, O.
+#
+# What it does: a postfix on MeterScreen.Refresh rewrites the top left colony label as the
+# colony's name, a line break and the computer's clock, DateTime.Now in its PLib option's format
+# (HH:mm:ss by default; HH:mm:ss when the format is invalid).
+# How a player reaches it: the top left of the screen, always.
+# What changes: the real time shown in game.
+#
+# The format is set to a quoted literal, so the clock line is fixed text: after a moment of play
+# the label reads the colony's name and that text. The label is dumped and shot.
+from: early-base
+mods: [2546671384]
+options:
+  SystemClockRemake: {TimeStringFormat: "'e2e clock' yyyy"}
+steps:
+  - run: {seconds: 3}
+  - expect_ui:
+      "**/TopLeftControlPanel*/**": {any_text: "/\\ne2e clock 20\\d\\d$/"}
+  - ui_dump: {name: label, root: "**/TopLeftControlPanel*", mask_text: ['20\d\d']}
+  - shot: {name: label, crop: "**/TopLeftControlPanel*", threshold: 0.04}

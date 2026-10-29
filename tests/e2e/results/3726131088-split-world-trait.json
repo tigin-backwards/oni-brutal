@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3726131088-split-world-trait.yaml",
+ "mods": [
+  "3726131088"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Split World trait is in the worldgen settings with its tags, exclusivity, extra subworlds and cell filters, and its icon sprite and name load; no new game is played",
+ "updated": "2026-10-29",
+ "commit": "5d1b985e",
+ "mod_dlls": {
+  "3726131088": {
+   "SplitWorld.dll": "da8fc147b6f1a69a52939edc8b5e3912d235bcc498cf46b960ae880058e64eb6"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-112540-575b1ae3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T11:48:43",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-011514-321a148e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T01:15:14",
+    "lane": 14,
+    "reference_run": "20261027-112540-575b1ae3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-011514-321a148e",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T01:16:06",
+    "lane": 14,
+    "reference_run": "20261027-112540-575b1ae3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

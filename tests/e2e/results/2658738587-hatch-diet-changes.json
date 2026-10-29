@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2658738587-hatch-diet-changes.yaml",
+ "mods": [
+  "2658738587"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Hatch's diet turns copper into copper ore (95 %) and salt into coal and keeps sandstone; the four hatches' diets have the original's sizes",
+ "updated": "2026-10-29",
+ "commit": "1e3123ec",
+ "mod_dlls": {
+  "2658738587": {
+   "Hatch Diet Changes.dll": "74e735a3f3aa8b6e0484ea043156fa55cc4df465aa8ddf880a425b5249c0feed"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-112540-575b1ae3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T11:51:48",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-011658-1265a925",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T01:16:58",
+    "lane": 14,
+    "reference_run": "20261027-112540-575b1ae3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-011658-1265a925",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T01:18:02",
+    "lane": 14,
+    "reference_run": "20261027-112540-575b1ae3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

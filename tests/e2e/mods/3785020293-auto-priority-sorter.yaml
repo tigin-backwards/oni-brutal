@@ -1,0 +1,28 @@
+# Auto Priority Sorter | 自动优先级排序 (3785020293), classes S, P.
+#
+# What it does: adds a button to the Priorities screen's options panel that sorts every
+# Duplicant's personal priorities from their skills and attributes, in two modes it toggles
+# between: efficiency first ("效率优先", by skill level tiers) and automatic ("自动排序"); a monitor on
+# the screen re-sorts when Duplicants or chore groups change.
+# How a player reaches it: the Priorities screen (L), its options button, the sort button.
+# What changes: the Duplicants' priorities, set for them.
+#
+# The Priorities screen is opened and its options panel shows the button in efficiency mode; a
+# click switches it to automatic and sorts every Duplicant: the log says the sort succeeded, the
+# button's label follows, and the priorities table matches the original's.
+from: early-base
+mods: [3785020293]
+require_log: ['\[AutoPrioritySorter\] button sort success: mode=auto']
+steps:
+  - expect_state: {"type:AutoPrioritySorter.PrioritySorter::ExtremeEfficiency": true}
+  - open: {management: priorities}
+  - ui_wait: {path: "**/JobsTableScreen/HeaderContent/prefab_row_header/OptionsButton", cond: stable}
+  - click: {ui: "**/JobsTableScreen/HeaderContent/prefab_row_header/OptionsButton"}
+  - ui_wait: {path: "**/JobsTableScreen/OptionsPanel/AutoSortButton", cond: stable}
+  - expect_ui:
+      "**/JobsTableScreen/OptionsPanel/AutoSortButton/**": {any_text: "效率优先"}
+  - click: {ui: "**/JobsTableScreen/OptionsPanel/AutoSortButton"}
+  - expect_state: {"type:AutoPrioritySorter.PrioritySorter::ExtremeEfficiency": false}
+  - expect_ui:
+      "**/JobsTableScreen/OptionsPanel/AutoSortButton/**": {any_text: "自动排序"}
+  - ui_dump: {name: table, root: "**/JobsTableScreen/Content"}

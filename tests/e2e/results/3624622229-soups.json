@@ -1,0 +1,75 @@
+{
+ "spec": "mods/3624622229-soups.yaml",
+ "mods": [
+  "3624622229"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "the five soups are Electric Grill recipes with their foods' calories and quality; a grill built in the corridor lists them on its recipe side screen (dump matches)",
+ "updated": "2026-10-29",
+ "commit": "72b42f9f",
+ "mod_dlls": {
+  "3624622229": {
+   "Soups.dll": "c0a4af136f4431073d64d85e2921cee95c71236fef967cca11b6418477f1ffdf"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-112540-575b1ae3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T11:39:08",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-010922-241453d4",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-29T01:09:22",
+    "lane": 14,
+    "reference_run": "20261027-112540-575b1ae3",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261029-010922-241453d4",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-29T01:10:17",
+    "lane": 14,
+    "reference_run": "20261027-112540-575b1ae3",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

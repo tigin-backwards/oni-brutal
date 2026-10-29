@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3767691401-no-enough-storage.yaml",
+ "mods": [
+  "3767691401"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Smart Storage unlocks the Ultra Large Solid Storage; one built takes sandstone through its filter and Duplicants store it",
+ "updated": "2026-10-29",
+ "commit": "a844a2ce",
+ "mod_dlls": {
+  "3767691401": {
+   "NoEnoughStorage.dll": "03fe78690ddb848e87625eaadbed9bd321db7eb50801366d0c590a22c983f21e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-134518-3daf9420",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T15:46:57",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-023019-a82210fd",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T02:30:19",
+    "lane": 14,
+    "reference_run": "20261027-134518-3daf9420",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-023019-a82210fd",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T02:38:15",
+    "lane": 14,
+    "reference_run": "20261027-134518-3daf9420",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

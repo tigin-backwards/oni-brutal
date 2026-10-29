@@ -1,0 +1,64 @@
+{
+ "spec": "mods/3229764220-temperature-regulator.yaml",
+ "mods": [
+  "3229764220"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Thermo Regulator's slider side screen reads -14 (dump matches); -20 typed into its field sets the change, and the absolute check box widens the range to 4000",
+ "updated": "2026-10-29",
+ "commit": "d55a8a2f",
+ "mod_dlls": {
+  "3229764220": {
+   "Conditioner.dll": "28f9274210930ff66e005b1b3ce5702890d4817d9a90ec16d33ec20a8cedf9c9",
+   "PLib.dll": "5d6a8ef9d87143b90113548016180078efaf112d69afe0cdf1073a6125b33773"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-114104-90e83e51",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T12:29:32",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-013453-2c15575d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T01:34:53",
+    "lane": 14,
+    "reference_run": "20261027-114104-90e83e51",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261029-013453-2c15575d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T01:35:49",
+    "lane": 14,
+    "reference_run": "20261027-114104-90e83e51",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

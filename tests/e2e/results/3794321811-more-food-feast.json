@@ -1,0 +1,76 @@
+{
+ "spec": "mods/3794321811-more-food-feast.yaml",
+ "mods": [
+  "3794321811"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "the mod's recipes are at the Gas Range, Smoker, Dehydrator and Plant Pulverizer and its foods have their calories; a Microbe Musher built in the corridor lists Puff Pastry and crab meat balls (recipe dump matches)",
+ "updated": "2026-10-29",
+ "commit": "2017b092",
+ "mod_dlls": {
+  "3794321811": {
+   "MoreFood_KFC.dll": "d860bb31ad75c7bf8ef665700e9f09bafe1e6a982e0fe59488cf20330b17294f",
+   "PLib.dll": "432e28fbecb2d422a46eafe489a446f946ec828acfb2b721f7fe6df19d84cd7c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-010724-da620746",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T01:19:00",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-024913-9d0a5761",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-29T02:49:13",
+    "lane": 14,
+    "reference_run": "20261029-010724-da620746",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261029-024913-9d0a5761",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-29T02:50:05",
+    "lane": 14,
+    "reference_run": "20261029-010724-da620746",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

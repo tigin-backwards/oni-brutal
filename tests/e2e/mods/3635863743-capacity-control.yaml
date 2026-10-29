@@ -1,0 +1,29 @@
+# Capacity Control (3635863743), classes S, O.
+#
+# What it does: a postfix on CapacityControlSideScreen.OnSpawn raises the character limit of the
+# capacity side screen's number field from the game's 6 to 6 plus its PLib option (2 by
+# default), so capacities of a million kilograms and more can be typed.
+# How a player reaches it: a storage building's capacity side screen.
+# What changes: how large a capacity can be typed.
+#
+# Super bigger Storage (3772304726) is installed too, so a storage bin holds 10,000,000 kg. A
+# bin built in setup in the corridor west of the printing pod is selected: its capacity field
+# takes 8 characters, and 5000000 typed into it sets the bin's capacity to 5,000,000 kg (the
+# game's 6 characters would stop at 500000).
+from: early-base
+mods: [3772304726, 3635863743]
+options:
+  MiserableGamer.CapacityControl: {AdditionalCharacters: 2}
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"StorageLocker\")", method: Build, args: [{"$": "Grid.XYToCell(113, 207)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: StorageLocker}
+  - ui_wait: {path: "**/CapacityControlSideScreen/ValidContent/Max/VerticalLayout/InputField", cond: stable}
+  - expect_state:
+      "ui:**/CapacityControlSideScreen/ValidContent/Max/VerticalLayout/InputField::GetComponent<TMPro.TMP_InputField>.characterLimit": 8
+  - type: {ui: "**/CapacityControlSideScreen/ValidContent/Max/VerticalLayout/InputField", text: "5000000", clear: true, enter: true}
+  - expect_state:
+      "selected:StorageLocker.UserMaxCapacity": 5000000
+  - ui_dump: {name: capacity, root: "**/DetailsScreen/SideScreen/**/CapacityControlSideScreen"}

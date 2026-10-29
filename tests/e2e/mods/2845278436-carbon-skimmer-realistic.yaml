@@ -1,0 +1,33 @@
+# Carbon Skimmer - Realistic (2845278436), class P.
+#
+# What it does: rebuilds the Carbon Skimmer (CO2Scrubber): instead of water it takes hydrogen
+# from a gas pipe (0.38 kg/s) and carbon dioxide from the air around it (radius 4) and makes hot
+# methane (393 K) and steam (383 K), which it sends out of a new gas output; it draws 300 W,
+# heats itself by 1.525 kW and overheats at 82 °C; its description says so.
+# How a player reaches it: building a Carbon Skimmer (after its research).
+# What changes: a skimmer that turns carbon dioxide and hydrogen into natural gas and steam.
+#
+# The Carbon Skimmer's def and prefab carry the new inputs and outputs. Setup builds one in the
+# corridor west of the printing pod; selected, it shows its new description, gas ports and the
+# hydrogen it lacks.
+from: early-base
+mods: [2845278436]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"CO2Scrubber\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"CO2Scrubber\").EnergyConsumptionWhenActive": 300
+      "Assets.GetBuildingDef(\"CO2Scrubber\").InputConduitType": Gas
+      "Assets.GetBuildingDef(\"CO2Scrubber\").OutputConduitType": Gas
+      "Assets.GetPrefab(\"CO2Scrubber\").GetComponent<ElementConverter>.consumedElements[0].Tag": "== 'Hydrogen'"
+      "Assets.GetPrefab(\"CO2Scrubber\").GetComponent<ElementConverter>.consumedElements[1].Tag": "== 'CarbonDioxide'"
+      "Assets.GetPrefab(\"CO2Scrubber\").GetComponent<ElementConverter>.outputElements[0].elementHash": Methane
+      "Assets.GetPrefab(\"CO2Scrubber\").GetComponent<ElementConverter>.outputElements[1].elementHash": Steam
+      "Assets.GetPrefab(\"CO2Scrubber\").GetComponent<PassiveElementConsumer>.elementToConsume": CarbonDioxide
+      "Strings.Get(\"STRINGS.BUILDINGS.PREFABS.CO2SCRUBBER.EFFECT\").String": {contains: "Methane"}
+  - run: {seconds: 2}
+  - expect: {buildings: {CO2Scrubber: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: CO2Scrubber}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state: {"selected:ConduitConsumer.capacityTag": "== 'Hydrogen'"}

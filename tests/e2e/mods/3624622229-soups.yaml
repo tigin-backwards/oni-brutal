@@ -1,0 +1,35 @@
+# Soups (3624622229), class P.
+#
+# What it does: adds five soups cooked at the Electric Grill with water: Mushroom Soup (a
+# mushroom and 2 kg of water, two servings), Spicy Mushroom Soup (with a Pincha Peppernut),
+# Berry Soup (two bristle berries), Tom Yum (cooked fish, a mushroom and a peppernut) and Pho
+# (meat and two nosh beans), each a food with its calories, quality and spoil time.
+# How a player reaches it: the Electric Grill's recipe list.
+# What changes: new grill recipes and foods.
+#
+# Setup builds an Electric Grill in the corridor west of the printing pod. The game's recipe
+# list holds the five soups at the grill, their foods have the mod's calories and quality, and
+# the grill's own recipe list (selected) offers them.
+from: early-base
+mods: [3624622229]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"CookingStation\")", method: Build, args: [131129, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0].Name == CookingStation and .results[0].material.Name == MushroomSoup": 1
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0].Name == CookingStation and .results[0].material.Name == SpicyMushroomSoup": 1
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0].Name == CookingStation and .results[0].material.Name == BerrySoup": 1
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0].Name == CookingStation and .results[0].material.Name == TomYum": 1
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0].Name == CookingStation and .results[0].material.Name == PhoBo": 1
+      "EdiblesManager.GetFoodInfo(\"MushroomSoup\").CaloriesPerUnit": 3600000
+      "EdiblesManager.GetFoodInfo(\"TomYum\").Quality": 5
+      "EdiblesManager.GetFoodInfo(\"PhoBo\").CaloriesPerUnit": 4200000
+  - run: {seconds: 2}
+  - expect: {buildings: {CookingStation: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: CookingStation}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/ComplexFabricatorSideScreen", cond: stable}
+  - expect_state:
+      "count:selected:ComplexFabricator.GetRecipes()[*] if .results[0].material.Name == BerrySoup": 1
+      "count:selected:ComplexFabricator.GetRecipes()[*] if .results[0].material.Name == PhoBo": 1
+  - ui_dump: {name: recipes, root: "**/ComplexFabricatorSideScreen/Contents"}

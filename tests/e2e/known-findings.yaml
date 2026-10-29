@@ -73,11 +73,13 @@
     shortest round-trip digits in ours, up to 9, where Mono shows 7 (ARCHITECTURE D2): a geyser's
     heat lines read "498.11588 kDTU/s" in ours and "498.1159 kDTU/s" in the original, and their
     labels are a few pixels wider, and so are the TMP sub-meshes a Chinese label draws its
-    fallback-font glyphs in (3618564887-automatic-geyser-calculation-zh).
+    fallback-font glyphs in (3618564887-automatic-geyser-calculation-zh). A capacity side screen's
+    field shows a capacity of 10,000,000 kg as "10000000" in ours and "1E+07" in the original
+    (3772304726-super-bigger-storage), and the field and its row are wider.
   link: tests/e2e/mods/2631833478-automatic-geyser-calculation.yaml
-  component: [rect, LocText]
-  fields: [rect, world, screen, text, textInfo]
-  path: ['**/SimpleInfoScreen/**/Descriptors/DescLabel', '**/SimpleInfoScreen/**/Descriptors/DescLabel/New Game Object']
+  component: [rect, LocText, KInputTextField, HorizontalLayoutGroup, VerticalLayoutGroup]
+  fields: [rect, world, screen, text, textInfo, preferredWidth]
+  path: ['**/SimpleInfoScreen/**/Descriptors/DescLabel', '**/SimpleInfoScreen/**/Descriptors/DescLabel/New Game Object', '**/CapacityControlSideScreen/ValidContent/Max', '**/CapacityControlSideScreen/ValidContent/Max/**']
 
 - id: vitals-first-frame-scrollbar
   description: >-

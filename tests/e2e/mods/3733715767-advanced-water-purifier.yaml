@@ -1,0 +1,31 @@
+# AdvancedWaterPurifier高级净水器 (3733715767), classes B, O.
+#
+# What it does: adds 高级净水器 (AdvancedWaterPurifier, any metal, 60 W, in the Refining menu): from
+# a liquid pipe it takes polluted water and filter media and makes clean water and a by-product
+# the player picks (its PLib option sets how much per second). The by-product is one of twenty
+# (iron, polluted dirt, diamond, plastic, algae, gold, copper, ... slime), cycled with its
+# user menu button ("点击切换产物 (current)" in Chinese).
+# How a player reaches it: the build menu (Refining); its user menu.
+# What changes: water purification with valuable by-products.
+#
+# Setup builds one in the corridor west of the printing pod. Selected, its user menu shows the
+# switch button with the first product; two clicks switch it to the second and third, and the
+# button's label follows (the menu is dumped before and after).
+from: early-base
+mods: [3733715767]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"AdvancedWaterPurifier\")", method: Build, args: [{"$": "Grid.XYToCell(113, 207)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {AdvancedWaterPurifier: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: AdvancedWaterPurifier}
+  - ui_wait: {path: "**/DetailsScreen/UserMenuButtons/UserMenuScreen", cond: stable}
+  - expect_state: {"selected:GetComponent<AdvancedWaterPurifierMode.AdvancedWaterPurifierWorkable>.GetCurrentModeName()": "== original"}
+  - ui_dump: {name: user-menu, root: "**/DetailsScreen/UserMenuButtons/UserMenuScreen"}
+  - click: {ui: "**/UserMenuScreen/Buttons/*(*)Button"}
+  - expect_state: {"selected:GetComponent<AdvancedWaterPurifierMode.AdvancedWaterPurifierWorkable>.GetCurrentModeName()": "== original"}
+  - ui_wait: {path: "**/DetailsScreen/UserMenuButtons/UserMenuScreen", cond: stable}
+  - click: {ui: "**/UserMenuScreen/Buttons/*(*)Button"}
+  - expect_state: {"selected:GetComponent<AdvancedWaterPurifierMode.AdvancedWaterPurifierWorkable>.GetCurrentModeName()": "== original"}
+  - ui_dump: {name: user-menu-switched, root: "**/DetailsScreen/UserMenuButtons/UserMenuScreen"}

@@ -1,0 +1,67 @@
+{
+ "spec": "mods/2546671384-system-clock-remake.yaml",
+ "mods": [
+  "2546671384"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the top left label reads the colony's name and the clock line in the option's format; its dump and shot match",
+ "updated": "2026-10-29",
+ "commit": "1ebd649f",
+ "mod_dlls": {
+  "2546671384": {
+   "SystemClockRemake.dll": "cf590881cc5e4f81b5573b79b0af3d7641acb9e60c35aa0f7990da04c1b91e56"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-010724-da620746",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T02:23:17",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-030237-e043d616",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T03:02:37",
+    "lane": 15,
+    "reference_run": "20261029-010724-da620746",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "label": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "label": 0.007478
+    }
+   },
+   {
+    "run": "20261029-030237-e043d616",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T03:03:28",
+    "lane": 15,
+    "reference_run": "20261029-010724-da620746",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "label": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "label": 0.006535
+    }
+   }
+  ]
+ }
+}

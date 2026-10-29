@@ -1,0 +1,40 @@
+# ONI Multiplayer (Co-op) (3807965885), classes S, M, P (uGUI screens built in code).
+#
+# What it does: several players share one colony. The host runs the simulation and streams the
+# world and every command to the clients over TCP (port 7777 by default, or a Steam lobby code
+# through Steam P2P); clients follow the host's world, with a lobby, a players panel, chat,
+# verification and repair of drifting state.
+# How a player reaches it: the main menu's MULTIPLAYER button opens its hub: HOST A NEW WORLD,
+# LOAD A MULTIPLAYER WORLD, JOIN A GAME (an address field, IP or IP:port, and a Connect button,
+# plus Steam friends hosting), Import a single-player save, Change name.
+# What changes: nothing until a session runs.
+#
+# A session needs two game processes (a host and a client), which one e2e run does not have, so
+# it cannot be played here. This spec drives what one player reaches: the MULTIPLAYER button,
+# the hub, and JOIN A GAME with an address nobody listens on: the dialog says it is connecting,
+# the TCP connect is refused (logged, retried every second), and CANCEL closes the dialog. It
+# records the original only.
+from: main-menu
+mods: [3807965885]
+require_log: ['tcp: connect to 127\.0\.0\.1:1 failed']
+steps:
+  # A first start: the intro short plays; closed.
+  - ui_wait: {path: "**/VideoScreen/CloseButton", cond: stable, frames: 3000}
+  - click: {ui: "**/VideoScreen/CloseButton"}
+  - ui_wait: {path: "**/VideoScreen", cond: gone, frames: 600}
+  - ui_wait: {path: "**/MainMenu_SpacedOut/MainMenuMenubar/MainMenuButtons", cond: stable, frames: 3000}
+  - click: {ui: "**/MainMenuButtons/OniMp_MultiplayerButton"}
+  - ui_wait: {path: "**/InfoDialog/Layout/Content/OniMp_JOIN A GAME", cond: stable}
+  - expect_ui:
+      "**/InfoDialog/Layout/Header/Label": {text: "MULTIPLAYER"}
+      "**/InfoDialog/Layout/Content/OniMp_HOST A NEW WORLD": {interactable: true}
+  - ui_dump: {name: hub, root: "**/InfoDialog/Layout"}
+  - click: {ui: "**/InfoDialog/Layout/Content/OniMp_JOIN A GAME"}
+  - ui_wait: {path: "**/InfoDialog/Layout/Content/OniMp_TextField", cond: stable}
+  - type: {ui: "**/InfoDialog/Layout/Content/OniMp_TextField", text: "127.0.0.1:1", clear: true}
+  - click: {text: "Connect", under: "**/InfoDialog/Layout/Buttons"}
+  - expect_ui:
+      "**/InfoDialog/Layout/Content/InfoScreenPlainText": {any_text: "~Connecting to"}
+  # The client's TCP connect is refused (logged) and it retries every second until cancelled.
+  - click: {text: "CANCEL", under: "**/InfoDialog/Layout/Buttons"}
+  - ui_wait: {path: "**/InfoDialog/Layout/Content/OniMp_TextField", cond: gone, frames: 600}

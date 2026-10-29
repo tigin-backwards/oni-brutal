@@ -1,0 +1,31 @@
+# 氢气转化天然气Hydrogen to natural gas conversion (3326254533), class B.
+#
+# What it does: adds a converter (zhuanhua, 1x2, any metal, 100 W, in the Utilities menu, no
+# research): it takes hydrogen from a gas pipe (1 kg/s) and refined carbon delivered by hand
+# (0.1 kg/s, up to 120 kg) and sends 1 kg/s of natural gas out of its gas output.
+# How a player reaches it: the build menu (Utilities).
+# What changes: natural gas from hydrogen.
+#
+# The Utilities menu lists it; one is ordered in the corridor west of the printing pod out of
+# copper ore and built by the Duplicants. Its converter takes refined carbon and hydrogen and
+# makes natural gas, and it asks for refined carbon.
+from: early-base
+mods: [3326254533]
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"zhuanhua\").GetComponent<ElementConverter>.consumedElements[0].Tag": "== 'RefinedCarbon'"
+      "Assets.GetPrefab(\"zhuanhua\").GetComponent<ElementConverter>.consumedElements[1].Tag": "== 'Hydrogen'"
+      "Assets.GetPrefab(\"zhuanhua\").GetComponent<ElementConverter>.outputElements[0].elementHash": Methane
+      "Assets.GetBuildingDef(\"zhuanhua\").InputConduitType": Gas
+      "Assets.GetBuildingDef(\"zhuanhua\").OutputConduitType": Gas
+  - run: {seconds: 5}
+  - click: {ui: "**/PlanScreen/Toggle:Utilities"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/zhuanhua Group*", cond: stable}
+  - shot: {name: utilities-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - build: {prefab: zhuanhua, at: [113, 206], material: Cuprite}
+  - expect: {blueprints: {zhuanhua: 1}}
+  - run: {seconds: 900, until: {buildings: {zhuanhua: 1}, pending_construction: 0}}
+  - expect_state:
+      "all:WaterPurifier::[0].GetComponent<ManualDeliveryKG>.RequestedItemTag": "== 'RefinedCarbon'"
+      "all:WaterPurifier::[0].GetComponent<Operational>.IsOperational": false

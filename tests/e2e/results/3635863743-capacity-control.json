@@ -1,0 +1,84 @@
+{
+ "spec": "mods/3635863743-capacity-control.yaml",
+ "mods": [
+  "3772304726",
+  "3635863743"
+ ],
+ "verdict": "warning",
+ "why": "known findings: float-tostring-shortest, unused-input-caret-layout",
+ "findings": [
+  "float-tostring-shortest",
+  "unused-input-caret-layout"
+ ],
+ "note": "a storage bin's capacity field takes 8 characters; 5000000 typed sets the capacity (with Super bigger Storage); the dump matches",
+ "updated": "2026-10-29",
+ "commit": "f36e2a85",
+ "mod_dlls": {
+  "3772304726": {
+   "SuperStorage.dll": "eac54ff74f5e452b9e16e2a81905e27d3f8a03958b92522acb5ab2e6d69d38dc"
+  },
+  "3635863743": {
+   "CapacityControl.dll": "704a761013823923ac1919d435298194340058c40538a377502b3d9845618cc7"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-114113-564df08f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T13:23:23",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-021140-be3f00af",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-29T02:11:40",
+    "lane": 14,
+    "reference_run": "20261027-114113-564df08f",
+    "new_signatures": 0,
+    "findings": [
+     "float-tostring-shortest",
+     "unused-input-caret-layout"
+    ],
+    "ui_dump": {
+     "capacity": {
+      "differences": 0,
+      "known": {
+       "float-tostring-shortest": 11,
+       "unused-input-caret-layout": 1
+      }
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261029-021140-be3f00af",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-29T02:12:28",
+    "lane": 14,
+    "reference_run": "20261027-114113-564df08f",
+    "new_signatures": 0,
+    "findings": [
+     "float-tostring-shortest",
+     "unused-input-caret-layout"
+    ],
+    "ui_dump": {
+     "capacity": {
+      "differences": 0,
+      "known": {
+       "float-tostring-shortest": 11,
+       "unused-input-caret-layout": 1
+      }
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

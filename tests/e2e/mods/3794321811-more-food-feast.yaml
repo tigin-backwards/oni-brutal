@@ -1,0 +1,35 @@
+# 更多食物（盛宴版本更新） (3794321811), classes P, B.
+#
+# What it does: adds dozens of foods and ingredients (rice, stock, flour, soy milk, cumin
+# powder, burgers, braised ribs, Beef Wellington, canned foods, cola ...) with recipes at the
+# Gas Range (16), Smoker (4), Dehydrator (4), Plant Pulverizer (3), Microbe Musher (2), Soda
+# Fountain (2) and the Chemical Refinery (1); new plants and critter drops feed them, care
+# packages offer some, and the Soda Fountain takes a liquid input.
+# How a player reaches it: the cooking stations' recipe lists.
+# What changes: what Duplicants can cook.
+#
+# Setup builds a Microbe Musher in the corridor west of the printing pod. The game's recipe list
+# holds the mod's recipes at each station, a new food has its calories and quality, and the
+# musher's own recipe list offers Puff Pastry and crab meat balls.
+from: early-base
+mods: [3794321811]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"MicrobeMusher\")", method: Build, args: [131129, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0].Name == GourmetCookingStation and .results[0].material.Name == BeefWellington": 1
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0].Name == Smoker and .results[0].material.Name == TomahawkSteak": 1
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0].Name == FoodDehydrator and .results[0].material.Name == CannedMeat": 1
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0].Name == MilkPress and .results[0].material.Name == SoyMilk": 1
+      "EdiblesManager.GetFoodInfo(\"GrilledSquidSkewer\").CaloriesPerUnit": 1600000
+      "EdiblesManager.GetFoodInfo(\"GrilledSquidSkewer\").Quality": 3
+      "Assets.GetPrefab(\"BeefBurger\").GetComponent<Edible>": exists
+  - run: {seconds: 2}
+  - expect: {buildings: {MicrobeMusher: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: MicrobeMusher}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/ComplexFabricatorSideScreen", cond: stable}
+  - expect_state:
+      "count:selected:ComplexFabricator.GetRecipes()[*] if .results[0].material.Name == PuffPastry": 1
+      "count:selected:ComplexFabricator.GetRecipes()[*] if .results[0].material.Name == CrabMeatBalls": ">= 1"
+  - ui_dump: {name: recipes, root: "**/ComplexFabricatorSideScreen/Contents"}

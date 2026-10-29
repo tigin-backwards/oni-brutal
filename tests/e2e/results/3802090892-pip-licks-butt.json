@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3802090892-pip-licks-butt.yaml",
+ "mods": [
+  "3802090892"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the lick animation loads, and a Pip set down is sent to lick and rolls its next wait within a cycle",
+ "updated": "2026-10-29",
+ "commit": "87fb08c6",
+ "mod_dlls": {
+  "3802090892": {
+   "PipLicksButt.dll": "5097a9efba2a237a72a5e8bc39a814e94acd4001266d4a3bc8fc67f37859e493"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-114104-90e83e51",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T12:39:38",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-013649-23a686a0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T01:36:49",
+    "lane": 14,
+    "reference_run": "20261027-114104-90e83e51",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-013649-23a686a0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T01:49:58",
+    "lane": 14,
+    "reference_run": "20261027-114104-90e83e51",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

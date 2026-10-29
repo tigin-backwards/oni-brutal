@@ -1,0 +1,33 @@
+# Overheat Control (3519929015), classes P, S, O.
+#
+# What it does: every powered building that can overheat gets a temperature monitor. Checked
+# every 5 s of game time (PLib options: shutdown at 90 % and restore at 80 % of its overheat
+# temperature in °C), a building that reaches the shutdown temperature is cut off its circuit,
+# tinted red, pops "Thermal Shutdown: Cooling!" and shows a cooling status; once it cools to the
+# restore temperature it is reconnected. Its side screen adds a "Thermal Monitoring (Shutdown
+# X°C, Restore Y°C)" status item.
+# How a player reaches it: any powered building that overheats; selecting it.
+# What changes: buildings switch themselves off before they overheat.
+#
+# The early base's research station carries a monitor with the thresholds the options give.
+# Setup heats the station to 150 °C, above its shutdown temperature: within a few seconds the
+# monitor cuts it off and marks it cooling; selected, it shows the monitoring status.
+from: early-base
+mods: [3519929015]
+options:
+  creatrope.OverheatControl: {ShutdownPercent: 90, RestorePercent: 80, TemperatureCheckInterval: 5}
+setup:
+  - driver: {setup.call: {target: "all:ResearchCenter::[0].GetComponent<PrimaryElement>", method: set_Temperature, args: [423.15]}}
+steps:
+  - expect_state:
+      "all:ResearchCenter::[0].GetComponent<OverheatControl.BuildingTemperatureMonitor>.State": Active
+      "all:ResearchCenter::[0].GetComponent<OverheatControl.BuildingTemperatureMonitor>.ShutdownTemperature": "== original"
+      "all:ResearchCenter::[0].GetComponent<OverheatControl.BuildingTemperatureMonitor>.RestoreTemperature": "== original"
+  - run: {seconds: 8}
+  - expect_state:
+      "all:ResearchCenter::[0].GetComponent<OverheatControl.BuildingTemperatureMonitor>.State": Cooling
+  - driver: {camera.set: {cell: [128, 208], ortho: 8}}
+  - click_world: {cell: [128, 208], select: ResearchCenter}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/**": {any_text: "~Thermal Monitoring (Shutdown"}

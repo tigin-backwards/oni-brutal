@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3785020293-auto-priority-sorter.yaml",
+ "mods": [
+  "3785020293"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Priorities screen's options panel has the sort button; a click switches its mode, sorts every Duplicant (logged), and the table dump matches",
+ "updated": "2026-10-29",
+ "commit": "0d7478f2",
+ "mod_dlls": {
+  "3785020293": {
+   "AutoPrioritySorter.dll": "15e3fbfdcadc10346624e62db187f127251be3e2da3da5e2caeed594144b2283"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-114104-90e83e51",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T13:05:52",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-020252-02b27be0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T02:02:52",
+    "lane": 14,
+    "reference_run": "20261027-114104-90e83e51",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "table": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261029-020252-02b27be0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T02:03:36",
+    "lane": 14,
+    "reference_run": "20261027-114104-90e83e51",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "table": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

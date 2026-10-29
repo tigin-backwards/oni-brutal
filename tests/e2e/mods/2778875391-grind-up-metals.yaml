@@ -1,0 +1,28 @@
+# Grind Up Metals Updated (2778875391), class P.
+#
+# What it does: a postfix on RockCrusherConfig.ConfigureBuildingTemplate adds Rock Granulator
+# recipes that grind a refined metal's solid form back from what its melt solidifies into (iron,
+# aluminum, gold, copper, tungsten, and with the DLCs cobalt, ...): 100 kg with 50 kg of
+# phosphorite in, 100 kg of the metal and 50 kg of sand out, wherever the two differ.
+# How a player reaches it: the Rock Granulator's recipe list.
+# What changes: new rock crusher recipes.
+#
+# Setup builds a Rock Granulator in the corridor west of the printing pod. The game's recipe
+# list holds the mod's "Grind up" recipes at the granulator, as many as the original's, and its
+# recipe side screen (selected) lists them.
+from: early-base
+mods: [2778875391]
+require_log: ['RockCrusherConfig.ConfigureBuildingTemplate postfix loaded']
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"RockCrusher\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0].Name == RockCrusher and .description.StartsWith(\"Grind up\") == true": [">= 1", "== original"]
+  - run: {seconds: 2}
+  - expect: {buildings: {RockCrusher: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: RockCrusher}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/ComplexFabricatorSideScreen", cond: stable}
+  - expect_state:
+      "count:selected:ComplexFabricator.GetRecipes()[*] if .description.StartsWith(\"Grind up\") == true": [">= 1", "== original"]
+  - ui_dump: {name: recipes, root: "**/ComplexFabricatorSideScreen/Contents"}

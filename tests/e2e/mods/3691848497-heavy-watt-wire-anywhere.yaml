@@ -1,0 +1,28 @@
+# Heavy-Watt Wire Anywhere (3691848497), class P.
+#
+# What it does: postfixes on the Heavy-Watt Wire's and Heavy-Watt Conductive Wire's
+# CreateBuildingDef set their build rule to Anywhere, so they pass through walls and tiles
+# like ordinary wire (the game keeps them out of solid cells).
+# How a player reaches it: the Power menu's heavy-watt wires.
+# What changes: heavy-watt wire through tiles.
+#
+# Advanced Power Regulation is researched in setup. Both defs build anywhere, and the Power
+# menu's Heavy-Watt Wire card is shot.
+from: early-base
+mods: [3691848497]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"AdvancedPowerRegulation\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"HighWattageWire\").BuildLocationRule": "== 'Anywhere'"
+      "Assets.GetBuildingDef(\"WireRefinedHighWattage\").BuildLocationRule": "== 'Anywhere'"
+  - run: {seconds: 3}
+  - driver: {camera.set: {cell: [113, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Power"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/HighWattageWire Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/HighWattageWire Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}

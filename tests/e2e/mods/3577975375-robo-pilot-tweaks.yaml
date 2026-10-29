@@ -1,0 +1,17 @@
+# Robo-Pilot Tweaks (3577975375), classes P, O.
+#
+# What it does: a transpiler on RoboPilotModuleConfig.DoPostConfigureComplete replaces the
+# Robo-Pilot module's Data Bank refill threshold (the game's 20) with a PLib option, "Databank
+# Refill Mass" (10 to 100, default 80): Duplicants top it up once its store falls below that.
+# How a player reaches it: the Mods screen's options; a rocket's Robo-Pilot module.
+# What changes: the Robo-Pilot's Data Banks are refilled sooner.
+#
+# Options here: refill mass 50. The module's prefab asks for delivery below 50 of its 100.
+from: early-base
+mods: [3577975375]
+options:
+  Awbugl.RoboPilotModuleTweaks: {RefillMass: 50}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"RoboPilotModule\").GetComponent<ManualDeliveryKG>.refillMass": 50
+      "Assets.GetPrefab(\"RoboPilotModule\").GetComponent<ManualDeliveryKG>.capacity": 100

@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3800125328-expanded-lights.yaml",
+ "mods": [
+  "3800125328"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the three lights' techs and lux; the Furniture menu card (shot); a built LED light",
+ "updated": "2026-10-29",
+ "commit": "2d4aca2a",
+ "mod_dlls": {
+  "3800125328": {
+   "ExpandedLightsUpdated.dll": "3c9e18dfbe47963240ef5ca77f8deabd845e1359f2fd4a203faf6c70f980d806"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-112259-0d44a806",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T13:21:42",
+    "lane": 1,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-143747-9481627a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T16:02:44",
+    "lane": 1,
+    "reference_run": "20261029-112259-0d44a806",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.0
+    }
+   },
+   {
+    "run": "20261029-143747-9481627a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T16:03:42",
+    "lane": 1,
+    "reference_run": "20261029-112259-0d44a806",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.0
+    }
+   }
+  ]
+ }
+}

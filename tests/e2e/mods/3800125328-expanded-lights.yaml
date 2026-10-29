@@ -1,0 +1,39 @@
+# Expanded Lights (Updated) (3800125328), classes B, P.
+#
+# What it does: adds three lights to the Furniture menu: the Floodlight (Superconductors,
+# range 16, 2000 lux, 30 W), the Tile Light (Artistry, a plastic tile,
+# range 8, 1800 lux, 5 W) and the LED Light (Catalytics, range 6, 1500 lux, 2 W); patches on
+# the Ceiling Light and Lamp change them too.
+# How a player reaches it: research those techs; the Furniture menu.
+# What changes: brighter, cheaper lights.
+#
+# Catalytics is researched in setup and an LED Light built in the east corridor. The lights'
+# prefabs carry their lux and range; the Furniture menu's LED Light card is shot.
+from: early-base
+mods: [3800125328]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"Catalytics\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LEDLight\")", method: Build, args: [131786, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"Catalytics\").unlockedItemIDs": {contains: LEDLight}
+      "Db.Get().Techs.Get(\"PrettyGoodConductors\").unlockedItemIDs": {"contains": "Floodlight"}
+      "Db.Get().Techs.Get(\"Artistry\").unlockedItemIDs": {"contains": "TileLight"}
+      "Assets.GetPrefab(\"LEDLight\").GetComponent<Light2D>.Lux": 1500
+      "Assets.GetPrefab(\"Floodlight\").GetComponent<Light2D>.Lux": 2000
+      "Assets.GetPrefab(\"TileLight\").GetComponent<Light2D>.Range": 8
+      "Assets.GetBuildingDef(\"LEDLight\").EnergyConsumptionWhenActive": 2
+      "Assets.GetBuildingDef(\"CeilingLight\").EnergyConsumptionWhenActive": "== original"
+  - run: {seconds: 3}
+  - expect: {buildings: {LEDLight: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Furniture"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/LEDLight Group*", cond: stable}
+  - scroll: {at: "**/PlanBuildingSelectionPanel/BuildingGroups", notches: -10}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/LEDLight Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/LEDLight Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}

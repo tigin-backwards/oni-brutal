@@ -1,0 +1,31 @@
+# Quick Vacuum / 快速抽真空 和 移除液体 (3772248976), classes K, S (IMGUI).
+#
+# What it does: a MonoBehaviour on Game reads raw keys: Ctrl+Shift+V (gas) or Ctrl+Shift+L
+# (liquid) arms a box mode, shown by an IMGUI label "Quick Vacuum: left-drag to remove gas.
+# Esc/right-click cancels." at the top left. A left drag then replaces every gas (or liquid)
+# cell in the box with vacuum; a click without a drag does a 9x9 square around the pointer.
+# Solids are left alone.
+# How a player reaches it: the hotkeys, then the mouse.
+# What changes: gas or liquid deleted from the world.
+#
+# Ctrl+Shift+V arms gas mode (the label is shot); a click on the west corridor empties the
+# square around it: right after, the corridor's gas weighs far less than before (gas flows back
+# in from the rest of the base as time runs).
+from: early-base
+mods: [3772248976]
+steps:
+  - driver: {camera.set: {cell: [118, 208], ortho: 12}}
+  - expect_state:
+      "cells:110,207..114,209::Grid.Mass.get_Item({cell})": {save_as: before}
+  - expect_state: {"cells:110,207..114,209::Grid.Mass.get_Item({cell})": "> 5"}
+  - key: {code: "Ctrl+Shift+V"}
+  - expect_state:
+      "all:CodexQuickVacuum.QuickVacuumController::[0].boxMode": true
+      "all:CodexQuickVacuum.QuickVacuumController::[0].liquidMode": false
+  - shot: {name: armed, threshold: 0.03}
+  - click_world: {cell: [112, 208]}
+  - expect_state:
+      "all:CodexQuickVacuum.QuickVacuumController::[0].boxMode": false
+  - run: {seconds: 1, speed: 1}
+  - expect_state:
+      "cells:110,207..114,209::Grid.Mass.get_Item({cell})": "< 0.5 * before"

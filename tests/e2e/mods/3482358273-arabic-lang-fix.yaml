@@ -1,0 +1,21 @@
+# Arabic Lang Fix - مصحح اللغة العربية (ArabicTextFixMod, 3482358273), classes P, U.
+#
+# What it does: prefixes on TMP_Text's text setter and SetText reshape Arabic text (joined
+# letter forms, right-to-left order, Latin and number islands, mirrored brackets) for
+# TextMeshPro, swap in an Arabic font where needed, translate a few names the game builds
+# at runtime, and append a translator credit ("Translated by ...") to the build watermark.
+# Text without Arabic letters passes through unchanged.
+# How a player reaches it: play in Arabic (a translation mod); the build watermark.
+# What changes: readable Arabic text.
+#
+# In this English game the only visible change is the credit on the build watermark in the
+# lower-right corner; other labels keep their text.
+from: early-base
+mods: [3482358273]
+steps:
+  - run: {seconds: 2}
+  - ui_wait: {path: "**/BuildWatermark", cond: stable}
+  - expect_ui:
+      "**/BuildWatermark/**/DevelopmentBuildLabel*": {text: "~Translated by"}
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {exists: false}
+  - ui_dump: {name: watermark, root: "**/BuildWatermark"}

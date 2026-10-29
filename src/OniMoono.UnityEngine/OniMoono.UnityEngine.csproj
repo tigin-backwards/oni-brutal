@@ -18,5 +18,7 @@
     <PackageReference Include="Ahwoo.BRUTAL.Stb" />
     <!-- FreeType (native only): glyph rasterization for TextCore and legacy fonts. -->
     <PackageReference Include="Ahwoo.BRUTAL.FreeType" />
+    <!-- The original's inverse scales, measured (Math/InverseScale.cs). -->
+    <EmbeddedResource Include="Math/InverseScale.bin" LogicalName="OniMoono.Engine.InverseScale.bin" />
   </ItemGroup>
 </Project>

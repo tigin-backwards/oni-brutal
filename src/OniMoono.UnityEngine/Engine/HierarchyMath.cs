@@ -41,6 +41,25 @@ namespace OniMoono.Engine
             return m;
         }
 
+        /// The local matrix's inverse as the original builds it: row i is axis i's inverse scale
+        /// (InverseScale.Of) times rotation column i (the transposed rotation), and the
+        /// translation is −(row · p), summed r0·p.x + (r1·p.y + r2·p.z).
+        public static Affine InverseTrs(Vector3 p, Quaternion q, Vector3 s)
+        {
+            RotateBasis(q, 1f, 0f, 0f, out float a0, out float a1, out float a2);
+            RotateBasis(q, 0f, 1f, 0f, out float b0, out float b1, out float b2);
+            RotateBasis(q, 0f, 0f, 1f, out float c0, out float c1, out float c2);
+            float fx = InverseScale.Of(s.x), fy = InverseScale.Of(s.y), fz = InverseScale.Of(s.z);
+            Affine m;
+            m.M00 = fx * a0; m.M01 = fx * a1; m.M02 = fx * a2;
+            m.M10 = fy * b0; m.M11 = fy * b1; m.M12 = fy * b2;
+            m.M20 = fz * c0; m.M21 = fz * c1; m.M22 = fz * c2;
+            m.M03 = -(m.M00 * p.x + (m.M01 * p.y + m.M02 * p.z));
+            m.M13 = -(m.M10 * p.x + (m.M11 * p.y + m.M12 * p.z));
+            m.M23 = -(m.M20 * p.x + (m.M21 * p.y + m.M22 * p.z));
+            return m;
+        }
+
         static void RotateBasis(Quaternion q, float vx, float vy, float vz, out float rx, out float ry, out float rz)
         {
             float x = q.x, y = q.y, z = q.z, w = q.w;

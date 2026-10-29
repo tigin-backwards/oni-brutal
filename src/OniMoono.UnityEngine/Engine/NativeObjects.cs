@@ -153,6 +153,16 @@ namespace OniMoono.Engine
         Vector3 lossyScale;
         bool worldDirty = true, rotationDirty = true, scaleDirty = true, localTrsDirty = true;
 
+        /// The inverse matrices, made on the first worldToLocalMatrix read: most transforms
+        /// never have one read, and the big colonies have hundreds of thousands of them.
+        sealed class InverseCache
+        {
+            public HierarchyMath.Affine Local, World;
+            public bool LocalDirty = true, WorldDirty = true;
+        }
+
+        InverseCache inverse;
+
         public override void CopyStateFrom(NativeObject source)
         {
             var t = (TransformNative)source;
@@ -196,21 +206,42 @@ namespace OniMoono.Engine
             return localTrs;
         }
 
-        /// World to local. A transform with a zero scale component (Rocketry Expanded scales a UI
-        /// image by (1, 1), z 0) has no inverse; Unity then inverts each level's scale per axis,
-        /// with 0 for a zero axis, as measured in the original player (InverseTransformPoint,
-        /// worldToLocalMatrix, nested). A regular matrix gives the same as its inverse.
+        /// World to local, as the original player computes it (tools/UnityProbe `invscale`, IS3
+        /// and IS4: 3,000 chains of 1 to 6 levels, every element bit for bit): each level's
+        /// inverse (HierarchyMath.InverseTrs) multiplied from the leaf up, ((L⁻¹ P1⁻¹) … P0⁻¹),
+        /// never the world matrix inverted. A zero scale axis inverts to 0 (Rocketry Expanded
+        /// scales a UI image by (1, 1), z 0), so a singular transform has one too.
         public Matrix4x4 WorldToLocal
         {
             get
             {
-                var m = LocalToWorld;
-                if (m.determinant != 0f) return m.inverse;
-                var s = LocalScale;
-                var inverseScale = new Vector3(s.x != 0f ? 1f / s.x : 0f, s.y != 0f ? 1f / s.y : 0f, s.z != 0f ? 1f / s.z : 0f);
-                var local = Matrix4x4.Scale(inverseScale) * Matrix4x4.Rotate(Quaternion.Inverse(LocalRotation)) * Matrix4x4.Translate(-LocalPosition);
-                return Parent != null ? local * Parent.WorldToLocal : local;
+                var cache = Inverses();
+                if (Volatile.Read(ref cache.WorldDirty))
+                {
+                    var m = LocalInverse();
+                    for (var p = Parent; p != null; p = p.Parent)
+                    {
+                        var pm = p.LocalInverse();
+                        m = HierarchyMath.Mul(in m, in pm);
+                    }
+                    cache.World = m;
+                    Volatile.Write(ref cache.WorldDirty, false);
+                }
+                return cache.World.ToMatrix();
             }
+        }
+
+        InverseCache Inverses() => inverse ?? Interlocked.CompareExchange(ref inverse, new InverseCache(), null) ?? inverse;
+
+        HierarchyMath.Affine LocalInverse()
+        {
+            var cache = Inverses();
+            if (Volatile.Read(ref cache.LocalDirty))
+            {
+                cache.Local = HierarchyMath.InverseTrs(LocalPosition, LocalRotation, LocalScale);
+                Volatile.Write(ref cache.LocalDirty, false);
+            }
+            return cache.Local;
         }
 
         public Quaternion WorldRotation
@@ -258,6 +289,8 @@ namespace OniMoono.Engine
         public void MarkDirty(bool moved)
         {
             worldDirty = rotationDirty = scaleDirty = localTrsDirty = true;
+            var cache = inverse;
+            if (cache != null) cache.LocalDirty = cache.WorldDirty = true;
             HasChanged = true;
             if (moved) OnMoved();
             foreach (var c in Children) c.MarkDirty(moved);

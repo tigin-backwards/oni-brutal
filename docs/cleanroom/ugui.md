@@ -676,9 +676,11 @@ stated). This implementation already does all of this, on these measurements; ke
     0, +0.00001 and +0.001 it reports 0; by −0.00001 either, by the layout.
   - In 48 random exactly-fitting layouts (sizes 80–600, fractional positions, half of them
     under a parent at scale 0.86) the original reported 1 on about 40 % of the axes.
-  - Both players apply this formula. Their difference on such axes comes from the engine's
-    corners and matrices, 1 to 3 ulps apart in 57 of 86 cases. That belongs to the engine's
-    transform arithmetic, not to this package; do not add a tolerance here to hide it.
+  - Both players apply this formula. Their difference on such axes came from the engine's
+    corners and matrices, 1 to 3 ulps apart in 57 of 86 cases; it went with the engine's
+    worldToLocalMatrix following the original's ("Transform hierarchy to the bit" below,
+    2026-10-29). That belongs to the engine's transform arithmetic, not to this package; do not
+    add a tolerance here.
 - **Scrollbars.** On an update that finds the view bounds, the content bounds or the content's
   position changed since the previous one (always on the first):
   - each assigned scrollbar's `size` becomes clamp01((view size − |overshoot|) / content
@@ -730,15 +732,11 @@ screen opened with a scrollbar of size 0.94 to 0.98 in about half of our runs, 1
   way (400 random cases of each, `mm-check.py`); that is the engine's `Matrix4x4`
   (ARCHITECTURE D25), which now follows it. This package needs nothing beyond mapping the
   corners with the engine's `MultiplyPoint3x4`.
-- **Still apart.** `localToWorldMatrix` (and with it `GetWorldCorners`), `rotation` and
-  `lossyScale` now follow the original bit for bit ("Transform hierarchy to the bit" below),
-  but `worldToLocalMatrix` does not in general: the original's inverse scale is not always 1/s
-  rounded (f(s) below). Here it agrees: the translation was -(316.1741 × (1 / 0.86)) =
-  -367.6443, which inverting the world matrix with Mesa's inversion (`Matrix4x4.inverse`
-  below) also gives; the cofactor inverse used before gave -367.64432. So
-  whether the grown bounds move by an ulp still differs between the players for a given
-  layout, and both remain timing-dependent: the stale size shows in the original too (3 runs
-  of 12, sizes 0.995 to 0.9985), and in either player after a slow frame.
+- **No longer apart.** `localToWorldMatrix` (and with it `GetWorldCorners`), `rotation`,
+  `lossyScale` and, since 2026-10-29, `worldToLocalMatrix` follow the original bit for bit
+  ("Transform hierarchy to the bit" below), so the grown bounds move by an ulp in ours exactly
+  when they do in the original. Both remain timing-dependent: the stale size shows in the
+  original too (3 runs of 12, sizes 0.995 to 0.9985), and in either player after a slow frame.
 - **Schedule & Priority Screen Expander** (3774780988, measured 2026-10-26 with `vitalsopen` in
   its spec, `PROBE_VO_SCREEN=VitalsTableScreen`) opens the same Vitals screen, and its dump
   differs from one original run to the next. The screen's first update is under scale 0 in both
@@ -792,14 +790,21 @@ RectTransforms, every level logged. Each operation below rounds to float; no fus
     Inverse3DAffine's and Rotate's findings in hand: the managed `Quaternion * Vector3` matrix
     form in float gives 18% of vectors (66% of x lanes), in double 12%, the basis formula in
     double 10%.
-  - `worldToLocalMatrix`, `InverseTransform*`: the per-axis inverse scale f(s) is a function of
-    s alone (the same in every context, sign-symmetric, exponent-independent, 0 for 1e-20 and
-    1e38), within 1.25 ulp of 1/s and correctly rounded in 69% of 2,585 values; not 1/s, nor
-    rcpps (this CPU's table) with one or two Newton steps in eight evaluation orders, nor a
-    constant estimate refined, nor rsqrt forms, nor any expression of up to three operations
-    on s, 1/s, s², rcp and rsqrt. Rows of the inverse are f(s) times the transposed rotation;
-    the translation is −p·f(s) in 98% of cases. Nor is it the cofactor form Inverse3DAffine
-    takes, s²·(1/s³) or s/s² (52 to 57% of 1,009 values; 1/s 64%).
+  - `InverseTransformPoint` and the other `InverseTransform*`: not the worldToLocalMatrix
+    product (IS1 `itp`: 1,780 of 6,000 even without rotation), not reproduced.
+  - The formula of the per-axis inverse scale f(s) (`worldToLocalMatrix` below takes it from a
+    measured table instead). It is a function of the mantissa alone (all 2^23 mantissas of
+    [1, 2) measured, `PROBE_IS_PART=full`; 26,414 drawn scales of exponents −8 to 8 and both
+    signs agree with them), within 1.4 ulp of 1/s and equal to 1/s rounded for 65% of
+    mantissas (−1 ulp 16%, +1 ulp 18%). Its error has a part linear in the distance of 1/s
+    from the nearest multiple of 1/8, about 0.75 ulp × (8/s − round(8/s)), which jumps at
+    1/s = 9/16, 11/16, 13/16 and 15/16, plus a part that correlates with the rounding of
+    s × rcpps(s). At the edges: 0 for |s| below 1e-9 (bits 0x3089705f; −0 and subnormals
+    included), 0 with the scale's sign from 2^126 up, where rcpps(2^126) = 0.99976 × 2^-126 is
+    subnormal (1/2^126 itself is not), and NaN for NaN. Not reproduced by 1/s, rcpps or
+    vrcp14ss (this CPU's tables) with one or two Newton steps in about 40 evaluation orders
+    with float, double or fused intermediates, Halley and series steps, Goldschmidt from
+    rcpps or from round(8/s)/8, rsqrt forms, nor the cofactor forms (s²·(1/s³), s/s²).
   - RectTransform's rect from its anchors: (w·aMax − w·aMin) + sizeDelta matches 98% of sizes;
     w·(aMax − aMin) + sizeDelta 94%, the sums in double 91%, the size as the difference of the
     corners in the parent (anchor points plus offsets) at most 71%.
@@ -811,10 +816,20 @@ RectTransforms, every level logged. Each operation below rounds to float; no fus
   and 35 of 35 singular and near-singular ones (`MMS`): rank-deficient at each step, a zero TRS
   scale, a 1e-20 scale whose float determinant is 0 (inverted all the same), subnormal scales
   (inf and NaN), rows dependent but for an ulp, negative zeros, NaN, infinity, projections.
-  Our player matches both sets bit for bit (`mm-check.py diff`). worldToLocalMatrix inverts
-  the world matrix with it when its determinant is not 0, so that and `InverseTransform*`
-  match the original more often (TN `w2l` 668 of 4,200 against 396 with the cofactor inverse,
-  TR 227 of 1,046 against 134), but not throughout: the original builds them from f(s) above.
+  Our player matches both sets bit for bit (`mm-check.py diff`). `worldToLocalMatrix` does not
+  use it.
+- **`worldToLocalMatrix`** (measured 2026-10-29, `PROBE_SCENARIO=invscale`, lines `IS1` to
+  `IS6`; 3,000 chains of 1 to 6 transforms, UI-like ones with a scaled root and z rotations,
+  and general rotations with non-uniform and negative scales) is each level's inverse,
+  multiplied from the leaf up: ((L⁻¹ · P_{n−1}⁻¹) · …) · P_0⁻¹, each product as the world
+  matrix's (a0·b0 + (a1·b1 + a2·b2), the translation column added last). A level's inverse has
+  row i = f(s_i) × column i of its rotation matrix (the transposed rotation, its columns as the
+  local matrix's), and the translation −(row · p), summed r0·p.x + (r1·p.y + r2·p.z). Every
+  element of all 2,779 chains whose local values our player reads back alike (the rest differ
+  in `Quaternion.Euler`) matches; inverting the world matrix (Mesa or cofactors) and composing
+  from the root down do not. A zero scale axis inverts to 0 at that level, so singular chains
+  need no other path. The engine keeps f(s) as 1/s corrected by the measured difference
+  (`Math/InverseScale.bin`, 2 bits per mantissa, 465 KB deflated).
 
 **Camera and projection math** (measured 2026-10-24, `tools/UnityProbe`
 `PROBE_SCENARIO=projection`, `pj-check.py rule`; the U57 player on this machine). Does more of

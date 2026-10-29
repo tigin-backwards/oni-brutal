@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2306600428-rainbow-farts.yaml",
+ "mods": [
+  "2306600428"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the eight flatulence traits exist and Flatulence is no bad trait; a given trait adds its farting component",
+ "updated": "2026-10-29",
+ "commit": "2d4aca2a",
+ "mod_dlls": {
+  "2306600428": {
+   "RainbowFarts.dll": "c9c71578ada151cf494cb2c1a34c33c2f4123ee98188614900f148f6129857ad"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-074432-9668621b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T07:50:28",
+    "lane": 3,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-143747-9481627a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T14:44:25",
+    "lane": 1,
+    "reference_run": "20261029-074432-9668621b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-143747-9481627a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T14:46:07",
+    "lane": 1,
+    "reference_run": "20261029-074432-9668621b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

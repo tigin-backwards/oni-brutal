@@ -1,0 +1,24 @@
+# Rainbow Farts (2306600428), class P (and the printing pod's trait colour).
+#
+# What it does: removes Flatulence from the bad traits and adds eight flatulence traits
+# (hydrogen, chlorine, oxygen, polluted oxygen, carbon dioxide, natural gas, sour gas and
+# rainbow), one of which every new Duplicant gets; a trait adds a RainbowFlatulence component
+# that farts its gas now and then. On the printing pod's cards the trait is coloured purple.
+# How a player reaches it: new Duplicants (the printing pod, a new colony).
+# What changes: every Duplicant farts some gas.
+#
+# The traits exist and Flatulence is no longer a bad trait. Airy Flatulence is given to a
+# Duplicant in setup: it carries the component, set to oxygen.
+from: early-base
+mods: [2306600428]
+setup:
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[0].GetComponent<Traits>", method: Add, args: [{"$": "Db.Get().traits.Get(\"flatulence_o2\")"}]}}
+steps:
+  - expect_state:
+      "Db.Get().traits.TryGet(\"flatulence_rainbow\").Name": Rainbow Flatulence
+      "Db.Get().traits.TryGet(\"flatulence_h2\").Name": Floaty Flatulence
+      "count:TUNING.DUPLICANTSTATS.BADTRAITS[*] if .id == Flatulence": 0
+      "Components.LiveMinionIdentities.Items[0].GetComponent<Traits>.GetTraitIds()": {contains: flatulence_o2}
+      "Components.LiveMinionIdentities.Items[0].GetComponent<RainbowFarts.RainbowFlatulence>.EmitElement": "== 'Oxygen'"
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

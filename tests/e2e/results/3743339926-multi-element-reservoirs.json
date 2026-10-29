@@ -1,0 +1,79 @@
+{
+ "spec": "mods/3743339926-multi-element-reservoirs.yaml",
+ "mods": [
+  "3743339926"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "a built reservoir's side screen (dump, shot); its output button cycles the element",
+ "updated": "2026-10-29",
+ "commit": "2d4aca2a",
+ "mod_dlls": {
+  "3743339926": {
+   "ReservoirPerElementCapMod.dll": "1ab297d5a98a22db49df6b1c164dfc208ec89ce4562401806e02c26210dd8cff"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-134140-71c6d6eb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T14:01:00",
+    "lane": 1,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-143747-9481627a",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-29T15:37:44",
+    "lane": 1,
+    "reference_run": "20261029-134140-71c6d6eb",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "side": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "side": 0.0
+    }
+   },
+   {
+    "run": "20261029-143747-9481627a",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-29T15:38:31",
+    "lane": 1,
+    "reference_run": "20261029-134140-71c6d6eb",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "side": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "side": 0.0
+    }
+   }
+  ]
+ }
+}

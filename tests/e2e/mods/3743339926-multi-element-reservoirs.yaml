@@ -1,0 +1,40 @@
+# Multi-Element Reservoirs (大型多物质气液库) (3743339926), classes B, S, user menu.
+#
+# What it does: adds a Large Liquid Reservoir (LargeLiquidReservoir, 2x3, the Base
+# menu, unlocked by Improved Liquid Piping) and a Large Gas Reservoir (LargeGasReservoir, 5x3,
+# Ventilation): they store up to 99 999 kg of each element (599 994 kg in all) and have two
+# output ports, each set to one stored element, to automatic or to none. A user-menu button per
+# port ("Output 1: ...") cycles its element; a side screen (a copy of the filter side screen)
+# lists the choices.
+# How a player reaches it: research; the Base menu; select a reservoir.
+# What changes: one reservoir holds and dispenses several liquids or gases apart.
+#
+# Improved Liquid Piping is researched in setup; a Large Liquid Reservoir is built in the east
+# corridor with water and polluted water in it, and selected. Its side screen is dumped and
+# shot; the "Output 1" button cycles the first port from none to a stored liquid.
+from: early-base
+mods: [3743339926]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"ImprovedLiquidPiping\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LargeLiquidReservoir\")", method: Build, args: [131786, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "all:ReservoirPerElementCapMod.MultiPortReservoir::[0].GetComponent<Storage>", method: AddLiquid, args: [Water, 500, 300, 255, 0, false, true]}}
+  - driver: {setup.call: {target: "all:ReservoirPerElementCapMod.MultiPortReservoir::[0].GetComponent<Storage>", method: AddLiquid, args: [DirtyWater, 300, 300, 255, 0, false, true]}}
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "all:ReservoirPerElementCapMod.MultiPortReservoir::[0]"}]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"ImprovedLiquidPiping\").unlockedItemIDs": {contains: LargeLiquidReservoir}
+      "Db.Get().Techs.Get(\"HVAC\").unlockedItemIDs": {contains: LargeGasReservoir}
+      "selected:KPrefabID.PrefabTag.Name": LargeLiquidReservoir
+      "selected:Storage.capacityKg": 599994
+      "selected:Storage.MassStored()": ">= 799"
+      "selected:MultiPortReservoir.outputFilter0.Name": "== original"
+  - driver: {camera.set: {cell: [134, 208], ortho: 8}}
+  - ui_wait: {path: "**/DetailsScreen/**/MultiPortReservoirSideScreen", cond: stable}
+  - ui_dump: {name: side, root: "**/DetailsScreen/**/MultiPortReservoirSideScreen"}
+  - shot: {name: side, crop: "**/DetailsScreen", threshold: 0.04}
+  - click: {text: "~Output 1", under: "**/DetailsScreen"}
+  - expect_state:
+      "selected:MultiPortReservoir.outputFilter0.Name": ["!= 'Void'", "== original"]

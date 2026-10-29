@@ -1,0 +1,28 @@
+# 金属锻炉 Metal Forge (an advanced Metal Refinery, 3639032470), classes B, O; PLib options.
+#
+# What it does: adds the Metal Forge (MetalForge, 3x4, metal, Refining menu, researched with
+# Smelting): a powered fabricator (480 W, an option) with recipes that refine the metal ores
+# into their metals, outputs scaled by an option (1 by default).
+# How a player reaches it: research Smelting; the Refining menu; its recipe side screen.
+# What changes: another way to refine metal.
+#
+# Options here: 600 W. A forge built by setup in the corridor west of the printing pod is
+# selected: its side screen lists its recipes, as many as in the original.
+from: early-base
+mods: [3639032470]
+options:
+  "3639032470": {Power: 600.0}
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"MetalForge\")", method: Build, args: [{"$": "Grid.XYToCell(113, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"Smelting\").unlockedItemIDs": {contains: MetalForge}
+      "Assets.GetBuildingDef(\"MetalForge\").EnergyConsumptionWhenActive": 600
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0].Name == MetalForge": [">= 8", "== original"]
+  - run: {seconds: 2}
+  - expect: {buildings: {MetalForge: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: MetalForge}
+  - ui_wait: {path: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView", cond: stable}
+  - ui_dump: {name: recipes, root: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView"}
+  - shot: {name: recipes, crop: "**/DetailsScreen", threshold: 0.04}

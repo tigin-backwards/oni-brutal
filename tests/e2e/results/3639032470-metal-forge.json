@@ -1,0 +1,80 @@
+{
+ "spec": "mods/3639032470-metal-forge.yaml",
+ "mods": [
+  "3639032470"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "with 600 W in its options the forge draws 600 W; a built one's recipe list matches the original's but for a scroll position",
+ "updated": "2026-10-29",
+ "commit": "1785bc2f",
+ "mod_dlls": {
+  "3639032470": {
+   "MetalForge.dll": "9245ac94a55e1a25a69502585bfa042ab22ff165b37bf55986ef28e9dc468876",
+   "PLib.dll": "48c63fd4654b6fbb390afdac71a3d29194eeb9405eca4290cba6e4fbf60805ce"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-090559-e1e62f9e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T11:02:01",
+    "lane": 4,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-121806-2d41950c",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-29T12:40:47",
+    "lane": 4,
+    "reference_run": "20261029-090559-e1e62f9e",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "recipes": 0.0
+    }
+   },
+   {
+    "run": "20261029-121806-2d41950c",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-29T12:41:37",
+    "lane": 4,
+    "reference_run": "20261029-090559-e1e62f9e",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "recipes": 0.0
+    }
+   }
+  ]
+ }
+}

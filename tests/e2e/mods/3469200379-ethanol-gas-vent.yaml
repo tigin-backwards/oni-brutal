@@ -1,0 +1,28 @@
+# Geyser - EthanolGas Vent 乙醇蒸气喷孔 (3469200379), classes P, W.
+#
+# What it does: adds a geyser type, hot_ethanol (GeyserGeneric_hot_ethanol, 2x4, its own
+# animation), that vents ethanol gas at 500 °C, with the game's usual iteration and year ranges;
+# a geotuner can tune it with 400 kg of its material (+20 % mass, +50 °C). Its strings come from
+# its strings folder, and its worldgen files let new worlds place it.
+# How a player reaches it: a vent found in a new world (or spawned in sandbox).
+# What changes: a renewable source of hot ethanol gas.
+#
+# The geyser's prefab vents ethanol gas at 773.15 K. One set down in setup in the corridor west
+# of the printing pod is a geyser of that type, and selected it shows its name (a random
+# suffix follows it, so the title is not compared).
+from: early-base
+mods: [3469200379]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131762, 0, 0, \"GeyserGeneric_hot_ethanol\", \"Building\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"GeyserGeneric_hot_ethanol\").GetComponent<GeyserConfigurator>.presetType.HashValue": "== original"
+      "GeyserConfigurator.FindType(\"hot_ethanol\").element": EthanolGas
+      "GeyserConfigurator.FindType(\"hot_ethanol\").temperature": 773.15
+  - run: {seconds: 2}
+  - expect_state:
+      "count:all:Geyser::[*] if .configuration.geyserType.id == hot_ethanol": 1
+  - driver: {camera.set: {cell: [110, 209], ortho: 8}}
+  - click_world: {cell: [110, 208], select: GeyserGeneric_hot_ethanol}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state: {"selected:KSelectable.GetName()": {contains: "Hot Ethanol"}}

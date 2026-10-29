@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3469200379-ethanol-gas-vent.yaml",
+ "mods": [
+  "3469200379"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the hot ethanol geyser type vents ethanol gas at 773.15 K; one set down is selected with its name; the title dump matches",
+ "updated": "2026-10-29",
+ "commit": "1283fcec",
+ "mod_dlls": {
+  "3469200379": {
+   "HotEthanol.dll": "2bac10277b17dcb6ba77b754bc96a73a2a89209a333d1b4b69f8e0120c4548aa"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-010724-da620746",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T02:19:47",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-031909-d9992d37",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T03:19:09",
+    "lane": 15,
+    "reference_run": "20261029-010724-da620746",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-031909-d9992d37",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T03:20:01",
+    "lane": 15,
+    "reference_run": "20261029-010724-da620746",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

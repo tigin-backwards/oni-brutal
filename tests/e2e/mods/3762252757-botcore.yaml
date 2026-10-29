@@ -1,0 +1,35 @@
+# BotCore (Robot overhaul + Sweepy enhancement) (3762252757), classes P, O, user menu.
+#
+# What it does: reworks the robots. The Sweepy Dock gets a conveyor output (and optionally a
+# liquid pipe), a 1000 kg output storage and a cargo-threshold logic port; Sweepy holds 1000
+# kg, mops and picks up more, and gets user-menu modes: patrol (Standard or Cleanup), pickup
+# filter (both, solid, liquid), door access and vertical navigation. Battery capacity and
+# depletion multipliers for Rovers, Biobots, Flydos and Remote Workers, and Biobot chores, are
+# PLib options.
+# How a player reaches it: the Mods screen's options; a Sweepy Dock and its Sweepy.
+# What changes: Sweepies clean better and deliver by conveyor; robots last longer.
+#
+# The dock's def has its conveyor output and logic port. A Sweepy placed in the west corridor
+# is selected: its "Patrol: Standard" button turns it to Cleanup, and the pickup filter button
+# cycles from Both to Solid Only.
+from: early-base
+mods: [3762252757]
+setup:
+  - driver: {setup.call: {type: GameUtil, method: KInstantiate, args: [{"$": "Assets.GetPrefab(\"SweepBot\")"}, [112.5, 207.01, -24.5], Creatures]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "all:BotCore.Core.SweepyExtraModes::[0]"}]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"SweepBotStation\").OutputConduitType": "== 'Solid'"
+      "Assets.GetBuildingDef(\"SweepBotStation\").LogicOutputPorts.Count": 1
+      "Assets.GetPrefab(\"SweepBot\").GetComponent<Storage>.capacityKg": "== original"
+      "selected:KPrefabID.PrefabTag.Name": SweepBot
+      "selected:SweepyExtraModes.PatrolMode": "== 'Standard'"
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - click: {text: "Patrol: Standard", under: "**/DetailsScreen"}
+  - expect_state:
+      "selected:SweepyExtraModes.PatrolMode": "== 'Cleanup'"
+  - click: {text: "Filter: Both", under: "**/DetailsScreen"}
+  - expect_state:
+      "selected:SweepyExtraModes.PickupFilter": "== 'Solid'"

@@ -1,0 +1,37 @@
+# Drawable Drywall (2839691577), classes B, S.
+#
+# What it does: adds the Drawable Drywall (DrawableWall, a copy of the game's Drywall with its
+# own nine-part anim, Utilities menu, researched with Hazard Protection). Its side screen
+# (PLib, "Drawable Wall") shows a 3x3 grid of the wall's parts and a 7x16 palette: a part
+# clicked, then a colour, tints that symbol of the wall's anim; the colours are saved and
+# copied with Copy Settings.
+# How a player reaches it: the Utilities menu, then the built wall's side screen.
+# What changes: drywall in any colours.
+#
+# Hazard Protection is researched in setup and a wall built in the corridor west of the
+# printing pod. Selected, its side screen shows the grid; the centre part is clicked, then a
+# palette colour, and the wall's centre colour follows.
+from: early-base
+mods: [2839691577]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"Suits\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"DrawableWall\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"Suits\").unlockedItemIDs": {contains: DrawableWall}
+  - run: {seconds: 2}
+  - expect: {buildings: {DrawableWall: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: DrawableWall}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/DrawableWallSideScreen", cond: stable}
+  - ui_dump: {name: side, root: "**/DetailsScreen/SideScreen/**/DrawableWallSideScreen"}
+  - click: {ui: "**/DrawableWallSideScreen/**/DrawableWallBoxButton1x1"}
+  - click: {ui: "**/DrawableWallSideScreen/**/DrawableWallCBoxButton2x5"}
+  - expect_state:
+      "selected:GetComponent<DrawableDecoration.DrawableWall>.colors[4].r": "== original"
+      "selected:GetComponent<DrawableDecoration.DrawableWall>.colors[4].g": "== original"
+      "selected:GetComponent<DrawableDecoration.DrawableWall>.colors[0].r": 1
+  - expect_state:
+      "selected:GetComponent<DrawableDecoration.DrawableWall>.colors[4].b": "< 1"
+  - shot: {name: side, crop: "**/DetailsScreen/SideScreen/**/DrawableWallSideScreen", threshold: 0.04}

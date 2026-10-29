@@ -1,0 +1,67 @@
+{
+ "spec": "mods/2839691577-drawable-drywall.yaml",
+ "mods": [
+  "2839691577"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a built drywall's PLib side screen tints the clicked part with the picked colour; side screen dump and shot match the original's",
+ "updated": "2026-10-29",
+ "commit": "2d4aca2a",
+ "mod_dlls": {
+  "2839691577": {
+   "DrawableDecoration.dll": "3078a0d49799ec677b4a5aba9e409cb1558ab1f6819bcf55ea151df1710dbef2"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-071158-8a6b9b85",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T07:18:55",
+    "lane": 4,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-083519-82e8344c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T08:42:23",
+    "lane": 4,
+    "reference_run": "20261029-071158-8a6b9b85",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "side": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "side": 0.0
+    }
+   },
+   {
+    "run": "20261029-083519-82e8344c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T08:43:19",
+    "lane": 4,
+    "reference_run": "20261029-071158-8a6b9b85",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "side": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "side": 0.0
+    }
+   }
+  ]
+ }
+}

@@ -261,6 +261,11 @@ namespace SemanticsProbe
                 go.AddComponent<Tooltip>();
                 return;
             }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "invscale")
+            {
+                InverseScale.Run();
+                return;
+            }
             if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "transform")
             {
                 TransformMath.Run();

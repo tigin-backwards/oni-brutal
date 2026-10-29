@@ -660,3 +660,10 @@ what it logs:
   `tm-check.py rule LOG` and `tm-check.py diff ORIG OURS` read the `TM` lines; the file's header
   lists the rest, and `docs/cleanroom/ugui.md` ("Transform hierarchy to the bit") what they
   measured.
+- `invscale` (`InverseScale.cs`, `IS1` to `IS4`, at mod load): `worldToLocalMatrix` of single
+  transforms over scales of every exponent, a dense sweep of mantissas, and 3,000 chains (UI-like
+  and general). `PROBE_IS_PART=full` logs instead each of the 2^23 mantissas' inverse scale as
+  its difference from 1/s (`IS5`, a minute), `PROBE_IS_PART=edge` the edges (`IS6`: special
+  values, every exponent, the smallest scale with an inverse, by bisection). `is-check.py diff
+  ORIG OURS` compares players; `is-check.py table LOG OUT` rebuilds the engine's
+  `Math/InverseScale.bin` from a `full` run.

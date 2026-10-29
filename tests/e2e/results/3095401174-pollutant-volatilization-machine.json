@@ -1,0 +1,65 @@
+{
+ "spec": "mods/3095401174-pollutant-volatilization-machine.yaml",
+ "mods": [
+  "3095401174"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "spec fails in ours: the Polluted Dirt Volatilizer's card from the Oxygen menu shows only its title and material row (128 px tall against 389 in the original), as the Christmas Tree's does; the defs and research match",
+ "updated": "2026-10-29",
+ "commit": "2d4aca2a",
+ "mod_dlls": {
+  "3095401174": {
+   "huifaqi.dll": "7fe319cd04a8c02f85f02bdce0db56d456e75bd438277962f9f313302ffa68b1"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-071158-8a6b9b85",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T08:05:01",
+    "lane": 5,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-083519-82e8344c",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-29T08:46:04",
+    "lane": 4,
+    "reasons": [
+     "shot product: 100.00% of pixels differ (> 4%)"
+    ],
+    "reference_run": "20261029-071158-8a6b9b85",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 1.0
+    }
+   },
+   {
+    "run": "20261029-083519-82e8344c",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-29T08:46:58",
+    "lane": 4,
+    "reasons": [
+     "shot product: 100.00% of pixels differ (> 4%)"
+    ],
+    "reference_run": "20261029-071158-8a6b9b85",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 1.0
+    }
+   }
+  ]
+ }
+}

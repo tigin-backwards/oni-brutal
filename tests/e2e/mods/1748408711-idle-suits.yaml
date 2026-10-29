@@ -1,0 +1,23 @@
+# Idle Suits (1748408711), class P.
+#
+# What it does: a postfix on SuitLocker.ReturnSuitWorkable.CreateChore cancels the errands it
+# has just made, so Duplicants wearing a suit never walk back to an empty dock to return it
+# (urgently or when idle): they keep the suit on while idle.
+# How a player reaches it: an Atmo Suit Dock with its suit out.
+# What changes: no "return suit" errands.
+#
+# An empty Atmo Suit Dock is built in the east corridor. Entering its empty state makes the
+# return-suit errands, which the mod cancels at once: both stay null (the game keeps two).
+from: early-base
+mods: [1748408711]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SuitLocker\")", method: Build, args: [131786, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 3}
+  - expect: {buildings: {SuitLocker: 1}}
+  - expect_state:
+      "all:SuitLocker::[0].GetStoredOutfit()": null
+      "all:SuitLocker::[0].returnSuitWorkable.urgentChore": null
+      "all:SuitLocker::[0].returnSuitWorkable.idleChore": null
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

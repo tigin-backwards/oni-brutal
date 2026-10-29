@@ -1,4 +1,4 @@
-# scripts/mod-sweep.py s2000: 1343 mods, batches of 22, the save 2minnow, 90 s of play; commit 6d4545b9, 2026-10-27
+# scripts/mod-sweep.py s2000: 1343 mods, batches of 22, the save 2minnow, 90 s of play; commit 3bf80ec4, 2026-10-29
 id	rank	original	ours	note
 1882162095	751	ok	ok	
 2836461351	752	ok	ok	
@@ -751,7 +751,7 @@ id	rank	original	ours	note
 2339405225	1594	ok	ok	
 929247646	1595	-	-	a translation: installed disabled, as a subscription leaves it; not swept
 2813526647	1596	ok	ok	
-2361043018	1597	ok	colony	the crash screen opens while the save loads; N Exception in: (Minion).SleepChoreMonitor.root.checkforbed @ Public_Cots.Patches.Patches.Postfix_UpdateBed(Instance __instance) in C.\Repos\MrPurpleN\ONI\Public Cots\Patches\Patches.cs.line N; System.MethodAccessException: At
+2361043018	1597	ok	colony	alone, on the player of commit 3bf80ec4: the crash screen opens while the save loads; N Exception in: (Minion).SleepChoreMonitor.root.checkforbed @ Public_Cots.Patches.Patches.Postfix_UpdateBed(Instance __instance) in C.\Repos\MrPurpleN\ONI\Public Cots\Patches\Patches.cs.line N; System.MethodAccessException: At
 3674542335	1598	ok	ok	
 2932976861	1599	ok	ok	
 2845508297	1600	ok	ok	
@@ -839,7 +839,7 @@ id	rank	original	ours	note
 3610828533	1691	ok	ok	
 3695988693	1692	ok	ok	
 3420064522	1693	menu	-	the player exits (1) while loading; System.IO.FileNotFoundException: Could not load file or assembly "PLib, Version=N.N, Culture=neutral, PublicKeyToken=null" or one of its dependencies; null Exception while loading mod GetAllTheGoodTraits at RUN/home/config/unityNd/Klei/Oxygen Not Included/mods/Local/N
-3546567438	1694	ok	colony	IndexOutOfRangeException: Index was outside the bounds of the array @ Internal.Runtime.CompilerHelpers.ThrowHelpers.ThrowIndexOutOfRangeException
+3546567438	1694	ok	ok	loads alone in both players on the player of commit 3bf80ec4 (its batch failed in ours on an older build)
 2837711870	1695	menu	-	the original disables it ("Failed to load mod ...disabling"): step start: the player exited (1) before OniMcp started; HarmonyLib.HarmonyException: Patching exception in method null ---> System.ArgumentException: Undefined target method for patch method static System.Void AutomaticOilRefinery.ElementConverterHasEnoughMass::Postfix(ElementConverter __instance, System.Boolean& __result) @ HarmonyLib.PatchClassProcessor.PatchWithAttributes; System.MissingMethodException: Method not found: void .ConsumedElement..ctor(Tag,single)
 3506650482	1696	ok	ok	
 1956033615	1698	ok	ok	
@@ -901,7 +901,7 @@ id	rank	original	ours	note
 3577962693	1759	ok	ok	
 3620202317	1761	-	-	a translation: installed disabled, as a subscription leaves it; not swept
 3683507975	1763	menu	-	the original disables it ("Failed to load mod ...disabling"): step start: the player exited (1) while loading; FileNotFoundException: YamlIO tried loading a file that doesn"t exist: /home/nigit/projects/oni-brutal/.claude/worktrees/agent-aNdNfNeNfN/out/sweep/.original-N/OxygenNotIncluded_Data/StreamingAssets/worldgen/subworlds/Terr/Start_Default.yaml @ Klei.YamlIO.LoadFile[T]; First anim file needs to be non-null. TorchComplete (UnityEngine.GameObject) @ KAnimControllerBase.set_AnimFiles
-3759075866	1764	ok	menu	step start: the player exited (1) before OniMcp started; DeliveryTemperatureLimit: Failed to find FetchAreaChore.StatesInstance.Begin() delegate for patching
+3759075866	1764	ok	ok	loads alone in both players on the player of commit 3bf80ec4 (its batch failed in ours on an older build)
 3025430728	1765	ok	ok	
 1368234558	1766	-	-	a translation: installed disabled, as a subscription leaves it; not swept
 3474203860	1767	ok	ok	
@@ -950,7 +950,7 @@ id	rank	original	ours	note
 2961593835	1813	ok	ok	
 2846822603	1814	ok	ok	
 2547745654	1815	ok	ok	
-3433108302	1817	ok	colony	the player exits (1) while loading; ---> System.ArgumentException: The Object you want to instantiate is null @ UnityEngine.Object.Instantiate(Object original) in /home/nigit/projects/oni-brutal/.claude/worktrees/agent-aNdNfNeNfN/src/OniBrutal.UnityEngine/Core/Instantiate.cs.line N; ArgumentException: The Object you want to instantiate is null @ UnityEngine.Object.Instantiate; ArgumentOutOfRangeException: Index was out of range. Must be non-negative and less than the size of the collection. (Parameter "index") @ BackwallManager+BackwallIndexer.get_Element (and 55 more)
+3433108302	1817	ok	colony	alone, on the player of commit 3bf80ec4: step start: the player exited (1) while loading; ArgumentException: The Object you want to instantiate is null @ UnityEngine.Object.Instantiate; ArgumentOutOfRangeException: Index was out of range. Must be non-negative and less than the size of the collection. (Parameter "index") @ BackwallManager+BackwallIndexer.get_Element; System.NullReferenceException: Object reference not set to an instance of an object @ Util.KInstantiate (and 54 more)
 2853421859	1818	ok	ok	
 3743339926	1819	ok	ok	
 3762252757	1820	ok	ok	
@@ -1063,7 +1063,7 @@ id	rank	original	ours	note
 3719939081	1943	ok	ok	
 3742958503	1944	ok	ok	
 3053330755	1945	ok	ok	
-3600537542	1946	ok	menu	the player exits (1) while loading; ours disables it ("Failed to load mod ...disabling"); System.BadImageFormatException: Enclosing type(s) not found for type "‭⁬‪‌‎‫​⁯‭⁫‌‍‏⁪‪‭​‎‬​‎​⁭​‫‭‮⁮‏‌‫​‍‍⁮⁪‪‌‍⁬‮" in assembly "Katairite, Version=N.N, Culture=neutral, PublicKeyToken=null" @ KMod.DLLLoader.LoadDLLs; null Exception while loading mod Abyssalite at RUN/home/config/unityNd/Klei/Oxygen Not Included/mods/Local/N @ KMod.DLLLoader.LoadDLLs
+3600537542	1946	ok	menu	alone, on the player of commit 3bf80ec4: step start: <urlopen error [Errno 104] Connection reset by peer>; ours disables it ("Failed to load mod ...disabling"); System.BadImageFormatException: Enclosing type(s) not found for type "‭⁬‪‌‎‫​⁯‭⁫‌‍‏⁪‪‭​‎‬​‎​⁭​‫‭‮⁮‏‌‫​‍‍⁮⁪‪‌‍⁬‮" in assembly "Katairite, Version=N.N, Culture=neutral, PublicKeyToken=null" @ KMod.DLLLoader.LoadDLLs; null Exception while loading mod Abyssalite at RUN/home/config/unityNd/Klei/Oxygen Not Included/mods/Local/N @ KMod.DLLLoader.LoadDLLs
 3478498118	1947	ok	ok	
 2865091697	1948	ok	ok	
 3772297140	1949	ok	ok	

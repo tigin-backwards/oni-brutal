@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3542413342-cafeplus.yaml",
+ "mods": [
+  "3542413342"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "an Espresso Machine's recipe side screen lists the seven drinks; picking Mushroom Gravitano sets its recipe, filter and delivery; screens match the original's",
+ "updated": "2026-10-29",
+ "commit": "2d4aca2a",
+ "mod_dlls": {
+  "3542413342": {
+   "CafePlus.dll": "e398354aa3968ce8b9285d5f0cffa15b9b18c5dff5f4b5001dd321926737c71e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-071158-8a6b9b85",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T07:30:44",
+    "lane": 4,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-083519-82e8344c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T08:49:45",
+    "lane": 4,
+    "reference_run": "20261029-071158-8a6b9b85",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "recipes-picked": 7.5e-05
+    }
+   },
+   {
+    "run": "20261029-083519-82e8344c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T08:50:38",
+    "lane": 4,
+    "reference_run": "20261029-071158-8a6b9b85",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "recipes-picked": 7.5e-05
+    }
+   }
+  ]
+ }
+}

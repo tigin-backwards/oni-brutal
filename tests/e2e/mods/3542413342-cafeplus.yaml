@@ -1,0 +1,35 @@
+# CafePlus: New Coffee Drinks (3542413342), classes P, S.
+#
+# What it does: the Espresso Machine gets a recipe chooser (an IFewOptionSideScreen,
+# EspressoMachineFewOptions): seven drinks from an embedded JSON (Espresso, Mushroom
+# Gravitano, Muckroot Moocchiato, Moocchiato, Petroccino, Cafe Au Lube, Isobrew; a user JSON
+# beside the DLL may add more), each with its liquid and solid ingredient, its allowed users
+# (Duplicants or bionic ones) and its own effect. Picking one sets the machine's storage
+# filter, manual delivery and conduit consumer to its ingredients; patches on the machine's
+# chore, descriptors and work completion give the drink's effect.
+# How a player reaches it: select an Espresso Machine; its side screen.
+# What changes: what an Espresso Machine brews.
+#
+# setup builds an Espresso Machine in the corridor west of the printing pod. Selected, its
+# side screen lists the recipes; Mushroom Gravitano is clicked and the machine follows.
+from: early-base
+mods: [3542413342]
+require_log: ['\[CafePlus\] Embedded recipes loaded: 7']
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"EspressoMachine\")", method: Build, args: [{"$": "Grid.XYToCell(113, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {EspressoMachine: 1}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 206], select: EspressoMachine}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/FewOptionSelectionSideScreen", cond: stable}
+  - expect_ui:
+      "**/FewOptionSelectionSideScreen/**/Rows/RowPrefab/AssignmentText": {any_text: "~Mushroom Gravitano"}
+  - ui_dump: {name: recipes, root: "**/FewOptionSelectionSideScreen"}
+  - click: {text: "Mushroom Gravitano", under: "**/FewOptionSelectionSideScreen"}
+  - expect_state:
+      "selected:GetComponent<CafePlus.RecipeComponent>.SelectedRecipe.Recipe": Mushroom Gravitano
+      "selected:GetComponent<CafePlus.EspressoMachineFewOptions>.GetSelectedOption().Name": Mushroom Gravitano
+      "selected:GetComponent<Storage>.storageFilters[0].Name": "== original"
+      "selected:GetComponent<ManualDeliveryKG>.RequestedItemTag.Name": "== original"
+  - shot: {name: recipes-picked, crop: "**/FewOptionSelectionSideScreen", threshold: 0.04}

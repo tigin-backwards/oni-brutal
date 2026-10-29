@@ -1,0 +1,22 @@
+# Performance Assist / 性能辅助 (3772297140), class P.
+#
+# What it does: at load and every ten seconds of play (a controller on the Game object, added
+# by a postfix on Game.OnSpawn) it raises the process to high priority, sets the GC to
+# sustained low latency, turns vsync off and asks for 240 frames a second, running in the
+# background; each step is skipped silently where it fails.
+# How a player reaches it: it is passive.
+# What changes: the frame cap and process settings.
+#
+# After the colony loads the controller is on the Game object, vsync is off and the frame
+# rate target is 240; the colony plays on.
+from: early-base
+mods: [3772297140]
+steps:
+  - run: {seconds: 3}
+  - expect_state:
+      "Game.Instance.GetComponent<CodexPerformanceAssist.PerformanceAssistController>": exists
+      "QualitySettings.vSyncCount": 0
+      "Application.targetFrameRate": 240
+      "Application.runInBackground": true
+  - run: {seconds: 15}
+  - expect: {duplicants: 3}

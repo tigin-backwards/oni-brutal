@@ -1,0 +1,29 @@
+# REC 降低电力消耗 Reduce Electricity Consumption (3412947176), class P.
+#
+# What it does: about a hundred postfixes on building configs cut their power draw (the
+# Metal Refinery to 60 W, the Electrolyzer to 10 W, pumps, refineries, research stations,
+# lamps and recreation buildings likewise), and the batteries (normal, jumbo, smart) lose no
+# charge over time.
+# How a player reaches it: build powered buildings.
+# What changes: buildings draw much less power.
+#
+# The defs carry the cuts; setup builds an Electrolyzer in the corridor west of the printing
+# pod, and selected it draws 10 W.
+from: early-base
+mods: [3412947176]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Electrolyzer\")", method: Build, args: [131765, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"MetalRefinery\").EnergyConsumptionWhenActive": 60
+      "Assets.GetBuildingDef(\"Electrolyzer\").EnergyConsumptionWhenActive": 10
+      "Assets.GetPrefab(\"BatterySmart\").GetComponent<BatterySmart>.joulesLostPerSecond": 0
+      "Assets.GetPrefab(\"Battery\").GetComponent<Battery>.joulesLostPerSecond": 0
+      "Assets.GetBuildingDef(\"LiquidPump\").EnergyConsumptionWhenActive": "== original"
+  - run: {seconds: 2}
+  - expect: {buildings: {Electrolyzer: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: Electrolyzer}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<EnergyConsumer>.WattsNeededWhenActive": 10

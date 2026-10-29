@@ -1,0 +1,27 @@
+# 资源计算器 Resource Calculator (3772549326), class U.
+#
+# What it does: at Game.OnSpawn it adds its own canvas (ResCalcRoot): a draggable calculator
+# button in the lower-left corner, and Ctrl+Shift+R, open a 1280x780 panel with two tabs: a
+# food planner (how many plants and critters feed the colony, from the game's recipes and
+# plants) and a rocket planner (fuel and oxidizer for a range, from the colony's rockets and
+# geysers). Escape closes it; it consumes the mouse wheel while open.
+# How a player reaches it: the calculator button; Ctrl+Shift+R.
+# What changes: a planning screen.
+#
+# The calculator button opens the panel on its food tab (dumped, shot); Escape closes it.
+from: early-base
+mods: [3772549326]
+steps:
+  - run: {seconds: 2}
+  - expect_state:
+      "type:ONI_ResourceCalculator.UI.CalcScreen::Instance.IsVisible": false
+  - ui_wait: {path: "**/ResCalcCanvas/ResCalcToggle", cond: stable}
+  - click: {ui: "**/ResCalcCanvas/ResCalcToggle"}
+  - ui_wait: {path: "**/ResCalcCanvas/MainContent", cond: stable}
+  - expect_state:
+      "type:ONI_ResourceCalculator.UI.CalcScreen::Instance.IsVisible": true
+  - ui_dump: {name: panel, root: "**/ResCalcCanvas/MainContent"}
+  - shot: {name: panel, crop: "**/ResCalcCanvas/MainContent", threshold: 0.04}
+  - key: {code: Escape}
+  - expect_state:
+      "type:ONI_ResourceCalculator.UI.CalcScreen::Instance.IsVisible": false

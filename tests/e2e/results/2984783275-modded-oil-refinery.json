@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2984783275-modded-oil-refinery.yaml",
+ "mods": [
+  "2984783275"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the refinery's unlock and water-to-petroleum converter (no power) load, and one built in a cleared corridor holds the water put in it; it does not become operational there, in the original either, so its conversion is not seen",
+ "updated": "2026-10-29",
+ "commit": "a1b87963",
+ "mod_dlls": {
+  "2984783275": {
+   "─º╕─╘¡╙═╛½┴╢╞≈.dll": "51f042df779554a213a2d201a3fe4011db2085b863f53cd62346ac4a4172e83e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-023937-6271990c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T02:47:47",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-025919-2c770b7b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T02:59:19",
+    "lane": 15,
+    "reference_run": "20261029-023937-6271990c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-025919-2c770b7b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T03:00:18",
+    "lane": 15,
+    "reference_run": "20261029-023937-6271990c",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

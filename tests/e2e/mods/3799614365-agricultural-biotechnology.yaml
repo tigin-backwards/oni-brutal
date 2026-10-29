@@ -1,0 +1,35 @@
+# Agricultural Biotechnology / 农业生物工程 (3799614365), classes B, S.
+#
+# What it does: adds a research node (AgriculturalBioRefineryTech, after Basic Farming) that
+# unlocks the Agricultural Bio-Refinery (3x2, the Fertilizer Synthesizer's art, Refinement
+# menu), a fabricator that synthesises seeds from dirt and fertilizer (recipes for discovered
+# seeds, which a patch on its recipe side screen reveals), and the Greenhouse Farm Tile (Food
+# menu, after the Farm Tile), a farm tile that keeps its plant's temperature in range.
+# How a player reaches it: research the new node; the Refinement and Food menus.
+# What changes: seeds can be made, and plants kept warm or cool.
+#
+# The node is researched in setup and a Bio-Refinery built in the west corridor. Its recipes
+# exist (as many as in the original); the Refinement menu's card is shot.
+from: early-base
+mods: [3799614365]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"AgriculturalBioRefineryTech\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"AgriculturalBioRefinery\")", method: Build, args: [131763, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"AgriculturalBioRefineryTech\").unlockedItemIDs": [{contains: AgriculturalBioRefinery}, {contains: GreenhouseFarmTile}]
+      "Db.Get().Techs.Get(\"AgriculturalBioRefineryTech\").requiredTech[0].Id": "FarmingTech"
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0].Name == AgriculturalBioRefinery": [">= 1", "== original"]
+  - run: {seconds: 3}
+  - expect: {buildings: {AgriculturalBioRefinery: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Refinement"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/AgriculturalBioRefinery Group*", cond: stable}
+  - scroll: {at: "**/PlanBuildingSelectionPanel/BuildingGroups", notches: -10}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/AgriculturalBioRefinery Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/AgriculturalBioRefinery Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}

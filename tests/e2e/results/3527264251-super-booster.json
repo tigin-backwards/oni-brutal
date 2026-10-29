@@ -1,0 +1,60 @@
+{
+ "spec": "mods/3527264251-super-booster.yaml",
+ "mods": [
+  "3744428492",
+  "3527264251"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with PLib from Easy Vacuum, the boosters' descriptions list +10000 to their attributes",
+ "updated": "2026-10-29",
+ "commit": "4ea7016f",
+ "mod_dlls": {
+  "3744428492": {
+   "Easy_Vacuum.dll": "52186a1cc59f3d230827ee4bd5a087bb2b4d62b1790bea490829c887c01549fb",
+   "PLib.dll": "c4bb22f1bc06ebcb0dbba75a7f1bc46f63eaa3dae12c22a08729f1a6d3362dda"
+  },
+  "3527264251": {
+   "│¼╝╢╘÷╖∙┐Θ.dll": "b40540edb920aea783f1ca31457f4ec6605573ea8d3c35ee0570d5b64d1db465"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-132508-335cbefc",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T14:34:16",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-022022-2bfaab7f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T02:20:22",
+    "lane": 14,
+    "reference_run": "20261027-132508-335cbefc",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-022022-2bfaab7f",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T02:21:09",
+    "lane": 14,
+    "reference_run": "20261027-132508-335cbefc",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

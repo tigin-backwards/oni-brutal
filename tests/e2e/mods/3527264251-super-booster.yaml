@@ -1,0 +1,24 @@
+# 超级增幅块 (3527264251), classes P, O.
+#
+# What it does: replaces BionicUpgradeComponentConfig.CreateBoosterModifiers, so every bionic
+# booster raises each attribute it boosts by its PLib option's value (10000 by default) instead
+# of the game's few points; stress changes keep the game's values.
+# How a player reaches it: a bionic Duplicant with boosters installed.
+# What changes: boosted bionic Duplicants become extremely skilled.
+#
+# The mod needs PLib, which it does not ship: Easy Vacuum (3744428492), which ships PLib, is
+# installed first, as a Workshop subscription to both would provide it. The Digging and
+# Construction boosters' descriptions list +10000 to their attributes, and the early base's
+# bionic Duplicant's Digging is the original's.
+from: early-base
+mods: [3744428492, 3527264251]
+options:
+  "3527264251": {$file: Controler.json, a1: 10000}
+steps:
+  - expect_state:
+      "BionicUpgradeComponentConfig.UpgradesData[\"Booster_Dig1\"].stateMachineDescription": [{contains: "10000"}, "== original"]
+      "BionicUpgradeComponentConfig.UpgradesData[\"Booster_Construct1\"].stateMachineDescription": {contains: "10000"}
+  - run: {seconds: 2}
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[0].GetComponent<KPrefabID>.PrefabTag.Name": BionicMinion
+      "Components.LiveMinionIdentities.Items[0].GetComponent<Modifiers>.attributes.Get(\"Digging\").GetTotalValue()": "== original"

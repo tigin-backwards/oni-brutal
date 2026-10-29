@@ -1,0 +1,29 @@
+# Auto Underwater Ranching Station (3747850787), class B.
+#
+# What it does: adds powered versions of the three underwater ranching buildings (DLC5
+# content): the Auto Underwater Ranch Station and Shearing Station (Animal Control) and the
+# Auto Underwater Milking Station (Dairy Operation), in the Equipment menu after their manual
+# counterparts. They groom, shear and milk aquatic critters in a creature pen without a
+# Duplicant, for 120 W.
+# How a player reaches it: research Animal Control; the Equipment menu.
+# What changes: underwater ranching without ranchers.
+#
+# The techs list the stations; setup builds an auto ranch station in the corridor west of
+# the printing pod, and selected it is one, asking for a creature pen.
+from: early-base
+mods: [3747850787]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"AutoUnderwaterRanchStation\")", method: Build, args: [131765, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"AnimalControl\").unlockedItemIDs": [{contains: AutoUnderwaterRanchStation}, {contains: AutoUnderwaterShearingStation}]
+      "Db.Get().Techs.Get(\"DairyOperation\").unlockedItemIDs": {contains: AutoUnderwaterMilkingStation}
+      "Assets.GetBuildingDef(\"AutoUnderwaterRanchStation\").EnergyConsumptionWhenActive": 120
+      "Assets.GetPrefab(\"AutoUnderwaterRanchStation\").GetComponent<RoomTracker>.requiredRoomType": CreaturePen
+  - run: {seconds: 3}
+  - expect: {buildings: {AutoUnderwaterRanchStation: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 208], select: AutoUnderwaterRanchStation}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<AutoUnderwaterStationMod.AutoUnderwaterRanchStation>": exists

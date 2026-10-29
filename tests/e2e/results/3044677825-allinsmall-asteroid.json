@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3044677825-allinsmall-asteroid.yaml",
+ "mods": [
+  "3044677825"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "New Game with the M-S coordinate: the twelve small worlds generate, a 128x153 start moonlet",
+ "updated": "2026-10-29",
+ "commit": "63c8a9fe",
+ "mod_dlls": {
+  "3044677825": {
+   "AllInSmall.dll": "1ce26f0b29e9b847566eb8fa41c6f546fc8261657402fe248ebcfb7724c0dde5"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-010732-2e8b7c55",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T02:47:07",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-031016-b1419adc",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T03:14:00",
+    "lane": 16,
+    "reference_run": "20261029-010732-2e8b7c55",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261029-031016-b1419adc",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T03:15:11",
+    "lane": 16,
+    "reference_run": "20261029-010732-2e8b7c55",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

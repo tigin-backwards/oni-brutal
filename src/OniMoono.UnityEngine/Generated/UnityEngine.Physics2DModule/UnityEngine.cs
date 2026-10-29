@@ -5,9 +5,18 @@ namespace UnityEngine
     public sealed partial class BoxCollider2D : global::UnityEngine.Collider2D
     {
     }
+    public sealed partial class CircleCollider2D : global::UnityEngine.Collider2D
+    {
+    }
     [global::UnityEngine.RequireComponent(typeof(global::UnityEngine.Transform))]
     public partial class Collider2D : global::UnityEngine.Behaviour
     {
+    }
+    public enum CollisionDetectionMode2D
+    {
+        None = 0,
+        Discrete = 0,
+        Continuous = 1,
     }
     public sealed partial class EdgeCollider2D : global::UnityEngine.Collider2D
     {
@@ -24,5 +33,17 @@ namespace UnityEngine
     [global::UnityEngine.RequireComponent(typeof(global::UnityEngine.Transform))]
     public sealed partial class Rigidbody2D : global::UnityEngine.Component
     {
+    }
+    public enum RigidbodyInterpolation2D
+    {
+        None = 0,
+        Interpolate = 1,
+        Extrapolate = 2,
+    }
+    public enum RigidbodyType2D
+    {
+        Dynamic = 0,
+        Kinematic = 1,
+        Static = 2,
     }
 }

@@ -34,8 +34,52 @@ namespace UnityEngine
         }
     }
 
+    public partial class Physics2D
+    {
+        /// Which pairs of layers ignore each other's contacts (the layer collision matrix). Nothing
+        /// simulates 2D contacts here, so it is only kept, as GetIgnoreLayerCollision reports it.
+        static readonly uint[] ignoredLayers = new uint[32];
+
+        public static void IgnoreLayerCollision(int layer1, int layer2, bool ignore)
+        {
+            CheckLayer(layer1, nameof(layer1));
+            CheckLayer(layer2, nameof(layer2));
+            if (ignore)
+            {
+                ignoredLayers[layer1] |= 1u << layer2;
+                ignoredLayers[layer2] |= 1u << layer1;
+            }
+            else
+            {
+                ignoredLayers[layer1] &= ~(1u << layer2);
+                ignoredLayers[layer2] &= ~(1u << layer1);
+            }
+        }
+
+        public static void IgnoreLayerCollision(int layer1, int layer2) => IgnoreLayerCollision(layer1, layer2, true);
+
+        public static bool GetIgnoreLayerCollision(int layer1, int layer2)
+        {
+            CheckLayer(layer1, nameof(layer1));
+            CheckLayer(layer2, nameof(layer2));
+            return (ignoredLayers[layer1] & (1u << layer2)) != 0;
+        }
+
+        static void CheckLayer(int layer, string name)
+        {
+            if (layer < 0 || layer > 31) throw new ArgumentOutOfRangeException(name, $"{name} is out of range. Layer numbers must be in the range 0 to 31.");
+        }
+    }
+
     public partial class Collider2D
     {
+        /// Stored; nothing simulates 2D contacts, so no trigger messages are sent.
+        public bool isTrigger
+        {
+            get => ((Collider2DNative)NativeOrThrow).IsTrigger;
+            set => ((Collider2DNative)NativeOrThrow).IsTrigger = value;
+        }
+
         /// The shape's offset from the transform in local space (stored; nothing simulates 2D physics).
         public Vector2 offset
         {
@@ -82,7 +126,17 @@ namespace UnityEngine
     {
         public Vector2 size
         {
+            get => ((BoxCollider2DNative)NativeOrThrow).Size;
             set => ((BoxCollider2DNative)NativeOrThrow).Size = value;
+        }
+    }
+
+    public sealed partial class CircleCollider2D
+    {
+        public float radius
+        {
+            get => ((CircleCollider2DNative)NativeOrThrow).Radius;
+            set => ((CircleCollider2DNative)NativeOrThrow).Radius = value;
         }
     }
 
@@ -95,6 +149,20 @@ namespace UnityEngine
             get => ((Rigidbody2DNative)NativeOrThrow).LinearVelocity;
             set => ((Rigidbody2DNative)NativeOrThrow).LinearVelocity = value;
         }
+
+        // The body's settings, kept as given (Unity's defaults until a script sets them). No
+        // simulation steps bodies, so none of them moves one.
+        Rigidbody2DNative Body => (Rigidbody2DNative)NativeOrThrow;
+        public RigidbodyType2D bodyType { get => Body.BodyType; set => Body.BodyType = value; }
+        public bool simulated { get => Body.Simulated; set => Body.Simulated = value; }
+        public bool useAutoMass { get => Body.UseAutoMass; set => Body.UseAutoMass = value; }
+        public float mass { get => Body.Mass; set => Body.Mass = value; }
+        public float linearDamping { get => Body.LinearDamping; set => Body.LinearDamping = value; }
+        public float angularDamping { get => Body.AngularDamping; set => Body.AngularDamping = value; }
+        public float gravityScale { get => Body.GravityScale; set => Body.GravityScale = value; }
+        public bool freezeRotation { get => Body.FreezeRotation; set => Body.FreezeRotation = value; }
+        public CollisionDetectionMode2D collisionDetectionMode { get => Body.CollisionDetection; set => Body.CollisionDetection = value; }
+        public RigidbodyInterpolation2D interpolation { get => Body.Interpolation; set => Body.Interpolation = value; }
     }
 }
 
@@ -196,7 +264,54 @@ namespace OniMoono.Engine
     internal sealed class Rigidbody2DNative : ComponentNative
     {
         public Vector2 LinearVelocity;
+        public RigidbodyType2D BodyType = RigidbodyType2D.Dynamic;
+        public bool Simulated = true;
+        public bool UseAutoMass;
+        public float Mass = 1f;
+        public float LinearDamping;
+        public float AngularDamping = 0.05f;
+        public float GravityScale = 1f;
+        public bool FreezeRotation;
+        public CollisionDetectionMode2D CollisionDetection = CollisionDetectionMode2D.Discrete;
+        public RigidbodyInterpolation2D Interpolation = RigidbodyInterpolation2D.None;
 
-        public override void Bind(Fields data, IReferenceResolver resolver) => Serialized = null;
+        public override void CopyStateFrom(NativeObject source)
+        {
+            base.CopyStateFrom(source);
+            var s = (Rigidbody2DNative)source;
+            BodyType = s.BodyType; Simulated = s.Simulated; UseAutoMass = s.UseAutoMass; Mass = s.Mass;
+            LinearDamping = s.LinearDamping; AngularDamping = s.AngularDamping; GravityScale = s.GravityScale;
+            FreezeRotation = s.FreezeRotation; CollisionDetection = s.CollisionDetection; Interpolation = s.Interpolation;
+        }
+
+        public override void Bind(Fields data, IReferenceResolver resolver)
+        {
+            if (data.Contains("m_BodyType")) BodyType = (RigidbodyType2D)data.Int("m_BodyType");
+            if (data.Contains("m_Simulated")) Simulated = data.Bool("m_Simulated");
+            if (data.Contains("m_UseAutoMass")) UseAutoMass = data.Bool("m_UseAutoMass");
+            if (data.Contains("m_Mass")) Mass = data.Float("m_Mass");
+            if (data.Contains("m_GravityScale")) GravityScale = data.Float("m_GravityScale");
+            if (data.Contains("m_Interpolate")) Interpolation = (RigidbodyInterpolation2D)data.Int("m_Interpolate");
+            if (data.Contains("m_CollisionDetection")) CollisionDetection = (CollisionDetectionMode2D)data.Int("m_CollisionDetection");
+            Serialized = null;
+        }
+    }
+
+    /// A CircleCollider2D's radius in local space.
+    internal sealed class CircleCollider2DNative : Collider2DNative
+    {
+        public float Radius = 0.5f;
+
+        public override void CopyStateFrom(NativeObject source)
+        {
+            base.CopyStateFrom(source);
+            Radius = ((CircleCollider2DNative)source).Radius;
+        }
+
+        public override void Bind(Fields data, IReferenceResolver resolver)
+        {
+            base.Bind(data, resolver);
+            Radius = data.Float("m_Radius");
+        }
     }
 }

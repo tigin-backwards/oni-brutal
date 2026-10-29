@@ -31,6 +31,7 @@ namespace OniMoono.Engine
             [typeof(BoxCollider2D)] = () => new BoxCollider2DNative(),
             [typeof(PolygonCollider2D)] = () => new PolygonCollider2DNative(),
             [typeof(EdgeCollider2D)] = () => new EdgeCollider2DNative(),
+            [typeof(CircleCollider2D)] = () => new CircleCollider2DNative(),
             [typeof(Rigidbody2D)] = () => new Rigidbody2DNative(),
             [typeof(Animator)] = () => new Mecanim.AnimatorNative(),
             [typeof(Animation)] = () => new Mecanim.AnimationNative(),

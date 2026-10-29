@@ -22,4 +22,8 @@ namespace UnityEngine.Scripting
     public partial class PreserveAttribute : global::System.Attribute
     {
     }
+    [global::System.AttributeUsage(global::System.AttributeTargets.Constructor | global::System.AttributeTargets.Method | global::System.AttributeTargets.Property | global::System.AttributeTargets.Field | global::System.AttributeTargets.Event)]
+    public partial class RequiredMemberAttribute : global::System.Attribute
+    {
+    }
 }

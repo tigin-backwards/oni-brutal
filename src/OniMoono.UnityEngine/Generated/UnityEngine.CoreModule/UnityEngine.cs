@@ -144,6 +144,10 @@ namespace UnityEngine
     public partial struct EntityId : global::System.IEquatable<global::UnityEngine.EntityId>, global::System.IComparable<global::UnityEngine.EntityId>
     {
     }
+    [global::System.AttributeUsage(global::System.AttributeTargets.Class)]
+    public partial class ExcludeFromObjectFactoryAttribute : global::System.Attribute
+    {
+    }
     [global::System.AttributeUsage(global::System.AttributeTargets.Class, Inherited = false)]
     public partial class ExcludeFromPresetAttribute : global::System.Attribute
     {

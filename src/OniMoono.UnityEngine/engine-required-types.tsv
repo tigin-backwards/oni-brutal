@@ -47,3 +47,29 @@ UnityEngine.CoreModule	UnityEngine.Rendering.ShaderPropertyType	# mods (Morphs N
 UnityEngine.TextRenderingModule	UnityEngine.TextAlignment	# mods (Antigravity): TextMesh.alignment
 UnityEngine.TextRenderingModule	UnityEngine.CharacterInfo	# Font.GetCharacterInfo, RequestCharactersInTexture's glyphs (the legacytext probe)
 UnityEngine.CoreModule	UnityEngine.Rendering.BlendMode	# mods (Arknights Operators): its Spine atlas loader sets materials' blend modes
+UnityEngine.Physics2DModule	UnityEngine.CircleCollider2D	# mods (Chaos Events for Twitch Integration): its Omega Sawblade prefab
+UnityEngine.Physics2DModule	UnityEngine.RigidbodyType2D	# mods (Twitch Integration, Chaos Events): Rigidbody2D.bodyType
+UnityEngine.Physics2DModule	UnityEngine.CollisionDetectionMode2D	# Rigidbody2D.collisionDetectionMode
+UnityEngine.Physics2DModule	UnityEngine.RigidbodyInterpolation2D	# Rigidbody2D.interpolation
+UnityEngine.SharedInternalsModule	UnityEngine.Bindings.FreeFunctionAttribute	# mods that merge Unity's modules (Twitch Integration): their attributes resolve
+UnityEngine.SharedInternalsModule	UnityEngine.Bindings.NativeConditionalAttribute	# as above
+UnityEngine.SharedInternalsModule	UnityEngine.Bindings.NativeHeaderAttribute	# as above
+UnityEngine.SharedInternalsModule	UnityEngine.Bindings.NativeMethodAttribute	# as above
+UnityEngine.SharedInternalsModule	UnityEngine.Bindings.NativeNameAttribute	# as above
+UnityEngine.SharedInternalsModule	UnityEngine.Bindings.NativePropertyAttribute	# as above
+UnityEngine.SharedInternalsModule	UnityEngine.Bindings.NativeThrowsAttribute	# as above
+UnityEngine.SharedInternalsModule	UnityEngine.Bindings.NativeType	# UnityMarshalAsAttribute's argument
+UnityEngine.SharedInternalsModule	UnityEngine.Bindings.StaticAccessorAttribute	# as above
+UnityEngine.SharedInternalsModule	UnityEngine.Bindings.StaticAccessorType	# StaticAccessorAttribute's argument
+UnityEngine.SharedInternalsModule	UnityEngine.Bindings.TargetType	# NativePropertyAttribute's argument
+UnityEngine.SharedInternalsModule	UnityEngine.Bindings.ThreadSafeAttribute	# as above
+UnityEngine.SharedInternalsModule	UnityEngine.Bindings.UnityMarshalAsAttribute	# as above
+UnityEngine.SharedInternalsModule	UnityEngine.Bindings.VisibleToOtherModulesAttribute	# as above
+UnityEngine.SharedInternalsModule	UnityEngine.NativeClassAttribute	# as above
+UnityEngine.SharedInternalsModule	UnityEngine.Scripting.RequiredByNativeCodeAttribute	# as above
+UnityEngine.SharedInternalsModule	UnityEngine.Scripting.UsedByNativeCodeAttribute	# as above
+UnityEngine.SharedInternalsModule	UnityEngine.WritableAttribute	# as above
+UnityEngine.CoreModule	UnityEngine.ExcludeFromObjectFactoryAttribute	# as above
+UnityEngine.CoreModule	UnityEngine.Internal.DefaultValueAttribute	# as above
+UnityEngine.CoreModule	UnityEngine.Internal.ExcludeFromDocsAttribute	# as above
+UnityEngine.CoreModule	UnityEngine.Scripting.RequiredMemberAttribute	# as above

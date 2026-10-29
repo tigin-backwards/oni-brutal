@@ -1648,6 +1648,18 @@ TMP runs as shipped. The engine provides what it needs: `Font`, `TextCore` data 
 - `UnityWebRequest` → `HttpClient`; `ImageConversion` → stb_image / stb_image_write
   (`Ahwoo.BRUTAL.Stb`); `JsonUtility` → the shared layout builder; `Physics.Raycast` → the
   colliders present in data; IMGUI → clipboard and the event/GUI surface the code paths touch.
+- 2D physics is not simulated: no step moves a `Rigidbody2D` and no contact or trigger message
+  (`OnTriggerEnter2D`…) is sent. The game creates no 2D bodies; for mods that do, the bodies'
+  and colliders' settings are kept as given (`bodyType`, `mass`, `gravityScale`, the dampings,
+  `isTrigger`, `CircleCollider2D.radius`, `Physics2D.IgnoreLayerCollision`'s matrix…), so their
+  prefabs build (Twitch Integration's glitter pufts, Chaos Events for Twitch Integration's Omega
+  Sawblade). `Rigidbody2D.AddForce`, which only a step could honour, is not implemented: Chaos
+  Events' sawblade fails with MissingMethodException once its event homes in. Unity's internal
+  binding attributes (`UnityEngine.Bindings.NativeHeaderAttribute` and the like, in
+  `SharedInternalsModule` and `CoreModule`) exist with Unity's constructors, so a mod that merges
+  copies of Unity's modules into its own assembly (Twitch Integration carries
+  `InputLegacyModule` and `TextRenderingModule`) has its types' attributes resolve; before, the
+  first one stopped Harmony's `PatchAll` (TypeLoadException) and KMod disabled the mod.
 
 ## 4. Threading
 

@@ -6,4 +6,12 @@ namespace UnityEngine
     internal sealed partial class AssetFileNameExtensionAttribute : global::System.Attribute
     {
     }
+    [global::System.AttributeUsage(global::System.AttributeTargets.Class | global::System.AttributeTargets.Struct, Inherited = false)]
+    internal sealed partial class NativeClassAttribute : global::System.Attribute
+    {
+    }
+    [global::System.AttributeUsage(global::System.AttributeTargets.Parameter, AllowMultiple = false)]
+    internal partial class WritableAttribute : global::System.Attribute
+    {
+    }
 }

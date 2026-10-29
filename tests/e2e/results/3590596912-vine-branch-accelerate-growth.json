@@ -1,0 +1,33 @@
+{
+ "spec": "mods/3590596912-vine-branch-accelerate-growth.yaml",
+ "mods": [
+  "3590596912"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-29",
+ "commit": "2d4aca2a",
+ "mod_dlls": {
+  "3590596912": {
+   "S_┬■╗¿╣√╔·│ñ╝╙╦┘.dll": "5ed1db5165524daf0b3ffaad381419f910e2e24b58a293d552007743731bf737"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-071158-8a6b9b85",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-29T07:11:59",
+    "lane": 5,
+    "reasons": [
+     "step start: the player exited (1) while loading"
+    ],
+    "signatures": 2
+   }
+  ],
+  "ours": []
+ }
+}

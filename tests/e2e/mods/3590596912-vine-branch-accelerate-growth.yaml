@@ -1,0 +1,21 @@
+# S 漫花果生长加速 Vine Branch Accelerate Growth (3590596912), class P.
+#
+# What it does: a transpiler on VineBranchConfig.CreatePrefab turns every 3f constant into 1f,
+# so a Vine branch (Prehistoric Planet Pack) matures, and grows its second maturity, in one
+# cycle instead of three.
+# How a player reaches it: a Vine Mother's branches, in a Prehistoric colony.
+# What changes: vine fruit grows three times as fast.
+#
+# The Prehistoric fixture has the Vine branch prefab: its trait's two maturity modifiers read
+# 1 cycle, none 3. The mod calls PUtil.InitLibrary but ships no PLib, so alone it fails to load
+# in the original (it is broken upstream) and the game exits while loading.
+from: prehistoric1
+mods: [3590596912]
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"VineBranch\").GetComponent<Modifiers>.initialTraits[0]": VineBranchOriginal
+      "count:Db.Get().traits.Get(\"VineBranchOriginal\").SelfModifiers[*] if .Value == 1.0": ">= 2"
+      "count:Db.Get().traits.Get(\"VineBranchOriginal\").SelfModifiers[*] if .Value == 3.0": 0
+      "count:Db.Get().traits.Get(\"VineBranchOriginal\").SelfModifiers[*] if .AttributeId == MaturityMax": 1
+  - expect_state:
+      "Db.Get().traits.Get(\"VineBranchOriginal\").SelfModifiers.Count": "== original"

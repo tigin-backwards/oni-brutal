@@ -1,0 +1,33 @@
+{
+ "spec": "mods/2844428595-camera-scroll-pan-speed.yaml",
+ "mods": [
+  "2844428595"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-29",
+ "commit": "2d4aca2a",
+ "mod_dlls": {
+  "2844428595": {
+   "CameraScrollPanSpeed.dll": "94d8233be94867a05f9666a974e646db212736539abcd99c6d8e353d1ab438ac"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-071158-8a6b9b85",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-29T07:46:17",
+    "lane": 5,
+    "reasons": [
+     "step 1: CameraController.Instance.keyPanningSpeed is 1.0, wanted 0.25"
+    ],
+    "signatures": 0
+   }
+  ],
+  "ours": []
+ }
+}

@@ -375,6 +375,11 @@ broken.update({
     '2936219269': 'broken upstream: its side screen is never added (it looks for DetailsScreen.sideScreenContentBody, which the game no longer has), so the wallpaper\'s picture cannot be chosen (spec tests/e2e/mods/2936219269-customize-your-wallpaper.yaml)',
     '2981889053': 'broken upstream: its side screen is never added (it looks for DetailsScreen.sideScreenContentBody, which the game no longer has), so the weapon\'s picture cannot be chosen (spec tests/e2e/mods/2981889053-xia-weapons.yaml)',
 })
+# Found by the e2e specs of ranks 1884 to 1965: the spec fails the same way in the original.
+broken.update({
+    '3590596912': 'broken upstream: it calls `PUtil.InitLibrary` but ships no PLib, so alone it fails to load (FileNotFoundException for PLib 4.8.1.0) and the game exits while loading; the load sweep passed only because another mod of its batch shipped PLib (spec tests/e2e/mods/3590596912-vine-branch-accelerate-growth.yaml)',
+    '2844428595': 'broken upstream: its prefix on `CameraController.OnPrefabInit` sets the keyboard panning speed to 0.25, which the method then overwrites from the CameraSpeed pref (`SetSpeedFromPrefs`), so the speed stays 1 (spec tests/e2e/mods/2844428595-camera-scroll-pan-speed.yaml)',
+})
 # Broken in the original only: ours happens to load it, so its note says how the original fails
 # and why ours does not (no "same in the original").
 broken.update({

@@ -1,0 +1,21 @@
+# Camera Scroll Pan Speed (2844428595), class V.
+#
+# What it does: a prefix on CameraController.OnPrefabInit sets the keyboard panning speed to
+# 0.25 (the game's default is 1), and a postfix on ResearchScreen.OnPrefabInit the research
+# tree's keyboard scroll speed to 150.
+# How a player reaches it: pan the camera with the arrow or WASD keys; scroll the research
+# screen with them.
+# What changes: slower keyboard panning.
+#
+# The camera's panning speed reads 0.25; the research screen opens with its scroll speed 150.
+# The camera's speed reads 1 in the original: CameraController.OnPrefabInit sets it from the
+# CameraSpeed pref after the mod's prefix has run, so the mod is broken upstream.
+from: early-base
+mods: [2844428595]
+steps:
+  - expect_state:
+      "CameraController.Instance.keyPanningSpeed": 0.25
+  - open: {management: research}
+  - ui_wait: {path: "**/FullScreenUICanvases/ResearchScreen", cond: stable}
+  - expect_state:
+      "ui:**/FullScreenUICanvases/ResearchScreen::GetComponent<ResearchScreen>.keyboardScrollSpeed": 150

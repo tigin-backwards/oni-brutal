@@ -1,0 +1,35 @@
+# 太阳能舱电池舱太阳能板 Solar panel module, battery module, solar panel (3257386232), class P.
+#
+# What it does: makes three buildings far stronger: the Solar Panel and the rocket Solar
+# Panel Module produce up to 38 MW and 6 MW (transpilers raise the per-lux factor and the
+# cap in EnergySim200ms), the Battery Module holds 1e20 J without leaking (its
+# DoPostConfigureComplete replaced); all three get 200 decor in a radius of 20 and do not
+# overheat.
+# How a player reaches it: the Power menu's Solar Panel; rocket modules (Spaced Out).
+# What changes: near-unlimited solar power.
+#
+# The Solar Panel's tech is researched in setup. The defs and the battery module's prefab carry the numbers. A Solar Panel built by setup in
+# the corridor west of the printing pod has them; its card in the Power menu is shot.
+from: early-base
+mods: [3257386232]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.TryGetTechForTechItem(\"SolarPanel\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SolarPanel\")", method: Build, args: [{"$": "Grid.XYToCell(110, 206)"}, Neutral, null, [Glass], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"SolarPanel\").GeneratorWattageRating": 38000000
+      "Assets.GetBuildingDef(\"SolarPanel\").BaseDecor": 200
+      "Assets.GetBuildingDef(\"SolarPanelModule\").GeneratorWattageRating": 6000000
+      "Assets.GetPrefab(\"BatteryModule\").GetComponent<ModuleBattery>.capacity": "== original"
+      "Assets.GetPrefab(\"BatteryModule\").GetComponent<ModuleBattery>.joulesLostPerSecond": 0
+  - run: {seconds: 3}
+  - expect: {buildings: {SolarPanel: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Power"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/SolarPanel Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/SolarPanel Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}

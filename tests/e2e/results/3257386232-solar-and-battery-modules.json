@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3257386232-solar-and-battery-modules.yaml",
+ "mods": [
+  "3257386232"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Solar Panel, Solar Panel Module and Battery Module carry the mod's numbers; the Power card matches",
+ "updated": "2026-10-29",
+ "commit": "20364bdc",
+ "mod_dlls": {
+  "3257386232": {
+   "╠½╤⌠─▄▓╒╡τ│╪▓╒╠½╤⌠─▄░σ.dll": "e946cf301e198a9238677174437c9b9eb0055d346bdf217a1ede1bdd82e33636"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-130335-d1da02eb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T13:45:47",
+    "lane": 4,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-142627-ee879ee1",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T14:46:30",
+    "lane": 4,
+    "reference_run": "20261029-130335-d1da02eb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.0
+    }
+   },
+   {
+    "run": "20261029-142627-ee879ee1",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T14:47:36",
+    "lane": 4,
+    "reference_run": "20261029-130335-d1da02eb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.0
+    }
+   }
+  ]
+ }
+}

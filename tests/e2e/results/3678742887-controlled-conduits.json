@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3678742887-controlled-conduits.yaml",
+ "mods": [
+  "3678742887"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the three volume sensors are unlocked; a built liquid one's threshold side screen matches the original's",
+ "updated": "2026-10-29",
+ "commit": "1785bc2f",
+ "mod_dlls": {
+  "3678742887": {
+   "ControlledConduits.dll": "6cbd53d07667f5f37abd8f5f22dd4d2586e51d2b9e3a5306ad44c728dd74352e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-090559-e1e62f9e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T11:12:21",
+    "lane": 4,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-121806-2d41950c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T12:42:26",
+    "lane": 4,
+    "reference_run": "20261029-090559-e1e62f9e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "side": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "side": 0.0
+    }
+   },
+   {
+    "run": "20261029-121806-2d41950c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T12:43:22",
+    "lane": 4,
+    "reference_run": "20261029-090559-e1e62f9e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "side": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "side": 0.0
+    }
+   }
+  ]
+ }
+}

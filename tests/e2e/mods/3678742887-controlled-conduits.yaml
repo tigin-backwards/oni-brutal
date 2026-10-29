@@ -1,0 +1,33 @@
+# Controlled Conduits (3678742887), classes B, S.
+#
+# What it does: adds three pipe sensors that read how full a pipe is: the Gas, Liquid and
+# Conveyor Volume Sensors (GasConduitVolumeSensor, LiquidConduitVolumeSensor,
+# SolidConduitVolumeSensor; next to the temperature sensors, researched with HVAC, Liquid
+# Temperature and Solid Management), each a ConduitThresholdSensor whose threshold side
+# screen (patched in SetTarget) is in mass per packet; patches on the threshold sensor keep
+# its updates and copied settings.
+# How a player reaches it: the Ventilation, Plumbing and Shipping menus; the sensor's side
+# screen.
+# What changes: automation on how full a pipe runs.
+#
+# The research unlocks all three. A Liquid Volume Sensor built by setup in the corridor west
+# of the printing pod is selected: its threshold side screen opens.
+from: early-base
+mods: [3678742887]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidConduitVolumeSensor\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"HVAC\").unlockedItemIDs": {contains: GasConduitVolumeSensor}
+      "Db.Get().Techs.Get(\"LiquidTemperature\").unlockedItemIDs": {contains: LiquidConduitVolumeSensor}
+      "Db.Get().Techs.Get(\"SolidManagement\").unlockedItemIDs": {contains: SolidConduitVolumeSensor}
+  - run: {seconds: 3}
+  - expect: {buildings: {LiquidConduitVolumeSensor: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: LiquidConduitVolumeSensor}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/ThresholdSwitchSideScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<ControlledConduits.Components.ConduitVolumeSensor>.Threshold": "== original"
+      "selected:GetComponent<ControlledConduits.Components.ConduitVolumeSensor>.RangeMax": "== original"
+  - ui_dump: {name: side, root: "**/DetailsScreen/SideScreen/**/ThresholdSwitchSideScreen"}
+  - shot: {name: side, crop: "**/DetailsScreen/SideScreen/**/ThresholdSwitchSideScreen", threshold: 0.04}

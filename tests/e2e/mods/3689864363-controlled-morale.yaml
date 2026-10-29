@@ -1,0 +1,32 @@
+# Controlled Morale (3689864363), classes B, S, O; PLib options.
+#
+# What it does: adds the Alcohol Brewery (AlcoholBrewery, 3x3, metal, powered, Refining menu
+# beside the Ethanol Distiller, researched with Food Repurposing): a fabricator with three
+# recipes that brew three new liquids, beer, wine and spirits (ControlledMoraleBeer, -Wine,
+# -Spirits), bottled for Duplicants to drink. Each drink's effect raises morale and lowers
+# athletics (+2/-2, +4/-4, +6/-6 by default), set in PLib option dialogs. Patches keep the
+# brewery's queue and output working.
+# How a player reaches it: research Food Repurposing; the Refining menu; the brewery's recipe
+# side screen.
+# What changes: drinks for morale.
+#
+# setup builds a brewery in the corridor west of the printing pod. The three liquids exist;
+# selected, its side screen lists the three recipes.
+from: early-base
+mods: [3689864363]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"AlcoholBrewery\")", method: Build, args: [{"$": "Grid.XYToCell(113, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"FoodRepurposing\").unlockedItemIDs": {contains: AlcoholBrewery}
+      "ElementLoader.FindElementByName(\"ControlledMoraleBeer\").id": "== original"
+      "ElementLoader.FindElementByName(\"ControlledMoraleWine\").IsLiquid": true
+      "ElementLoader.FindElementByName(\"ControlledMoraleSpirits\").IsLiquid": true
+      "count:ComplexRecipeManager.Get().recipes[*] if .id.StartsWith(\"AlcoholBrewery\") == true": 3
+  - run: {seconds: 2}
+  - expect: {buildings: {AlcoholBrewery: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: AlcoholBrewery}
+  - ui_wait: {path: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView", cond: stable}
+  - ui_dump: {name: recipes, root: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView"}
+  - shot: {name: recipes, crop: "**/DetailsScreen", threshold: 0.04}

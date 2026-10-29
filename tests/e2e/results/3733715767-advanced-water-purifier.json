@@ -1,0 +1,70 @@
+{
+ "spec": "mods/3733715767-advanced-water-purifier.yaml",
+ "mods": [
+  "3733715767"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the purifier's user-menu button cycles its by-product (iron ore, polluted dirt, diamond) with its label in Chinese; the user menu dump matches",
+ "updated": "2026-10-29",
+ "commit": "b6f33e0d",
+ "mod_dlls": {
+  "3733715767": {
+   "PLib.dll": "79350ee2d4eea7a879c6eebc12acca89bdd1d2a93ed7b396b875a7907a91d1e2",
+   "╠·║¼┴┐╣²╕▀.dll": "548304a1f37d9baffc558c9690c8233b1d681c33506b739f9b55dc626ab4d47d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-132508-335cbefc",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T14:21:43",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-021453-7ca4b72e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T02:14:53",
+    "lane": 14,
+    "reference_run": "20261027-132508-335cbefc",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     },
+     "user-menu-switched": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261029-021453-7ca4b72e",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T02:15:42",
+    "lane": 14,
+    "reference_run": "20261027-132508-335cbefc",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     },
+     "user-menu-switched": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

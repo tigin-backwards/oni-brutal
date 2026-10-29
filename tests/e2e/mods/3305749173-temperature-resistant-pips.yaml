@@ -1,0 +1,23 @@
+# Temperature Resistant Pips (3305749173), classes P, O; PLib options.
+#
+# What it does: a postfix on BaseSquirrelConfig.BaseSquirrel sets every Pip's critter
+# temperature monitor to the options' range: deadly below the minimum (0 K by default) and
+# above the maximum (9999 K), uncomfortable one degree inside them.
+# How a player reaches it: any Pip; the PLib options.
+# What changes: Pips survive any temperature.
+#
+# Options here: 100 K to 500 K. The Pip's and the Cuddle Pip's monitors use them.
+from: early-base
+mods: [3305749173]
+options:
+  "3305749173": {PipMinTemperature: 100.0, PipMaxTemperature: 500.0}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"Squirrel\").GetComponent<StateMachineController>.cmpdef.defs[5].GetType().Name": Def
+      "Assets.GetPrefab(\"Squirrel\").GetComponent<StateMachineController>.cmpdef.defs[5].temperatureHotDeadly": 500
+      "Assets.GetPrefab(\"Squirrel\").GetComponent<StateMachineController>.cmpdef.defs[5].temperatureColdDeadly": 100
+      "Assets.GetPrefab(\"Squirrel\").GetComponent<StateMachineController>.cmpdef.defs[5].temperatureHotUncomfortable": 499
+      "Assets.GetPrefab(\"Squirrel\").GetComponent<StateMachineController>.cmpdef.defs[5].temperatureColdUncomfortable": 101
+  - expect_state:
+      "Assets.GetPrefab(\"SquirrelHug\").GetComponent<StateMachineController>.cmpdef.defs[5].temperatureHotDeadly": "== original"
+      "Assets.GetPrefab(\"SquirrelBaby\").GetComponent<StateMachineController>.cmpdef.defs[5].temperatureHotDeadly": "== original"

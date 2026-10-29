@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3305749173-temperature-resistant-pips.yaml",
+ "mods": [
+  "3305749173"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with 100 to 500 K in its options, the Pip's temperature monitor uses that range",
+ "updated": "2026-10-29",
+ "commit": "1fdd8d67",
+ "mod_dlls": {
+  "3305749173": {
+   "TemperatureResistantPips.dll": "366baf0c2a28b177537b7fe4b3fb03bab69971065f66b65417587218f6982807"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-150642-6081766e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T15:12:36",
+    "lane": 4,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-152554-d2a50413",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T15:27:17",
+    "lane": 4,
+    "reference_run": "20261029-150642-6081766e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-152554-d2a50413",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T15:27:59",
+    "lane": 4,
+    "reference_run": "20261029-150642-6081766e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

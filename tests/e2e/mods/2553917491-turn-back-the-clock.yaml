@@ -1,0 +1,28 @@
+# Turn Back the Clock (2553917491), classes P, O; base game only.
+#
+# What it does: PLib options, grouped by the game update they undo, revert changes of past
+# updates: the old tech tree, Deodorizers without power, Pacu that eat no seeds, no Yucky
+# Lungs or Eye Irritation, deprecated buildings (Oxygen Mask Locker and Marker, Crafting
+# Station, Meter Valves, Clothing Refashionator), no critter morphs or new Duplicants, and
+# more. Each patch applies only when its option is on (all off by default).
+# How a player reaches it: the Mods screen's options.
+# What changes: the chosen parts of the game play as they used to.
+#
+# Options here: Powerless Deodorizers and Disable Buildings (Breath of Fresh Air) on. The
+# Deodorizer needs no power and makes no heat; the Crafting Station and Gas Meter Valve are
+# deprecated; buildings an option leaves off stay as they are.
+from: vanilla-base
+mods: [2553917491]
+options:
+  PeterHan.TurnBackTheClock: {MD471618_DeodorizerPower: true, MD471618_DisableBuildings: true}
+steps:
+  - expect_state:
+      "DlcManager.IsExpansion1Active()": false
+      "Assets.GetBuildingDef(\"AirFilter\").RequiresPowerInput": false
+      "Assets.GetBuildingDef(\"AirFilter\").EnergyConsumptionWhenActive": 0
+      "Assets.GetBuildingDef(\"AirFilter\").SelfHeatKilowattsWhenActive": 0
+      "Assets.GetBuildingDef(\"CraftingTable\").Deprecated": true
+      "Assets.GetBuildingDef(\"GasLimitValve\").Deprecated": true
+      "Assets.GetBuildingDef(\"ClothingAlterationStation\").Deprecated": "== original"
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

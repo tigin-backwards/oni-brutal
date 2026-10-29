@@ -1,0 +1,15 @@
+# TemperaturE-05 (2729922307), class P.
+#
+# What it does: a postfix on GameUtil.GetFormattedTemperature formats every temperature with
+# five decimals (##0.00000) and the unit, wherever the game shows one.
+# How a player reaches it: any temperature readout (hover cards, tooltips, the details
+# screen's properties, the temperature overlay's legend).
+# What changes: temperatures to five decimals.
+#
+# The game's formatter turns 300 K into "300.00000" and the unit: the postfix formats the
+# kelvin value it was given without converting it, as in the original.
+from: early-base
+mods: [2729922307]
+steps:
+  - expect_state:
+      "GameUtil.GetFormattedTemperature(300, \"None\", \"Absolute\", true, false)": {contains: "300.00000"}

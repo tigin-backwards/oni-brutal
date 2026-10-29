@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2729922307-temperature-e-05.yaml",
+ "mods": [
+  "2729922307"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the game's temperature formatter gives five decimals (300 K reads 300.00000, the kelvin value unconverted), as in the original",
+ "updated": "2026-10-29",
+ "commit": "d11ce963",
+ "mod_dlls": {
+  "2729922307": {
+   "TemperaturE-05.dll": "7d83505170537aed54b3b99b3032ae993725f28a51ded0d26fbbad61e8a5e5db"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-153158-a84c6ff9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T15:31:58",
+    "lane": 4,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-153816-719811d3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T15:38:16",
+    "lane": 4,
+    "reference_run": "20261029-153158-a84c6ff9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-153816-719811d3",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T15:39:00",
+    "lane": 4,
+    "reference_run": "20261029-153158-a84c6ff9",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

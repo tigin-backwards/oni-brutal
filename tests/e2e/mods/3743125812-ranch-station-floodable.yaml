@@ -1,0 +1,30 @@
+# RanchStationFloodable (3743125812), class P.
+#
+# What it does: the Grooming Station no longer floods (BuildingDef.Floodable false), and its
+# ranching state machine aims critters at the station's own cell (one to the right for
+# critters that do not swim), so it works under water; critters already Ranched are not
+# eligible again.
+# How a player reaches it: build a Grooming Station, even in liquid.
+# What changes: grooming stations work when flooded.
+#
+# setup builds a Grooming Station in the corridor west of the printing pod and pours water
+# over it. The station stands in water with nothing that would flood it.
+from: early-base
+mods: [3743125812]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"RanchStation\")", method: Build, args: [131764, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {type: SimMessages, method: AddRemoveSubstance, args: [131765, Water, null, 600, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"RanchStation\").Floodable": false
+      "Assets.GetPrefab(\"RanchStation\").GetComponent<Floodable>": missing
+  - run: {seconds: 10}
+  - expect: {buildings: {RanchStation: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 208], select: RanchStation}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Floodable>": missing
+      "Grid.IsLiquid(131129)": true
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Grooming Station"}

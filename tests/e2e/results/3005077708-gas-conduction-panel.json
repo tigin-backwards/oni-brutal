@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3005077708-gas-conduction-panel.yaml",
+ "mods": [
+  "3005077708"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Utilities menu card (shot); a built panel exchanges heat with buildings",
+ "updated": "2026-10-27",
+ "commit": "d52da26d",
+ "mod_dlls": {
+  "3005077708": {
+   "GasContactConDuctivePipeBridge.dll": "4d153462c1ee52556aacd0d50d70d9e3d9d6495bd69f6f405343cae6a184aa88"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-145102-18288f91",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T15:19:25",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-153635-35d5ca9b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T16:20:14",
+    "lane": 17,
+    "reference_run": "20261027-145102-18288f91",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.0
+    }
+   },
+   {
+    "run": "20261027-153635-35d5ca9b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T16:21:06",
+    "lane": 17,
+    "reference_run": "20261027-145102-18288f91",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.0
+    }
+   }
+  ]
+ }
+}

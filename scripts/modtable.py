@@ -364,6 +364,10 @@ broken.update({
 broken.update({
     '3608466042': 'broken upstream: its door\'s OnSpawn and Sim200ms call `SimMessages.SetCellProperties(int, byte)`, which the game no longer has (MissingMethodException), so a built Insulated Pressure Door opens the crash screen (spec tests/e2e/mods/3608466042-insulated-pressure-door.yaml)',
 })
+# Found by the e2e specs of ranks 1556 to 1640: the spec fails the same way in the original.
+broken.update({
+    '3038061222': 'broken upstream: its Mars start world guarantees eight oil pocket templates that worldgen cannot place ("Guaranteed placement failure on expansion1::worlds/Mars"), so a new game of the Mars cluster fails to generate (seeds 12345 and 1); spec tests/e2e/mods/3038061222-mars.yaml',
+})
 # Broken in the original only: ours happens to load it, so its note says how the original fails
 # and why ours does not (no "same in the original").
 broken.update({
@@ -487,4 +491,8 @@ installs get developer checks subscribers never see).
   something (a mod's reflection, say) listed the class's nested types.
 - **Transpilers on Unity's UI code** (uGUI, TextMeshPro) are not supported: they need the exact
   IL of Unity's builds, which ours does not have. Ordinary Harmony patches on those classes
-  work. Text Input Hotkeys transpiles TMP_InputField.Backspace.''')
+  work. Text Input Hotkeys transpiles TMP_InputField.Backspace.
+- **Out-of-range NativeArray access:** a write is dropped and a read gives the default value,
+  and copies and sub-arrays keep to the part within the arrays, where Unity's release player
+  reads or writes the memory before or past them (ARCHITECTURE D46). Affected: Zoned Auto
+  Sweeper.''')

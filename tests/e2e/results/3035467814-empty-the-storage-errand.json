@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3035467814-empty-the-storage-errand.yaml",
+ "mods": [
+  "3035467814"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Ration Box's Empty Storage button (dump) queues the emptying errand",
+ "updated": "2026-10-27",
+ "commit": "8edec30d",
+ "mod_dlls": {
+  "3035467814": {
+   "EmptyTheStorageErrand.dll": "20928991ac1cf7ab7186ceb6ffa1ec5004f4c044f1ad29987eb0fbf654c0ffd0"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-131522-a47d65cb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T13:40:14",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-142041-80e4c84c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T14:34:03",
+    "lane": 16,
+    "reference_run": "20261027-131522-a47d65cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261027-142041-80e4c84c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T14:34:51",
+    "lane": 16,
+    "reference_run": "20261027-131522-a47d65cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

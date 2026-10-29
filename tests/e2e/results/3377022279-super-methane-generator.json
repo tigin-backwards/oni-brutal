@@ -1,0 +1,56 @@
+{
+ "spec": "mods/3377022279-super-methane-generator.yaml",
+ "mods": [
+  "3377022279"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with options set, a Natural Gas Generator built is rated 5000 W with no exhaust heat",
+ "updated": "2026-10-27",
+ "commit": "b8e90d44",
+ "mod_dlls": {
+  "3377022279": {
+   "PLib.dll": "bdd637dbef718cdd52e61c0a7177bd297864a50bac1583d2837a36ff3edf07db",
+   "SuperMethaneGenerator.dll": "70b80a1fd0d43b72084a1b032d8f341151544685b590079f8846a0becb905061"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-054228-6d816ef2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T06:24:07",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-070541-c1e82ff0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T07:24:56",
+    "lane": 16,
+    "reference_run": "20261027-054228-6d816ef2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-070541-c1e82ff0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T07:25:45",
+    "lane": 16,
+    "reference_run": "20261027-054228-6d816ef2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,29 @@
+# 孟丫杰的懒狗工具-无情萝卜 (Ruthless Radish, 3286903205), class P.
+#
+# What it does: the Wheezewort (ColdBreather) cools by 50 °C instead of 5, consumes 10 kg/s
+# of gas in a radius of 3 (capacity 8 kg), and a transpiler on ColdBreather.Exhale zeroes one
+# of its constants; the Mealwood (BasicSingleHarvestPlant) photosynthesises like an Oxyfern:
+# it takes in carbon dioxide and gives out oxygen.
+# How a player reaches it: plant Wheezeworts and Mealwood.
+# What changes: a much colder Wheezewort, oxygen from Mealwood.
+#
+# The prefabs carry the changes; a wild Wheezewort spawned by setup in the room east of the
+# printing pod is selected after a while of play.
+from: early-base
+mods: [3286903205]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131786, 0, 0, \"ColdBreather\", \"BuildingFront\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"ColdBreather\").GetComponent<ColdBreather>.deltaEmitTemperature": -50
+      "Assets.GetPrefab(\"ColdBreather\").GetComponent<ElementConsumer>.consumptionRadius": 3
+      "Assets.GetPrefab(\"BasicSingleHarvestPlant\").GetComponent<Oxyfern>": exists
+      "Assets.GetPrefab(\"BasicSingleHarvestPlant\").GetComponent<ElementConverter>.outputElements[0].elementHash": "== 'Oxygen'"
+  - run: {seconds: 5}
+  - driver: {camera.set: {cell: [134, 208], ortho: 8}}
+  - click_world: {cell: [134, 207], select: ColdBreather}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<ColdBreather>.deltaEmitTemperature": -50
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Wheezewort"}

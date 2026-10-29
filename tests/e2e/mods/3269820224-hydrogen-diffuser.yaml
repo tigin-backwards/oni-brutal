@@ -1,0 +1,27 @@
+# 氢气扩散器, Hydrogen diffuser (3269820224), class B.
+#
+# What it does: adds Qingqi to the Utilities menu, researched with Renewable Energy: a powered
+# machine (4000 W) that makes 0.5 kg/s of hydrogen at 30 °C out of a trickle of coal (0.001
+# kg/s), delivered to it.
+# How a player reaches it: the research screen, then the build menu (Utilities).
+# What changes: an almost free source of hydrogen.
+#
+# setup researches Renewable Energy; the diffuser shows in the Utilities menu, and its prefab
+# holds its recipe.
+from: early-base
+mods: [3269820224]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"RenewableEnergy\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"RenewableEnergy\").unlockedItemIDs": {contains: Qingqi}
+      "Assets.GetBuildingDef(\"Qingqi\").EnergyConsumptionWhenActive": 4000
+      "Assets.GetPrefab(\"Qingqi\").GetComponent<ElementConverter>.outputElements[0].elementHash": "== 'Hydrogen'"
+      "Assets.GetPrefab(\"Qingqi\").GetComponent<ElementConverter>.outputElements[0].massGenerationRate": 0.5
+  - run: {seconds: 5}
+  - click: {ui: "**/PlanScreen/Toggle:Utilities"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/Qingqi Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/Qingqi Group*": {active: true}
+  - shot: {name: utilities-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}

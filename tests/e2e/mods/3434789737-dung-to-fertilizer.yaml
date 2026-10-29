@@ -1,0 +1,25 @@
+# Dung To Fertilizer (3434789737), class P.
+#
+# What it does: a postfix on CompostConfig.ConfigureBuildingTemplate makes the Compost put out
+# fertilizer instead of dirt (0.1 kg/s at 75 °C), and drop it as fertilizer.
+# How a player reaches it: build a Compost and let it work.
+# What changes: compost makes fertilizer.
+#
+# setup builds a Compost in the corridor west of the printing pod and loads it with polluted
+# dirt; selected, its converter makes fertilizer.
+from: early-base
+mods: [3434789737]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Compost\")", method: Build, args: [131764, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "all:Compost::[0].GetComponent<Storage>", method: AddOre, args: [ToxicSand, 200, 300, 255, 0, false, true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"Compost\").GetComponent<ElementConverter>.outputElements[0].elementHash": "== 'Fertilizer'"
+      "Assets.GetPrefab(\"Compost\").GetComponent<ElementDropper>.emitTag.Name": Fertilizer
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: Compost}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<ElementConverter>.outputElements[0].elementHash": "== 'Fertilizer'"
+      "selected:GetComponent<Storage>.MassStored()": 200

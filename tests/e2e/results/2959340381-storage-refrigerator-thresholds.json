@@ -1,0 +1,67 @@
+{
+ "spec": "mods/2959340381-storage-refrigerator-thresholds.yaml",
+ "mods": [
+  "2959340381"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Smart Storage Bin's thresholds side screen (dump, shot); its checkbox inverts the signal",
+ "updated": "2026-10-27",
+ "commit": "d39ef694",
+ "mod_dlls": {
+  "2959340381": {
+   "StorageRefrigeratorThresholds.dll": "f30a52434a3a71e8928d62889825f29b229afb7e362026fe38acf42324574a1e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-070541-7d2f8e16",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T07:47:40",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-084405-285e8af9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T08:50:29",
+    "lane": 17,
+    "reference_run": "20261027-070541-7d2f8e16",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "thresholds": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "side-screen": 0.001186
+    }
+   },
+   {
+    "run": "20261027-084405-285e8af9",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T08:51:19",
+    "lane": 17,
+    "reference_run": "20261027-070541-7d2f8e16",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "thresholds": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "side-screen": 0.001186
+    }
+   }
+  ]
+ }
+}

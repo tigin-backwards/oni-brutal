@@ -1,0 +1,51 @@
+# Issue #23: a stored item's row in the details panel, clicked after the item was gone, crashed
+# ours (NullReferenceException in SimpleInfoScreen's OnStorageCollapsibleRowExpanded lambda,
+# go.GetComponent<KSelectable>() on a destroyed GameObject).
+#
+# A building's storage lists several items of one kind under a collapsible label; expanded, it
+# shows a row per item, siblings after the label. The rows are rebuilt every frame while the label
+# is shown, and DetailCollapsableLabel.OnDisable hides them, but only those whose
+# activeInHierarchy differs from their "in use" flag. When the details screen closes (a deselect,
+# or a world switch's DeselectAndClose), Unity's player still reports the later siblings active
+# while the label's OnDisable runs, so they are hidden. Ours cleared the whole subtree's flags
+# before any OnDisable: the rows stayed active, came back with the next building selected, kept
+# the items of the first one, and a click on one whose item had been destroyed threw.
+from: early-base
+setup:
+  # Two barbeques in the ration box at (121, 207), kept apart (is_deserializing skips the merge).
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [131773, 0, 0, "CookedMeat"]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "all:RationBox::[0].GetComponent<Storage>", method: Store, args: [{"$": "last:"}, true, false, true, true]}}
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [131773, 0, 0, "CookedMeat"]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "all:RationBox::[0].GetComponent<Storage>", method: Store, args: [{"$": "last:"}, true, false, true, true]}}
+  # The second one weighs 500 g, to tell its row apart, and is destroyed after 2 s of game time
+  # (in the first `run`), as food is eaten or launched.
+  - driver: {setup.call: {target: "all:RationBox::[0].GetComponent<Storage>.items[2].GetComponent<PrimaryElement>", method: set_Mass, args: [0.5]}}
+  - driver: {setup.call: {type: "UnityEngine.Object", method: Destroy, args: [{"$": "all:RationBox::[0].GetComponent<Storage>.items[2]"}, 2.0]}}
+steps:
+  - expect_state:
+      "all:RationBox::[0].GetComponent<Storage>.items.Count": 3
+  - driver: {camera.set: {cell: [121, 208], ortho: 8}}
+  - click_world: {cell: [121, 207], select: RationBox}
+  - scroll: {at: "**/DetailsScreen/Body/TabBody/ScrollRect", notches: -20}
+  - ui_wait: {path: "**/ContentStatus/storage_group_*", cond: stable, frames: 300}
+  - click: {ui: "**/ContentStatus/storage_group_*"}
+  - expect_ui: {"**/ContentStatus/storage_group_*": {isOn: true}}
+  - expect_ui:
+      "**/ContentStatus/DetailLabelWithButtonTemplateForCollapsibleLabels": {count: 2}
+      "**/ContentStatus/DetailLabelWithButtonTemplateForCollapsibleLabels[0]/label3": {text: "500 g"}
+  # Deselected: the details screen closes with the label expanded.
+  - key: {code: Escape}
+  - ui_wait: {path: "**/ContentStatus/storage_group_*", cond: gone, frames: 120}
+  # The 500 g barbeque is destroyed meanwhile.
+  - run: {seconds: 5, speed: 1}
+  - expect_state:
+      "all:RationBox::[0].GetComponent<Storage>.items.Count": 2
+  # Selected again: one barbeque, no collapsible label, and no rows left over.
+  - click_world: {cell: [121, 207], select: RationBox}
+  - scroll: {at: "**/DetailsScreen/Body/TabBody/ScrollRect", notches: -20}
+  - ui_wait: {path: "**/ContentStatus/storage_1", cond: stable, frames: 300}
+  - expect_ui:
+      "**/ContentStatus/storage_group_*": {count: 0}
+      "**/ContentStatus/DetailLabelWithButtonTemplateForCollapsibleLabels": {count: 0}

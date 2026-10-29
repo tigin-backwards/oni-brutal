@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3024606677-steam-turbine-tweaks.yaml",
+ "mods": [
+  "3024606677"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Steam Turbine's def is reworked; its Power menu card (shot)",
+ "updated": "2026-10-27",
+ "commit": "d52da26d",
+ "mod_dlls": {
+  "3024606677": {
+   "╒⌠╞√╬╨┬╓╗·.dll": "03c6058534f0e3ce7321657c8477bf537d3e1a9ff65042f74d6d7e1e32d8a721"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-145102-18288f91",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T15:07:51",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-153635-35d5ca9b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T16:14:59",
+    "lane": 17,
+    "reference_run": "20261027-145102-18288f91",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.0
+    }
+   },
+   {
+    "run": "20261027-153635-35d5ca9b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T16:15:52",
+    "lane": 17,
+    "reference_run": "20261027-145102-18288f91",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.0
+    }
+   }
+  ]
+ }
+}

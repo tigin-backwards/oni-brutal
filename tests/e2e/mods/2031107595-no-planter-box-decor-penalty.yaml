@@ -1,0 +1,26 @@
+# No Planter Box Decor Penalty (2031107595), class P.
+#
+# What it does: a postfix on PlanterBoxConfig.CreateBuildingDef sets the Planter Box's decor
+# and decor radius to 0 (the game's: -5 in a radius of 1).
+# How a player reaches it: build a Planter Box.
+# What changes: planter boxes no longer lower the decor around them.
+#
+# setup builds a Planter Box in the corridor west of the printing pod; selected, its decor
+# provider gives 0.
+from: early-base
+mods: [2031107595]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"PlanterBox\")", method: Build, args: [131764, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"PlanterBox\").BaseDecor": 0
+      "Assets.GetBuildingDef(\"PlanterBox\").BaseDecorRadius": 0
+  - run: {seconds: 2}
+  - expect: {buildings: {PlanterBox: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: PlanterBox}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<DecorProvider>.baseDecor": 0
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Planter Box"}

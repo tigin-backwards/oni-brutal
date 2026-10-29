@@ -1,0 +1,27 @@
+# Flight planning (2813526647), class P; its own config.json.
+#
+# What it does: each rocket keeps a list of destinations it flies in turn: a postfix on
+# ClusterDestinationSelector.SetDestination adds every destination a player picks to the
+# rocket's list, a launch (Clustercraft.Launch) sets the next one, and clearing the destination
+# empties the list. A postfix on ClusterTraveler.OnPrefabInit gives every rocket its entry; the
+# lists are saved in config.json beside the mod's DLL.
+# How a player reaches it: the starmap, picking a rocket's destinations one after another.
+# What changes: rockets fly a route of several asteroids.
+#
+# In a Spaced Out colony with two rockets on their pads (rockets-so), each rocket gets its
+# entry when the save loads, written to the mod's config.json.
+from: rockets-so
+mods: [2813526647]
+steps:
+  # The save predates two rounds of changes, and the game shows a dialog for each, the later
+  # one on top.
+  - expect_ui: {"**/SpriteListDialog": {count: 2}}
+  - click: {ui: "**/SpriteListDialog/**/ConfigurableButton", index: 1}
+  - expect_ui: {"**/SpriteListDialog": {count: 1}}
+  - click: {ui: "**/SpriteListDialog/**/ConfigurableButton"}
+  - ui_wait: {path: "**/SpriteListDialog", cond: gone, frames: 120}
+  - expect_state:
+      "Components.Clustercrafts.Count": 2
+      "count:type:FlightPlanning.Config::Cfg.baseBoxes[*] if .index == 0": ">= 2"
+      "file:mods/Local/2813526647/config.json": {contains: baseBoxes}
+  - run: {seconds: 2}

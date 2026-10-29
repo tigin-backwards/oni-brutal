@@ -1,0 +1,37 @@
+# More Tempshift Plates (3304951452), class B.
+#
+# What it does: adds three plates to the Utilities menu after the Tempshift Plate, researched
+# with Refined Objects: the Tempshift Plate 2x2 (rotatable, a 2x2 area of effect), the Very
+# Dense Tempshift Plate (5x the mass, a fifth of the conductivity, no range) and the Morphable
+# Tempshift Plate, whose side screen has four sliders (left, right, down, up) for its area of
+# effect. It also fixes the Tempshift Plate's extents.
+# How a player reaches it: the research screen, then the build menu (Utilities).
+# What changes: more ways to spread heat.
+#
+# setup researches Refined Objects and builds a Morphable Tempshift Plate in the corridor west
+# of the printing pod. The three plates show in the Utilities menu; the plate, selected, shows
+# its slider side screen.
+from: early-base
+mods: [3304951452]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"RefinedObjects\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"MorphTempshiftPlate\")", method: Build, args: [131765, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"RefinedObjects\").unlockedItemIDs": [{contains: TempshiftPlate2x2}, {contains: VeryDenseTempshiftPlate}, {contains: MorphTempshiftPlate}]
+  - run: {seconds: 5}
+  - expect: {buildings: {MorphTempshiftPlate: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Utilities"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/MorphTempshiftPlate Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/TempshiftPlate2x2 Group*": {active: true}
+      "**/BuildingGroups/**/Grid/VeryDenseTempshiftPlate Group*": {active: true}
+      "**/BuildingGroups/**/Grid/MorphTempshiftPlate Group*": {active: true}
+  - shot: {name: utilities-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: MorphTempshiftPlate}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<MultiSliderExtents>": exists

@@ -1,0 +1,79 @@
+{
+ "spec": "mods/2147011067-kinda-useful-sulfur.yaml",
+ "mods": [
+  "2147011067"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "a Rock Granulator's recipe list (dump, shot) has the sulfur-to-fertilizer recipe",
+ "updated": "2026-10-27",
+ "commit": "b8e90d44",
+ "mod_dlls": {
+  "2147011067": {
+   "Kinda Useful Sulfur.dll": "ed0d17a0a2dd6b3a8b8c3122284b88ad3d701eff9107e42bfac63ff495fb6b47"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-054228-6d816ef2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T06:20:41",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-070541-c1e82ff0",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-27T07:23:17",
+    "lane": 16,
+    "reference_run": "20261027-054228-6d816ef2",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "recipes": 0.0
+    }
+   },
+   {
+    "run": "20261027-070541-c1e82ff0",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-27T07:24:07",
+    "lane": 16,
+    "reference_run": "20261027-054228-6d816ef2",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "recipes": 0.0
+    }
+   }
+  ]
+ }
+}

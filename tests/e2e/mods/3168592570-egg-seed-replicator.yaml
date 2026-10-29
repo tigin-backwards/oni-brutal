@@ -1,0 +1,32 @@
+# Egg/Seed Replicator (3168592570), class B.
+#
+# What it does: adds the Seed Copyer and the Egg Copyer to the Utilities menu, two fabricators
+# with a recipe for every seed (one seed into two, a postfix on
+# EntityTemplates.CreateAndRegisterSeedForPlant) and for every critter species' egg (one egg
+# into two).
+# How a player reaches it: the build menu (Utilities), then a copyer's recipe list.
+# What changes: seeds and eggs can be duplicated.
+#
+# Both show in the Utilities menu; setup builds a Seed Copyer in the corridor west of the
+# printing pod, and selected it lists a recipe per seed, Mealwood's among them.
+from: early-base
+mods: [3168592570]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SeedCopyer\")", method: Build, args: [131765, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 5}
+  - expect: {buildings: {SeedCopyer: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Utilities"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/EggCopyer Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/SeedCopyer Group*": {active: true}
+      "**/BuildingGroups/**/Grid/EggCopyer Group*": {active: true}
+  - shot: {name: utilities-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: SeedCopyer}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_wait: {path: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView", cond: stable}
+  - expect_state:
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0].Name == SeedCopyer": ">= 10"
+  - ui_dump: {name: recipes, root: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView"}

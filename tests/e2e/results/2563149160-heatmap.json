@@ -1,0 +1,68 @@
+{
+ "spec": "mods/2563149160-heatmap.yaml",
+ "mods": [
+  "2563149160"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "F3 shows the temperature panel (dump, shot); its slider moves the overlay's thresholds",
+ "updated": "2026-10-27",
+ "commit": "8edec30d",
+ "mod_dlls": {
+  "2563149160": {
+   "HeatMap.dll": "fdf7098781c9cb22b0a4e5b16d52c092081796237c6ec7cc5c08ba856440c4b4",
+   "PLib.dll": "c4bb22f1bc06ebcb0dbba75a7f1bc46f63eaa3dae12c22a08729f1a6d3362dda"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-132745-bfd98f4e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T13:36:50",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-142041-80e4c84c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T14:37:21",
+    "lane": 16,
+    "reference_run": "20261027-132745-bfd98f4e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "panel": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "panel": 0.0
+    }
+   },
+   {
+    "run": "20261027-142041-80e4c84c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T14:38:14",
+    "lane": 16,
+    "reference_run": "20261027-132745-bfd98f4e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "panel": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "panel": 0.0
+    }
+   }
+  ]
+ }
+}

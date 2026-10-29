@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3033510103-adjust-algae-distillery.yaml",
+ "mods": [
+  "3033510103"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "an Algae Distiller built and selected makes 400 g/s of algae",
+ "updated": "2026-10-27",
+ "commit": "6d4545b9",
+ "mod_dlls": {
+  "3033510103": {
+   "╡≈╒√╘σ└α╒⌠┴≤╞≈Adjust Algae Distillery.dll": "ad0dde023633ac41c1c553888118bdd0f5c8b781e2a2446a3ce5ea825550a885"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-122300-34502628",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T12:49:35",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-130634-0528365b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T13:20:55",
+    "lane": 16,
+    "reference_run": "20261027-122300-34502628",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-130634-0528365b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T13:21:43",
+    "lane": 16,
+    "reference_run": "20261027-122300-34502628",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

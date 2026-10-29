@@ -216,6 +216,29 @@ namespace OniMoono.Desktop.Gl
             return 0;
         }
 
+        /// The NVIDIA extension's free dedicated memory and evictions (count and size since the
+        /// context was made), or the AMD one's free memory in the texture pool and the auxiliary
+        /// (system memory) pool. A driver short of video memory moves allocations to system
+        /// memory, after which drawing from them is much slower.
+        public override string MemoryCounters() => worker.Call(() =>
+        {
+            if (GlPrograms.Extensions.Contains("GL_NVX_gpu_memory_info"))
+            {
+                int free = 0, evictions = 0, evicted = 0;
+                N.glGetIntegerv(0x9049, &free); // GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX
+                N.glGetIntegerv(0x904A, &evictions); // GPU_MEMORY_INFO_EVICTION_COUNT_NVX
+                N.glGetIntegerv(0x904B, &evicted); // GPU_MEMORY_INFO_EVICTED_MEMORY_NVX
+                return $"{free >> 10} MiB free of {caps.MemoryMB} MiB, {evictions} evictions ({evicted >> 10} MiB)";
+            }
+            if (GlPrograms.Extensions.Contains("GL_ATI_meminfo"))
+            {
+                int* info = stackalloc int[4];
+                N.glGetIntegerv(0x87FC, info); // TEXTURE_FREE_MEMORY_ATI
+                return $"{info[0] >> 10} MiB free (largest block {info[1] >> 10} MiB), auxiliary {info[2] >> 10} MiB free";
+            }
+            return null;
+        });
+
         public override GraphicsCaps Caps => caps;
         public override bool RendersFrames => true;
 

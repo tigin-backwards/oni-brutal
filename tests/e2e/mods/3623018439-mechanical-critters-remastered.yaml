@@ -1,0 +1,36 @@
+# 机械小动物（重置版）, Mechanical Critters Remastered (3623018439), class B; PLib.
+#
+# What it does: adds nine 1x1 powered machines to the Utilities menu, researched with
+# Smelting, each doing a critter's job without the critter: the Robot Hatch (a fabricator
+# that eats sand, sandstone, clay, dirt and other rock or food into coal), and Robot Pacu,
+# Pokeshell, Puft, Shove Vole, Slickster, Staterpillar, Stego and Worm, each with its
+# critter's recipes or air filter. None needs a Duplicant to run.
+# How a player reaches it: the research screen, then the build menu (Utilities).
+# What changes: ranching without ranches.
+#
+# setup researches Smelting and builds a Robot Hatch in the corridor west of the printing pod.
+# The nine machines show in the Utilities menu; the Robot Hatch, selected, lists its recipes.
+from: early-base
+mods: [3623018439]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"Smelting\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"RobotHatch\")", method: Build, args: [131765, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"Smelting\").unlockedItemIDs": [{contains: RobotHatch}, {contains: RobotWorm}, {contains: RobotStego}]
+      "Assets.GetPrefab(\"RobotHatch\").GetComponent<ComplexFabricator>.duplicantOperated": false
+  - run: {seconds: 5}
+  - expect: {buildings: {RobotHatch: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Utilities"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/RobotHatch Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/RobotHatch Group*": {active: true}
+      "**/BuildingGroups/**/Grid/RobotPuft Group*": {active: true}
+      "**/BuildingGroups/**/Grid/RobotWorm Group*": {active: true}
+  - shot: {name: utilities-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: RobotHatch}
+  - ui_wait: {path: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView", cond: stable}
+  - ui_dump: {name: recipes, root: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView"}

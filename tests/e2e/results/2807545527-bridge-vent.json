@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2807545527-bridge-vent.yaml",
+ "mods": [
+  "2807545527"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "its techs unlock the three bridge vents; the Plumbing menu shot lists the liquid one",
+ "updated": "2026-10-27",
+ "commit": "b8e90d44",
+ "mod_dlls": {
+  "2807545527": {
+   "BridgeVent.dll": "b70b0bb95adb70480c309c483a7402d84112b92e44d4be08b2169067d5c6c814"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-063313-07ba5b84",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T06:48:55",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-070541-c1e82ff0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T07:34:35",
+    "lane": 16,
+    "reference_run": "20261027-063313-07ba5b84",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "plumbing-menu": 0.0
+    }
+   },
+   {
+    "run": "20261027-070541-c1e82ff0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T07:35:28",
+    "lane": 16,
+    "reference_run": "20261027-063313-07ba5b84",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "plumbing-menu": 0.0
+    }
+   }
+  ]
+ }
+}

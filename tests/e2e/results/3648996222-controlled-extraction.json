@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3648996222-controlled-extraction.yaml",
+ "mods": [
+  "3648996222"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "an Oil Well's slider reads 1 kg/s between 0.01 and 100 (dump, shot)",
+ "updated": "2026-10-27",
+ "commit": "e100c86e",
+ "mod_dlls": {
+  "3648996222": {
+   "ControlledExtraction.dll": "cfa542e6d2a73b2f5d3a97c8ccf9c50f3a0817791cb9ef42009810add9cf8ad0"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-074831-45ab7067",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:01:23",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-090819-f38336a7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:38:13",
+    "lane": 17,
+    "reference_run": "20261027-074831-45ab7067",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "side-screen": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "side-screen": 0.000214
+    }
+   },
+   {
+    "run": "20261027-090819-f38336a7",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T09:39:06",
+    "lane": 17,
+    "reference_run": "20261027-074831-45ab7067",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "side-screen": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "side-screen": 0.000214
+    }
+   }
+  ]
+ }
+}

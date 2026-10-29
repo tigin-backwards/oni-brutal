@@ -1,0 +1,34 @@
+# Overlay Values On Grid (3786116196), class U (overlay legend, world-space text).
+#
+# What it does: the Light, Radiation and Decor overlays' legends get a filter pair, "... Display
+# ON" and "... Display OFF" (a postfix on OverlayLegend.SetLegend builds a ToolParameterMenu,
+# a prefix on OnFiltersChanged reads it). With it on, every visible cell shows its lux, rads or
+# decor as a number in a uGUI Text on the world-space canvas (pooled per cell), refreshed
+# every 0.2 s while the camera is zoomed in (orthographic size up to 20); the cell under the
+# pointer is left clear.
+# How a player reaches it: open the Decor (F8), Light or Radiation overlay, then the legend's
+# Display ON filter.
+# What changes: overlay values read as numbers on the grid.
+#
+# The Decor overlay is opened with F8; its legend shows the two filters, Display ON is clicked,
+# and the cells of the corridor west of the printing pod show their decor as numbers.
+from: early-base
+mods: [3786116196]
+steps:
+  - run: {seconds: 1}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - key: {code: F8}
+  - ui_wait: {path: "**/TopRight/OverlayLegend", cond: stable}
+  - expect_ui:
+      "**/OverlayLegend/**": {any_text: "Decor Display ON"}
+  - expect_state:
+      "type:OverlayVaulesOnGrid.DecorDisplay::Instance.legendToggleOn": false
+  - click: {ui: "**/OverlayParamaterMenu/Content/List/toggleEntry[0]/Toggle"}
+  - expect_state:
+      "type:OverlayVaulesOnGrid.DecorDisplay::Instance.legendToggleOn": true
+  - ui_dump: {name: legend, root: "**/TopRight/OverlayLegend"}
+  - run: {seconds: 1, speed: 1}
+  - expect_state:
+      "type:OverlayVaulesOnGrid.CellTextDrawer::Instance.textObjects[131766].activeSelf": true
+      "type:OverlayVaulesOnGrid.CellTextDrawer::Instance.textObjects[131766].GetComponent<UnityEngine.UI.Text>.text": "== original"
+  - world_shot: {name: decor-values, ortho: 6, at: [113, 208], hide_ui: false, mask: [[0, 0, 1280, 140], [1000, 0, 280, 720], [0, 600, 1280, 120]]}

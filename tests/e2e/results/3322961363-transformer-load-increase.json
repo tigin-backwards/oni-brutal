@@ -1,0 +1,60 @@
+{
+ "spec": "mods/3322961363-transformer-load-increase.yaml",
+ "mods": [
+  "3322961363"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the transformers are rated 2.5 and 10 kW; a Power Transformer built shows 2.5 kW",
+ "updated": "2026-10-27",
+ "commit": "e100c86e",
+ "mod_dlls": {
+  "3322961363": {
+   "Oni Mod 02.dll": "8a3d5f5aa7ce2dc7c5b99a1450f735d801788cc8637bbeab2795cb2c25067708",
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-074831-45ab7067",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T07:59:31",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-090819-f38336a7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:18:00",
+    "lane": 17,
+    "reference_run": "20261027-074831-45ab7067",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "power-menu": 0.0
+    }
+   },
+   {
+    "run": "20261027-090819-f38336a7",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T09:19:00",
+    "lane": 17,
+    "reference_run": "20261027-074831-45ab7067",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "power-menu": 0.0
+    }
+   }
+  ]
+ }
+}

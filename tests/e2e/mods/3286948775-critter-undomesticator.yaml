@@ -1,0 +1,33 @@
+# 小动物野化器, Critter Undomesticator (3286948775), class B.
+#
+# What it does: adds the Uncultivate machine (WildMachine) to the Food menu, researched with
+# Animal Control: a 3x2 building that charges up to 40 kJ from power and, once charged, turns a
+# tame critter standing on it wild again (it loses its Tame tag), using the charge.
+# How a player reaches it: the research screen, then the build menu (Food).
+# What changes: tamed critters can be made wild.
+#
+# setup researches Animal Control and builds the machine in the corridor west of the printing
+# pod. It shows in the Food menu; selected, it holds no charge, having no power.
+from: early-base
+mods: [3286948775]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"AnimalControl\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"WildMachine\")", method: Build, args: [131765, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"AnimalControl\").unlockedItemIDs": {contains: WildMachine}
+  - run: {seconds: 5}
+  - expect: {buildings: {WildMachine: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Food"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/WildMachine Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/WildMachine Group*": {active: true}
+  - shot: {name: food-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: WildMachine}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<CritterMadeWild.WildMachine>.AvailableJoules": 0
+      "selected:GetComponent<CritterMadeWild.WildMachine>.TotalCapacity": 40000

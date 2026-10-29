@@ -1,0 +1,49 @@
+# Skills Retainer (3130228843), class P.
+#
+# What it does: a postfix on MinionResume.ResetSkillLevels masters again every skill a
+# Duplicant was granted rather than learned (its GrantedSkillIDs: skills that come with it,
+# such as a bionic's or a trait's), so the Skill Scrubber only takes back learned skills.
+# How a player reaches it: assign a Duplicant to a Skill Scrubber.
+# What changes: scrubbing keeps a Duplicant's granted skills.
+#
+# setup grants Nikola Hard Digging, has him learn Improved Farming, and builds a Skill
+# Scrubber on tiles in the corridor west of the printing pod (its 180 s of work cut to 5),
+# powered by a charged battery through wires, and selects it. Nikola is assigned to it in its
+# side screen; once he has used it, the learned skill is gone and the granted one is still
+# mastered.
+from: early-base
+mods: [3130228843]
+setup:
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>", method: GrantSkill, args: [Mining1]}}
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>", method: MasterSkill, args: [Farming1]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Tile\")", method: Build, args: [131125, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Tile\")", method: Build, args: [131126, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Tile\")", method: Build, args: [131127, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"ResetSkillsStation\")", method: Build, args: [131762, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "last:GetComponent<ResetSkillsStation>", method: SetWorkTime, args: [5]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Battery\")", method: Build, args: [131764, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "last:GetComponent<Battery>", method: AddEnergy, args: [10000.0]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [131762, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [131763, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [131764, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Right", 131762, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Left, Right", 131763, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: ["Left", 131764, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: ForceRebuildNetworks}}
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "all:ResetSkillsStation::[0].GetComponent<KSelectable>"}]}}
+steps:
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[1].name": Nikola
+      "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>.HasMasteredSkill(\"Mining1\")": true
+      "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>.HasMasteredSkill(\"Farming1\")": true
+  - run: {seconds: 2}
+  - expect_state:
+      "all:ResetSkillsStation::[0].GetComponent<Operational>.IsOperational": true
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/AssignableSideScreen", cond: stable}
+  - click: {text: "Nikola", under: "**/AssignableSideScreen/**/AssignableSideScreenRow"}
+  - expect_state:
+      "all:ResetSkillsStation::[0].GetComponent<Assignable>.assignee.GetProperName()": Nikola
+  - run: {seconds: 150}
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>.HasMasteredSkill(\"Farming1\")": false
+      "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>.HasMasteredSkill(\"Mining1\")": true

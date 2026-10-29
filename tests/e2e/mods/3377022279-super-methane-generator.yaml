@@ -1,0 +1,31 @@
+# SuperMethaneGenerator (3377022279), class P; PLib options (Controler.json).
+#
+# What it does: postfixes on MethaneGeneratorConfig set the Natural Gas Generator's wattage
+# (option Power), its methane use and its CO2 and polluted water output (multipliers), its
+# storage, no exhaust or self-heat; option Port adds a liquid output port for the polluted
+# water, and option Place lets it be built anywhere (no foundation).
+# How a player reaches it: build a Natural Gas Generator; the options in the mod's PLib dialog.
+# What changes: a generator as strong as the options say.
+#
+# Its shipped Controler.json holds non-default values, so the options are set here: 5000 W,
+# methane x1, Place on. setup builds a generator in the corridor west of the printing pod;
+# selected, it is rated 5000 W and makes no exhaust heat.
+from: early-base
+mods: [3377022279]
+options:
+  "3377022279": {$file: Controler.json, Power: 5000, Methane: 1, Carbondioxide: 1, Pollutedwater: 1, Storage: 1, Port: false, Place: true}
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"MethaneGenerator\")", method: Build, args: [131765, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"MethaneGenerator\").GeneratorWattageRating": 5000
+      "Assets.GetBuildingDef(\"MethaneGenerator\").ExhaustKilowattsWhenActive": 0
+      "Assets.GetBuildingDef(\"MethaneGenerator\").BuildLocationRule": "== 'Anywhere'"
+  - run: {seconds: 2}
+  - expect: {buildings: {MethaneGenerator: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 208], select: MethaneGenerator}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Generator>.WattageRating": 5000
+      "selected:GetComponent<EnergyGenerator>.formula.inputs[0].consumptionRate": 0.09

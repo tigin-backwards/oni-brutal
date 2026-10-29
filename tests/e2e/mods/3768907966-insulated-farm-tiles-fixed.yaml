@@ -1,0 +1,36 @@
+# Insulated Farm Tiles (Fixed) (3768907966), class B.
+#
+# What it does: adds an Insulated Farm Tile and an Insulated Hydroponic Farm Tile to the Food
+# menu, researched with Gourmet Meal Preparation: farm tiles of raw minerals with the insulation
+# of an Insulated Tile, so a plant's roots do not pass heat (a FarmTileInsulation sets its
+# cells' insulation as an Insulated Tile's).
+# How a player reaches it: the research screen, then the build menu (Food).
+# What changes: planters that keep heat out.
+#
+# setup researches Gourmet Meal Preparation and builds an Insulated Farm Tile in the corridor
+# west of the printing pod; both show in the Food menu, and the tile built, selected, accepts a
+# seed and is insulated.
+from: early-base
+mods: [3768907966]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"FinerDining\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"InsulatedFarmTile\")", method: Build, args: [131765, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"FinerDining\").unlockedItemIDs": [{contains: InsulatedFarmTile}, {contains: InsulatedHydroponicFarm}]
+  - run: {seconds: 5}
+  - expect: {buildings: {InsulatedFarmTile: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Food"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/InsulatedHydroponicFarm Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/InsulatedFarmTile Group*": {active: true}
+      "**/BuildingGroups/**/Grid/InsulatedHydroponicFarm Group*": {active: true}
+  - shot: {name: food-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: InsulatedFarmTile}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<PlantablePlot>": exists
+      "selected:GetComponent<InsulatedFarmTiles.FarmTileInsulation>": exists

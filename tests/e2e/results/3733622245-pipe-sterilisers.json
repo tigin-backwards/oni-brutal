@@ -1,0 +1,60 @@
+{
+ "spec": "mods/3733622245-pipe-sterilisers.yaml",
+ "mods": [
+  "3733622245"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Pathogen Diagnostics researched, the Plumbing menu shot lists the steriliser; built, set to liquid pipes",
+ "updated": "2026-10-27",
+ "commit": "d2afe5dd",
+ "mod_dlls": {
+  "3733622245": {
+   "JasonONIMods.Shared.dll": "530609678c9b04eeec78cf2f9e832f1951c7fb24d843315205b6ea58edc46b6e",
+   "PipeSterilisers.dll": "9de9ffef7b9246e39c3f13ae41f4a32e07ffd8c47490b4c1bd003b894bfcfed6"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-092853-dabffb17",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T10:26:36",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-104856-56f64ce0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T10:48:56",
+    "lane": 17,
+    "reference_run": "20261027-092853-dabffb17",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "plumbing-menu": 0.0
+    }
+   },
+   {
+    "run": "20261027-104856-56f64ce0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T11:16:26",
+    "lane": 17,
+    "reference_run": "20261027-092853-dabffb17",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "plumbing-menu": 0.0
+    }
+   }
+  ]
+ }
+}

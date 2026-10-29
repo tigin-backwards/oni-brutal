@@ -1,0 +1,34 @@
+# 变压器负载提升, Transformer load increase (3322961363), class P.
+#
+# What it does: postfixes on the transformers' CreateBuildingDef raise the Power Transformer's
+# output to 2.5 kW (the game's 1 kW) and the Large Power Transformer's to 10 kW (the game's 4
+# kW).
+# How a player reaches it: build a transformer.
+# What changes: transformers pass more power.
+#
+# setup researches Advanced Power Regulation and builds a Power Transformer in the corridor west
+# of the printing pod. It shows in the Power menu; selected, it is rated 2.5 kW.
+from: early-base
+mods: [3322961363]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"AdvancedPowerRegulation\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"PowerTransformerSmall\")", method: Build, args: [131765, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"AdvancedPowerRegulation\").unlockedItemIDs": {contains: PowerTransformerSmall}
+      "Assets.GetBuildingDef(\"PowerTransformerSmall\").GeneratorWattageRating": 2500
+      "Assets.GetBuildingDef(\"PowerTransformer\").GeneratorWattageRating": 10000
+  - run: {seconds: 5}
+  - expect: {buildings: {PowerTransformerSmall: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Power"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/PowerTransformerSmall Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/PowerTransformerSmall Group*": {active: true}
+  - shot: {name: power-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: PowerTransformerSmall}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Generator>.WattageRating": 2500

@@ -1,0 +1,31 @@
+# Vertical Liquid Pump (2845508297), class B; PLib.
+#
+# What it does: adds LiquidMiniPump1 to the Plumbing menu: a 1x2 pump of gold that stands
+# upright or upside down (flip), draws 333 W and pumps 10 kg/s of liquid in a radius of 3 into a
+# liquid pipe from its own cell; it does not flood, corrode or need a foundation (+20 decor).
+# How a player reaches it: the build menu (Plumbing).
+# What changes: a narrow, strong liquid pump.
+#
+# The pump shows in the Plumbing menu; setup builds one in the corridor west of the printing
+# pod, and selected it pumps 10 kg/s.
+from: early-base
+mods: [2845508297]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidMiniPump1\")", method: Build, args: [131765, Neutral, null, [Gold], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"LiquidMiniPump1\").EnergyConsumptionWhenActive": 333
+  - run: {seconds: 5}
+  - expect: {buildings: {LiquidMiniPump1: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Plumbing"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/LiquidMiniPump1 Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/LiquidMiniPump1 Group*": {active: true}
+  - shot: {name: plumbing-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: LiquidMiniPump1}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<ElementConsumer>.consumptionRate": 10
+      "selected:GetComponent<Storage>.capacityKg": 20

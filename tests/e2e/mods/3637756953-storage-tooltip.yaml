@@ -1,0 +1,29 @@
+# Storage Tooltip (3637756953), class U (hover text).
+#
+# What it does: a transpiler on SelectToolHoverTextCard.UpdateHoverElements calls the mod
+# before the hover card ends: for each hovered building with a storage shown in the UI it adds
+# a CONTENTS block, up to ten lines "Item (mass)" or "Item xN (mass)", and "Total: stored /
+# capacity" (Radbolt storages too).
+# How a player reaches it: hover the pointer over a storage building.
+# What changes: the hover card lists what a storage holds.
+#
+# setup builds a Storage Bin in the corridor west of the printing pod and stores 200 kg of
+# sandstone in it; with the pointer over the bin, the hover card lists the sandstone and the
+# total.
+from: early-base
+mods: [3637756953]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"StorageLocker\")", method: Build, args: [131764, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "all:StorageLocker::[0].GetComponent<Storage>", method: AddOre, args: [SandStone, 200, 300, 255, 0, false, true]}}
+require_log: ['StorageTooltipMod: Transpiler patch applied successfully']
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {StorageLocker: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - key: {code: LeftShift, at: [112, 207]}
+  - expect_ui:
+      "**/HoverTextScreen/**": {any_text: "CONTENTS"}
+  - expect_ui:
+      "**/HoverTextScreen/**": {any_text: "~Sandstone</link> (200 kg)"}
+  - expect_ui:
+      "**/HoverTextScreen/**": {any_text: "Total: 200 kg / 20 t"}

@@ -1,0 +1,25 @@
+# Better Rad Pill Fixed (3175775975), class P; PLib options.
+#
+# What it does (Spaced Out only): a Duplicant may take a Rad Pill only once it has absorbed
+# at least the threshold in rads (option Rads, default 33; a postfix on
+# MedicinalPillWorkable.CanBeTakenBy), and taking one lasts 1 s instead of 10 (option
+# FasterAnim, on by default; a postfix on MedicinalPillWorkable.OnSpawn).
+# How a player reaches it: Rad Pills in the colony, and Duplicants exposed to radiation.
+# What changes: no pills wasted on small doses, and less time spent taking them.
+#
+# setup drops a Rad Pill in the corridor west of the printing pod. Selected, its workable
+# takes 1 s; no Duplicant of early-base has absorbed rads, so after a while the pill is still
+# there.
+from: early-base
+mods: [3175775975]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131128, 0, 0, \"BasicRadPill\", \"Ore\")", method: SetActive, args: [true]}}
+steps:
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {pos: [112.5, 206.2], select: BasicRadPill}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<MedicinalPillWorkable>.workTime": 1
+  - run: {seconds: 60}
+  - expect_state:
+      "count:all:MedicinalPillWorkable::[*]": 1

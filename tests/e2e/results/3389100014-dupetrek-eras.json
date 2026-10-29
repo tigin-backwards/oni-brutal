@@ -1,0 +1,57 @@
+{
+ "spec": "mods/3389100014-dupetrek-eras.yaml",
+ "mods": [
+  "3172734005",
+  "3389100014"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Dupery imports the crew's personalities (with Dupery 3172734005)",
+ "updated": "2026-10-27",
+ "commit": "e100c86e",
+ "mod_dlls": {
+  "3172734005": {
+   "DuperyFixed.dll": "9ef4a93958b6b80fbf086cab57821955dd344324d2192086db7ea7845e71f7f2"
+  },
+  "3389100014": {}
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-074831-45ab7067",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T08:06:35",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-090819-f38336a7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:21:45",
+    "lane": 17,
+    "reference_run": "20261027-074831-45ab7067",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-090819-f38336a7",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T09:22:43",
+    "lane": 17,
+    "reference_run": "20261027-074831-45ab7067",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

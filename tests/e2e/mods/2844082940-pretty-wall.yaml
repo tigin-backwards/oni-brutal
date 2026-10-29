@@ -1,0 +1,27 @@
+# Pretty Wall 精致墙壁 (2844082940), class P.
+#
+# What it does: postfixes on the defs of the Tempshift Plate (+10 decor in a radius of 3) and
+# the Drywall (+5 decor in a radius of 2) make them decorative.
+# How a player reaches it: build either.
+# What changes: walls raise decor.
+#
+# setup builds a Drywall in the corridor west of the printing pod; selected, it gives 5
+# decor.
+from: early-base
+mods: [2844082940]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"ExteriorWall\")", method: Build, args: [131764, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"ThermalBlock\").BaseDecor": 10
+      "Assets.GetBuildingDef(\"ExteriorWall\").BaseDecor": 5
+  - run: {seconds: 2}
+  - expect: {buildings: {ExteriorWall: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: ExteriorWall}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<DecorProvider>.baseDecor": 5
+      "selected:GetComponent<DecorProvider>.baseRadius": 2
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Drywall"}

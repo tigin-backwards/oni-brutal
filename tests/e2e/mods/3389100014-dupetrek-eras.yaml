@@ -1,0 +1,21 @@
+# DupeTrek: Eras (3389100014), class O (content for Dupery).
+#
+# What it does: no code of its own; through Dupery (3172734005, its requirement) its
+# PERSONALITIES.json adds printable Duplicant personalities, the crews of two series
+# (Picard, Data, Geordi and the others), and OVERRIDE.dupetrk.json groups them in eras.
+# How a player reaches it: the Printing Pod's choices and the starting Duplicants.
+# What changes: more personalities in the pool.
+#
+# Dupery imports the personalities into the game's Personalities; Picard and Data are there
+# and printable.
+from: early-base
+mods: [3172734005, 3389100014]
+steps:
+  - expect_state:
+      "Db.Get().Personalities.TryGet(\"PICARD\")": exists
+      "Db.Get().Personalities.TryGet(\"PICARD\").Disabled": false
+      "Db.Get().Personalities.TryGet(\"DATA\")": exists
+      "Db.Get().Personalities.TryGet(\"GEORDI\").Name": {contains: Geordi}
+      "Db.Get().Personalities.Count": "== original"
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

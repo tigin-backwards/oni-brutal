@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2588729110-no-empty-conveyors.yaml",
+ "mods": [
+  "2588729110"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "ice melting on a conveyor rail leaves the rail cell empty",
+ "updated": "2026-10-27",
+ "commit": "d39ef694",
+ "mod_dlls": {
+  "2588729110": {
+   "NoEmptyConveyors.dll": "8d316ad98e7812ba68e046c3d19686266ddf5af85724284868e054fab6b8e6c6"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-070541-7d2f8e16",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T07:22:52",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-084405-285e8af9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T08:45:54",
+    "lane": 17,
+    "reference_run": "20261027-070541-7d2f8e16",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-084405-285e8af9",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T08:47:21",
+    "lane": 17,
+    "reference_run": "20261027-070541-7d2f8e16",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

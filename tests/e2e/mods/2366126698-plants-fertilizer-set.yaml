@@ -1,0 +1,19 @@
+# 植物施肥(Plants Fertilizer Set) (2366126698), class P; its own JSON config.
+#
+# What it does: prefixes on EntityTemplates.ExtendPlantToFertilizable and
+# ExtendPlantToIrrigated record every plant's fertilizer and irrigation into
+# mods/HuangConfigs/PlantFertilizer.josn on the first load, copy it to an editable
+# PlantFertilizer.config.josn on the second, and from then on apply the amounts written in
+# the editable file.
+# How a player reaches it: edit the config file the mod writes; restart the game.
+# What changes: what each plant needs, as configured.
+#
+# A first load writes the record of the game's values and leaves the plants as they are:
+# Sleet Wheat still asks for the game's fertilizer.
+from: early-base
+mods: [2366126698]
+steps:
+  - expect_state:
+      "file:mods/HuangConfigs/PlantFertilizer.josn": [exists, {contains: ColdWheat}]
+      "Assets.GetPrefab(\"ColdWheat\").GetComponent<StateMachineController>.cmpdef.defs[2].consumedElements[0].massConsumptionRate": [">= 0.0083", "<= 0.0084"]
+  - run: {seconds: 5}

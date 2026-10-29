@@ -1,0 +1,18 @@
+# 石油油井, Oil Well (2897349471), class P.
+#
+# What it does: postfixes on OilWellCapConfig make the Oil Well take 1.2 kg/s of water and
+# put out 3.33 kg/s of petroleum (the game's crude oil) at 75 °C, its gas at 75 °C, and draw
+# 480 W.
+# How a player reaches it: build an Oil Well on an oil reservoir.
+# What changes: oil wells pump petroleum.
+#
+# The Oil Well's prefab holds the changed recipe and power.
+from: early-base
+mods: [2897349471]
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"OilWellCap\").GetComponent<ElementConverter>.outputElements[0].elementHash": "== 'Petroleum'"
+      "Assets.GetPrefab(\"OilWellCap\").GetComponent<ElementConverter>.consumedElements[0].Tag.Name": Water
+      "Assets.GetPrefab(\"OilWellCap\").GetComponent<OilWellCap>.gasTemperature": 348.15
+      "Assets.GetBuildingDef(\"OilWellCap\").EnergyConsumptionWhenActive": 480
+  - run: {seconds: 2}

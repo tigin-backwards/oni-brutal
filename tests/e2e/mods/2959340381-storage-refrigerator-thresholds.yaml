@@ -1,0 +1,29 @@
+# Storage Refrigerator Thresholds (2959340381), classes S, U; PLib side screen.
+#
+# What it does: the Smart Storage Bin and the Refrigerator get a low and a high threshold for
+# their automation output (a StorageThresholds activation range: green from the high threshold
+# until the storage drops below the low one), and a PLib side screen with a checkbox "Send
+# Green Signal When Low" that inverts it; the logic port's descriptions follow.
+# How a player reaches it: select a Smart Storage Bin or a Refrigerator.
+# What changes: storages switch automation with hysteresis.
+#
+# setup builds a Smart Storage Bin in the corridor west of the printing pod and selects it:
+# its side screen shows the checkbox, and clicking it makes the bin send green when low.
+from: early-base
+mods: [2959340381]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"StorageLockerSmart\")", method: Build, args: [131764, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "all:StorageLockerSmart::[0].GetComponent<KSelectable>"}]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {StorageLockerSmart: 1}}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/ThresholdsSideScreen", cond: stable}
+  - expect_ui:
+      "**/ThresholdsSideScreen/MainPanel/checkbox/AlignmentWrapper/Text": {text: "Send Green Signal When Low"}
+  - expect_state:
+      "selected:GetComponent<StorageRefrigeratorThresholds.StorageThresholds>.SendGreenOnLow": false
+  - ui_dump: {name: thresholds, root: "**/DetailsScreen/SideScreen/**/ThresholdsSideScreen"}
+  - click: {ui: "**/ThresholdsSideScreen/MainPanel/checkbox/AlignmentWrapper/CheckBox"}
+  - expect_state:
+      "selected:GetComponent<StorageRefrigeratorThresholds.StorageThresholds>.SendGreenOnLow": true
+  - shot: {name: side-screen, crop: "**/DetailsScreen/SideScreen", threshold: 0.04}

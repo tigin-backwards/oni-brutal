@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3637756953-storage-tooltip.yaml",
+ "mods": [
+  "3637756953"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "hovering a Storage Bin, the hover card lists its sandstone and total",
+ "updated": "2026-10-27",
+ "commit": "e100c86e",
+ "mod_dlls": {
+  "3637756953": {
+   "StorageTooltipMod.dll": "0c8ad497cbbd006b7d795b42cce8ab6f675ebb17134d256dac7483477ade2a1a"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-074831-45ab7067",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T08:58:05",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-090819-f38336a7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:36:29",
+    "lane": 17,
+    "reference_run": "20261027-074831-45ab7067",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-090819-f38336a7",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T09:37:21",
+    "lane": 17,
+    "reference_run": "20261027-074831-45ab7067",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

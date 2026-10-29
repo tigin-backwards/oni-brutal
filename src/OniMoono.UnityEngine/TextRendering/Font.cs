@@ -12,6 +12,13 @@ namespace UnityEngine
             Bind(new FontNative());
         }
 
+        /// An empty font of that name, as Font() (Worldgen Designer passes a font file's path
+        /// and falls back to an OS font when it has no 'A').
+        public Font(string name) : this()
+        {
+            this.name = name;
+        }
+
         FontNative Data => (FontNative)NativeOrThrow;
 
         internal override void EngineOnDestroy() => Data.ReleaseFaces();

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3244175954-high-temperature-cooking.yaml",
+ "mods": [
+  "3244175954"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a mushroom heated to 90 °C turns into a Fried Mushroom, the selection following it",
+ "updated": "2026-10-27",
+ "commit": "d39ef694",
+ "mod_dlls": {
+  "3244175954": {
+   "HighTemperatureCooking.dll": "9bd4641a0361d1e995b0eb643138d90d57ff033f8aa49c910caffca8604c5340"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-070541-7d2f8e16",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T08:22:11",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-084405-285e8af9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:04:12",
+    "lane": 17,
+    "reference_run": "20261027-070541-7d2f8e16",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-084405-285e8af9",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T09:05:03",
+    "lane": 17,
+    "reference_run": "20261027-070541-7d2f8e16",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

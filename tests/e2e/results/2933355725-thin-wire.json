@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2933355725-thin-wire.yaml",
+ "mods": [
+  "2933355725"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Power menu shot lists the thin wire; built and selected, it is a 1 kW wire",
+ "updated": "2026-10-27",
+ "commit": "a0585958",
+ "mod_dlls": {
+  "2933355725": {
+   "╧╕╡τ╧▀ Thin Wire.dll": "337f6a0bfc0ec2a6fb93a3b05616ae2500f726706d13840f562481e265c2cae1"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-074831-45ab7067",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:21:03",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-094212-b2312f58",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:52:29",
+    "lane": 17,
+    "reference_run": "20261027-074831-45ab7067",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "power-menu": 0.0
+    }
+   },
+   {
+    "run": "20261027-094212-b2312f58",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T09:53:23",
+    "lane": 17,
+    "reference_run": "20261027-074831-45ab7067",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "power-menu": 0.0
+    }
+   }
+  ]
+ }
+}

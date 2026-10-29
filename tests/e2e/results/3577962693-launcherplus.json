@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3577962693-launcherplus.yaml",
+ "mods": [
+  "3577962693"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a launcher's side screen gains the demand-only checkbox (dump); clicking it sets the mode",
+ "updated": "2026-10-27",
+ "commit": "8edec30d",
+ "mod_dlls": {
+  "3577962693": {
+   "LauncherPlus.dll": "c6ea2ba65d21a6c514ecaf987e75483d24765bea2d54026b24afc2cd76a9530f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-132745-bfd98f4e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T13:54:41",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-142041-80e4c84c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T14:44:01",
+    "lane": 16,
+    "reference_run": "20261027-132745-bfd98f4e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "side": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261027-142041-80e4c84c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T14:44:52",
+    "lane": 16,
+    "reference_run": "20261027-132745-bfd98f4e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "side": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

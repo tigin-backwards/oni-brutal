@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3674542335-auto-exit-neural-vacillators.yaml",
+ "mods": [
+  "3674542335"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Nikola, assigned to a Neural Vacillator, gets a trait and leaves without the button",
+ "updated": "2026-10-27",
+ "commit": "434c8f48",
+ "mod_dlls": {
+  "3674542335": {
+   "AutoGeneShuffler.dll": "44572b77bbfd917480d2a2b7ebc77a776bada8c9c899c5cdbd717ffdb40047be"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-092853-dabffb17",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T10:15:13",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-102849-d33d3487",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T10:30:27",
+    "lane": 17,
+    "reference_run": "20261027-092853-dabffb17",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-102849-d33d3487",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T10:33:50",
+    "lane": 17,
+    "reference_run": "20261027-092853-dabffb17",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,460 @@
+# Keyboard layouts (issue #24): which key codes a French (AZERTY) layout gives each physical
+# key. The lane's Xvfb gets the fr layout (setxkbmap); each step presses one key by its X
+# keycode (evdev numbering) and checks what E2eDriver's key log saw: the key codes
+# Input.GetKeyDown was true for, the key codes of IMGUI KeyDown events and the characters
+# typed, against the original's. The comment on each key is its US and its fr label.
+from: main-menu
+keyboard: fr
+setup:
+  - driver: {keys.log: {}}
+steps:
+  # 49: US grave, fr twosuperior
+  # Characters not compared: the original types none on a key without a key code, ours
+  # types the layout's (GLFW's character callback), as a French player expects.
+  - key: {keycode: 49}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: ""}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: ""}, "== original"]
+  - driver: {keys.log: {}}
+  # 10: US 1, fr &
+  - key: {keycode: 10}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "Alpha1"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "Alpha1"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "&"}, "== original"]
+  - driver: {keys.log: {}}
+  # 11: US 2, fr é
+  - key: {keycode: 11}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "Alpha2"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "Alpha2"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "é"}, "== original"]
+  - driver: {keys.log: {}}
+  # 12: US 3, fr "
+  - key: {keycode: 12}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "Alpha3"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "Alpha3"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "\""}, "== original"]
+  - driver: {keys.log: {}}
+  # 13: US 4, fr '
+  - key: {keycode: 13}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "Alpha4"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "Alpha4"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "'"}, "== original"]
+  - driver: {keys.log: {}}
+  # 14: US 5, fr (
+  - key: {keycode: 14}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "Alpha5"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "Alpha5"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "("}, "== original"]
+  - driver: {keys.log: {}}
+  # 15: US 6, fr -
+  - key: {keycode: 15}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "Alpha6"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "Alpha6"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "-"}, "== original"]
+  - driver: {keys.log: {}}
+  # 16: US 7, fr è
+  - key: {keycode: 16}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "Alpha7"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "Alpha7"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "è"}, "== original"]
+  - driver: {keys.log: {}}
+  # 17: US 8, fr _
+  - key: {keycode: 17}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "Alpha8"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "Alpha8"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "_"}, "== original"]
+  - driver: {keys.log: {}}
+  # 18: US 9, fr ç
+  - key: {keycode: 18}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "Alpha9"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "Alpha9"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "ç"}, "== original"]
+  - driver: {keys.log: {}}
+  # 19: US 0, fr à
+  - key: {keycode: 19}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "Alpha0"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "Alpha0"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "à"}, "== original"]
+  - driver: {keys.log: {}}
+  # 20: US minus, fr parenright
+  - key: {keycode: 20}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "RightParen"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "RightParen"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: ")"}, "== original"]
+  - driver: {keys.log: {}}
+  # 21: US equal, fr equal
+  - key: {keycode: 21}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "Equals"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "Equals"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "="}, "== original"]
+  - driver: {keys.log: {}}
+  # 24: US q, fr a
+  - key: {keycode: 24}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "A"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "A"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "a"}, "== original"]
+  - driver: {keys.log: {}}
+  # 25: US w, fr z
+  - key: {keycode: 25}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "Z"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "Z"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "z"}, "== original"]
+  - driver: {keys.log: {}}
+  # 26: US e, fr e
+  - key: {keycode: 26}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "E"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "E"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "e"}, "== original"]
+  - driver: {keys.log: {}}
+  # 27: US r, fr r
+  - key: {keycode: 27}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "R"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "R"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "r"}, "== original"]
+  - driver: {keys.log: {}}
+  # 28: US t, fr t
+  - key: {keycode: 28}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "T"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "T"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "t"}, "== original"]
+  - driver: {keys.log: {}}
+  # 29: US y, fr y
+  - key: {keycode: 29}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "Y"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "Y"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "y"}, "== original"]
+  - driver: {keys.log: {}}
+  # 30: US u, fr u
+  - key: {keycode: 30}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "U"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "U"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "u"}, "== original"]
+  - driver: {keys.log: {}}
+  # 31: US i, fr i
+  - key: {keycode: 31}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "I"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "I"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "i"}, "== original"]
+  - driver: {keys.log: {}}
+  # 32: US o, fr o
+  - key: {keycode: 32}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "O"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "O"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "o"}, "== original"]
+  - driver: {keys.log: {}}
+  # 33: US p, fr p
+  - key: {keycode: 33}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "P"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "P"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "p"}, "== original"]
+  - driver: {keys.log: {}}
+  # 34: US bracketleft, fr dead_circumflex
+  - key: {keycode: 34}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: ""}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: ""}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: ""}, "== original"]
+  - driver: {keys.log: {}}
+  # 35: US bracketright, fr dollar
+  # Characters not compared: after the dead ^ the original types $ as is, ours composes
+  # through the input method (^ and $ make nothing).
+  - key: {keycode: 35}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "Dollar"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "Dollar"}, "== original"]
+  - driver: {keys.log: {}}
+  # 38: US a, fr q
+  - key: {keycode: 38}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "Q"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "Q"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "q"}, "== original"]
+  - driver: {keys.log: {}}
+  # 39: US s, fr s
+  - key: {keycode: 39}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "S"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "S"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "s"}, "== original"]
+  - driver: {keys.log: {}}
+  # 40: US d, fr d
+  - key: {keycode: 40}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "D"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "D"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "d"}, "== original"]
+  - driver: {keys.log: {}}
+  # 41: US f, fr f
+  - key: {keycode: 41}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "F"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "F"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "f"}, "== original"]
+  - driver: {keys.log: {}}
+  # 42: US g, fr g
+  - key: {keycode: 42}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "G"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "G"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "g"}, "== original"]
+  - driver: {keys.log: {}}
+  # 43: US h, fr h
+  - key: {keycode: 43}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "H"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "H"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "h"}, "== original"]
+  - driver: {keys.log: {}}
+  # 44: US j, fr j
+  - key: {keycode: 44}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "J"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "J"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "j"}, "== original"]
+  - driver: {keys.log: {}}
+  # 45: US k, fr k
+  - key: {keycode: 45}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "K"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "K"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "k"}, "== original"]
+  - driver: {keys.log: {}}
+  # 46: US l, fr l
+  - key: {keycode: 46}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "L"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "L"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "l"}, "== original"]
+  - driver: {keys.log: {}}
+  # 47: US semicolon, fr m
+  - key: {keycode: 47}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "M"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "M"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "m"}, "== original"]
+  - driver: {keys.log: {}}
+  # 48: US apostrophe, fr ugrave
+  # Characters not compared: the original types none on a key without a key code, ours
+  # types the layout's (GLFW's character callback), as a French player expects.
+  - key: {keycode: 48}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: ""}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: ""}, "== original"]
+  - driver: {keys.log: {}}
+  # 51: US backslash, fr asterisk
+  - key: {keycode: 51}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "Asterisk"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "Asterisk"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "*"}, "== original"]
+  - driver: {keys.log: {}}
+  # 94: US less (LSGT), fr less
+  - key: {keycode: 94}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "Less"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "Less"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "<"}, "== original"]
+  - driver: {keys.log: {}}
+  # 52: US z, fr w
+  - key: {keycode: 52}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "W"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "W"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "w"}, "== original"]
+  - driver: {keys.log: {}}
+  # 53: US x, fr x
+  - key: {keycode: 53}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "X"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "X"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "x"}, "== original"]
+  - driver: {keys.log: {}}
+  # 54: US c, fr c
+  - key: {keycode: 54}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "C"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "C"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "c"}, "== original"]
+  - driver: {keys.log: {}}
+  # 55: US v, fr v
+  - key: {keycode: 55}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "V"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "V"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "v"}, "== original"]
+  - driver: {keys.log: {}}
+  # 56: US b, fr b
+  - key: {keycode: 56}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "B"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "B"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "b"}, "== original"]
+  - driver: {keys.log: {}}
+  # 57: US n, fr n
+  - key: {keycode: 57}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "N"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "N"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "n"}, "== original"]
+  - driver: {keys.log: {}}
+  # 58: US m, fr ,
+  - key: {keycode: 58}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "Comma"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "Comma"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: ","}, "== original"]
+  - driver: {keys.log: {}}
+  # 59: US comma, fr semicolon
+  - key: {keycode: 59}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "Semicolon"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "Semicolon"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: ";"}, "== original"]
+  - driver: {keys.log: {}}
+  # 60: US period, fr colon
+  - key: {keycode: 60}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "Colon"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "Colon"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: ":"}, "== original"]
+  - driver: {keys.log: {}}
+  # 61: US slash, fr exclam
+  - key: {keycode: 61}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "Exclaim"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "Exclaim"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "!"}, "== original"]
+  - driver: {keys.log: {}}
+  # 65: US space, fr space
+  - key: {keycode: 65}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "Space"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "Space"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: " "}, "== original"]
+  - driver: {keys.log: {}}
+  # 23: US Tab, fr Tab
+  - key: {keycode: 23}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "Tab"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "Tab"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "\t"}, "== original"]
+  - driver: {keys.log: {}}
+  # 36: US Return, fr Return
+  - key: {keycode: 36}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "Return"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "Return"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "\n"}, "== original"]
+  - driver: {keys.log: {}}
+  # 22: US BackSpace, fr BackSpace
+  - key: {keycode: 22}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "Backspace"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "Backspace"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: ""}, "== original"]
+  - driver: {keys.log: {}}
+  # 67: US F1, fr F1
+  - key: {keycode: 67}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "F1"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "F1"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: ""}, "== original"]
+  - driver: {keys.log: {}}
+  # 113: US Left, fr Left
+  - key: {keycode: 113}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "LeftArrow"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "LeftArrow"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: ""}, "== original"]
+  - driver: {keys.log: {}}
+  # 63: US KP_Multiply, fr KP_Multiply
+  - key: {keycode: 63}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "KeypadMultiply"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "KeypadMultiply"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "*"}, "== original"]
+  - driver: {keys.log: {}}
+  # Shift+10 (US 1)
+  - key: {keycode: 10, mods: [Shift]}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "LeftShift Alpha1"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "LeftShift Alpha1"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "1"}, "== original"]
+  - driver: {keys.log: {}}
+  # Shift+24 (US q)
+  - key: {keycode: 24, mods: [Shift]}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "LeftShift A"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "LeftShift A"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "A"}, "== original"]
+  - driver: {keys.log: {}}
+  # Shift+38 (US a)
+  - key: {keycode: 38, mods: [Shift]}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "LeftShift Q"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "LeftShift Q"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "Q"}, "== original"]
+  - driver: {keys.log: {}}
+  # Shift+47 (US semicolon)
+  - key: {keycode: 47, mods: [Shift]}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "LeftShift M"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "LeftShift M"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "M"}, "== original"]
+  - driver: {keys.log: {}}
+  # Shift+20 (US minus)
+  - key: {keycode: 20, mods: [Shift]}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "LeftShift RightParen"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "LeftShift RightParen"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "°"}, "== original"]
+  - driver: {keys.log: {}}
+  # The layout switched to us while the player runs: no mapping outlives a layout change.
+  - keyboard: us
+  - driver: {keys.log: {}}
+  - key: {keycode: 24}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "Q"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "Q"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "q"}, "== original"]
+  - driver: {keys.log: {}}
+  - key: {keycode: 38}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "A"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "A"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "a"}, "== original"]
+  - driver: {keys.log: {}}
+  - key: {keycode: 47}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "Semicolon"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "Semicolon"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: ";"}, "== original"]
+  - driver: {keys.log: {}}
+  - key: {keycode: 10}
+  - expect_state:
+      "type:E2eDriver.KeyLog::Down": [{equals: "Alpha1"}, "== original"]
+      "type:E2eDriver.KeyLog::Events": [{equals: "Alpha1"}, "== original"]
+      "type:E2eDriver.KeyLog::Chars": [{equals: "1"}, "== original"]
+  - driver: {keys.log: {}}

@@ -1,0 +1,38 @@
+# Gas Conduction Panel 气体导热板 (3005077708), class B.
+#
+# What it does: adds the Gas Conduction Panel (GasGContactConDuctivePipeBridge, 3x1), a gas
+# pipe bridge for the Utilities menu unlocked by Ventilation (HVAC): it buffers 10 kg of gas,
+# passes it on, and exchanges heat between the gas and itself, and with buildings it
+# overlaps, even in a vacuum.
+# How a player reaches it: research Ventilation; the Utilities menu.
+# What changes: a gas bridge that works as a heat exchanger.
+#
+# Ventilation is researched in setup and a panel built in the corridor west of the printing
+# pod. The Utilities menu offers it (its card); the built one exchanges heat with the
+# buildings it overlaps (a StructureToStructureTemperature).
+from: early-base
+mods: [3005077708]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"HVAC\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"GasGContactConDuctivePipeBridge\")", method: Build, args: [131765, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"HVAC\").unlockedItemIDs": {contains: GasGContactConDuctivePipeBridge}
+      "Assets.GetPrefab(\"GasGContactConDuctivePipeBridge\").GetComponent<Storage>.capacityKg": 10
+  - run: {seconds: 3}
+  - driver: {camera.set: {cell: [113, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Utilities"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/GasGContactConDuctivePipeBridge Group*", cond: stable}
+  - scroll: {at: "**/PlanBuildingSelectionPanel/BuildingGroups", notches: -10}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/GasGContactConDuctivePipeBridge Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/GasGContactConDuctivePipeBridge Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - key: {code: Escape}
+  - expect: {buildings: {GasGContactConDuctivePipeBridge: 1}}
+  - expect_state:
+      "count:all:KPrefabID::[*] if .PrefabTag.Name == GasGContactConDuctivePipeBridge": 1
+      "all:StructureToStructureTemperature::Length": ">= 1"

@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2928148711-landscape-lamp.yaml",
+ "mods": [
+  "2928148711"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a lamp built and selected gives 100 lux; the Furniture menu shot lists it",
+ "updated": "2026-10-27",
+ "commit": "d39ef694",
+ "mod_dlls": {
+  "2928148711": {
+   "╘∞╛░╡╞ Landscape lamp.dll": "eee23a662b06dc846b478846ad8b55263d76310cb69066831f3b6f7da3f6669a"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-070541-7d2f8e16",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T07:32:43",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-084405-285e8af9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T08:48:48",
+    "lane": 17,
+    "reference_run": "20261027-070541-7d2f8e16",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "furniture-menu": 0.0
+    }
+   },
+   {
+    "run": "20261027-084405-285e8af9",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T08:49:38",
+    "lane": 17,
+    "reference_run": "20261027-070541-7d2f8e16",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "furniture-menu": 0.0
+    }
+   }
+  ]
+ }
+}

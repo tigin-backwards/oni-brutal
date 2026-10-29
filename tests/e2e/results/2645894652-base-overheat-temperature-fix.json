@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2645894652-base-overheat-temperature-fix.yaml",
+ "mods": [
+  "2645894652"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the research station's overheat tooltip shows its base value as 75 °C",
+ "updated": "2026-10-27",
+ "commit": "8edec30d",
+ "mod_dlls": {
+  "2645894652": {
+   "BaseValueFix.dll": "ec4027d227ba8378501f02f07bf010e1b57c1b0f845ccca1722cf961b469b77a"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-131522-a47d65cb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T13:15:22",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-142041-80e4c84c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T14:20:41",
+    "lane": 16,
+    "reference_run": "20261027-131522-a47d65cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-142041-80e4c84c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T14:29:55",
+    "lane": 16,
+    "reference_run": "20261027-131522-a47d65cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

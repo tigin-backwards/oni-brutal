@@ -1,0 +1,79 @@
+{
+ "spec": "mods/3168592570-egg-seed-replicator.yaml",
+ "mods": [
+  "3168592570"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "the Utilities menu shot lists both copyers; a Seed Copyer built lists its seed recipes (dump)",
+ "updated": "2026-10-27",
+ "commit": "d39ef694",
+ "mod_dlls": {
+  "3168592570": {
+   "seedCopyer.dll": "d430c677a8e59b34fd8fe58c46deb59873cb73dc73d914f119b508daaab8ccc6"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-070541-7d2f8e16",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T08:11:08",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-084405-285e8af9",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-27T08:59:07",
+    "lane": 17,
+    "reference_run": "20261027-070541-7d2f8e16",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "utilities-menu": 0.0
+    }
+   },
+   {
+    "run": "20261027-084405-285e8af9",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-27T09:00:02",
+    "lane": 17,
+    "reference_run": "20261027-070541-7d2f8e16",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "utilities-menu": 0.0
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,36 @@
+# 自动奶茶机V2, Auto Milk Tea Machine (3137470934), class B.
+#
+# What it does: adds two 2x2 recreation machines to the Furniture menu, researched with Food
+# Repurposing: AutoMTMachine (red bean milk tea, from Nosh Beans) and AutoMTMachine2 (lily milk
+# tea, from Mealwood or Balm Lily), 240 W each. A Duplicant on break drinks a tea there, regains
+# stamina and gets a timed attribute bonus, as at the Espresso Machine.
+# How a player reaches it: the research screen, then the build menu (Furniture).
+# What changes: two more break-time machines.
+#
+# setup researches Food Repurposing and builds a red bean machine in the corridor west of the
+# printing pod. Both machines show in the Furniture menu; the one built, selected, holds its
+# workable.
+from: early-base
+mods: [3137470934]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"FoodRepurposing\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"AutoMTMachine\")", method: Build, args: [131762, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"FoodRepurposing\").unlockedItemIDs": [{contains: AutoMTMachine}, {contains: AutoMTMachine2}]
+      "Assets.GetBuildingDef(\"AutoMTMachine\").EnergyConsumptionWhenActive": 240
+  - run: {seconds: 5}
+  - expect: {buildings: {AutoMTMachine: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Furniture"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/AutoMTMachine2 Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/AutoMTMachine Group*": {active: true}
+      "**/BuildingGroups/**/Grid/AutoMTMachine2 Group*": {active: true}
+  - shot: {name: furniture-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [110, 208], ortho: 8}}
+  - click_world: {cell: [110, 207], select: AutoMTMachine}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<AutoMilkTea.AutoMTMachineWorkable>": exists

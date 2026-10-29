@@ -1,0 +1,26 @@
+# Swap Flow Colours (2006586451), class P; PLib options.
+#
+# What it does: a postfix on BuildingCellVisualizerResources.Initialize swaps the colours of
+# liquid and gas input and output ports, so inputs show the base game's output colour and
+# outputs its input colour; with the option Red/Blue, inputs are blue and outputs red.
+# How a player reaches it: the plumbing and ventilation overlays, a building's ports.
+# What changes: port icons' colours.
+#
+# With the default options, the liquid and gas input colours are the base game's output
+# colour (green, 107/211/132), the outputs its input colour (white). An Electrolyzer built by setup in the
+# corridor west of the printing pod shows its ports in the plumbing overlay.
+from: early-base
+mods: [2006586451]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Electrolyzer\")", method: Build, args: [131765, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "BuildingCellVisualizerResources.Instance().liquidIOColours.input.connected.r": 107
+      "BuildingCellVisualizerResources.Instance().liquidIOColours.input.connected.g": 211
+      "BuildingCellVisualizerResources.Instance().liquidIOColours.output.connected.r": 255
+      "BuildingCellVisualizerResources.Instance().gasIOColours.input.connected.b": 132
+      "BuildingCellVisualizerResources.Instance().gasIOColours.output.connected.g": 255
+  - run: {seconds: 2}
+  - key: {code: F6}
+  - run: {seconds: 1}
+  - world_shot: {name: plumbing, ortho: 6, at: [113, 208]}

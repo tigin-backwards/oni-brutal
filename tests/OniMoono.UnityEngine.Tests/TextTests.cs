@@ -381,6 +381,15 @@ namespace OniMoono.Tests
         }
 
         [Fact]
+        public void FontNamedIsEmpty()
+        {
+            var font = new Font("fonts/NotoSansUI-Regular.ttf");
+            Assert.Equal("fonts/NotoSansUI-Regular.ttf", font.name);
+            Assert.False(font.HasCharacter('A'));
+            Assert.False(font.dynamic);
+        }
+
+        [Fact]
         public void TextGeneratorDropsOverridesOnNonDynamicFonts()
         {
             var font = new Font();

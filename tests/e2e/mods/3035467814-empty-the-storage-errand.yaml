@@ -1,0 +1,26 @@
+# Empty The Storage (Errand) (3035467814), class P.
+#
+# What it does: a postfix on Storage.OnPrefabInit gives every storage building that has no
+# way to empty itself (not a cargo bay, Dumpable or DropAllWorkable already) a
+# DropAllWorkable: an "Empty Storage" button in its user menu that makes a Duplicant with the
+# groundskeeping strength perk empty it; a prefix on DropAll scales the work time with the
+# mass stored (1 s per 100 kg).
+# How a player reaches it: select a storage, such as a Ration Box, and press Empty Storage.
+# What changes: any storage can be emptied by an errand.
+#
+# The base's Ration Box is selected; its user menu has the new button (dumped), which queues
+# the emptying errand when pressed.
+from: early-base
+mods: [3035467814]
+steps:
+  - expect_state:
+      "all:RationBox::[0].GetComponent<DropAllWorkable>": exists
+      "all:RationBox::[0].GetComponent<DropAllWorkable>.Chore": missing
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [121, 208], ortho: 8}}
+  - click_world: {cell: [121, 207], select: RationBox}
+  - ui_wait: {path: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons", cond: stable}
+  - ui_dump: {name: user-menu, root: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons"}
+  - click: {text: "Empty Storage", under: "**/UserMenuScreen"}
+  - expect_state:
+      "all:RationBox::[0].GetComponent<DropAllWorkable>.Chore": exists

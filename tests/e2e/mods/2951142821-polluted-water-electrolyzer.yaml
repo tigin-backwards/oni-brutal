@@ -1,0 +1,31 @@
+# Polluted Water Electrolyzer (2951142821), class P.
+#
+# What it does: water and polluted water get a new tag, ElectrolyzableLiquid; the
+# Electrolyzer's pipe input asks for that tag and gains a second converter that turns 1 kg/s
+# of polluted water into polluted oxygen (888 g/s) and hydrogen (112 g/s); its state machine
+# runs while either converter can.
+# How a player reaches it: pipe polluted water into an Electrolyzer.
+# What changes: electrolyzers make polluted oxygen from polluted water.
+#
+# setup builds an Electrolyzer in the corridor west of the printing pod; selected, it has
+# both converters, the second making polluted oxygen.
+from: early-base
+mods: [2951142821]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Electrolyzer\")", method: Build, args: [131765, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "ElementLoader.FindElementByName(\"DirtyWater\").oreTags": {contains: ElectrolyzableLiquid}
+      "ElementLoader.FindElementByName(\"Water\").oreTags": {contains: ElectrolyzableLiquid}
+      "Assets.GetPrefab(\"Electrolyzer\").GetComponent<ConduitConsumer>.capacityTag.Name": ElectrolyzableLiquid
+      "Assets.GetPrefab(\"Electrolyzer\").GetComponents<ElementConverter>().Length": 2
+  - run: {seconds: 2}
+  - expect: {buildings: {Electrolyzer: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: Electrolyzer}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponents<ElementConverter>()[1].outputElements[0].elementHash": "== 'ContaminatedOxygen'"
+      "selected:GetComponents<ElementConverter>()[1].consumedElements[0].Tag.Name": DirtyWater
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Electrolyzer"}

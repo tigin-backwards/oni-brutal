@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3761372593-hydrogenerator.yaml",
+ "mods": [
+  "3761372593"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "research of its two techs and the Power menu shot; a water geyser gets the generator socket, a steam vent none",
+ "updated": "2026-10-27",
+ "commit": "b8e90d44",
+ "mod_dlls": {
+  "3761372593": {
+   "HydroGenerator.dll": "9a5cc0495ca336c2ddfc7a0aa47d033a820fb3c48d30b8c547adc1ca9611f524"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-054228-6d816ef2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T05:42:28",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-070541-c1e82ff0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T07:05:41",
+    "lane": 16,
+    "reference_run": "20261027-054228-6d816ef2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "power-menu": 0.0
+    }
+   },
+   {
+    "run": "20261027-070541-c1e82ff0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T07:06:35",
+    "lane": 16,
+    "reference_run": "20261027-054228-6d816ef2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "power-menu": 0.0
+    }
+   }
+  ]
+ }
+}

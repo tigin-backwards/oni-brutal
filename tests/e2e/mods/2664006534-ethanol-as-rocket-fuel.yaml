@@ -1,0 +1,24 @@
+# [DLC] Ethanol as Rocket Fuel (2664006534), class P.
+#
+# What it does: postfixes on the two Petroleum Engine configs (KeroseneEngineCluster and its
+# small sibling) make them burn any combustible liquid (the CombustibleLiquid tag, ethanol
+# included) instead of petroleum, and give them new module stats.
+# How a player reaches it: a rocket's Petroleum Engine fuelled with ethanol.
+# What changes: ethanol flies rockets.
+#
+# The engines' prefabs take combustible liquid; setup builds a small petroleum engine module
+# in the corridor west of the printing pod, and the built module asks for combustible liquid.
+from: early-base
+mods: [2664006534]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"KeroseneEngineClusterSmall\")", method: Build, args: [131764, Neutral, null, [Steel], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"KeroseneEngineCluster\").GetComponent<RocketEngineCluster>.fuelTag.Name": CombustibleLiquid
+      "Assets.GetPrefab(\"KeroseneEngineClusterSmall\").GetComponent<RocketEngineCluster>.fuelTag.Name": CombustibleLiquid
+      "Assets.GetPrefab(\"KeroseneEngineClusterSmall\").GetComponent<FuelTank>.FuelType.Name": CombustibleLiquid
+  - run: {seconds: 2}
+  - expect: {buildings: {KeroseneEngineClusterSmall: 1}}
+  - expect_state:
+      "all:RocketEngineCluster::[0].fuelTag.Name": CombustibleLiquid
+      "all:RocketEngineCluster::[0].GetComponent<FuelTank>.FuelType.Name": CombustibleLiquid

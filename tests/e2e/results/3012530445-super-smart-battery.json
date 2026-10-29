@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3012530445-super-smart-battery.yaml",
+ "mods": [
+  "3012530445"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Smart Battery built and selected holds 8 GJ and leaks 4 J/s",
+ "updated": "2026-10-27",
+ "commit": "6d4545b9",
+ "mod_dlls": {
+  "3012530445": {
+   "SuperSmartBettery.dll": "24e9586666ca6125b5475be96114db992b5b479f30ab132fae9ec7caba208232"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-122300-34502628",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T12:23:00",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-130634-0528365b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T13:06:34",
+    "lane": 16,
+    "reference_run": "20261027-122300-34502628",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-130634-0528365b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T13:14:18",
+    "lane": 16,
+    "reference_run": "20261027-122300-34502628",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

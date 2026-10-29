@@ -1,0 +1,39 @@
+# 喷泉改造 / Geyser Conversion (3777868198), classes S, U; its own JSON config.
+#
+# What it does: an analysed geyser, tidal spring or (Aquatic) thermal vent gets two user-menu
+# buttons, conversion and relocation. Conversion opens a side screen (a few-option list of the
+# geyser types whose element is discovered, each with its steel cost, and a start button);
+# once High-Temperature Forging is researched, Duplicants deliver the steel (100 kg for a
+# reroll of the same type, 400 to 1200 kg across shapes and kinds, config.json) and work it
+# for 30 s; a reroll never gives a worse output. Relocation moves a geyser within or between
+# worlds. With the debug instant build mode on, conversion is immediate and free. The mod's
+# texts are Chinese.
+# How a player reaches it: select an analysed geyser, then its conversion button.
+# What changes: a player can change and move geysers.
+#
+# setup places a cool steam vent in the dug-out corridor west of the printing pod and
+# completes its analysis. Selected, it has the conversion and relocation buttons; the first
+# opens the side screen with its target list (Carbon Dioxide Vent among them, 400 kg of steel)
+# and its start button.
+from: early-base
+mods: [3777868198]
+setup:
+  - driver: {seed: 12345}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(0, 112, 206, \"GeyserGeneric_steam\", \"BuildingBack\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "all:Geyser::[0].GetComponent<Studyable>", method: OnCompleteWork, args: [null]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"GeyserGeneric_steam\").GetComponent<FunnyONI.GeyserConversionStandalone.GeyserConversionController>": exists
+      "all:Geyser::[0].GetComponent<Studyable>.Studied": true
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: GeyserGeneric_steam}
+  - ui_wait: {path: "**/UserMenuScreen/Buttons", cond: stable}
+  - expect_ui:
+      "**/UserMenuScreen/Buttons/迁移喷泉Button": {active: true}
+  - click: {ui: "**/UserMenuScreen/Buttons/喷泉改造Button"}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/FewOptionSelectionSideScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/SideScreen/**/ButtonMenuSideScreen/**": {any_text: "开始喷泉改造"}
+      "**/FewOptionSelectionSideScreen/**/RowPrefab/AssignmentText": {any_text: "~Carbon Dioxide Vent · 400 kg Steel"}
+  - ui_dump: {name: targets, root: "**/DetailsScreen/SideScreen/**/FewOptionSelectionSideScreen"}
+  - shot: {name: side-screen, crop: "**/DetailsScreen/SideScreen", threshold: 0.04}

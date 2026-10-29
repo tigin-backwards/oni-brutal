@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3137470934-auto-milk-tea-machine.yaml",
+ "mods": [
+  "3137470934"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Food Repurposing researched, the Furniture menu shot lists both machines; one built has its workable",
+ "updated": "2026-10-27",
+ "commit": "d39ef694",
+ "mod_dlls": {
+  "3137470934": {
+   "AutoMilkTea.dll": "70838c956c4d23fce2cccd7d74de7a517a90ebd3516a276d1fefd6db0089b42c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-070541-7d2f8e16",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T08:03:55",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-084405-285e8af9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T08:57:16",
+    "lane": 17,
+    "reference_run": "20261027-070541-7d2f8e16",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "furniture-menu": 0.0
+    }
+   },
+   {
+    "run": "20261027-084405-285e8af9",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T08:58:12",
+    "lane": 17,
+    "reference_run": "20261027-070541-7d2f8e16",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "furniture-menu": 0.0
+    }
+   }
+  ]
+ }
+}

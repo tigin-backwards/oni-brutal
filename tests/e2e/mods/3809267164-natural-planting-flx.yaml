@@ -1,0 +1,41 @@
+# Natural-Planting-Flx 自然种植土块 (3809267164), class B; PLib options
+# (BuildableDirtTileOptions.json).
+#
+# What it does: adds the Natural Planting Tile (BuildableDirtTile, Utilities, no research),
+# a tile built of dirt. Once built it turns into a natural dirt cell of DirtMass kg (option)
+# and, after the dirt appears, spawns a wild plant of the chosen kind above it (or below for
+# hanging plants; options: any plant, mutants with radiation in Spaced Out); its card text
+# describes the current setting.
+# How a player reaches it: the Utilities menu; the mod's options pick the plant.
+# What changes: wild plants on buildable natural tiles.
+#
+# The options pick a Mealwood on 100 kg of dirt. setup drops 300 kg of dirt in the corridor
+# west of the printing pod; a tile is ordered there, the Duplicants build it, and the cell
+# becomes dirt with a wild Mealwood above.
+from: early-base
+mods: [3809267164]
+options:
+  "3809267164": {$file: BuildableDirtTileOptions.json, SelectedPlant: 3, DirtMass: 100}
+setup:
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Dirt\").substance", method: SpawnResource, args: [[118.5, 207.5, -12], 300, 293, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"BuildableDirtTile\").Mass[0]": 100
+      "Assets.GetBuildingDef(\"BuildableDirtTile\").MaterialCategory": {contains: Dirt}
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [114, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Utilities"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/BuildableDirtTile Group*", cond: stable}
+  - scroll: {at: "**/PlanBuildingSelectionPanel/BuildingGroups", notches: -10}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/BuildableDirtTile Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/BuildableDirtTile Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - click_world: {cell: [114, 207]}
+  - key: {code: Escape}
+  - expect: {blueprints: {BuildableDirtTile: 1}}
+  - run: {seconds: 900, until: {pending_construction: 0}}
+  - run: {seconds: 5}
+  - expect_state:
+      "Grid.Element[131766].id": "== 'Dirt'"
+      "count:all:KPrefabID::[*] if .PrefabTag.Name == BasicSingleHarvestPlant": ">= 1"

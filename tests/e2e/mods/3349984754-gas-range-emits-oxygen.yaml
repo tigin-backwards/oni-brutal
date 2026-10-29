@@ -1,0 +1,25 @@
+# 燃气灶排放氧气, Gas Range emits oxygen (3349984754), class P.
+#
+# What it does: a transpiler on GourmetCookingStationConfig.ConfigureBuildingTemplate swaps
+# the element of the Gas Range's first output, carbon dioxide, for oxygen.
+# How a player reaches it: build a Gas Range and cook on it.
+# What changes: the Gas Range breathes out oxygen instead of carbon dioxide.
+#
+# The Gas Range's converter puts out oxygen; setup builds one in the corridor west of the
+# printing pod, and selected its converter does too.
+from: early-base
+mods: [3349984754]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"GourmetCookingStation\")", method: Build, args: [131765, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"GourmetCookingStation\").GetComponent<ElementConverter>.outputElements[0].elementHash": "== 'Oxygen'"
+  - run: {seconds: 2}
+  - expect: {buildings: {GourmetCookingStation: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: GourmetCookingStation}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<ElementConverter>.outputElements[0].elementHash": "== 'Oxygen'"
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Gas Range"}

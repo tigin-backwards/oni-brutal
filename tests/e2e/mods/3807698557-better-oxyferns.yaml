@@ -1,0 +1,29 @@
+# Better Oxyferns (3807698557), class P.
+#
+# What it does: a postfix on OxyfernConfig.CreatePrefab gives the Oxyfern +25 decor in a
+# radius of 4, oxygen as a safe atmosphere (no wilt-flicker when its CO2 thins out) and an
+# OxyfernSpores component: a wild fern rustled by a Pip releases spores that grow into new
+# wild ferns nearby. Patches on DecorProvider cap overlapping wild ferns' decor.
+# How a player reaches it: wild Oxyferns in a base, and Pips.
+# What changes: ferns spread and decorate.
+#
+# setup grows a wild Oxyfern on the floor of the room east of the printing pod; selected,
+# it carries the spores component and gives 25 decor.
+from: early-base
+mods: [3807698557]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131786, 0, 0, \"Oxyfern\", \"BuildingFront\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"Oxyfern\").GetComponent<OxyfernSporelings.OxyfernSpores>": exists
+      "Assets.GetPrefab(\"Oxyfern\").GetComponent<DecorProvider>.baseDecor": 25
+      "Assets.GetPrefab(\"Oxyfern\").GetComponent<DecorProvider>.baseRadius": 4
+  - run: {seconds: 3}
+  - driver: {camera.set: {cell: [134, 208], ortho: 8}}
+  - click_world: {cell: [134, 207], select: Oxyfern}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<OxyfernSporelings.OxyfernSpores>": exists
+      "selected:GetComponent<DecorProvider>.baseDecor": 25
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Oxyfern"}

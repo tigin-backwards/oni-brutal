@@ -1,0 +1,32 @@
+# Ultra Coolant (2938461528), class E (elements).
+#
+# What it does: adds three elements from its elements/UltraCoolant.yaml, Ultra Coolant
+# (liquid, specific heat 125, conductivity 50, from 40 K to 2073 K), Solid Ultra Coolant and
+# Ultra Coolant Gas, with their substances, strings and sim hashes registered in a patch on
+# Assets.SubstanceListHookup (an upgraded Super Coolant).
+# How a player reaches it: its recipe or a sandbox; it flows in pipes like any liquid.
+# What changes: a coolant that holds more heat.
+#
+# The three elements are loaded with their properties; setup drops a bottle of Ultra Coolant
+# in the corridor west of the printing pod and selects it (debris lies there): it shows its
+# name.
+from: early-base
+mods: [2938461528]
+setup:
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"UltraCoolant\").substance", method: SpawnResource, args: [[112.5, 207.5, -12], 100, 300, 255, 0]}}
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "last:GetComponent<KSelectable>"}]}}
+steps:
+  - expect_state:
+      "ElementLoader.FindElementByName(\"UltraCoolant\").specificHeatCapacity": 125
+      "ElementLoader.FindElementByName(\"UltraCoolant\").thermalConductivity": 50
+      "ElementLoader.FindElementByName(\"UltraCoolant\").IsLiquid": true
+      "ElementLoader.FindElementByName(\"SolidUltraCoolant\").IsSolid": true
+      "ElementLoader.FindElementByName(\"UltraCoolantGas\").IsGas": true
+      "ElementLoader.FindElementByName(\"UltraCoolant\").lowTempTransitionTarget": "== 'SolidUltraCoolant'"
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Ultra Coolant"}
+  - run: {seconds: 3}
+  - expect_state:
+      "sum:all:Pickupable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.Element.tag.Name == UltraCoolant": 100

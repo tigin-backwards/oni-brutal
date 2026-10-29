@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2830365640-crematorium-v2-0.yaml",
+ "mods": [
+  "2830365640"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Tasteful Memorial's storage change throws out 7 kg of Cooked Meat",
+ "updated": "2026-10-27",
+ "commit": "b8e90d44",
+ "mod_dlls": {
+  "2830365640": {
+   "huozangv2.0.dll": "6f3121b1da6d58504bf18fb9eab68b527b805a289e56b1ac2a0c729c877e5f01"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-063313-07ba5b84",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T06:52:37",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-070541-c1e82ff0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T07:37:50",
+    "lane": 16,
+    "reference_run": "20261027-063313-07ba5b84",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-070541-c1e82ff0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T07:38:40",
+    "lane": 16,
+    "reference_run": "20261027-063313-07ba5b84",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

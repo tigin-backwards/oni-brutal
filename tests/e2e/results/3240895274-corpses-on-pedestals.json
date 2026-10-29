@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3240895274-corpses-on-pedestals.yaml",
+ "mods": [
+  "3240895274"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Duplicants and rovers are pedestal-displayable; a Pedestal's side screen (dump)",
+ "updated": "2026-10-27",
+ "commit": "d39ef694",
+ "mod_dlls": {
+  "3240895274": {
+   "CorpseOnPedestal.dll": "2c8fb5576cfc028156fba37941c7af147001519562b4446c52337af5aa547fb2"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-070541-7d2f8e16",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T08:18:41",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-084405-285e8af9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T09:02:36",
+    "lane": 17,
+    "reference_run": "20261027-070541-7d2f8e16",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "side-screen": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261027-084405-285e8af9",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T09:03:23",
+    "lane": 17,
+    "reference_run": "20261027-070541-7d2f8e16",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "side-screen": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

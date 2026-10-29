@@ -20,6 +20,10 @@ namespace OniMoono.Engine.Assets
         public static IReadOnlyList<string> BuildScenes { get; private set; } = Array.Empty<string>();
         public static IReadOnlyList<ResourceEntry> ResourceContainer { get; private set; } = Array.Empty<ResourceEntry>();
         public static IReadOnlyList<InputAxis> InputAxes { get; private set; } = Array.Empty<InputAxis>();
+        /// The Input Manager's "Use Physical Keys" (m_UsePhysicalKeys): KeyCodes name key positions
+        /// (a US layout's) when set, the active layout's keys when not. This game's builds (Linux
+        /// and Windows, U57) have it off. True until the settings are loaded.
+        public static bool UsePhysicalKeys { get; private set; } = true;
         public static Fields PlayerSettings { get; private set; }
         public static Fields QualitySettings { get; private set; }
         public static Fields GraphicsSettings { get; private set; }
@@ -47,7 +51,9 @@ namespace OniMoono.Engine.Assets
             ResourceContainer = Read("ResourceManager").Array("m_Container").Cast<Fields>()
                 .Select(p => new ResourceEntry(p.String("first"), p.PPtr("second"))).ToArray();
 
-            InputAxes = Read("InputManager").Array("m_Axes").Cast<Fields>().Select(a => new InputAxis(
+            var inputManager = Read("InputManager");
+            UsePhysicalKeys = inputManager.Bool("m_UsePhysicalKeys");
+            InputAxes = inputManager.Array("m_Axes").Cast<Fields>().Select(a => new InputAxis(
                 a.String("m_Name"), a.String("negativeButton"), a.String("positiveButton"), a.String("altNegativeButton"), a.String("altPositiveButton"),
                 a.Float("gravity"), a.Float("dead"), a.Float("sensitivity"), a.Bool("snap"), a.Bool("invert"), a.Int("type"), a.Int("axis"), a.Int("joyNum"))).ToArray();
 

@@ -1,0 +1,29 @@
+# Auto Refinery (3736804781), class P; PLib options.
+#
+# What it does: postfixes on eleven buildings' ConfigureBuildingTemplate (Rock Granulator,
+# Metal Refinery, Glass Forge, Molecular Forge, Diamond Press, Sludge Press, Oil Refinery,
+# Milk Press, Microbe Musher, Electric Grill, Gas Range) clear BuildingComplete's
+# isManuallyOperated and ComplexFabricator's duplicantOperated, each behind an option (all on
+# in its shipped config.json), so those buildings work without a Duplicant at them; a
+# coroutine started with the game fixes existing Oil Refineries every 5 s.
+# How a player reaches it: build one of them and queue a recipe.
+# What changes: Duplicants only deliver materials; the machines run by themselves.
+#
+# The prefabs of three of them are not Duplicant-operated. setup builds a Microbe Musher in
+# the corridor west of the printing pod; selected, it is not Duplicant-operated either.
+from: early-base
+mods: [3736804781]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"MicrobeMusher\")", method: Build, args: [131762, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"RockCrusher\").GetComponent<ComplexFabricator>.duplicantOperated": false
+      "Assets.GetPrefab(\"MetalRefinery\").GetComponent<ComplexFabricator>.duplicantOperated": false
+      "Assets.GetPrefab(\"MicrobeMusher\").GetComponent<BuildingComplete>.isManuallyOperated": false
+  - run: {seconds: 2}
+  - expect: {buildings: {MicrobeMusher: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [110, 208], select: MicrobeMusher}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<ComplexFabricator>.duplicantOperated": false

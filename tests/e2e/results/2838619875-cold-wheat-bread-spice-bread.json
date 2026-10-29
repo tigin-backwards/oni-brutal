@@ -1,0 +1,75 @@
+{
+ "spec": "mods/2838619875-cold-wheat-bread-spice-bread.yaml",
+ "mods": [
+  "2838619875"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "a Gas Range selected lists the Pepper Bread and Barbeque recipes (dump)",
+ "updated": "2026-10-27",
+ "commit": "6d4545b9",
+ "mod_dlls": {
+  "2838619875": {
+   "mianbao.dll": "a615c644cfff5264a8a91d3ea0edcd003ad0de5cbbdaf98b0c850c9f93954fc6"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-122300-34502628",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T12:52:55",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-130634-0528365b",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-27T13:22:31",
+    "lane": 16,
+    "reference_run": "20261027-122300-34502628",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261027-130634-0528365b",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-27T13:23:21",
+    "lane": 16,
+    "reference_run": "20261027-122300-34502628",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

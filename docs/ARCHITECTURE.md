@@ -975,6 +975,21 @@ game or mod code can notice. Each says how it is resolved, or why it is kept.
   `--check-types` loads a strong-named copy, another version beside it, references to both
   versions and to a third, a mod's `Assembly.LoadFrom` of another version, and a reference to a
   missing assembly, and checks the AssemblyResolve events.
+- **D46 NativeArray ranges.** Measured in the original player with UnityProbe's range probe
+  (`NativeRanges.cs`): nothing on `NativeArray` checks a range or throws for one. The indexer
+  reads and writes the memory before or past the array; `GetSubArray` gives views before or
+  past it (a negative length gives a negative `Length`); the two-array `Copy`, `CopyFrom` and
+  `CopyTo` copy the source's length whatever the destination's, past a managed array's end
+  too, and the five-argument `Copy` the length given, before or past either array. A negative
+  length writes garbage over a NativeArray and crashed the player into a managed array. The
+  game's `RangeVisualizerEffect.OnPostRender` writes past an occlusion texture's
+  `GetPixelData` array when a range outgrows the texture (Zoned Auto Sweeper's zone mode), and
+  the original carries on. **Kept safe, without exceptions:** an out-of-range write is dropped
+  and a read gives `default(T)`; the copies copy only the part within both arrays (nothing for
+  a negative length); `GetSubArray` past the end is cut to the array, and one with a negative
+  start or length is empty. The first one in a process is logged with its stack. An array that
+  is not created or is disposed still throws. In-range access costs what it did (the same
+  compare).
 
 ## 3. The engine API (`OniMoono.UnityEngine`)
 
@@ -1035,7 +1050,11 @@ citing why.
     component's first update callback, at the next Start pass or that callback, whichever
     comes first (§3.3). Activation and deactivation
     recurse in Unity's order (Awake/OnEnable for the whole subtree, parent first; OnDisable
-    children-first when deactivating).
+    children-first when deactivating). Deactivation, and the same step of a destruction, walks
+    the subtree: an object's `activeInHierarchy` turns false when the walk reaches it, then its
+    children are walked, then its own `OnDisable`s run. While one object's `OnDisable` runs, its
+    later siblings still read active, and deactivating one of them disables it there and then
+    (UnityProbe's deactorder; the details panel's storage rows, issue #23).
   - `Destroy` is deferred to the end of the frame; `DestroyImmediate` is synchronous,
     children first, with `OnDisable` then `OnDestroy`. The GameObject passed to either turns
     inactive itself (`activeSelf` false) before its subtree's callbacks, its descendants keeping
@@ -1325,7 +1344,8 @@ merging is an optimisation we may add only where it cannot change the result).
 
 `OniMoono.Platform` wraps `Brutal.Glfw`: one window with a GL 4.5 core context, vsync,
 resize, fullscreen/windowed modes (`Screen.*`), monitors/resolutions, DPI, keyboard
-(GLFW key → Unity `KeyCode`), text input (UTF-32 via our own char-callback handling where
+(GLFW key → Unity `KeyCode`; character keys through the active layout, as the game's Input
+Manager has "Use Physical Keys" off: `KeyboardLayout`, measured on AZERTY), text input (UTF-32 via our own char-callback handling where
 BRUTAL's 16-bit truncation would corrupt input), mouse buttons/position (bottom-left origin)
 and scroll, hardware cursors from `Texture2D`, clipboard, focus events. Legacy Input Manager
 axes/buttons come from `globalgamemanagers` `InputManager` settings, with Unity's gravity /

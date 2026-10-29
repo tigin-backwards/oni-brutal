@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3163125334-show-liquid-on-airflow-tiles.yaml",
+ "mods": [
+  "3163125334"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "water poured beside an Airflow Tile makes it replace its element; world shot",
+ "updated": "2026-10-27",
+ "commit": "7a927b44",
+ "mod_dlls": {
+  "3163125334": {
+   "ShowLiquidOnAirflowTiles.dll": "3c0f0aff039c718b17a46e6486f83ec24574a84d50e77cc124655a3a3fc0b718"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-111432-ae629e14",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T11:14:32",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-114144-61e46230",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T11:59:44",
+    "lane": 17,
+    "reference_run": "20261027-111432-ae629e14",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "tile": 0.027858
+    }
+   },
+   {
+    "run": "20261027-114144-61e46230",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T12:00:41",
+    "lane": 17,
+    "reference_run": "20261027-111432-ae629e14",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "tile": 0.01782
+    }
+   }
+  ]
+ }
+}

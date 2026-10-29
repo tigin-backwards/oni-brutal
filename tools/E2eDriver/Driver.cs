@@ -154,6 +154,7 @@ namespace E2eDriver
 
         void Update()
         {
+            KeyLog.Scan();
             // A request spanning frames holds the queue: requests are answered in order.
             if (current != null)
             {

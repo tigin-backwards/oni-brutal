@@ -1,0 +1,35 @@
+# Better Electrolyzer (200kg) (2841507339), class P.
+#
+# What it does: postfixes on ElectrolyzerConfig make the Electrolyzer stop only at 200 kg of gas
+# pressure (the game's 1.8 kg), not flood, build anywhere (no foundation) and rotate in all four
+# directions.
+# How a player reaches it: build an Electrolyzer.
+# What changes: electrolyzers keep working in dense gas and under water.
+#
+# setup researches Air Systems and builds an Electrolyzer in the corridor west of the printing
+# pod; selected, its overpressure limit is 200 kg.
+from: early-base
+mods: [2841507339]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"ImprovedOxygen\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Electrolyzer\")", method: Build, args: [131765, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"ImprovedOxygen\").unlockedItemIDs": {contains: Electrolyzer}
+      "Assets.GetBuildingDef(\"Electrolyzer\").Floodable": false
+      "Assets.GetBuildingDef(\"Electrolyzer\").BuildLocationRule": "== 'Anywhere'"
+      "Assets.GetBuildingDef(\"Electrolyzer\").PermittedRotations": "== 'R360'"
+  - run: {seconds: 5}
+  - expect: {buildings: {Electrolyzer: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Oxygen"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/Electrolyzer Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/Electrolyzer Group*": {active: true}
+  - shot: {name: oxygen-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: Electrolyzer}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Electrolyzer>.maxMass": 200

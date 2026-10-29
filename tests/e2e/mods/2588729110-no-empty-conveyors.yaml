@@ -1,0 +1,26 @@
+# No Empty Conveyors (2588729110), class P.
+#
+# What it does: a prefix and a postfix on SimTemperatureTransfer.DoOreMeltTransition: when an
+# item melts while it rides a conveyor rail, the rail cells around it are checked afterwards
+# and any whose item is no longer active is emptied, so the melted item leaves no empty basket
+# travelling the rail.
+# How a player reaches it: send items that melt along a conveyor rail.
+# What changes: melted items no longer clog conveyors.
+#
+# setup builds a Conveyor Rail in the corridor west of the printing pod and puts a lump of ice
+# above its melting point on it. Once the game runs, the ice melts and the rail cell is empty.
+from: early-base
+mods: [2588729110]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SolidConduit\")", method: Build, args: [131766, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Game.Instance.solidConduitSystem", method: ForceRebuildNetworks}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Ice\").substance", method: SpawnResource, args: [[114.5, 207.5, -12], 10, 285, 255, 0]}}
+  - driver: {setup.call: {target: "Game.Instance.solidConduitFlow", method: AddPickupable, args: [131766, {"$": "last:GetComponent<Pickupable>"}]}}
+steps:
+  - expect_state:
+      "Game.Instance.solidConduitFlow.GetContents(131766).pickupableHandle.IsValid()": true
+      "count:all:Pickupable::[*] if .GetComponent<PrimaryElement>.ElementID == Ice": {save_as: ice}
+  - run: {seconds: 30}
+  - expect_state:
+      "count:all:Pickupable::[*] if .GetComponent<PrimaryElement>.ElementID == Ice": "<= ice - 1"
+      "Game.Instance.solidConduitFlow.GetContents(131766).pickupableHandle.IsValid()": false

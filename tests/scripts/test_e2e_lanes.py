@@ -56,7 +56,7 @@ class XvfbDisplay(unittest.TestCase):
         env.pop('XAUTHORITY', None)
         process = subprocess.Popen(['xvfb-run', '-a', 'sleep', '30'], env=env, start_new_session=True)
         try:
-            stub = types.SimpleNamespace(process=process, display=None, xauthority=None)
+            stub = types.SimpleNamespace(process=process, display=None, xauthority=None, keyboard=None)
             e2e.Player.find_display(stub)
             self.assertRegex(stub.display, r'^:\d+$')
             self.assertNotEqual(stub.display, ':0')
@@ -70,12 +70,12 @@ class XvfbDisplay(unittest.TestCase):
     @unittest.skipIf(os.path.exists('/tmp/.X89-lock'), 'display :89 is in use')
     def test_an_explicit_display(self):
         with tempfile.TemporaryDirectory() as out:
-            stub = types.SimpleNamespace(out=out, xvfb=None)
+            stub = types.SimpleNamespace(out=out, xvfb=None, keyboard=None)
             e2e.Player.start_xvfb(stub, ':89')
             try:
                 self.assertTrue(e2e.display_ready('89'))
                 with self.assertRaises(e2e.SpecFailure):
-                    e2e.Player.start_xvfb(types.SimpleNamespace(out=out, xvfb=None), ':89')
+                    e2e.Player.start_xvfb(types.SimpleNamespace(out=out, xvfb=None, keyboard=None), ':89')
             finally:
                 os.killpg(stub.xvfb.pid, signal.SIGTERM)
                 stub.xvfb.wait(10)

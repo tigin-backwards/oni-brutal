@@ -1,0 +1,30 @@
+# 安全门 Emergency Door (2932976861), class B.
+#
+# What it does: adds EMERGENYDOOR20230213 to the Base menu: a 2x2 manual airlock (a pressure
+# door Duplicants open by hand) of any buildable material, built like a tile (rotatable by 90°),
+# with access control and the door side screen (open, auto, locked); unflooding, unentombable,
+# opened by a Duplicant in 5 s.
+# How a player reaches it: the build menu (Base).
+# What changes: a wide pressure door.
+#
+# The door shows in the Base menu; setup builds one in the corridor west of the printing pod,
+# and selected it is a manual airlock with access control.
+from: early-base
+mods: [2932976861]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"EMERGENYDOOR20230213\")", method: Build, args: [131762, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 5}
+  - expect: {buildings: {EMERGENYDOOR20230213: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/EMERGENYDOOR20230213 Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/EMERGENYDOOR20230213 Group*": {active: true}
+  - shot: {name: base-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [110, 208], ortho: 8}}
+  - click_world: {cell: [110, 207], select: EMERGENYDOOR20230213}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Door>.doorType": "== 'ManualPressure'"
+      "selected:GetComponent<AccessControl>.controlEnabled": true

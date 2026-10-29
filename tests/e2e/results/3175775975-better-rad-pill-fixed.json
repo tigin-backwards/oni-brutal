@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3175775975-better-rad-pill-fixed.yaml",
+ "mods": [
+  "3175775975"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Rad Pill takes 1 s and stays untaken by Duplicants without rads",
+ "updated": "2026-10-27",
+ "commit": "b8e90d44",
+ "mod_dlls": {
+  "3175775975": {
+   "RadPillThreshold.dll": "dacc6731e348a0558ac75c339c9e5edc0560cee245cb9fd3c04f152a9c84c398"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-054228-6d816ef2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T06:02:05",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-070541-c1e82ff0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T07:15:43",
+    "lane": 16,
+    "reference_run": "20261027-054228-6d816ef2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-070541-c1e82ff0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T07:17:50",
+    "lane": 16,
+    "reference_run": "20261027-054228-6d816ef2",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

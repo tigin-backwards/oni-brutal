@@ -1,0 +1,41 @@
+# Bionics Expanded (3798248283), class B; skills, boosters.
+#
+# What it does: adds boosters for bionic Duplicants (a battery slot, a solar booster, a medikit,
+# a dreamer booster, an overclocked skilled worker and more), new bionic skills
+# (Bionics_C3_Watts, Bionics_D3_Rads and others), and two Stations buildings: the Booster
+# Recycler (after the Soldering Station, Brute-Force Refinement), which breaks boosters down,
+# and the Mk3 Booster Maker (Radbolt-powered, Materials Science Research in Spaced Out).
+# How a player reaches it: the research screen, then the build menu (Stations); the skills
+# screen of a bionic Duplicant.
+# What changes: more ways to build up bionic Duplicants.
+#
+# setup researches Brute-Force Refinement and builds a Booster Recycler in the corridor west of
+# the printing pod. The new skills exist; the recycler shows in the Stations menu and, selected,
+# lists its recipes.
+from: early-base
+mods: [3798248283]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"BasicRefinement\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"BBP_BoosterRecycler\")", method: Build, args: [131765, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"BasicRefinement\").unlockedItemIDs": {contains: BBP_BoosterRecycler}
+      "Db.Get().Skills.TryGet(\"Bionics_C3_Watts\")": exists
+      "Db.Get().Skills.TryGet(\"Bionics_D3_Rads\")": exists
+      "Db.Get().Techs.Get(\"NuclearRefinement\").unlockedItemIDs": {contains: BBP_Mk3BoosterMaker}
+  - run: {seconds: 5}
+  - expect: {buildings: {BBP_BoosterRecycler: 1}}
+  - click: {ui: "**/PlanScreen/Toggle:Stations"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/BBP_BoosterRecycler Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/BBP_BoosterRecycler Group*": {active: true}
+  - shot: {name: stations-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: BBP_BoosterRecycler}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_wait: {path: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView", cond: stable}
+  - expect_state:
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0].Name == BBP_BoosterRecycler": ">= 1"
+  - ui_dump: {name: recipes, root: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView"}

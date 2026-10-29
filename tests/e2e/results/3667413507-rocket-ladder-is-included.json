@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3667413507-rocket-ladder-is-included.yaml",
+ "mods": [
+  "3667413507"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "on rockets-so, the launch pads build ladders beside their rockets",
+ "updated": "2026-10-27",
+ "commit": "d52da26d",
+ "mod_dlls": {
+  "3667413507": {
+   "RocketScaffoldLadder.dll": "71fbd98b4da93dc353025f6757c600c1e7495a825a56c291ee6155dd0ff6eefe"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-131522-a47d65cb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T14:25:52",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-153635-35d5ca9b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T16:05:29",
+    "lane": 17,
+    "reference_run": "20261027-131522-a47d65cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-153635-35d5ca9b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T16:06:18",
+    "lane": 17,
+    "reference_run": "20261027-131522-a47d65cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

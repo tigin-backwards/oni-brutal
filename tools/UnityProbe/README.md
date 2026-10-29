@@ -204,6 +204,19 @@ toggle row. Compare the players with `tools/UnityProbe/lc-check.py diff ORIG OUR
 [--positions]`. `ugui.md` ("Moved children of layout groups", "RectMask2D culling") records what
 it measured.
 
+With `PROBE_SCENARIO=deactorder` only the deactivation-order probe runs (`DeactivateOrder.cs`,
+lines `DA …`, at mod load): a small hierarchy deactivated, activated and destroyed, with each
+`OnEnable` and `OnDisable` logging every object's `activeSelf`, `activeInHierarchy` and
+`isActiveAndEnabled`, and cases where an `OnDisable` deactivates a sibling or disables a
+component. Diff the players' `DA` lines; `LifecycleTests` (`DeactivationTurnsEachObjectInactive…`)
+encodes it.
+
+With `PROBE_SCENARIO=focusdelivery` only the focus probe runs (`FocusDelivery.cs`, lines `AF …`,
+from mod load): which MonoBehaviours `OnApplicationFocus` reaches. Move the X input focus away
+from the player's window and back (XSetInputFocus on the lane's display) while the main menu is
+up. Measured in U59: both players call it on enabled and disabled behaviours of active objects,
+and on an object with a timed Destroy pending, never on inactive objects.
+
 To run one of them in a player without the e2e runner's lanes, give it a scratch profile
 (`XDG_CONFIG_HOME`) whose `mods/Local/SemanticsProbe/` holds the DLL and the two yaml files, with
 the `mods.json` entry described above. Run the original player through `scripts/e2e.py`'s
@@ -391,6 +404,14 @@ inactive parent; its child and grandchild) and when a component is destroyed alo
 whether `KObjectManager` released the event system of a destroyed `KMonoBehaviour`. A
 `DestroyFlagsProbeDone` canvas appears at the end. `LifecycleTests`
 (`DestroyedObjectIsInactiveInItsOwnOnDestroy` and the three after it) encodes the results.
+
+With `PROBE_SCENARIO=nativerange` only the NativeArray range probe runs (`NativeRanges.cs`, lines
+`NR …`, at mod load, in the original player only): the indexer, `Copy`, `CopyFrom`, `CopyTo`
+and `GetSubArray` with indices and ranges before or past an array, through views of a larger
+backing array so that what an unchecked access touches is logged. It runs through
+`scripts/e2e.py` with OniMcp's mod folder as above and a spec `from: main-menu`. Measured
+2026-10-27: none of them throws (the file's header has the details). ARCHITECTURE D46 records
+it; `NativeArrayRangeTests` encodes it.
 
 With `PROBE_SCENARIO=statics` only the statics probe runs (`StaticValues.cs`, lines `SV …`, at mod
 load): every public static property and field of `Color` and `Color32`, found by reflection (so

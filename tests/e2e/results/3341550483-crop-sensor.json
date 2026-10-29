@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3341550483-crop-sensor.yaml",
+ "mods": [
+  "3341550483"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Automation menu card (shot); a built detector's threshold side screen (dump)",
+ "updated": "2026-10-27",
+ "commit": "d52da26d",
+ "mod_dlls": {
+  "3341550483": {
+   "LogicPlantsCountSensor.dll": "195bcbd72dab0a40032bcd2c03754040515bdc2acebd5aa194f71d0df9659fc5"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-145102-18288f91",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T15:15:22",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-153635-35d5ca9b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T16:18:28",
+    "lane": 17,
+    "reference_run": "20261027-145102-18288f91",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "threshold": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "product": 0.0
+    }
+   },
+   {
+    "run": "20261027-153635-35d5ca9b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T16:19:21",
+    "lane": 17,
+    "reference_run": "20261027-145102-18288f91",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "threshold": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "product": 0.0
+    }
+   }
+  ]
+ }
+}

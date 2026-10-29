@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3479125383-errand-notifier.yaml",
+ "mods": [
+  "3479125383"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Notifier tool (menu dump) on three dig orders makes a notification that fires once they are dug",
+ "updated": "2026-10-27",
+ "commit": "7a927b44",
+ "mod_dlls": {
+  "3479125383": {
+   "ErrandNotifier.dll": "fc975db3167802a5dc7bd353450611454d68292a7a6cda34000861c5fe3028ae"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-111432-ae629e14",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T11:30:04",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-114144-61e46230",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T12:01:40",
+    "lane": 17,
+    "reference_run": "20261027-111432-ae629e14",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261027-114144-61e46230",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T12:02:59",
+    "lane": 17,
+    "reference_run": "20261027-111432-ae629e14",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

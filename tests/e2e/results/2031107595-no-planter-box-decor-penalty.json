@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2031107595-no-planter-box-decor-penalty.yaml",
+ "mods": [
+  "2031107595"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Planter Box built and selected gives 0 decor",
+ "updated": "2026-10-27",
+ "commit": "b8e90d44",
+ "mod_dlls": {
+  "2031107595": {
+   "No Planter Box Decor Penalty.dll": "2cfb1f0c00e288b8501b4b90a6b160b42e2ee4ca5ac18fdc8bd673d7a146a888"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-063313-07ba5b84",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T06:41:43",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-070541-c1e82ff0",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T07:29:55",
+    "lane": 16,
+    "reference_run": "20261027-063313-07ba5b84",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-070541-c1e82ff0",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T07:30:44",
+    "lane": 16,
+    "reference_run": "20261027-063313-07ba5b84",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

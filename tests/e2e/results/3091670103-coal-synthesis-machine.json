@@ -1,0 +1,79 @@
+{
+ "spec": "mods/3091670103-coal-synthesis-machine.yaml",
+ "mods": [
+  "3091670103"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "the Utilities menu card (shot); a built machine lists its coal recipes (dump)",
+ "updated": "2026-10-27",
+ "commit": "d52da26d",
+ "mod_dlls": {
+  "3091670103": {
+   "meitanji.dll": "0e743a455618ac68018b3346308d0aaf4f4fd2614855b1d926c878a13c9d3b31"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-145102-18288f91",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T14:59:40",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-153635-35d5ca9b",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-27T16:11:11",
+    "lane": 17,
+    "reference_run": "20261027-145102-18288f91",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "product": 0.0
+    }
+   },
+   {
+    "run": "20261027-153635-35d5ca9b",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-27T16:12:15",
+    "lane": 17,
+    "reference_run": "20261027-145102-18288f91",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "product": 0.0
+    }
+   }
+  ]
+ }
+}

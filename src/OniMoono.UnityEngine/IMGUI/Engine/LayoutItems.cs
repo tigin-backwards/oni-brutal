@@ -165,8 +165,10 @@ namespace OniMoono.Engine.IMGUI
     }
 
     /// A content entry of a style without word wrap: CalcSize rounded up to whole pixels.
-    /// A word-wrapping style's entry takes its width range from CalcMinMaxWidth (rounded up)
-    /// and, once its width is known, the height CalcHeight gives there, unrounded.
+    /// A word-wrapping style's entry takes its width range from CalcMinMaxWidth rounded up (a
+    /// label "Count: 59" ranges from 32 to 55: in a 400-wide row with buttons of 113 and 43 and
+    /// a field of 80 it is placed at 212.5, rounded to 212, as measured) and, once its width
+    /// is known, the height CalcHeight gives there, unrounded.
     internal sealed class WrappedEntry : LayoutEntry
     {
         readonly GUIContent content;

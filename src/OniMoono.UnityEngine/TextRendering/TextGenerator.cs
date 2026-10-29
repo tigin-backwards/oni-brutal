@@ -42,6 +42,11 @@ namespace UnityEngine
         /// The tab stop in multiples of the space advance (TextMesh sets its own).
         internal float TabSize { get; set; } = 4f;
 
+        /// IMGUI's text layout (docs/cleanroom/imgui.md, "GUILayout, measured", part 5): a
+        /// dynamic font's advances unrounded, and wrapping that treats a space like any other
+        /// character, so a space that does not fit starts the next line.
+        internal bool GuiMetrics { get; init; }
+
         public IList<UIVertex> verts => vertexView;
         public IList<UICharInfo> characters => characterView;
         public IList<UILineInfo> lines => lineView;
@@ -165,7 +170,7 @@ namespace UnityEngine
             int size = native.Dynamic && settings.fontSize > 0 ? settings.fontSize : (int)native.FontSize;
             float scale = settings.scaleFactor > 0f ? settings.scaleFactor : 1f;
             // Unity's native generator takes no null string; it lays out as empty text.
-            var layout = new TextLayout(native, str ?? string.Empty, settings, scale, TabSize);
+            var layout = new TextLayout(native, str ?? string.Empty, settings, scale, TabSize, GuiMetrics);
             if (settings.resizeTextForBestFit)
                 size = LargestFittingSize(layout, settings.resizeTextMinSize, Math.Max(settings.resizeTextMaxSize, settings.resizeTextMinSize));
             else
@@ -269,10 +274,12 @@ namespace OniMoono.Engine.Text
         public float WidestLine { get; private set; }
 
         readonly float tabSize;
+        readonly bool gui;
 
-        public TextLayout(FontNative font, string text, TextGenerationSettings settings, float scale, float tabSize)
+        public TextLayout(FontNative font, string text, TextGenerationSettings settings, float scale, float tabSize, bool gui = false)
         {
             this.tabSize = tabSize;
+            this.gui = gui;
             this.font = font;
             this.text = text;
             this.settings = settings;
@@ -386,7 +393,7 @@ namespace OniMoono.Engine.Text
                 item.Kind = Kind.Glyph;
                 item.CodePoint = cp;
                 item.Glyph = font.GetGlyph(cp, pixelSize, style);
-                item.Advance = item.Glyph.Exists ? item.Glyph.Advance : 0f;
+                item.Advance = !item.Glyph.Exists ? 0f : gui && font.Dynamic ? item.Glyph.FineAdvance : item.Glyph.Advance;
                 if (!font.Dynamic && item.Glyph.Exists) item.Advance += font.CharacterSpacing;
                 item.Whitespace = c == ' ' || c == '​' || c == '　';
                 item.BreakBefore = IsIdeograph(cp);
@@ -408,7 +415,7 @@ namespace OniMoono.Engine.Text
         float TabStop(float x, int size)
         {
             var space = font.GetGlyph(' ', size, FontStyle.Normal);
-            float tab = tabSize * (space.Exists ? space.Advance : size * 0.25f);
+            float tab = tabSize * (space.Exists ? (gui && font.Dynamic ? space.FineAdvance : space.Advance) : size * 0.25f);
             return tab <= 0f ? x : (float)(Math.Floor(x / tab) + 1) * tab;
         }
 
@@ -445,7 +452,7 @@ namespace OniMoono.Engine.Text
                         lastBreak = i + 1;
                         continue;
                 }
-                if (item.Whitespace)
+                if (item.Whitespace && !gui)
                 {
                     // Whitespace never wraps; the line may break after it.
                     x += Step(i, start);
@@ -453,7 +460,7 @@ namespace OniMoono.Engine.Text
                     continue;
                 }
                 if (item.BreakBefore && i > start) lastBreak = i;
-                if (wrap && x + Step(i, start) > maxWidth && HasContent(start, i))
+                while (wrap && x + Step(i, start) > maxWidth && HasContent(start, i))
                 {
                     int breakAt = lastBreak > start ? lastBreak : i;
                     if (breakAt == i && lastBreak <= start) brokeWord = true;
@@ -462,8 +469,13 @@ namespace OniMoono.Engine.Text
                     lastBreak = -1;
                     x = 0f;
                     for (int k = start; k < i; k++) x += Advances(items[k].Kind) ? Step(k, start) : 0f;
+                    // IMGUI: the item is checked again against the new line, whose word may
+                    // itself be too wide ("X - Close Window" at 35: " " / "Wind" / "ow").
+                    if (!gui) break;
                 }
                 x += Step(i, start);
+                // IMGUI: a space wraps like a glyph; the line may break after it.
+                if (item.Whitespace) lastBreak = i + 1;
             }
             AddLine(start, items.Length, false, basePixelSize);
         }

@@ -198,8 +198,11 @@ namespace UnityEngine
             return ContentSize(content, wrap).y + m_Padding.vertical;
         }
 
-        /// The width range of the content: `maxWidth` its unwrapped width, `minWidth` (when the
-        /// style word-wraps) the width of its widest word.
+        const float WrappedMinWidth = 32f;
+
+        /// The width range of the content: `maxWidth` its unwrapped width (CalcSize), and
+        /// `minWidth` the same, or when the style word-wraps 32 or `maxWidth` if that is smaller,
+        /// whatever the words ("GUILayout, measured", part 5, rule 1).
         public void CalcMinMaxWidth(GUIContent content, out float minWidth, out float maxWidth)
         {
             content ??= GUIContent.none;
@@ -214,10 +217,7 @@ namespace UnityEngine
                 minWidth = maxWidth;
                 return;
             }
-            float word = GUIText.WidestWord(content.text, ResolvedFont, m_FontSize, m_FontStyle, m_RichText);
-            if (ShowsImage(content))
-                word = m_ImagePosition == ImagePosition.ImageAbove ? Mathf.Max(word, content.image.width) : word + content.image.width;
-            minWidth = Mathf.Min(maxWidth, word + m_Padding.horizontal);
+            minWidth = Mathf.Min(WrappedMinWidth, maxWidth);
         }
 
         /// The rect the content goes in: `position` shrunk by the padding and moved by the

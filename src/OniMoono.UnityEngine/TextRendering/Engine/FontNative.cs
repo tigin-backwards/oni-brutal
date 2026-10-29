@@ -16,6 +16,9 @@ namespace OniMoono.Engine.Text
     {
         public bool Exists;
         public float Advance;
+        /// Dynamic fonts: the advance unrounded, the linear (unhinted) one, units × size / em
+        /// (plus what synthesized bold adds). IMGUI lays text out with it.
+        public float FineAdvance;
         /// Dynamic fonts: the box of the bitmap FreeType renders (bitmap_left, bitmap_top,
         /// width, rows), without the font's character padding. Bitmap fonts: the character rect.
         public int Left, Top, Width, Height;
@@ -348,8 +351,11 @@ namespace OniMoono.Engine.Text
 
         /// Loads a glyph into its face's slot, with any style its face lacks synthesized; null
         /// when no face of the chain has it.
-        unsafe FontFace LoadStyled(GlyphKey key)
+        unsafe FontFace LoadStyled(GlyphKey key) => LoadStyled(key, out _);
+
+        unsafe FontFace LoadStyled(GlyphKey key, out bool emboldened)
         {
+            emboldened = false;
             int style = StyleBits(key.Style);
             foreach (var link in Chain)
             {
@@ -363,7 +369,11 @@ namespace OniMoono.Engine.Text
                 if (slot->format == FT.GLYPH_FORMAT_OUTLINE)
                 {
                     if ((synthesize & SystemFonts.Italic) != 0) FT.FT_GlyphSlot_Oblique(slot);
-                    if ((synthesize & SystemFonts.Bold) != 0) FT.FT_GlyphSlot_Embolden(slot);
+                    if ((synthesize & SystemFonts.Bold) != 0)
+                    {
+                        FT.FT_GlyphSlot_Embolden(slot);
+                        emboldened = true;
+                    }
                 }
                 return face;
             }
@@ -377,11 +387,15 @@ namespace OniMoono.Engine.Text
         unsafe LegacyGlyph Measure(GlyphKey key)
         {
             var g = new LegacyGlyph { Exists = true };
-            var face = LoadStyled(key);
+            var face = LoadStyled(key, out bool emboldened);
             if (face == null) return g;
             var slot = face.Slot;
             long advance = (long)slot->advance.x.Value;
             g.Advance = ShouldRoundAdvanceValue ? (advance + 32) >> 6 : advance / 64f;
+            long linear = (long)slot->linearHoriAdvance.Value;
+            g.FineAdvance = linear / 65536f;
+            // Synthesized bold widens the advance (26.6) but not the linear one (16.16).
+            if (emboldened) g.FineAdvance += (advance - ((linear + 512) >> 10)) / 64f;
             if (slot->format == FT.GLYPH_FORMAT_OUTLINE && FT.FT_Render_Glyph(slot, RenderMode) != 0) return g;
             g.Left = slot->bitmap_left;
             g.Top = slot->bitmap_top;

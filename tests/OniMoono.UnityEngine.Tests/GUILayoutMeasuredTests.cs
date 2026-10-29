@@ -11,7 +11,7 @@ namespace OniMoono.Tests
     /// docs/cleanroom/imgui.md, "GUILayout, measured": mismatches (part 1), entry sizes and
     /// spacing (part 2), GUILayout.Window's rect (part 3) and the order of calls and windows
     /// (part 4), with the game's skin.
-    public class GUILayoutMeasuredTests : EngineTest, IDisposable
+    public partial class GUILayoutMeasuredTests : EngineTest, IDisposable
     {
         static string DataDir
         {

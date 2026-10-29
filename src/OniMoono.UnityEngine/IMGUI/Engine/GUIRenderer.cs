@@ -18,7 +18,7 @@ namespace OniMoono.Engine.IMGUI
         static Material textureClip, textClip, blit;
         static bool active;
         static readonly List<ImmediateVertex> vertices = new();
-        static readonly TextGenerator generator = new();
+        static readonly TextGenerator generator = new() { GuiMetrics = true };
 
         /// Hidden/Internal-GUITextureClip: texture × vertex colour, alpha × the clip texture.
         /// Clipping is done on the geometry here, so the clip texture is plain white.
@@ -207,7 +207,7 @@ namespace OniMoono.Engine.IMGUI
     /// style's font size 0 means the font's own size.
     internal static class GUIText
     {
-        static readonly TextGenerator measure = new();
+        static readonly TextGenerator measure = new() { GuiMetrics = true };
         static Font builtinFont;
         static bool builtinLoaded;
 
@@ -284,9 +284,11 @@ namespace OniMoono.Engine.IMGUI
         }
 
         /// Size of the text, unwrapped (width ≤ 0) or wrapped at `width`. Empty text measures
-        /// one empty line. With the built-in font at size s ("GUILayout, measured", part 2),
-        /// one line of text is s + 0.01 high and each further line adds 1.1 × s, bold and rich
-        /// text alike.
+        /// one empty line. Widths come from the font's unrounded advances and step up to the
+        /// next hundredth ("GUILayout, measured", part 5: "Clear" 30.31, "Count: 59" 54.72).
+        /// With the built-in font at size s (part 2), one line of text is s + 0.01 high and
+        /// each further line adds 1.1 × s, bold and rich text alike: the lines' s + 1.1 × s
+        /// stepped up the same way (27.31 for two at 13).
         public static Vector2 Size(string text, Font font, int fontSize, FontStyle fontStyle, bool richText, float width)
         {
             if (font == null) return Vector2.zero;
@@ -296,25 +298,17 @@ namespace OniMoono.Engine.IMGUI
             var settings = Settings(font, fontSize, fontStyle, TextAnchor.UpperLeft, wrap, richText, new Vector2(wrap ? width : 0f, 0f));
             measure.Populate(text, settings);
             var extents = measure.rectExtents;
+            float w = NextHundredth(measure.WidestLine);
             if (IsLegacyRuntime(font))
             {
-                float s = PixelSize((Text.FontNative)font.NativeOrThrow, fontSize);
-                float height = s + 0.01f;
-                for (int i = 1; i < measure.lineCount; i++) height += 1.1f * s;
-                return new Vector2(measure.WidestLine, height);
+                double s = PixelSize((Text.FontNative)font.NativeOrThrow, fontSize);
+                return new Vector2(w, NextHundredth(s + 1.1 * s * Math.Max(0, measure.lineCount - 1)));
             }
-            return new Vector2(measure.WidestLine, Mathf.Max(extents.height, line));
+            return new Vector2(w, Mathf.Max(extents.height, line));
         }
 
-        /// Width of the widest unbreakable run (a word) of the text.
-        public static float WidestWord(string text, Font font, int fontSize, FontStyle fontStyle, bool richText)
-        {
-            if (font == null || string.IsNullOrEmpty(text)) return 0f;
-            float widest = 0f;
-            foreach (var word in text.Split(new[] { ' ', '\n', '\t' }, StringSplitOptions.RemoveEmptyEntries))
-                widest = Mathf.Max(widest, Size(word, font, fontSize, fontStyle, richText, 0f).x);
-            return widest;
-        }
+        /// The next hundredth above `v` (13 → 13.01, 30.303 → 30.31), as the float nearest to it.
+        static float NextHundredth(double v) => (float)((Math.Floor(v * 100.0 + 1e-4) + 1.0) / 100.0);
 
         /// Cursor geometry of laid-out text: for each string index, the top-left position of the
         /// caret relative to the text rect, and the line it is on.

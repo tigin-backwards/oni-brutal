@@ -1,0 +1,33 @@
+# 皇帝的新砖V3.0 (Transparent Tile) (3138268148), class B (art).
+#
+# What it does: adds five see-through tiles, each a glass-tile-like foundation tile drawn from a
+# 1024x1024 texture atlas the mod builds at load from PNGs embedded in its DLL
+# (ImageConversion.LoadImage into a new TextureAtlas): the Transparent Tile of any buildable
+# material (after Basic Refinement), an insulated one (Temperature Modulation), a metal one
+# (Smelting), a carpeted one (Clothing) and a plastic one (Luxury).
+# How a player reaches it: the build menu (Base), after the research.
+# What changes: tiles that do not hide what is behind them.
+#
+# Setup researches Basic Refinement. Two Transparent Tiles are ordered in the corridor west of
+# the printing pod, out of sandstone, and built: their cells are solid, and they are drawn with
+# the mod's atlas (a world shot).
+from: early-base
+mods: [3138268148]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"BasicRefinement\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"BasicRefinement\").unlockedItemIDs": {contains: TransparentTile}
+      "Assets.GetBuildingDef(\"TransparentTile\").BlockTileAtlas.texture.width": 1024
+      "Assets.GetBuildingDef(\"TransparentTile\").BlockTileAtlas.texture.height": 1024
+      "Assets.GetBuildingDef(\"TITile\").BlockTileAtlas.texture.width": "== original"
+      "Grid.Solid.get_Item(132400)": false
+  - run: {seconds: 2}
+  - build: {prefab: TransparentTile, cells: [[112, 208], [113, 208]], material: SandStone}
+  - expect: {blueprints: {TransparentTile: 2}}
+  - run: {seconds: 900, until: {buildings: {TransparentTile: 2}, pending_construction: 0}}
+  - expect_state:
+      "Grid.Solid.get_Item(132400)": true
+      "Grid.Solid.get_Item(132401)": true
+  - world_shot: {name: tiles, ortho: 4, at: [112, 208], threshold: 0.08}

@@ -1,4 +1,4 @@
-# scripts/mod-sweep.py s2000: 1343 mods, batches of 22, the save 2minnow, 90 s of play; commit 3bf80ec4, 2026-10-29
+# scripts/mod-sweep.py s2000: 1343 mods, batches of 22, the save 2minnow, 90 s of play; commit 451279ec, 2026-10-29
 id	rank	original	ours	note
 1882162095	751	ok	ok	
 2836461351	752	ok	ok	
@@ -425,7 +425,7 @@ id	rank	original	ours	note
 2832650525	1227	ok	ok	
 2857940400	1228	menu	-	alone, on the player of commit 6d4545b9: the original disables it ("Failed to load mod ...disabling"): step start: the player exited (1) while loading; Fatal parse error in /home/nigit/projects/oni-brutal/.claude/worktrees/agent-aNdNfNeNfN/out/sweep/.original-N/OxygenNotIncluded_Data/StreamingAssets/dlc/dlcN/worldgen/subworlds/carrotquarry/CarrotQuarryBasicScarce.yaml; System.IO.FileNotFoundException: Could not load file or assembly "PLib, Version=N.N, Culture=neutral, PublicKeyToken=null" or one of its dependencies @ KMod.DLLLoader.LoadDLLs
 3100888062	1229	ok	ok	
-3799038247	1230	ok	colony	alone, on the player of commit 6d4545b9: the crash screen opens while the save loads; System.Collections.Generic.KeyNotFoundException: The given key "N" was not present in the dictionary @ ColonyDiagnosticUtility.GetDiagnostic; Assert failed: Clustercraft Exterior Door has no targetDoor
+3799038247	1230	ok	ok	loads alone in both players on the player of commit 451279ec (it failed in ours on older builds)
 3297925875	1232	ok	ok	
 2994335358	1233	ok	ok	
 3340413393	1234	ok	ok	
@@ -446,7 +446,7 @@ id	rank	original	ours	note
 1994592210	1251	ok	ok	
 3339017519	1253	ok	ok	
 3006462315	1254	ok	ok	
-2983351482	1255	ok	menu	alone, on the player of commit 6d4545b9: step start: the player exited (1) before OniMcp started; ours disables it ("Failed to load mod ...disabling"); System.NullReferenceException: Object reference not set to an instance of an object @ ONITwitch.DefaultCommands.SetupCommands; System.MissingMethodException: Method not found: "Void UnityEngine.PhysicsND.IgnoreLayerCollision(IntN, IntN, Boolean)" @ ONITwitch.Patches.PhysicsPatches.MainMenu_OnSpawn_Patch.Postfix; System.TypeLoadException: Could not load type "UnityEngine.Bindings.NativeHeaderAttribute" from assembly "UnityEngine.SharedIntern
+2983351482	1255	ok	ok	loads alone in both players on the player of commit 451279ec (it failed in ours on older builds)
 3521556826	1256	ok	ok	
 2876954518	1257	ok	ok	
 3247018513	1258	ok	ok	
@@ -601,7 +601,7 @@ id	rank	original	ours	note
 2985335138	1425	colony	-	the crash screen opens while the save loads; ArgumentException: Accessing mismatched handle version. Expected version=N but got version=N @ HandleVector`N.UnpackHandle; Nu
 2141411697	1426	ok	ok	
 2897919789	1428	ok	ok	
-2363171361	1429	ok	colony	alone, on the player of commit 6d4545b9: the crash screen opens while the save loads; N Exception in: (Minion).SleepChoreMonitor.root.checkforbed @ Public_Luxury_Beds.Patches.Patches.Postfix_UpdateBed(Instance __instance) in C.\Repos\MrPurpleN\ONI\Public Luxury Beds\Patches\Patches.cs.line N; System.MethodAcces
+2363171361	1429	ok	ok	loads alone in both players on the player of commit 451279ec (it failed in ours on older builds)
 3002566087	1430	ok	ok	
 3523056620	1431	-	-	a translation: installed disabled, as a subscription leaves it; not swept
 3022436400	1432	ok	ok	
@@ -609,7 +609,7 @@ id	rank	original	ours	note
 2872005064	1435	ok	ok	
 3580813956	1436	ok	ok	
 2369401506	1437	ok	ok	
-3609531831	1439	ok	colony	alone, on the player of commit 6d4545b9: NullReferenceException: Object reference not set to an instance of an object @ UnityEngine.Object.ThrowNullReference; SeaTurtle Exception in: (SeaTurtle).EatStates.root.eating.loop @ Rephysicalized.FueledDietController.TryApplyFuelConversion; System.NullReferenceException: Object reference not set to an instance of an object @ Rephysicalized.FueledDietController.TryApplyFuelConversion
+3609531831	1439	ok	ok	loads alone in both players on the player of commit 451279ec (it failed in ours on older builds)
 3760466471	1440	ok	ok	
 2781529336	1441	ok	ok	
 1725334376	1442	ok	ok	
@@ -751,7 +751,7 @@ id	rank	original	ours	note
 2339405225	1594	ok	ok	
 929247646	1595	-	-	a translation: installed disabled, as a subscription leaves it; not swept
 2813526647	1596	ok	ok	
-2361043018	1597	ok	colony	alone, on the player of commit 3bf80ec4: the crash screen opens while the save loads; N Exception in: (Minion).SleepChoreMonitor.root.checkforbed @ Public_Cots.Patches.Patches.Postfix_UpdateBed(Instance __instance) in C.\Repos\MrPurpleN\ONI\Public Cots\Patches\Patches.cs.line N; System.MethodAccessException: At
+2361043018	1597	ok	ok	loads alone in both players on the player of commit 451279ec (it failed in ours on older builds)
 3674542335	1598	ok	ok	
 2932976861	1599	ok	ok	
 2845508297	1600	ok	ok	
@@ -950,7 +950,7 @@ id	rank	original	ours	note
 2961593835	1813	ok	ok	
 2846822603	1814	ok	ok	
 2547745654	1815	ok	ok	
-3433108302	1817	ok	colony	alone, on the player of commit 3bf80ec4: step start: the player exited (1) while loading; ArgumentException: The Object you want to instantiate is null @ UnityEngine.Object.Instantiate; ArgumentOutOfRangeException: Index was out of range. Must be non-negative and less than the size of the collection. (Parameter "index") @ BackwallManager+BackwallIndexer.get_Element; System.NullReferenceException: Object reference not set to an instance of an object @ Util.KInstantiate (and 54 more)
+3433108302	1817	ok	ok	loads alone in both players on the player of commit 451279ec (it failed in ours on older builds)
 2853421859	1818	ok	ok	
 3743339926	1819	ok	ok	
 3762252757	1820	ok	ok	
@@ -1063,7 +1063,7 @@ id	rank	original	ours	note
 3719939081	1943	ok	ok	
 3742958503	1944	ok	ok	
 3053330755	1945	ok	ok	
-3600537542	1946	ok	menu	alone, on the player of commit 3bf80ec4: step start: <urlopen error [Errno 104] Connection reset by peer>; ours disables it ("Failed to load mod ...disabling"); System.BadImageFormatException: Enclosing type(s) not found for type "‭⁬‪‌‎‫​⁯‭⁫‌‍‏⁪‪‭​‎‬​‎​⁭​‫‭‮⁮‏‌‫​‍‍⁮⁪‪‌‍⁬‮" in assembly "Katairite, Version=N.N, Culture=neutral, PublicKeyToken=null" @ KMod.DLLLoader.LoadDLLs; null Exception while loading mod Abyssalite at RUN/home/config/unityNd/Klei/Oxygen Not Included/mods/Local/N @ KMod.DLLLoader.LoadDLLs
+3600537542	1946	ok	ok	loads alone in both players on the player of commit 451279ec (it failed in ours on older builds)
 3478498118	1947	ok	ok	
 2865091697	1948	ok	ok	
 3772297140	1949	ok	ok	
@@ -1129,7 +1129,7 @@ id	rank	original	ours	note
 2801784483	2030	ok	ok	
 2936219269	2031	ok	ok	
 2571093570	2032	ok	ok	
-3600547549	2033	ok	menu	step start: the player exited (1) before OniMcp started; ours disables it ("Failed to load mod ...disabling"); System.BadImageFormatException: Enclosing type(s) not found for type "‌‌‍⁯‬⁭​⁫‪⁮⁮⁮‎‌‬‏⁫⁮‍⁭‌‎‎⁬‌‍⁪⁯⁫⁮​‭‎⁬⁮‬⁬⁯‭‬‮" in assembly "Refrigerator, Version=N.N, Culture=neutral, PublicKeyToken=null" @ KMod.DLLLoader.LoadDLLs; null Exception while loading mod Refrigerator at RUN/home/config/unityNd/Klei/Oxygen Not Included/mods/Local/N @ KMod.DLLLoader.LoadDLLs
+3600547549	2033	ok	ok	loads alone in both players on the player of commit 451279ec (it failed in ours on older builds)
 2993579796	2034	colony	-	the player exits (1) while loading; ArgumentOutOfRangeException: Index was out of range. Must be non-negative and less than the size of the collection @ BackwallManager+BackwallIndexer.get_Element; Assert failed: Cannot send a frame to the sim with zero active regions @ SubworldZoneRenderData.GenerateTexture
 2761762708	2035	ok	ok	
 3778736902	2036	ok	ok	
@@ -1190,7 +1190,7 @@ id	rank	original	ours	note
 3536307961	2099	ok	ok	
 3669014459	2100	menu	-	the original disables it ("Failed to load mod ...disabling"):
 1924502103	2101	ok	ok	
-3815900814	2102	ok	colony	the crash screen opens while the save loads; System.Collections.Generic.KeyNotFoundException: The given key "N" was not present in the dictionary @ ColonyDiagnosticUtility.GetDiagnostic; Assert failed: Clustercraft Exterior Door has no targetDoor
+3815900814	2102	ok	ok	loads alone in both players on the player of commit 451279ec (it failed in ours on older builds)
 3664027081	2103	ok	ok	
 3384420807	2104	ok	ok	
 3691374894	2105	ok	ok	
@@ -1233,7 +1233,7 @@ id	rank	original	ours	note
 2194551369	2148	ok	ok	
 3799668020	2149	ok	ok	
 3740803157	2151	-	-	a translation: installed disabled, as a subscription leaves it; not swept
-3280526635	2152	ok	menu	step start: the player exited (1) before OniMcp started; ours disables it ("Failed to load mod ...disabling"); System.IO.FileLoadException: Could not load file or assembly "TestMod, Version=N.N, Culture=neutral, PublicKeyToken=null". The assembly architecture is not compatible with the current process architecture @ KMod.DLLLoader.LoadDLLs; null Exception while loading mod N.Local at RUN/home/config/unityNd/Klei/Oxygen Not Included/mods/Local/N @ KMod.DLLLoader.LoadDLLs
+3280526635	2152	ok	ok	loads alone in both players on the player of commit 451279ec (it failed in ours on older builds)
 3794685601	2153	ok	ok	
 3733343625	2154	ok	ok	
 2544278649	2155	ok	ok	
@@ -1259,7 +1259,7 @@ id	rank	original	ours	note
 3809293304	2176	ok	ok	
 3572721874	2177	ok	ok	
 2984784113	2178	ok	ok	
-2798967122	2179	ok	colony	the player exits (-6) while loading; System.AccessViolationException: Attempted to read or write protected memory. This is often an indication that other memory is corrupt @ Default_Deconstruct.Patches+DefaultDeconstruct.Postfix
+2798967122	2179	ok	colony	alone, on the player of commit 451279ec: the player exits (-6) while loading; System.AccessViolationException: Attempted to read or write protected memory. This is often an indication that other memory is corrupt @ Default_Deconstruct.Patches+DefaultDeconstruct.Postfix
 3777521625	2180	ok	ok	
 2817871454	2181	ok	ok	
 2984782534	2182	ok	ok	
@@ -1307,7 +1307,7 @@ id	rank	original	ours	note
 3471468928	2230	ok	ok	
 3372332347	2231	ok	ok	
 2871231353	2232	colony	-	the crash screen opens while the save loads; ForestTreeBranch (ForestTreeBranch_Original) ~~~!System.NullReferenceException: Object reference not set to an instance of an
-3075795676	2233	ok	colony	KelpPlant (KelpPlant_Original) Exception in: (KelpPlant).StandardCropPlant+States.root.alive.harvest.Enter @ SeedProducer.<>c.<.cctor>b__N_N; System.TypeLoadException: Could not resolve type with token N from typeref (expected class "Worker" in assembly "Assembly-CSharp, Version=N.N, Culture=neutral, PublicKeyToken=null") @ SeedProducer.<>c.<.cctor>b__N_N
+3075795676	2233	ok	ok	loads alone in both players on the player of commit 451279ec (it failed in ours on older builds)
 3258344801	2234	ok	ok	
 3756093578	2236	ok	ok	
 3565141562	2237	ok	ok	

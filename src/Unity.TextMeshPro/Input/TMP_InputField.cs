@@ -564,6 +564,9 @@ namespace TMPro
             if (EventSystem.current == null) return;
             if (EventSystem.current.currentSelectedGameObject != gameObject) EventSystem.current.SetSelectedGameObject(gameObject);
             m_AllowInput = true;
+            // The IME is turned on for the edit, once: a mode set while the field is focused
+            // stays until it is deactivated (measured, issue #30).
+            Input.imeCompositionMode = IMECompositionMode.On;
             m_OriginalText = m_Text;
             m_WasCanceled = false;
             m_TextChangedSinceActivation = false;
@@ -599,6 +602,8 @@ namespace TMPro
             m_ShouldActivateNextUpdate = false;
             if (!m_AllowInput) return;
             m_AllowInput = false;
+            // Back to Auto, whatever the mode was set to while focused (measured).
+            Input.imeCompositionMode = IMECompositionMode.Auto;
             if (m_WasCanceled && m_RestoreOriginalTextOnEscape) text = m_OriginalText;
             m_IsSelectAll = false;
             if (keyed || m_ResetOnDeActivation || clearSelection) SendOnEndEdit();

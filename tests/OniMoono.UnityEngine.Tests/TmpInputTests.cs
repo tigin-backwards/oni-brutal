@@ -86,6 +86,39 @@ namespace OniMoono.Tests
         static Event Char(char c) => Key(KeyCode.None, c);
 
         [Fact]
+        public void FocusTurnsTheImeOnAndDeactivationSetsItToAuto()
+        {
+            var saved = Input.imeCompositionMode;
+            try
+            {
+                var field = NewField();
+                Input.imeCompositionMode = IMECompositionMode.Off;
+                field.ActivateInputField();
+                Assert.Equal(IMECompositionMode.Off, Input.imeCompositionMode);
+                Frame();
+                Assert.True(field.isFocused);
+                Assert.Equal(IMECompositionMode.On, Input.imeCompositionMode);
+                // While focused the field leaves a mode set by others alone.
+                Input.imeCompositionMode = IMECompositionMode.Off;
+                Frame();
+                Assert.Equal(IMECompositionMode.Off, Input.imeCompositionMode);
+                field.DeactivateInputField();
+                Assert.Equal(IMECompositionMode.Auto, Input.imeCompositionMode);
+                // Deactivating an unfocused field changes nothing.
+                Input.imeCompositionMode = IMECompositionMode.Off;
+                field.DeactivateInputField();
+                Assert.Equal(IMECompositionMode.Off, Input.imeCompositionMode);
+                // Activating again turns it on again.
+                field.ActivateInputField();
+                Frame();
+                Assert.Equal(IMECompositionMode.On, Input.imeCompositionMode);
+                field.DeactivateInputField();
+                Assert.Equal(IMECompositionMode.Auto, Input.imeCompositionMode);
+            }
+            finally { Input.imeCompositionMode = saved; }
+        }
+
+        [Fact]
         public void ActivationStartsEditingInTheNextLateUpdate()
         {
             var field = NewField();

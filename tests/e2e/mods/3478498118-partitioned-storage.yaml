@@ -1,0 +1,31 @@
+# Partitioned Storage (fixed) (3478498118), classes S, B.
+#
+# What it does: storage lockers (and the Ration Box, Refrigerator and Smart Storage Bin) get
+# an ImprovedTreeFilterable: a user-menu button, Enable Partitions, turns it on, and a PLib
+# side screen (ImprovedTreeFilterableSideScreen) then lists each accepted item with its own
+# limit; patches on FilteredStorage fetch each item up to its limit, and the capacity side
+# screen hides while partitions are on.
+# How a player reaches it: select a Storage Bin; its user menu; its side screen.
+# What changes: per-item limits in a storage bin.
+#
+# setup builds a Storage Bin in the corridor west of the printing pod. Selected, its user
+# menu has Enable Partitions; a click turns them on and the side screen opens.
+from: early-base
+mods: [3478498118]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"StorageLocker\")", method: Build, args: [{"$": "Grid.XYToCell(113, 206)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {StorageLocker: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: StorageLocker}
+  - ui_wait: {path: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons", cond: stable}
+  - expect_state:
+      "selected:GetComponent<ImprovedFilteredStorage.ImprovedTreeFilterable>.Enabled": false
+  - ui_dump: {name: user-menu, root: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons"}
+  - click: {ui: "**/UserMenuScreen/Buttons/Enable PartitionsButton"}
+  - expect_state:
+      "selected:GetComponent<ImprovedFilteredStorage.ImprovedTreeFilterable>.Enabled": true
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/ImprovedTreeFilterableSideScreen", cond: stable}
+  - ui_dump: {name: side, root: "**/DetailsScreen/SideScreen/**/ImprovedTreeFilterableSideScreen"}
+  - shot: {name: side, crop: "**/DetailsScreen/SideScreen/**/ImprovedTreeFilterableSideScreen", threshold: 0.04}

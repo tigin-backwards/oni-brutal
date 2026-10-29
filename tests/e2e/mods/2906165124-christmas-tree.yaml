@@ -7,6 +7,11 @@
 #
 # The Furniture menu offers the tree (its card); one built in the corridor west of the
 # printing pod by setup is selected and carries its light.
+#
+# The card is shot with the pointer still on the tree's button: the card hides its requirements
+# and effects when the pointer leaves the build menu (ProductInfoScreen.CheckMouseOver), and a
+# shot after moving it away caught that or not by frame timing, in both players (UnityProbe
+# cardcollapse).
 from: early-base
 mods: [2906165124]
 setup:
@@ -21,7 +26,7 @@ steps:
   - ui_wait: {path: "**/BuildingGroups/**/Grid/CHRISTMASTREE Group*", cond: stable}
   - click: {ui: "**/BuildingGroups/**/Grid/CHRISTMASTREE Group*"}
   - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
-  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04, pointer: stay}
   - key: {code: Escape}
   - click_world: {cell: [113, 208], select: CHRISTMASTREE}
   - ui_wait: {path: "**/DetailsScreen", cond: stable}

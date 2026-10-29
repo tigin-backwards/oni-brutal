@@ -3,12 +3,12 @@
  "mods": [
   "2906165124"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "spec fails in ours: the tree's build-menu card lacks its requirements, effects and material panes (128 px tall, 365 in the original)",
+ "note": "the tree's card is shot with the pointer on its button: it collapses when the pointer leaves the build menu, which a shot after moving the pointer away caught or not by frame timing in both players",
  "updated": "2026-10-29",
- "commit": "e0b1e1de",
+ "commit": "e4d3cc88",
  "mod_dlls": {
   "2906165124": {
    "╩Ñ╡«╩≈christmas tree.dll": "438d47eba0605a105e53d542ac3cab446f22533d0ebf2878e9ebd28e67bcd066"
@@ -17,47 +17,49 @@
  "runs": {
   "original": [
    {
-    "run": "20261027-145102-18288f91",
+    "run": "20261029-112239-eed38cb6",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T11:22:40",
+    "lane": 16,
+    "signatures": 0
+   },
+   {
+    "run": "20261029-112239-eed38cb6",
     "index": 1,
     "verdict": "pass",
-    "date": "2026-10-27T15:03:43",
-    "lane": 16,
+    "date": "2026-10-29T11:22:39",
+    "lane": 15,
     "signatures": 0
    }
   ],
   "ours": [
    {
-    "run": "20261029-033517-7dbb305f",
+    "run": "20261029-112239-eed38cb6",
     "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-29T03:35:17",
-    "lane": 16,
-    "reasons": [
-     "shot product: 100.00% of pixels differ (> 4%)"
-    ],
-    "reference_run": "20261027-145102-18288f91",
+    "verdict": "pass",
+    "date": "2026-10-29T11:34:19",
+    "lane": 15,
+    "reference_run": "20261029-112239-eed38cb6",
     "new_signatures": 0,
     "findings": [],
     "ui_dump": {},
     "shots": {
-     "product": 1.0
+     "product": 0.0
     }
    },
    {
-    "run": "20261029-033517-7dbb305f",
+    "run": "20261029-112239-eed38cb6",
     "index": 2,
-    "verdict": "fail",
-    "date": "2026-10-29T03:36:04",
-    "lane": 16,
-    "reasons": [
-     "shot product: 100.00% of pixels differ (> 4%)"
-    ],
-    "reference_run": "20261027-145102-18288f91",
+    "verdict": "pass",
+    "date": "2026-10-29T11:35:10",
+    "lane": 15,
+    "reference_run": "20261029-112239-eed38cb6",
     "new_signatures": 0,
     "findings": [],
     "ui_dump": {},
     "shots": {
-     "product": 1.0
+     "product": 0.0
     }
    }
   ]

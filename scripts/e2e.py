@@ -201,8 +201,9 @@ def check_step(where, kind, value, in_setup):
     elif kind == 'save':
         need(isinstance(value, str) and value, 'save takes a name')
     elif kind == 'shot':
-        need(isinstance(value, str) or (isinstance(value, dict) and value.get('name')), 'shot takes NAME or {name, crop, mask}')
+        need(isinstance(value, str) or (isinstance(value, dict) and value.get('name')), 'shot takes NAME or {name, crop, mask, pointer}')
         if isinstance(value, dict):
+            need(value.get('pointer', 'away') in ('away', 'stay'), 'shot `pointer` is away (the default) or stay')
             for m in value.get('mask', []):
                 need(isinstance(m, str) or _rect(m), f'mask {m!r} is neither a UI path nor [x, y, w, h]')
     elif kind == 'world_shot':
@@ -2871,7 +2872,8 @@ class Run:
 
     def shot(self, value):
         name = value['name']
-        self.pointer_away()
+        if value.get('pointer', 'away') == 'away':
+            self.pointer_away()
         menu = self.at_main_menu()
         if not menu:
             self.settle_build_menu(f'shot {name}')

@@ -321,6 +321,11 @@ step. The original run itself records it and passes.
   where OniMcp takes no screenshot, it reads the lane's display instead (XGetImage of the
   root window, a frame later). Ours draws BRUTAL's credit tile (IMGUI) left of the main menu's
   news tiles: mask it in a main menu shot (`[210, 525, 60, 195]` beside the menu buttons).
+  `pointer: stay` leaves the pointer where the last step put it, for UI that reacts to the
+  pointer leaving it: a building's card (ProductInfoScreen) hides its requirements, effects and
+  description when the pointer leaves the build menu, and whether a shot after the move catches
+  that depends on frame timing in both players (Christmas Tree's card: collapsed in 2 of 3
+  original runs of one spec, full in 3 of 3 of another).
 - `world_shot` sets the camera through E2eDriver (`at` is a cell, `ortho` the orthographic size),
   hides the UI canvases (`hide_ui`, default true), shoots, and shows them again. Its masks are
   screen rects or UI paths. Symbolic masks such as Duplicants are not supported yet.

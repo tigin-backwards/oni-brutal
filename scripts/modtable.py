@@ -378,6 +378,7 @@ broken.update({
 # Found by the e2e specs of ranks 1884 to 1965: the spec fails the same way in the original.
 broken.update({
     '3590596912': 'broken upstream: it calls `PUtil.InitLibrary` but ships no PLib, so alone it fails to load (FileNotFoundException for PLib 4.8.1.0) and the game exits while loading; the load sweep passed only because another mod of its batch shipped PLib (spec tests/e2e/mods/3590596912-vine-branch-accelerate-growth.yaml)',
+    '2865091697': 'broken upstream: its sign\'s design side screen (a clone of the Monument\'s, added to the details screen\'s side screen list) never shows: a built sign selected says no configuration is available, so its six designs cannot be picked (spec tests/e2e/mods/2865091697-warning-signs.yaml)',
     '2844428595': 'broken upstream: its prefix on `CameraController.OnPrefabInit` sets the keyboard panning speed to 0.25, which the method then overwrites from the CameraSpeed pref (`SetSpeedFromPrefs`), so the speed stays 1 (spec tests/e2e/mods/2844428595-camera-scroll-pan-speed.yaml)',
 })
 # Broken in the original only: ours happens to load it, so its note says how the original fails

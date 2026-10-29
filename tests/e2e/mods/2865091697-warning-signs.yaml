@@ -1,0 +1,31 @@
+# 警示牌 Warning signs -K31 (2865091697), classes B, S.
+#
+# What it does: adds a warning sign in two parts, both in the Furniture menu: a 1x3 post
+# (K31M31GG31H1, metal, a door-like logic input that opens and closes it) and a sign
+# (K31M31GG31H2) that attaches to the top of a post; the sign shows one of six designs,
+# picked on a side screen cloned from the Monument's (标志侧屏, SignSideScreen), one button
+# per design.
+# How a player reaches it: the Furniture menu; the sign's side screen.
+# What changes: decorative warning signs.
+#
+# setup builds a post in the corridor west of the printing pod and a sign on it. Selected,
+# the sign's side screen lists six designs; a click on the third picks it. In the original the
+# side screen never shows (the Config tab has no configuration), so the mod is broken upstream.
+from: early-base
+mods: [2865091697]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"K31M31GG31H1\")", method: Build, args: [{"$": "Grid.XYToCell(113, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"K31M31GG31H2\")", method: Build, args: [{"$": "Grid.XYToCell(113, 208)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {K31M31GG31H1: 1, K31M31GG31H2: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 208], select: K31M31GG31H2}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/标志侧屏", cond: stable}
+  - expect_ui:
+      "**/标志侧屏/Content/Scroll/Grid/ButtonPrefab*": {count: 6}
+  - ui_dump: {name: side, root: "**/DetailsScreen/SideScreen/**/标志侧屏"}
+  - click: {ui: "**/标志侧屏/Content/Scroll/Grid/ButtonPrefab*", index: 2}
+  - expect_state:
+      "selected:GetComponent<K_31_警示牌.SelectableSign>.selectedIndex": 2
+  - shot: {name: side, crop: "**/DetailsScreen/SideScreen", threshold: 0.04}

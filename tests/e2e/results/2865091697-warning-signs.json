@@ -1,0 +1,33 @@
+{
+ "spec": "mods/2865091697-warning-signs.yaml",
+ "mods": [
+  "2865091697"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-29",
+ "commit": "1785bc2f",
+ "mod_dlls": {
+  "2865091697": {
+   "K-31-╛»╩╛┼╞.dll": "ba1a1b0c96b1d93939ee87eb2481666df9684f4c1a1e3568dfcd9b1226be5ea3"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-090559-e1e62f9e",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-29T09:51:35",
+    "lane": 4,
+    "reasons": [
+     "step 5: E2eDriver ui.wait {\"path\": \"**/DetailsScreen/SideScreen/**/\\u6807\\u5fd7\\u4fa7\\u5c4f\", \"cond\": \"stable\", \"frames\": 300}: timeout: stable not met within 300 frames"
+    ],
+    "signatures": 0
+   }
+  ],
+  "ours": []
+ }
+}

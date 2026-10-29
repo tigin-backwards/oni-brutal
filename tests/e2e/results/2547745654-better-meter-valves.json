@@ -1,0 +1,67 @@
+{
+ "spec": "mods/2547745654-better-meter-valves.yaml",
+ "mods": [
+  "2547745654"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "options raise the meter valves' limits; a built valve's side screen (dump, shot)",
+ "updated": "2026-10-29",
+ "commit": "e5cbc118",
+ "mod_dlls": {
+  "2547745654": {
+   "BetterMeterValves.dll": "e83126c6a73ad8a4cd6aaebbe2d45416643b796b2c9584949d098c270db9a73f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-070935-7f670b10",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T07:43:01",
+    "lane": 1,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-164749-3dfc6f64",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T16:47:49",
+    "lane": 1,
+    "reference_run": "20261029-070935-7f670b10",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "valve": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "valve": 0.002155
+    }
+   },
+   {
+    "run": "20261029-164749-3dfc6f64",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T16:48:37",
+    "lane": 1,
+    "reference_run": "20261029-070935-7f670b10",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "valve": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "valve": 0.002155
+    }
+   }
+  ]
+ }
+}

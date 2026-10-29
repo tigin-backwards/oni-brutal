@@ -1,0 +1,29 @@
+# (DLC) Better Meter Valves (2547745654), classes P, O.
+#
+# What it does: PLib options set the Meter Valves' maximum limits (default 500 kg for each,
+# the game's) and the packet sizes of the rocket ports and interior outputs; the valves' slider
+# ranges follow them.
+# How a player reaches it: the Mods screen's options; a Meter Valve's side screen.
+# What changes: a Liquid, Gas or Conveyor Meter Valve can count up to the set limit.
+#
+# Options here: liquid valve limit 2000 kg, gas 1000 kg, solid 3000 kg, liquid packet 20 kg.
+# The prefabs carry them; a Liquid Meter Valve built in the east corridor is selected, and its
+# side screen, whose slider now ends at 2000 kg, is shot.
+from: early-base
+mods: [2547745654]
+options:
+  BetterMeterValves: {LiquidValveMaxLimit: 2000, GasValveMaxLimit: 1000, SolidValveMaxLimit: 3000, LiquidValveStorage: 20}
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidLimitValve\")", method: Build, args: [131786, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "all:LimitValve::[0]"}]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"LiquidLimitValve\").GetComponent<LimitValve>.maxLimitKg": 2000
+      "Assets.GetPrefab(\"GasLimitValve\").GetComponent<LimitValve>.maxLimitKg": 1000
+      "Assets.GetPrefab(\"SolidLimitValve\").GetComponent<LimitValve>.maxLimitKg": 3000
+      "Assets.GetPrefab(\"RocketInteriorLiquidOutput\").GetComponent<Storage>.capacityKg": 20
+      "selected:LimitValve.maxLimitKg": 2000
+  - driver: {camera.set: {cell: [134, 208], ortho: 8}}
+  - ui_wait: {path: "**/DetailsScreen/**/LimitValveSideScreen", cond: stable}
+  - ui_dump: {name: valve, root: "**/DetailsScreen/**/LimitValveSideScreen"}
+  - shot: {name: valve, crop: "**/DetailsScreen", threshold: 0.04}

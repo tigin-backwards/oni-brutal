@@ -1,0 +1,18 @@
+# With Klei's servers out of reach, play must go on (issue #28).
+#
+# Needs the environment of scripts/e2e-klei-unreachable.sh: every proxy variable names a closed
+# local port (for the players only), and the Steam double hands out an auth ticket, as Steam
+# does, so KleiAccount posts its login. Both posts fail and retry after 16, 32 and 64 seconds.
+# Loading the colony starts a KleiMetrics session, whose HTTP thread is retrying when
+# KleiAccount gives up (about two minutes in): its callback has Global.Update start a session
+# again, which ends the running one with ThreadedHttps.End, which aborts the HTTP thread after
+# a 2 s join. Mono aborts it and play goes on; CoreCLR threw PlatformNotSupportedException from
+# Global.Update and the game went to the crash reporter. A new thread then posts the new
+# session, and gives up after its own retries.
+from: early-base
+steps:
+  - run: {seconds: 300, speed: 1}
+  - expect: {duplicants: 3}
+require_log:
+  - 'KleiAccount: Max Retries \(3\) reached'
+  - 'KleiMetrics: Max Retries \(3\) reached'

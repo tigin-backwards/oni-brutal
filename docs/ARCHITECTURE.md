@@ -143,11 +143,11 @@ and .NET 10 ships out-of-band. The host restores them the way .NET documents for
 persist or depend on runtime-specific values: two serialization paths (D1 state-machine
 parameter names, D3 a local mod's version stamp), mods' loading (D11) and the bubble manager's
 one use of a struct's hash as an identity (D26). The game's conversions of floats to integers
-are rewritten as its assemblies load (D29), in the same pass as its directory listings (D30)
-and the double close in 0Harmony's MonoMod (D31). The game's Harmony is adjusted where patches
-would run differently on CoreCLR (D12–D14, D17–D21, D33, D34, D43), and mods' assemblies are
-rewritten as they load where their IL relies on Mono (D11, D22, D23, D27–D32, D40, D42). No other
-game IL is touched.
+are rewritten as its assemblies load (D29), in the same pass as its directory listings (D30),
+the double close in 0Harmony's MonoMod (D31) and its thread aborts (D47). The game's Harmony is
+adjusted where patches would run differently on CoreCLR (D12–D14, D17–D21, D33, D34, D43), and
+mods' assemblies are rewritten as they load where their IL relies on Mono (D11, D22, D23,
+D27–D32, D40, D42, D47). No other game IL is touched.
 
 | Mono provided | Host provides | Needed by |
 |---|---|---|
@@ -206,8 +206,8 @@ game or mod code can notice. Each says how it is resolved, or why it is kept.
   other `GetHashCode` calls stay randomized, and none of them is persisted. A `mods.json`
   written before the patch carries random stamps: each local mod asks for a restart once and has
   to be re-enabled once.
-- **D4 `Thread.Abort`** throws on CoreCLR; reached only by `ThreadedHttps.End` after a 2 s join
-  timeout at shutdown.
+- **D4 `Thread.Abort`** throws on CoreCLR. It is reached during play too, not only at shutdown
+  as first thought: D47 has how the host aborts as Mono does.
 - **D5 `Process.MainModule`** is the host executable; `App.Restart` relaunches the host (we make
   the host the executable that is relaunched, so this works as intended).
 - **D6 Runtime tight sprite meshes.** `Sprite.Create(…, SpriteMeshType.Tight)` traces alpha
@@ -1030,6 +1030,65 @@ game or mod code can notice. Each says how it is resolved, or why it is kept.
   start or length is empty. The first one in a process is logged with its stack. An array that
   is not created or is disposed still throws. In-range access costs what it did (the same
   compare).
+- **D47 Thread.Abort.** Read in Mono's `metadata/threads.c` (Unity's fork, branch
+  `unity-6000.3-mbe`): an abort of another thread marks it AbortRequested and wakes it, and
+  ThreadAbortException ("Thread was being aborted") is raised at its next safe point, a wait or a
+  system call included. It is raised again at the end of every catch that takes it until the
+  thread calls ResetAbort, finally blocks run, and a thread it ends ends quietly (no
+  UnhandledException). An abort of a thread that has ended or is being aborted already does
+  nothing; one of a thread not started marks it, and its Start then does not run it; one of the
+  current thread throws at once. CoreCLR has none of it: Abort and ResetAbort throw
+  PlatformNotSupportedException on the caller. KleiMetrics' StartSession ends a running session
+  with ThreadedHttps.End, which aborts the session's HTTP thread when it has not stopped within
+  2 s. With Klei's servers out of reach that thread is waiting to retry its post (16, 32 and
+  64 s), and KleiAccount, giving up after the same retries, has Global.Update start a session
+  again about two minutes in: CoreCLR threw from Global.Update and the game went to the crash
+  reporter (issue #28). `scripts/e2e-klei-unreachable.sh` plays it
+  (`tests/e2e/klei-unreachable.yaml`, with proxies that refuse connections for the players alone
+  and a Steam double that gives a ticket). In the original, loading the colony started the session
+  at 12:43:04, and its thread was in the 64 s wait when KleiAccount gave up at 12:44:42; 2.5 s
+  later a new thread posted the new session (and gave up at 12:46:37), the old one was not heard
+  from again, and play went on. In ours before the fix, the same timeline ended in the
+  PlatformNotSupportedException from Global.Update and the crash reporter's screen; the new
+  session never started, and the old thread's "Max Retries" never came: past its wait it takes
+  Send's `if (shouldQuit) continue`, which posts again at once, with no line in the log and no
+  end. **Resolved in** `MonoThreadAbort`: the calls of Thread.Abort, Abort(object) and ResetAbort
+  in the game's assemblies and in mods are rewritten as they load (MonoConversions' pass). An
+  abort marks the thread and interrupts it (Thread.Interrupt), so its next wait throws
+  ThreadInterruptedException; in an assembly that calls Thread.Abort, every exit of a catch that
+  could take it (of object, Exception, SystemException, ThreadAbortException or
+  ThreadInterruptedException, or with a filter) calls `CatchEnd` first, which throws
+  ThreadAbortException while the thread is being aborted, as Mono's re-raise does
+  (ThreadedHttps.Send's catch goes back to retry: without it the thread posts again, forever).
+  ResetAbort ends the abort and takes back an interrupt not raised yet. The exception that ends
+  the thread is dropped quietly (UnhandledExceptions, D16). Aborting the current thread throws
+  ThreadAbortException with Mono's message at the call; one of an ended thread does nothing. The
+  game has 155 such catch exits (39 in Assembly-CSharp-firstpass, 116 in Assembly-CSharp), each a
+  static read when no thread is being aborted. Only direct calls (call, callvirt) are rewritten,
+  and catch exits only in an assembly with such a call of Thread.Abort. Load time, measured on the
+  game's assemblies: the metadata filter that skips an assembly without such a reference takes
+  0.2–7 ms (0Harmony, Assembly-CSharp); the pass over one that has it 7–25 ms for
+  Assembly-CSharp-firstpass and 36–56 ms for Assembly-CSharp, once, as the game's rewritten images
+  are cached; a mod with such a call is rewritten at each load, as for D29. `--check-types` aborts
+  threads waiting in Sleep, a wait handle, Monitor.Wait, Join, a task's Result and an HTTP request
+  to a server that never answers (each ends at once, quietly, and the call returns at once), the
+  current thread, an ended one and one not started, and a mod's retry loop like Send's and a catch
+  that calls ResetAbort. With the fix the spec passes in both players: the session's thread, in
+  its 64 s wait, ends at the abort (the engine log's "Thread.Abort" lines, interrupted and then
+  ended by its ThreadInterruptedException, nothing between them), and a new thread posts the new
+  session 2.3 s after KleiAccount gave up, and gives up after its own retries, as in the original.
+  **Differs from Mono:** the exception at the wait is ThreadInterruptedException, so a catch of
+  ThreadAbortException alone does not take it there (only the re-raise at a catch's end), and `e
+  is ThreadAbortException` is false for it: ONITwitch's connection thread logs "An unexpected
+  exception occurred" rather than "Thread aborted", and Truthful Thermal Conductivity's long-click
+  thread ends without its empty catch running (it ends either way). A thread that does not wait is
+  not stopped: a loop without waits, or a system call (a socket's Receive is measured to go on
+  until the socket closes). A catch in an assembly that does not call Thread.Abort is not followed
+  by a re-raise, and the one interrupt can land in a wait in a finally block, which Mono's abort
+  leaves alone. ThreadState never shows AbortRequested, ExceptionState is null (Abort(object)'s
+  state is lost), a thread aborted before its start runs and its first wait is interrupted, and
+  the main thread's own abort throws at the call without being followed. A delegate of
+  Thread.Abort, or a call through reflection, still throws PlatformNotSupportedException.
 
 ## 3. The engine API (`OniMoono.UnityEngine`)
 

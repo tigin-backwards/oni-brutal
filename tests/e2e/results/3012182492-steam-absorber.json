@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3012182492-steam-absorber.yaml",
+ "mods": [
+  "3012182492"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Advanced Filtration unlocks the Dehumidifier (Utilities menu shot matches); one built out of copper ore waits for power",
+ "updated": "2026-10-29",
+ "commit": "64d6e494",
+ "mod_dlls": {
+  "3012182492": {
+   "│²╩¬╗·.dll": "bfb1936411a1d508f015d32183b750cccd80ff4ef9cc342ff2628a14cb2a2785"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-010724-da620746",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T02:13:47",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-030558-dfd83eec",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T03:05:58",
+    "lane": 15,
+    "reference_run": "20261029-010724-da620746",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "utilities-menu": 0.0
+    }
+   },
+   {
+    "run": "20261029-030558-dfd83eec",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T03:07:56",
+    "lane": 15,
+    "reference_run": "20261029-010724-da620746",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "utilities-menu": 0.0
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,37 @@
+# 除湿机Steam absorber (3012182492), class B.
+#
+# What it does: adds the Dehumidifier (MM20230730GG2, 2x2, any metal, 60 W, in the Utilities
+# menu after Advanced Filtration): it draws steam from the air around it (radius 3), takes water
+# from a liquid pipe to cool it, and sends 2 kg/s of polluted water out of its liquid output.
+# How a player reaches it: the build menu (Utilities), after the research.
+# What changes: steam condensed into polluted water by a machine.
+#
+# Setup researches Advanced Filtration. The Utilities menu lists the Dehumidifier; one is
+# ordered in the corridor west of the printing pod out of copper ore and built; it consumes
+# steam and water and makes polluted water, and it waits for power.
+from: early-base
+mods: [3012182492]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"AdvancedFiltration\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"AdvancedFiltration\").unlockedItemIDs": {contains: MM20230730GG2}
+      "Assets.GetPrefab(\"MM20230730GG2\").GetComponent<ElementConverter>.consumedElements[1].Tag": "== 'Steam'"
+      "Assets.GetPrefab(\"MM20230730GG2\").GetComponent<ElementConverter>.outputElements[0].elementHash": DirtyWater
+      "Assets.GetPrefab(\"MM20230730GG2\").GetComponent<PassiveElementConsumer>.elementToConsume": Steam
+  - run: {seconds: 5}
+  - click: {ui: "**/PlanScreen/Toggle:Utilities"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/MM20230730GG2 Group*", cond: stable}
+  - shot: {name: utilities-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - build: {prefab: MM20230730GG2, at: [113, 206], material: Cuprite}
+  - expect: {blueprints: {MM20230730GG2: 1}}
+  - run: {seconds: 900, until: {buildings: {MM20230730GG2: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: MM20230730GG2}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Dehumidifier"}
+  - expect_state:
+      "selected:Operational.IsOperational": false

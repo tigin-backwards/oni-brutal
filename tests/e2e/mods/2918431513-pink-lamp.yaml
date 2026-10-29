@@ -1,0 +1,23 @@
+# 粉红灯 Pink lamp (2918431513), class P.
+#
+# What it does: a postfix on FloorLampConfig.DoPostConfigureComplete gives the Lamp a pink
+# light (colour 5, 0, 4) and an angle of 10.
+# How a player reaches it: the Furniture menu's Lamp, powered.
+# What changes: lamps light pink.
+#
+# The Lamp's prefab has the pink light; one built by setup in the corridor west of the
+# printing pod keeps it.
+from: early-base
+mods: [2918431513]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"FloorLamp\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"FloorLamp\").GetComponent<Light2D>.Color.r": 5
+      "Assets.GetPrefab(\"FloorLamp\").GetComponent<Light2D>.Color.g": 0
+      "Assets.GetPrefab(\"FloorLamp\").GetComponent<Light2D>.Color.b": 4
+      "Assets.GetPrefab(\"FloorLamp\").GetComponent<Light2D>.Angle": 10
+  - run: {seconds: 3}
+  - expect: {buildings: {FloorLamp: 1}}
+  - expect_state:
+      "count:all:Light2D::[*] if .Color.r == 5.0 and .Angle == 10.0": 1

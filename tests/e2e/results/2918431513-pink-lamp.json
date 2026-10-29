@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2918431513-pink-lamp.yaml",
+ "mods": [
+  "2918431513"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Lamp's light is pink with an angle of 10, built and in the prefab",
+ "updated": "2026-10-29",
+ "commit": "20364bdc",
+ "mod_dlls": {
+  "2918431513": {
+   "╖█║∞╡╞Pink lamp.dll": "33f4269f5da59525bc6cbb9cab859df85886664217173916570ea14176fc107f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-130335-d1da02eb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T13:31:08",
+    "lane": 4,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-142627-ee879ee1",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T14:38:38",
+    "lane": 4,
+    "reference_run": "20261029-130335-d1da02eb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-142627-ee879ee1",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T14:39:35",
+    "lane": 4,
+    "reference_run": "20261029-130335-d1da02eb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

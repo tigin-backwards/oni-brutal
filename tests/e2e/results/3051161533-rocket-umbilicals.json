@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3051161533-rocket-umbilicals.yaml",
+ "mods": [
+  "3051161533"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Rocket Platform is a power transformer; a Gas Rocket Port Loader gets its module selector and side screen, matching the original's",
+ "updated": "2026-10-29",
+ "commit": "1785bc2f",
+ "mod_dlls": {
+  "3051161533": {
+   "RocketUmbilicals.dll": "1fa5033a3bd027fe0f05bcd62503a0f7caa58bdaedeeec3267b51fce73472fc4"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-090559-e1e62f9e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T10:15:39",
+    "lane": 4,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-121806-2d41950c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T12:26:35",
+    "lane": 4,
+    "reference_run": "20261029-090559-e1e62f9e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "side": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "side": 0.0
+    }
+   },
+   {
+    "run": "20261029-121806-2d41950c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T12:27:26",
+    "lane": 4,
+    "reference_run": "20261029-090559-e1e62f9e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "side": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "side": 0.0
+    }
+   }
+  ]
+ }
+}

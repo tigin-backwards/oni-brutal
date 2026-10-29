@@ -1,0 +1,30 @@
+# Rocket Umbilicals (Deprecated) (3051161533), classes P, S.
+#
+# What it does: the Rocket Platform passes power to its rocket (a power input and output, a
+# 1000 W LaunchPadPowerTransformer generator, a prefix on Generator.CheckConnectionStatus for
+# its status) and its material distributor is extended; every rocket port (the loaders and
+# unloaders, BaseModularLaunchpadPortConfig) gets a module selector and a side screen,
+# "Module Selection", that picks which of the rocket's modules it serves.
+# How a player reaches it: a Rocket Platform and its ports (Spaced Out); a port's side screen.
+# What changes: rockets fed through their platform, port by port.
+#
+# The platform's def is a power transformer; a Gas Rocket Port Loader built by setup in the
+# corridor west of the printing pod has the selector and, selected, its side screen.
+from: early-base
+mods: [3051161533]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"ModularLaunchpadPortGas\")", method: Build, args: [{"$": "Grid.XYToCell(113, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"LaunchPad\").RequiresPowerInput": true
+      "Assets.GetBuildingDef(\"LaunchPad\").GeneratorWattageRating": 1000
+      "Assets.GetPrefab(\"LaunchPad\").GetComponent<RocketUmbilicals.LaunchPadPowerTransformer>": exists
+  - run: {seconds: 3}
+  - expect: {buildings: {ModularLaunchpadPortGas: 1}}
+  - expect_state:
+      "all:RocketUmbilicals.ModularLaunchpadPortModuleSelector::[0]": exists
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: ModularLaunchpadPortGas}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen", cond: stable}
+  - ui_dump: {name: side, root: "**/DetailsScreen/SideScreen/**/ModularLaunchpadPortModuleSelectorSideScreen"}
+  - shot: {name: side, crop: "**/DetailsScreen/SideScreen", threshold: 0.04}

@@ -1,0 +1,35 @@
+# Only Tame (3159785377), classes P, S.
+#
+# What it does: adds an "Only Tame" check box (a PLib side screen) to the buildings that take
+# critters or eggs: the Egg Cracker and other fabricators, the Incubator, the Critter Drop-Off,
+# the conveyor loader, the automatic dispenser and the critter cargo bay. Checked, they forbid
+# wild critters and eggs laid by wild critters (eggs get an OnlyTame:WildEgg tag until a tame
+# parent clears it), and the fabricator's queue and fetches refresh.
+# How a player reaches it: the building's side screen.
+# What changes: which critters and eggs Duplicants bring there.
+#
+# Setup builds an Egg Cracker in the corridor west of the printing pod. Its side screen shows
+# the check box; a click checks it, the cracker's filter turns on and its fabricator forbids
+# wild critters and wild eggs; a second click turns it off again.
+from: early-base
+mods: [3159785377]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"EggCracker\")", method: Build, args: [131129, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"EggCracker\").GetComponent<OnlyTame.OnlyTameFilter>": exists
+      "Assets.GetPrefab(\"EggIncubator\").GetComponent<OnlyTame.OnlyTameFilter>": exists
+      "Assets.GetPrefab(\"CritterDropOff\").GetComponent<OnlyTame.OnlyTameFilter>": exists
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: EggCracker}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/OnlyTameSideScreen*", cond: stable}
+  - expect_state: {"selected:GetComponent<OnlyTame.OnlyTameFilter>.OnlyTameEnabled": false}
+  - ui_dump: {name: only-tame, root: "**/DetailsScreen/SideScreen/**/OnlyTameSideScreen*"}
+  - click: {ui: "**/OnlyTameSideScreen*/MainPanel/checkbox"}
+  - expect_state:
+      "selected:GetComponent<OnlyTame.OnlyTameFilter>.OnlyTameEnabled": true
+      "selected:GetComponent<ComplexFabricator>.ForbiddenTags": [{contains: "Wild"}, {contains: "OnlyTame:WildEgg"}]
+  - shot: {name: side-screen, crop: "**/DetailsScreen/SideScreen", threshold: 0.04}
+  - click: {ui: "**/OnlyTameSideScreen*/MainPanel/checkbox"}
+  - expect_state: {"selected:GetComponent<OnlyTame.OnlyTameFilter>.OnlyTameEnabled": false}

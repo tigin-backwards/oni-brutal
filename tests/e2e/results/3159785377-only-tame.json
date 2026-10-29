@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3159785377-only-tame.yaml",
+ "mods": [
+  "3159785377"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "an Egg Cracker's Only Tame check box (PLib side screen) turns its filter on, forbidding wild critters and wild eggs, and off again; the side screen dump and shot match",
+ "updated": "2026-10-29",
+ "commit": "8de6f917",
+ "mod_dlls": {
+  "3159785377": {
+   "OnlyTame.dll": "706708d2d52797c8bff23b0001987c07a3e867e03572ebf60f7e7105ea32f614"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-114104-90e83e51",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T11:48:31",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-012302-3a7066f9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T01:23:02",
+    "lane": 14,
+    "reference_run": "20261027-114104-90e83e51",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "only-tame": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "side-screen": 0.00061
+    }
+   },
+   {
+    "run": "20261029-012302-3a7066f9",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T01:23:57",
+    "lane": 14,
+    "reference_run": "20261027-114104-90e83e51",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "only-tame": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "side-screen": 0.00061
+    }
+   }
+  ]
+ }
+}

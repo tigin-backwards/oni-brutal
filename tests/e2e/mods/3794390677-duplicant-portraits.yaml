@@ -1,0 +1,34 @@
+# Duplicant Portraits (3794390677), classes P, V.
+#
+# What it does: at Db.Initialize it adds a masterpiece artwork (DPP_Canvas_PERSONALITY) to
+# the 2x2 Blank Canvas for every available Duplicant personality. Each one's kanim is built at
+# load from a template painting kanim (its anim and build bytes captured in a
+# KAnimFile.FinalizeLoading prefix) with the personality's portrait drawn onto a generated
+# texture; the stages are permits, shown in the supply closet's subcategories too.
+# How a player reaches it: a Duplicant painting a Blank Canvas (or picking its artwork in the
+# canvas's side screen).
+# What changes: new canvas artworks.
+#
+# The stages are registered, as many as in the original, with their generated kanims. A
+# canvas built by setup west of the printing pod is set to the first portrait stage (the
+# artwork a Duplicant would paint) and selected: it shows the mod's kanim, and a paused shot of
+# it matches the original's.
+from: early-base
+mods: [3794390677]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Canvas\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "last:GetComponent<Artable>", method: SetStage, args: [{"$": "type:DuplicantPortraits.PortraitStages::StageIds[0]"}, true]}}
+steps:
+  - expect_state:
+      "type:DuplicantPortraits.PortraitStages::StageIds.Count": [">= 10", "== original"]
+      "type:DuplicantPortraits.PortraitStages::StageIds[0]": "== original"
+  - run: {seconds: 2}
+  - expect: {buildings: {Canvas: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: Canvas}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Artable>.CurrentStage": {contains: DPP_Canvas_}
+      "selected:GetComponent<KBatchedAnimController>.AnimFiles[0].name": [{contains: DPP_Canvas_}, "== original"]
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}
+  - world_shot: {name: canvas, ortho: 2, at: [113, 208], hide_ui: true, mask: [[0, 400, 1280, 320]]}

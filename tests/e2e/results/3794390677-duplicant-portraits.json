@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3794390677-duplicant-portraits.yaml",
+ "mods": [
+  "3794390677"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the portrait stages and their generated kanims are registered; a canvas set to one shows it, and its world shot matches",
+ "updated": "2026-10-29",
+ "commit": "f4926fda",
+ "mod_dlls": {
+  "3794390677": {
+   "DuplicantPortraits.dll": "c6981a20e12510e1d323869648fdfa08928ea181c41aef7e059df766a51af4ff"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-070726-6bd2020b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T07:27:46",
+    "lane": 8,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-154719-690ca251",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T15:47:19",
+    "lane": 7,
+    "reference_run": "20261029-070726-6bd2020b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "canvas": 0.031799
+    }
+   },
+   {
+    "run": "20261029-154719-690ca251",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T15:48:46",
+    "lane": 7,
+    "reference_run": "20261029-070726-6bd2020b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "canvas": 0.019406
+    }
+   }
+  ]
+ }
+}

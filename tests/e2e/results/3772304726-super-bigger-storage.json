@@ -1,0 +1,80 @@
+{
+ "spec": "mods/3772304726-super-bigger-storage.yaml",
+ "mods": [
+  "3772304726"
+ ],
+ "verdict": "warning",
+ "why": "known findings: float-tostring-shortest, unused-input-caret-layout",
+ "findings": [
+  "float-tostring-shortest",
+  "unused-input-caret-layout"
+ ],
+ "note": "the storage prefabs have the mod's capacities; a storage bin built in the corridor offers 10,000,000 kg on its capacity side screen (dump matches) and the ration box holds 1,000,000 kg",
+ "updated": "2026-10-29",
+ "commit": "bf12561d",
+ "mod_dlls": {
+  "3772304726": {
+   "SuperStorage.dll": "eac54ff74f5e452b9e16e2a81905e27d3f8a03958b92522acb5ab2e6d69d38dc"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-103032-617b0bb3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T11:04:02",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-012035-af0723c3",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-29T01:30:45",
+    "lane": 14,
+    "reference_run": "20261027-103032-617b0bb3",
+    "new_signatures": 0,
+    "findings": [
+     "float-tostring-shortest",
+     "unused-input-caret-layout"
+    ],
+    "ui_dump": {
+     "capacity": {
+      "differences": 0,
+      "known": {
+       "float-tostring-shortest": 13,
+       "unused-input-caret-layout": 1
+      }
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261029-012035-af0723c3",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-29T01:31:50",
+    "lane": 14,
+    "reference_run": "20261027-103032-617b0bb3",
+    "new_signatures": 0,
+    "findings": [
+     "float-tostring-shortest",
+     "unused-input-caret-layout"
+    ],
+    "ui_dump": {
+     "capacity": {
+      "differences": 0,
+      "known": {
+       "float-tostring-shortest": 13,
+       "unused-input-caret-layout": 1
+      }
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

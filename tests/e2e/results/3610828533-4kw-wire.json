@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3610828533-4kw-wire.yaml",
+ "mods": [
+  "3610828533"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the 2 kW wire rating carries 4000 W; Power Regulation lists the Conductive Wire with the mod's mass and build time, and its build card matches (dump)",
+ "updated": "2026-10-29",
+ "commit": "72b42f9f",
+ "mod_dlls": {
+  "3610828533": {
+   "4kwWire.dll": "780f8c42b762769bcac19f86545e8b2abdfeb4b4f389f3b663436ae501549af7"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-112540-575b1ae3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T11:25:40",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-010724-500e494c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T01:07:24",
+    "lane": 14,
+    "reference_run": "20261027-112540-575b1ae3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "card": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261029-010724-500e494c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T01:08:22",
+    "lane": 14,
+    "reference_run": "20261027-112540-575b1ae3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "card": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

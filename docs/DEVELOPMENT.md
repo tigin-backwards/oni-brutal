@@ -5,8 +5,9 @@ How to build, run and test Moono from source. If you just want to play, the
 
 ## Requirements
 
-- Linux x64 with an OpenGL 4.5 driver. The Windows test player is built from Linux or WSL, and
-  runs on Windows x64 with an OpenGL 4.5 driver and the .NET 10 runtime.
+- Linux x64 with an OpenGL 4.5 driver. The Windows test player is built from WSL (its
+  `OniMoono.exe` with the Visual Studio C++ build tools on the Windows side), and runs on
+  Windows x64 with an OpenGL 4.5 driver and the .NET 10 runtime.
 - The .NET SDK pinned in `global.json` (10.0.402, or a later patch release). The scripts use
   `~/.dotnet/dotnet` if it exists.
 - The Linux build of Oxygen Not Included, expected at `~/projects/oni-linux`. To use another
@@ -101,6 +102,14 @@ without building. Nothing of the game goes into them.
 scripts/build-windows.sh       # out/win: OniMoono.exe, Restarter.exe and the Steam stub
 scripts/run-windows.sh         # from WSL: a test run on the Windows install
 ```
+
+`OniMoono.exe` is our native host (`src/OniMoono.NativeHost`, [ARCHITECTURE.md](ARCHITECTURE.md)
+§2), built by `scripts/build-native-host.sh` with MSVC through `cmd.exe` (`VCVARS64` names
+`vcvars64.bat` when vswhere can't find it). `release.sh` builds it the same way, so releases are
+made from WSL. `scripts/check-windows-host.py EXE [--like OTHER.exe]` checks a built one from its
+PE file (the two GPU exports present, writable and 1; the icon, manifest, version and subsystem);
+`build-windows.sh` and `release.sh` run it, and `check.sh` runs it on `out/win/host` when
+there is one.
 
 The Windows player uses the Windows build's own data, whose shaders include OpenGL programs
 alongside the Direct3D ones. `run-windows.sh` copies `out/win` to `%TEMP%\oni-brutal` and starts

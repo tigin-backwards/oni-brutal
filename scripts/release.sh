@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Builds the release archives into out/release: the self-contained player for Windows and for
+# Builds the release archives into out/release (from WSL: the Windows player's OniMoono.exe is
+# built with MSVC, scripts/build-native-host.sh): the self-contained player for Windows and for
 # Linux, each with its setup script, the README and BRUTAL's NOTICE.txt, under one top folder
 # named oni-moono (extracting a newer release over an older one keeps the paths the same).
 #   scripts/release.sh [VERSION]      (VERSION defaults to the date of HEAD's commit)
@@ -28,6 +29,10 @@ cp "$root/setup.cmd" "$win/"
 cp -r "$root/out/bin/OniMoono.Host/release_win-x64/." "$win/player/"
 rm -f "$win/player/Restarter" "$win/player/"FacadeGen*
 cp "$root/out/bin/OniMoono.Restarter/release_win-x64/Restarter."{exe,dll,deps.json,runtimeconfig.json} "$win/player/"
+# OniMoono.exe: our native host, which exports the GPU hints (ARCHITECTURE §2), in place of
+# the SDK's apphost; built with MSVC on the Windows side, so the release is made from WSL.
+"$root/scripts/build-native-host.sh" "$win/player/OniMoono.exe"
+check=$(python3 -I "$root/scripts/check-windows-host.py" "$win/player/OniMoono.exe") || { echo "$check"; exit 1; }
 
 # Linux: OniMoono with the Restarter script.
 build "$root/src/OniMoono.Host" linux-x64

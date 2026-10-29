@@ -95,5 +95,13 @@ grep -A8 '^FAIL ' <<< "$types" || true
 "$root/out/bin/OniMoono.Host/debug/OniMoono" --game "$game" --check-bind --log "$root/out/check-bind.log" | grep -v '^\[engine\]'
 natives=$("$root/out/bin/OniMoono.Host/debug/OniMoono" --game "$game" --check-natives --log "$root/out/check-natives.log") || failed+=(check-natives)
 echo "check-natives: $(tail -1 <<< "$natives")"; grep -E 'MISSING|NO PLUGIN' <<< "$natives" || true
+# The Windows player's native host (src/OniMoono.NativeHost), when a Windows build is here: building
+# it needs Windows, checking it only its PE file (the GPU exports, icon, manifest, version).
+if [ -f "$root/out/win/host/OniMoono.exe" ]; then
+    winhost=$(python3 -I "$root/scripts/check-windows-host.py" "$root/out/win/host/OniMoono.exe") || { failed+=(check-windows-host); echo "$winhost"; }
+    echo "check-windows-host: $(grep -c '^ok ' <<< "$winhost") ok, $(grep -c '^FAIL ' <<< "$winhost") failed"
+else
+    echo "check-windows-host skipped: no out/win/host/OniMoono.exe (scripts/build-windows.sh)"
+fi
 "$root/scripts/build-packages.sh" >/dev/null; echo "packages: $(sed -n 2p "$root/out/apicheck-packages.txt")"
 [ ${#failed[@]} -eq 0 ] || { echo "test suites failed: ${failed[*]}"; exit 1; }

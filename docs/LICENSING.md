@@ -91,6 +91,9 @@ Steamworks (`libsteam_api.so`, Steamworks.NET under MIT); `cimgui.so` (Dear ImGu
   Software License B 2.0 (X11-equivalent). The notice is in the file's header and in
   `NOTICE.txt`. Both were measured to equal the original's bit for bit
   (`docs/cleanroom/ugui.md`, "Camera and projection math").
+- `src/OniMoono.NativeHost` (the Windows `OniMoono.exe`) links `libnethost.lib` and includes
+  `nethost.h` and `hostfxr.h` from the .NET SDK's `Microsoft.NETCore.App.Host.win-x64` pack
+  (dotnet/runtime, © .NET Foundation and Contributors, MIT). The notice is in `NOTICE.txt`.
 - Native libraries from BRUTAL's packages (GLFW, glad, stb, FreeType with libpng and zlib), under
   their own licences as shipped in those packages.
 

@@ -1,0 +1,38 @@
+// OniMoono.exe's resources, as the .NET SDK's apphost had them: the icon as resource 32512
+// (GlfwPlatform.SetClassIcon loads it for the taskbar), the SDK's manifest, and the version
+// information the SDK copied from OniMoono.dll. version.h (build.cmd) has the commit.
+#include <winres.h>
+#include "version.h"
+
+32512 ICON "Moo.ico"
+
+1 RT_MANIFEST "OniMoono.exe.manifest"
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,0
+ PRODUCTVERSION 1,0,0,0
+ FILEFLAGSMASK 0x3fL
+ FILEFLAGS 0x0L
+ FILEOS VOS_NT_WINDOWS32
+ FILETYPE VFT_APP
+ FILESUBTYPE VFT2_UNKNOWN
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "000004b0"
+        BEGIN
+            VALUE "CompanyName", "OniMoono"
+            VALUE "FileDescription", "OniMoono"
+            VALUE "FileVersion", "1.0.0.0"
+            VALUE "InternalName", "OniMoono.dll"
+            VALUE "LegalCopyright", " "
+            VALUE "OriginalFilename", "OniMoono.dll"
+            VALUE "ProductName", "OniMoono"
+            VALUE "ProductVersion", MOONO_PRODUCT_VERSION
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0, 1200
+    END
+END

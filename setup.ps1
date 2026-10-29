@@ -33,6 +33,45 @@ function Find-Game {
     return $null
 }
 
+# OniMoono.exe for a player built here: our native host (src\OniMoono.NativeHost), which asks
+# hybrid-graphics laptops for their discrete GPU as the original game's exe does. It needs the
+# Visual Studio C++ build tools, which the .NET SDK doesn't include; without them the SDK's own
+# OniMoono.exe stays, which plays the same but leaves the GPU to the driver's default (a
+# release's player always has ours).
+function Build-NativeHost($dotnet, $built) {
+    $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
+    $vs = if (Test-Path $vswhere) { & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath }
+    if (-not $vs) {
+        Write-Host 'No Visual Studio C++ build tools: OniMoono.exe is the .NET SDK''s, which does not ask a laptop with two GPUs for the faster one (a release''s does).' -ForegroundColor Yellow
+        return
+    }
+    $version = & $dotnet msbuild (Join-Path $here 'src\OniMoono.Restarter') -getProperty:BundledNETCoreAppPackageVersion
+    $packages = if ($env:NUGET_PACKAGES) { $env:NUGET_PACKAGES } else { Join-Path $env:USERPROFILE '.nuget\packages' }
+    $pack = @((Join-Path $packages "microsoft.netcore.app.host.win-x64\$version\runtimes\win-x64\native"),
+              (Join-Path (Split-Path $dotnet) "packs\Microsoft.NETCore.App.Host.win-x64\$version\runtimes\win-x64\native")) |
+        Where-Object { Test-Path (Join-Path $_ 'libnethost.lib') } | Select-Object -First 1
+    if (-not $pack) { Die "the .NET SDK's nethost ($version) wasn't found" }
+    $stage = Join-Path $env:TEMP "oni-moono-nativehost-$PID"
+    New-Item -ItemType Directory -Force $stage | Out-Null
+    try {
+        foreach ($file in 'host.c', 'host.rc', 'OniMoono.exe.manifest', 'build.cmd') { Copy-Item (Join-Path $here "src\OniMoono.NativeHost\$file") $stage }
+        Copy-Item (Join-Path $here 'src\OniMoono.Host\Moo.ico') $stage
+        foreach ($file in 'nethost.h', 'hostfxr.h', 'libnethost.lib') { Copy-Item (Join-Path $pack $file) $stage }
+        # The commit, as the SDK stamps it into OniMoono.dll.
+        $product = [Diagnostics.FileVersionInfo]::GetVersionInfo((Join-Path $built 'OniMoono.dll')).ProductVersion
+        $commit = if ($product -match '\+(.+)$') { $Matches[1] } else { 'unknown' }
+        Push-Location $stage
+        $env:VCVARS64 = Join-Path $vs 'VC\Auxiliary\Build\vcvars64.bat'
+        # (stderr joined inside cmd: Windows PowerShell stops on a native command's stderr here)
+        $output = & cmd /c "build.cmd $commit 2>&1"
+        Pop-Location
+        if (-not (Test-Path (Join-Path $stage 'OniMoono.exe'))) { $output | Write-Host; Die 'building OniMoono.exe failed' }
+        Copy-Item -Force (Join-Path $stage 'OniMoono.exe') $built
+    } finally {
+        Remove-Item -Recurse -Force $stage -ErrorAction SilentlyContinue
+    }
+}
+
 Write-Host 'Moono: Oxygen Not Included on its own engine (unofficial). Setup.'
 if (-not $Game) { $Game = Find-Game }
 if (-not $Game) { Die "Oxygen Not Included wasn't found in any Steam library; install it, or pass its directory: setup.ps1 'C:\path\to\OxygenNotIncluded'" }
@@ -80,6 +119,7 @@ if (Test-Path (Join-Path $here 'player\OniMoono.exe')) {
     Remove-Item -Force (Join-Path $built 'Restarter'), (Join-Path $built 'FacadeGen.*') -ErrorAction SilentlyContinue
     $restarter = Join-Path $here 'out\bin\OniMoono.Restarter\release_win-x64'
     foreach ($file in 'Restarter.exe', 'Restarter.dll', 'Restarter.deps.json', 'Restarter.runtimeconfig.json') { Copy-Item (Join-Path $restarter $file) $built }
+    Build-NativeHost $dotnet $built
 }
 
 # Installed to one place, so the launch options never change.

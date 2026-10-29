@@ -1,0 +1,31 @@
+# 梯子门 LadderDoor (3762973536), class B.
+#
+# What it does: adds the Ladder Door (LadderDoor, 1x1, raw minerals or wood, Base menu with
+# the ladders, built anywhere, drag-built, +decor): a ladder (20 % faster) whose cell is made
+# gas- and liquid-tight and fully insulating (SimMessages.SetCellProperties and
+# SetInsulation) while it stands.
+# How a player reaches it: the Base menu's ladders.
+# What changes: a ladder that seals its cell.
+#
+# A Ladder Door built by setup in the corridor west of the printing pod blocks gas and liquid
+# in its cell (the sim's cell properties) and insulates it; the Base menu offers it (its card
+# is shot).
+from: early-base
+mods: [3762973536]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LadderDoor\")", method: Build, args: [{"$": "Grid.XYToCell(112, 206)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"LadderDoor\").GetComponent<Ladder>.upwardsMovementSpeedMultiplier": 1.2
+  - run: {seconds: 3}
+  - expect: {buildings: {LadderDoor: 1}}
+  - expect_state:
+      "Grid.Properties.get_Item(131128)": [">= 3", "== original"]
+      "Grid.Insulation.get_Item(131128)": [0, "== original"]
+      "Grid.Properties.get_Item(131127)": "== original"
+  - driver: {camera.set: {cell: [113, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/LadderDoor Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/LadderDoor Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}

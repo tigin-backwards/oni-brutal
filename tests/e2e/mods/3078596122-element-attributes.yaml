@@ -1,0 +1,23 @@
+# Element Attributes (3078596122), class P.
+#
+# What it does: reads mods/config/ElementAttributes/config.json (writing a default one, and
+# opening its folder, when there is none) and, after the game configures its elements,
+# replaces each listed element's building attributes: "overheat" (an Overheat Temperature
+# bonus, 0 removes it) and "decor" (a decor multiplier in percent, 0 removes it).
+# How a player reaches it: editing the config file; any building made of those elements.
+# What changes: the materials' overheat and decor bonuses.
+#
+# Config here: Lead decor +30 %, Steel decor +50 %, Tungsten without its overheat bonus. The
+# elements carry exactly those modifiers.
+from: early-base
+mods: [3078596122]
+options:
+  ElementAttributes: {elements: [{name: Lead, decor: 30}, {name: Steel, decor: 50}, {name: Tungsten, overheat: 0}]}
+require_log: ['\[ElementAttributes\] Done modifying elements']
+steps:
+  - expect_state:
+      "count:ElementLoader.FindElementByName(\"Lead\").attributeModifiers[*] if .AttributeId == Decor": 1
+      "sum:ElementLoader.FindElementByName(\"Lead\").attributeModifiers[*].Value if .AttributeId == Decor": 0.3
+      "sum:ElementLoader.FindElementByName(\"Steel\").attributeModifiers[*].Value if .AttributeId == Decor": 0.5
+      "count:ElementLoader.FindElementByName(\"Steel\").attributeModifiers[*] if .AttributeId == Decor and .IsMultiplier == true": 1
+      "count:ElementLoader.FindElementByName(\"Tungsten\").attributeModifiers[*] if .AttributeId == OverheatTemperature": 0

@@ -1,0 +1,22 @@
+# Discord Rich Presence (3752842483), classes S, O; PLib options.
+#
+# What it does: when a save loads (a postfix on SaveLoader.OnSpawn) it opens a Discord RPC
+# client for each running Discord process (at least one) and publishes the colony: the save's
+# name, the cycle and Duplicant count, and the cluster's asteroid picture from the wiki
+# (options turn each off); it updates on each new cycle and when Duplicants come or go, and
+# closes on quit (PauseScreen.OnQuitConfirm). Without Discord the client just fails to
+# connect.
+# How a player reaches it: Discord's status; the PLib options.
+# What changes: Discord shows the game being played.
+#
+# The colony loads with the mod: its clients exist, and its state text names the cycle and
+# the three Duplicants, as in the original. The colony plays on.
+from: early-base
+mods: [3752842483]
+steps:
+  - expect_state:
+      "type:DiscordRPMod.DiscordRPMod_GameOnLoadPatch_OnSpawn::Settings.ModEnabled": true
+      "type:DiscordRPMod.DiscordRPMod_GameOnLoadPatch_OnSpawn::clients.Count": ">= 1"
+      "type:DiscordRPMod.DiscordRPMod_GameOnLoadPatch_OnSpawn::GetState(false)": {contains: "with 3 dups"}
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

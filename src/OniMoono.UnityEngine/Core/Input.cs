@@ -41,8 +41,9 @@ namespace UnityEngine
         public static bool anyKey => State.AnyKey;
         public static bool anyKeyDown => State.AnyKeyDown;
 
-        // Desktop Linux: no touch screen, no on-screen keyboard; IME composition text is delivered
-        // as committed characters, so there is never a composition string.
+        // Desktop: no touch screen, no on-screen keyboard; IME composition text is delivered as
+        // committed characters, so there is never a composition string. The mode decides whether
+        // the window takes IME input at all (ImeInput).
         public static bool touchSupported => false;
         public static int touchCount => 0;
         public static Touch GetTouch(int index) => throw new ArgumentException("Index out of bounds.");
@@ -50,6 +51,9 @@ namespace UnityEngine
         public static string compositionString => "";
         public static IMECompositionMode imeCompositionMode { get; set; } = IMECompositionMode.Auto;
         public static Vector2 compositionCursorPos { get; set; }
+        /// False in the original Windows player in every state measured (issue #30): the US and
+        /// the Chinese layout, the mode Auto and On, and while composing.
+        public static bool imeIsSelected => false;
     }
 
     public partial struct Touch

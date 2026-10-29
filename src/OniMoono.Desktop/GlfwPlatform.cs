@@ -247,6 +247,30 @@ namespace OniMoono.Desktop
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         static extern IntPtr SetClassLongPtrW(IntPtr hwnd, int index, IntPtr value);
 
+        /// Whether the window's IME is on (null: not set yet; Windows' default is on).
+        bool? imeEnabled;
+
+        /// Windows: the window takes IME input only when Input.imeCompositionMode asks for it
+        /// (ImeInput), as Unity's player: without its input context an IME such as Microsoft
+        /// Pinyin leaves the keys to the game (issue #30). The same calls as Unity's: the context
+        /// taken away, and the window's default one given back.
+        void ApplyIme()
+        {
+            bool wanted = OniMoono.Engine.Platform.ImeInput.WantedNow;
+            if (imeEnabled == wanted) return;
+            imeEnabled = wanted;
+            var hwnd = (IntPtr)window.GetWin32Window();
+            const uint IACE_DEFAULT = 0x10;
+            if (wanted) ImmAssociateContextEx(hwnd, IntPtr.Zero, IACE_DEFAULT);
+            else ImmAssociateContext(hwnd, IntPtr.Zero);
+        }
+
+        [System.Runtime.InteropServices.DllImport("imm32.dll")]
+        static extern IntPtr ImmAssociateContext(IntPtr hwnd, IntPtr himc);
+
+        [System.Runtime.InteropServices.DllImport("imm32.dll")]
+        static extern bool ImmAssociateContextEx(IntPtr hwnd, IntPtr himc, uint flags);
+
         static float MonitorDpi(GlfwMonitor m)
         {
             var mm = m.PhysicalSize;
@@ -414,6 +438,7 @@ namespace OniMoono.Desktop
                 inGlfw--;
             }
             ReadFramebufferSize();
+            if (OperatingSystem.IsWindows()) ApplyIme();
             if (!scripted) FollowCursorOutside();
             // Each close of the window is one quit request: Application.wantsToQuit may refuse it.
             bool open = !closeRequested;

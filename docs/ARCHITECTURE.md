@@ -1454,6 +1454,17 @@ and scroll, hardware cursors from `Texture2D`, clipboard, focus events. Legacy I
 axes/buttons come from `globalgamemanagers` `InputManager` settings, with Unity's gravity /
 sensitivity / dead-zone smoothing.
 
+On Windows the window takes IME input only when `Input.imeCompositionMode` asks for it
+(`ImeInput`): `On`, which a focused TextMeshPro or uGUI field sets, or `Auto` with an IMGUI text
+field focused. Otherwise its input context is taken away, so an IME such as Microsoft Pinyin
+leaves the game's hotkeys alone (issue #30). Measured in the original with the Chinese layout on
+its window and UnityPlayer.dll's imm32 calls logged: `ImmAssociateContext(hwnd, NULL)` outside
+text fields, `ImmAssociateContextEx(hwnd, NULL, IACE_DEFAULT)` in one, applied at the window's
+next focus, layout or key message; ours applies the mode at the next frame's event poll.
+Committed IME text arrives as typed characters; ours reports no composition string (the
+original's TMP fields show the composition inline, ours leave it to the IME's own window), and
+X11 input methods are untouched (none was available to measure).
+
 A minimized window keeps the size it had, as in Unity's player: Windows reports its framebuffer
 as 0x0, but `Screen.width`/`height`, `Display.renderingWidth`/`Height` and the cameras' pixel
 sizes stay what they were, and frames go on rendering at that size until the window is restored

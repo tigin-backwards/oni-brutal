@@ -169,6 +169,12 @@ namespace SemanticsProbe
                 MemberOrder.Hook(harmony);
                 return;
             }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "delegatejson")
+            {
+                Rec.Log("=== values: delegate json");
+                DelegateJson.Run();
+                return;
+            }
             if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "nativerange")
             {
                 NativeRanges.Run();

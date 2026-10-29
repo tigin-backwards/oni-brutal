@@ -422,6 +422,16 @@ the engine's colour table from the original's log with `sv-check.py cs LOG`. Mea
 2026-10-23: 157 named colours, none on `Color32`; `isIncremental` False; alignment Left by
 default and any value read back as set. `ModApiTests` encodes them.
 
+With `PROBE_SCENARIO=delegatejson` only the delegate probe runs (`DelegateJson.cs`, lines `DJ …`,
+at mod load): objects holding a static, an instance, a multicast, a generic method's, a closure's
+and a lambda's delegate through the game's Newtonsoft.Json (default settings, Indented,
+ReferenceLoopHandling.Ignore, TypeNameHandling.All), the delegate alone, reading the JSON back,
+a BinaryFormatter round trip, the entries of `GetObjectData` (and of each DelegateEntry), and
+MethodInfos' own `GetObjectData` and JSON. It needs the game's `Newtonsoft.Json.dll` (referenced
+from `Managed/`). It runs through `scripts/e2e.py` with OniMcp's mod folder as above and a spec
+`from: main-menu`. ARCHITECTURE D48 records what it measured; `MonoDelegateSerializationTests`
+encodes it.
+
 With `PROBE_SCENARIO=callingasm` only the calling-assembly probe runs (`CallingAssembly.cs`,
 lines `CA …`, at mod load): what `Assembly.GetCallingAssembly()`, `GetExecutingAssembly()` and
 `new StackTrace()` report in Harmony prefixes and postfixes of the probe's constructors and

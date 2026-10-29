@@ -1,0 +1,32 @@
+# Mutant Plus — Stackable Plant Mutations (3807135177), classes P, S, O; PLib options.
+#
+# What it does: rewrites plant mutation: a mutant seed may carry several mutations (up to 6,
+# an option, with a 40 % chance of each extra one), mutations may be lost, nine new ones are
+# registered in Db.PlantMutations (uranium-rich, luminous, prolific, hardy, spiced, seedless,
+# oviparous, scavenger, adaptive) with their drop, aura and harvest controllers, the vanilla
+# ones are reworked, and the planter side screen, tooltips and the pollen overlay show the
+# stacks. Dev tools add a mutation editor to a plant's user menu.
+# How a player reaches it: mutant seeds (radiation, Spaced Out); the planter side screen.
+# What changes: what a mutant plant can be.
+#
+# The new mutations are registered, named and counted as in the original.
+from: early-base
+mods: [3807135177]
+steps:
+  - expect_state:
+      "Db.Get().PlantMutations.TryGet(\"uraniumRich\").Id": uraniumRich
+      "Db.Get().PlantMutations.TryGet(\"luminous\").Id": luminous
+      "Db.Get().PlantMutations.TryGet(\"prolific\").Id": prolific
+      "Db.Get().PlantMutations.TryGet(\"hardy\").Id": hardy
+      "Db.Get().PlantMutations.TryGet(\"spiced\").Id": spiced
+      "Db.Get().PlantMutations.TryGet(\"seedless\").Id": seedless
+      "Db.Get().PlantMutations.TryGet(\"oviparous\").Id": oviparous
+      "Db.Get().PlantMutations.TryGet(\"scavenger\").Id": scavenger
+      "Db.Get().PlantMutations.TryGet(\"adaptive\").Id": adaptive
+  - expect_state:
+      "Db.Get().PlantMutations.Count": "== original"
+      "Db.Get().PlantMutations.TryGet(\"hardy\").Name": "== original"
+      "Db.Get().PlantMutations.TryGet(\"luminous\").desc": "== original"
+      "type:MutantPlus.ModState::Disabled": false
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

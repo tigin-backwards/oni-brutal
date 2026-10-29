@@ -1089,6 +1089,56 @@ game or mod code can notice. Each says how it is resolved, or why it is kept.
   state is lost), a thread aborted before its start runs and its first wait is interrupted, and
   the main thread's own abort throws at the call without being followed. A delegate of
   Thread.Abort, or a call through reflection, still throws PlatformNotSupportedException.
+- **D48 Serialized delegates.** Read in Mono's `System/Delegate.cs` and
+  `DelegateSerializationHolder.cs` (Unity's fork, branch `unity-6000.3-mbe`): Delegate is
+  ISerializable, and its GetObjectData (MulticastDelegate's calls it) writes, for each delegate of
+  the invocation list, a DelegateEntry chained to the one before it ("Delegate" holds the first;
+  private fields type, assembly, target, targetTypeAssembly, targetTypeName and methodName, public
+  `delegateEntry`), the target as "target<n>" when there is one, and the method as "method<n>",
+  and sets the info's type to DelegateSerializationHolder, which gives the delegate back. A
+  RuntimeMethodInfo is ISerializable too, and writes MemberInfoSerializationHolder's entries (Name,
+  AssemblyName, ClassName, Signature, Signature2, MemberType, GenericArguments). Newtonsoft.Json
+  writes an ISerializable value as an object of its GetObjectData entries, so on Mono an object
+  holding a delegate serializes. Measured in the original player with UnityProbe's delegate probe
+  (`DelegateJson.cs`, `PROBE_SCENARIO=delegatejson`) through the game's Newtonsoft.Json 7.0.1: a
+  holder of `Func<int,int>` writes `"Fn":{"Delegate":{"delegateEntry":null},"method0":{"Name":"Twice",
+  "AssemblyName":"…","ClassName":"…","Signature":"Int32 Twice(Int32)","Signature2":"System.Int32
+  Twice(System.Int32)","MemberType":8,"GenericArguments":null}}`; an instance method's and a
+  closure's add `"target0"`, the target's own serialization (`{"Add":3,"Label":"target"}`, the
+  display class's captured fields, `{}` for a lambda capturing nothing); a multicast one nests
+  `delegateEntry` once per delegate and writes `method0`, `target1`, `method1`, … in list order; a
+  generic method's GenericArguments are its type arguments' assembly-qualified names (mscorlib's).
+  The same with Formatting.Indented and ReferenceLoopHandling.Ignore; none throws. Reading the JSON
+  back throws (JsonSerializationException: the delegate type has no serialization constructor), and
+  BinaryFormatter round-trips a delegate whose targets are serializable. CoreCLR's GetObjectData
+  throws SerializationException ("Serializing delegates is not supported on this platform"), and
+  its RuntimeMethodInfo is not ISerializable (Newtonsoft fails on one with
+  PlatformNotSupportedException): OniExtract's export of game data, a postfix of
+  `LegacyModMain.Load`, threw, the game logged it from `Assets.OnPrefabInit` and quit through its
+  crash dialog (issue #22). **Resolved in** `MonoDelegateSerialization`: a prefix of
+  `Delegate.GetObjectData` and `MulticastDelegate.GetObjectData` writes Mono's entries, with
+  Mono's field names and order, and D1's names for types (mscorlib's for the class libraries'
+  types, the Unity modules' for the engine's). "method<n>" holds a MethodInfo standing for the
+  delegate's method (it reflects as the method and invokes it) that writes Mono's
+  RuntimeMethodInfo entries: Signature is `MethodInfo.ToString()`, the same in both runtimes,
+  Signature2 the types' `ToString()` with by-ref ones as `T&` and type arguments as ToString
+  prints them (`System.Int32 Same[Int32](System.Int32)`, as measured), and GenericArguments the
+  type arguments' Mono names as strings, which Newtonsoft writes as it writes Mono's Types. The
+  holder types give the delegate back through BinaryFormatter, the targets serialized as before.
+  The probe's JSON is then the original's for every case and setting (static, instance and
+  generic methods, multicast, closure, lambda; default, indented, loop-ignoring). Cost: none
+  elsewhere: two patches on the host's patch thread (about 20 ms, off the main thread), and a
+  delegate's serialization takes about 12 µs (release build). Tests: `MonoDelegateSerializationTests`.
+  **Differs from Mono:** names a formatter takes from the runtime: with TypeNameHandling, `$type`
+  names this runtime's types (`System.Private.CoreLib` for the delegate type, as for every class
+  library type, and `OniMoono.Host.DelegateSerializationHolder+DelegateEntry, OniMoono` and the
+  stand-in where Mono names `System.DelegateSerializationHolder+DelegateEntry, mscorlib` and
+  `System.Reflection.RuntimeMethodInfo, mscorlib`, GenericArguments `System.String[]` for
+  `System.Type[]`), the info's FullTypeName and AssemblyName (the host's holder), and
+  BinaryFormatter's bytes. Code reading the entries itself gets the stand-in, not a
+  RuntimeMethodInfo (`Delegate.CreateDelegate` refuses it), and GenericArguments as strings. A MethodInfo serialized alone (not in a delegate) still throws, as
+  does a delegate to a dynamic method (Mono's throws NullReferenceException, its method having no
+  declaring type).
 
 ## 3. The engine API (`OniMoono.UnityEngine`)
 

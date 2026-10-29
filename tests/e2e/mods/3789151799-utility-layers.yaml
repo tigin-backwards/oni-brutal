@@ -1,0 +1,31 @@
+# Utility Layers (TripleUtilityLayers, 3789151799), classes B, P, U.
+#
+# What it does: pipes, conveyor rails, wires and automation get three independent layers:
+# each building's ports can be assigned a layer (a port panel), lines of different layers
+# cross without connecting, layer transfer buildings move liquid, gas, items, power and
+# signals between layers, and in each utility overlay a draggable HUD (legacy uGUI Text in an
+# OS font) picks the layer shown and built on: Layer 1, 2, 3 or All, with hotkeys.
+# How a player reaches it: open a utility overlay; the HUD's layer buttons.
+# What changes: utilities in layers.
+#
+# The Power overlay (F2) shows the HUD (dumped, shot); its Layer 2 button selects layer 2,
+# and its All button all layers.
+from: early-base
+mods: [3789151799]
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"TULPowerLayerJunction\")": exists
+      "Assets.GetPrefab(\"ManualGenerator\").GetComponent<TripleUtilityLayers.PortLayerAssignments>": exists
+  - run: {seconds: 2}
+  - key: {code: F2}
+  - ui_wait: {path: "**/TripleUtilityLayersHUD", cond: stable}
+  - ui_dump: {name: hud, root: "**/TripleUtilityLayersHUD"}
+  - shot: {name: hud, crop: "**/TripleUtilityLayersHUD", threshold: 0.04}
+  - click: {ui: "**/TripleUtilityLayersHUD/LayerButtons/Layer 2"}
+  - expect_state:
+      "type:TripleUtilityLayers.LayerSelection::Active": "== 'Layer2'"
+      "type:TripleUtilityLayers.LayerSelection::ShowAll": false
+  - click: {ui: "**/TripleUtilityLayersHUD/LayerButtons/Layer 4"}
+  - expect_state:
+      "type:TripleUtilityLayers.LayerSelection::ShowAll": true
+  - key: {code: F2}

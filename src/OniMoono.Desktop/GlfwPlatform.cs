@@ -50,6 +50,9 @@ namespace OniMoono.Desktop
 
         public GlfwPlatform(WindowSettings settings)
         {
+            // Which GPU the window's context gets is decided when the driver loads, right here: a
+            // laptop with two GPUs would give the integrated one unless asked (GpuPreference).
+            GpuPreference.RequestHighPerformance();
             Glfw.ErrorCallback += (code, description) => Debug.LogWarning($"GLFW {code}: {description}");
             // Unity's Linux player is an X11 client (XWayland under Wayland compositors), where
             // window positions exist; prefer GLFW's X11 backend, else whatever GLFW finds.

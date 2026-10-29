@@ -1346,6 +1346,19 @@ and scroll, hardware cursors from `Texture2D`, clipboard, focus events. Legacy I
 axes/buttons come from `globalgamemanagers` `InputManager` settings, with Unity's gravity /
 sensitivity / dead-zone smoothing.
 
+**The GPU on a laptop with two.** A hybrid machine (NVIDIA Optimus, AMD switchable graphics)
+starts an application on the integrated GPU unless the application asks for the other one: the
+discrete card costs battery, so it is opt-in. Unity's player asked with the two exported flags
+the display drivers look for (`NvOptimusEnablement`, `AmdPowerXpressRequestHighPerformance`),
+and a .NET host cannot export data symbols from its executable. `GpuPreference` asks the system
+instead, before GLFW creates the window: on Windows the per-application preference behind
+Settings > System > Display > Graphics (`GpuPreference=2`, written only when the program has no
+entry, so the settings page is where a player overrides it), on Linux NVIDIA's PRIME render
+offload variables or, for Mesa, `DRI_PRIME` (only when there is a second card, and only where
+the user's own variables are not set). `ONI_MOONO_GPU=default` leaves the choice to the driver,
+for a machine whose discrete GPU is the slower one. Either way the log's
+`OpenGL: <version> / <renderer> / <vendor>` line (GlDevice) names the GPU the run got.
+
 ### 3.7 Text and fonts
 
 TMP runs as shipped. The engine provides what it needs: `Font`, `TextCore` data types,

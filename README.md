@@ -46,7 +46,9 @@ On Linux, Steam installed as a Flatpak or a snap runs games in a sandbox that ca
 your home folder; the setup notices and installs the player inside the sandbox's own folder.
 (Snap is tested; Flatpak isn't yet.)
 
-You'll need an OpenGL 4.5 graphics driver. The game uses your normal Steam account, DLCs, saves,
+You'll need an OpenGL 4.5 graphics driver. On a laptop with two GPUs the game asks for the
+discrete one (the log's `OpenGL:` line names the GPU it got; `ONI_MOONO_GPU=default` lets the
+driver choose instead). The game uses your normal Steam account, DLCs, saves,
 settings and mods.
 
 ## Performance

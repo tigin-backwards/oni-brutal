@@ -145,6 +145,13 @@ namespace SemanticsProbe
                 DirectoryOrder.Run();
                 return;
             }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "stackdepth")
+            {
+                Rec.Log("=== values: stack depth");
+                StackDepth.Run(harmony);
+                harmony.Patch(HarmonyLib.AccessTools.Method(typeof(MainMenu), "OnSpawn"), postfix: new HarmonyLib.HarmonyMethod(typeof(StackDepth), nameof(StackDepth.Summary)));
+                return;
+            }
             if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "callingasm")
             {
                 Rec.Log("=== values: calling assembly");

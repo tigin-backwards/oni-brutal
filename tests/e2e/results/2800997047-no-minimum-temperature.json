@@ -3,12 +3,12 @@
  "mods": [
   "2800997047"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "spec fails in ours: its postfix's StackTrace(2) never finds ConfigureBuildingTemplate, so no minimum temperature is reverted (the Electrolyzer's outputs stay at 343.15 K; the original logs 26 reverts)",
+ "note": "the Electrolyzer's and Oxygen Diffuser's outputs have no minimum temperature, and both players log the same 26 reverts (its postfix reads new StackTrace(2), which needs the replacement's frame, ARCHITECTURE D19)",
  "updated": "2026-10-29",
- "commit": "1785bc2f",
+ "commit": "ab14d9ea",
  "mod_dlls": {
   "2800997047": {
    "ONINoMinimumTemp.dll": "3f285156b19c8c0a8f4c7ba5b1d477873a2921addcbfdb61afc2c7707b69475d"
@@ -17,42 +17,34 @@
  "runs": {
   "original": [
    {
-    "run": "20261029-090559-e1e62f9e",
+    "run": "20261029-170312-8dc82e3a",
     "index": 1,
     "verdict": "pass",
-    "date": "2026-10-29T09:35:16",
-    "lane": 4,
+    "date": "2026-10-29T17:03:12",
+    "lane": 15,
     "signatures": 0
    }
   ],
   "ours": [
    {
-    "run": "20261029-121806-2d41950c",
+    "run": "20261029-170617-0edcee0f",
     "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-29T12:19:35",
-    "lane": 4,
-    "reasons": [
-     "step 1: Assets.GetPrefab(\"Electrolyzer\").GetComponent<ElementConverter>.outputElements[0].minOutputTemperature is 343.15, wanted 0; Assets.GetPrefab(\"Electrolyzer\").GetComponent<ElementConverter>.outputElements[1].minOutputTemperature is 343.15, wanted 0; Assets.GetPrefab(\"MineralDeoxidizer\").GetCom",
-     "required log lines missing: \\[NoMinimumTemp\\] Reverted the minimum temperature for ElectrolyzerConfig, \\[NoMinimumTemp\\] Reverted the minimum temperature for MineralDeoxidizerConfig"
-    ],
-    "reference_run": "20261029-090559-e1e62f9e",
+    "verdict": "pass",
+    "date": "2026-10-29T17:06:17",
+    "lane": 15,
+    "reference_run": "20261029-170312-8dc82e3a",
     "new_signatures": 0,
     "findings": [],
     "ui_dump": {},
     "shots": {}
    },
    {
-    "run": "20261029-121806-2d41950c",
+    "run": "20261029-170617-0edcee0f",
     "index": 2,
-    "verdict": "fail",
-    "date": "2026-10-29T12:20:18",
-    "lane": 4,
-    "reasons": [
-     "step 1: Assets.GetPrefab(\"Electrolyzer\").GetComponent<ElementConverter>.outputElements[0].minOutputTemperature is 343.15, wanted 0; Assets.GetPrefab(\"Electrolyzer\").GetComponent<ElementConverter>.outputElements[1].minOutputTemperature is 343.15, wanted 0; Assets.GetPrefab(\"MineralDeoxidizer\").GetCom",
-     "required log lines missing: \\[NoMinimumTemp\\] Reverted the minimum temperature for ElectrolyzerConfig, \\[NoMinimumTemp\\] Reverted the minimum temperature for MineralDeoxidizerConfig"
-    ],
-    "reference_run": "20261029-090559-e1e62f9e",
+    "verdict": "pass",
+    "date": "2026-10-29T17:07:01",
+    "lane": 15,
+    "reference_run": "20261029-170312-8dc82e3a",
     "new_signatures": 0,
     "findings": [],
     "ui_dump": {},

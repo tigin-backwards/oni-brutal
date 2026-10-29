@@ -353,8 +353,17 @@ game or mod code can notice. Each says how it is resolved, or why it is kept.
   replacement's `ret` follows (past `nop`s) with `ldc.i4.0; pop` (in `FaultBlockRewriter.Rewrite`,
   the last step before Harmony emits the replacement), which the JIT compiles to nothing and
   which takes the call out of tail position. Calls elsewhere keep their tail calls.
+  Stack indices inside a patch depend on it: No Minimum Temperature's only postfix of the
+  `ElementConverter.OutputElement` constructor reads `new StackTrace(2).GetFrame(0)` for the
+  building config that made the element, and found `BuildingConfigManager.RegisterBuilding` there
+  before the fix (no minimum temperature reverted; the original reverts 26, as ours does now).
+  UnityProbe's `stackdepth` scenario, a second postfix of that constructor, lists the same frames
+  in both players: the postfix, the replacement (`ElementConverter+OutputElement..ctor_PatchN`,
+  declared by `DynamicMethodDefinition`, D23), the config's `ConfigureBuildingTemplate`, then
+  `RegisterBuilding`.
   `--check-types` patches a method returning nothing with a mod's postfix that throws, and finds
-  the replacement's frame under the postfix's.
+  the replacement's frame under the postfix's; and patches an emitted struct's constructor with a
+  postfix that reads `new StackTrace(2)`, called from a `ConfigureBuildingTemplate`.
 - **D20 Patching a P/Invoke whose export is missing.** MonoMod prepares a method before
   detouring it; for a P/Invoke, CoreCLR then binds the native export, and a missing one fails the
   patch. Mono binds a P/Invoke at its first call, so mods patch one the platform lacks to keep it

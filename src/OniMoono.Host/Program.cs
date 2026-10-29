@@ -501,6 +501,50 @@ namespace OniMoono.Host
                         ? "the replacement's frame is under the postfix's, as on Mono" : throw new InvalidOperationException($"frames: {string.Join(", ", frames.Select(m => m?.Name ?? "?"))}");
                 }
             });
+            Check("Frames a mod's postfix of a struct's constructor sees (PatchFrames)", () =>
+            {
+                PatchFrames.Install();
+                // As No Minimum Temperature's postfix of ElementConverter.OutputElement's constructor,
+                // which reads new StackTrace(2).GetFrame(0) for the building config that made it.
+                System.Reflection.Emit.ModuleBuilder Module(string name) => System.Reflection.Emit.AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(name), System.Reflection.Emit.AssemblyBuilderAccess.Run).DefineDynamicModule(name);
+                var targetModule = Module("CheckDepthTarget");
+                var elem = targetModule.DefineType("Elem", TypeAttributes.Public | TypeAttributes.Sealed | TypeAttributes.SequentialLayout, typeof(ValueType));
+                var rate = elem.DefineField("Rate", typeof(float), FieldAttributes.Public);
+                var ctor = elem.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, [typeof(float), typeof(int)]);
+                var il = ctor.GetILGenerator();
+                il.Emit(System.Reflection.Emit.OpCodes.Ldarg_0); il.Emit(System.Reflection.Emit.OpCodes.Ldarg_1); il.Emit(System.Reflection.Emit.OpCodes.Stfld, rate); il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                var elemType = elem.CreateType();
+                var config = targetModule.DefineType("CheckConfig", TypeAttributes.Public | TypeAttributes.Sealed | TypeAttributes.Abstract);
+                var configure = config.DefineMethod("ConfigureBuildingTemplate", MethodAttributes.Public | MethodAttributes.Static, elemType.MakeArrayType(), Type.EmptyTypes);
+                il = configure.GetILGenerator();
+                il.Emit(System.Reflection.Emit.OpCodes.Ldc_I4_1); il.Emit(System.Reflection.Emit.OpCodes.Newarr, elemType);
+                il.Emit(System.Reflection.Emit.OpCodes.Dup); il.Emit(System.Reflection.Emit.OpCodes.Ldc_I4_0);
+                il.Emit(System.Reflection.Emit.OpCodes.Ldc_R4, 0.5f); il.Emit(System.Reflection.Emit.OpCodes.Ldc_I4_3);
+                il.Emit(System.Reflection.Emit.OpCodes.Newobj, elemType.GetConstructor([typeof(float), typeof(int)])!);
+                il.Emit(System.Reflection.Emit.OpCodes.Stelem, elemType); il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                var configType = config.CreateType();
+                var modType = Module("CheckDepthMod").DefineType("DepthMod", TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed);
+                var seen = modType.DefineField("Seen", typeof(string), FieldAttributes.Public | FieldAttributes.Static);
+                var postfix = modType.DefineMethod("Postfix", MethodAttributes.Public | MethodAttributes.Static, typeof(void), [elemType.MakeByRefType()]);
+                postfix.DefineParameter(1, ParameterAttributes.None, "__instance");
+                il = postfix.GetILGenerator();
+                il.Emit(System.Reflection.Emit.OpCodes.Ldc_I4_2); il.Emit(System.Reflection.Emit.OpCodes.Newobj, typeof(System.Diagnostics.StackTrace).GetConstructor([typeof(int)])!);
+                il.Emit(System.Reflection.Emit.OpCodes.Ldc_I4_0); il.Emit(System.Reflection.Emit.OpCodes.Callvirt, typeof(System.Diagnostics.StackTrace).GetMethod(nameof(System.Diagnostics.StackTrace.GetFrame))!);
+                il.Emit(System.Reflection.Emit.OpCodes.Call, typeof(MonoStackFrames).GetMethod(nameof(MonoStackFrames.GetMethod))!);
+                il.Emit(System.Reflection.Emit.OpCodes.Callvirt, typeof(MemberInfo).GetProperty(nameof(MemberInfo.Name))!.GetMethod!);
+                il.Emit(System.Reflection.Emit.OpCodes.Stsfld, seen); il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                var mod = modType.CreateType();
+                new HarmonyLib.Harmony("OniMoono.Host.Check").Patch(elemType.GetConstructor([typeof(float), typeof(int)]), postfix: new HarmonyLib.HarmonyMethod(mod.GetMethod("Postfix")));
+                var configureMethod = configType.GetMethod("ConfigureBuildingTemplate")!;
+                var results = new HashSet<string>();
+                for (int round = 0; round < 40; round++)
+                {
+                    for (int i = 0; i < 100; i++) configureMethod.Invoke(null, null);
+                    results.Add((string?)mod.GetField("Seen")!.GetValue(null) ?? "null");
+                    System.Threading.Thread.Sleep(20);
+                }
+                return results.Count == 1 && results.Contains("ConfigureBuildingTemplate") ? "two frames up is the constructor's caller, as on Mono" : throw new InvalidOperationException($"two frames up: {string.Join(", ", results)}");
+            });
             Check("Harmony prefixes on P/Invokes, one whose export is missing (PInvokePatches)", () =>
             {
                 PInvokePatches.Install();

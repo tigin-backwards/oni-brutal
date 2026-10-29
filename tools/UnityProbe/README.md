@@ -449,6 +449,13 @@ in small and non-inlined methods nothing patches. It runs through `scripts/e2e.p
 `from: main-menu`, as the canvas order probe does. ARCHITECTURE D41 records what it measured;
 `--check-types` ("GetCallingAssembly in a mod's patches …") encodes it.
 
+With `PROBE_SCENARIO=stackdepth` only the stack-depth probe runs (`StackDepth.cs`, lines `SD …`,
+at mod load, a summary at the main menu): a postfix of the `ElementConverter.OutputElement`
+constructor lists `new StackTrace()`'s frames for the first calls from a building config's
+`ConfigureBuildingTemplate`, the frames No Minimum Temperature reads. Run it through
+`scripts/e2e.py` with OniMcp's mod folder as above and any spec. ARCHITECTURE D19 records what it
+measured; `--check-types` ("Frames a mod's postfix of a struct's constructor sees") encodes it.
+
 With `PROBE_SCENARIO=asmbind` only the assembly-binding probe runs (`AssemblyBinding.cs`, lines
 `AB …`, at mod load). Write its assemblies into the mod folder first: `dotnet run --project
 tools/UnityProbe/Binding -- MODFOLDER/binding` (libraries in several versions, with and without

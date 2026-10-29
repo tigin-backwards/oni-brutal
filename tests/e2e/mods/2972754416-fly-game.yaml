@@ -1,0 +1,27 @@
+# 飞吧，游戏君 Fly, game (2972754416), class P.
+#
+# What it was meant to do: replace SpeedControlScreen.OnChanged so the three speeds run at 1x,
+# 3x and 6x. Its patch class names OnChanged but its method is neither called Prefix nor marked
+# as a patch, so Harmony applies nothing and the game's speeds (1x, 2x, 3x) stay.
+# How a player reaches it: the speed buttons or keys 1 to 3.
+# What changes: nothing in today's game.
+#
+# The game is resumed and the fastest speed button clicked: the time scale is the game's 3, as
+# in the original; then it is paused again.
+from: early-base
+mods: [2972754416]
+steps:
+  - expect_state:
+      "count:Global.Instance.modManager.mods[*] if .label.id == 2972754416 and .IsEnabledForActiveDlc() == true": 1
+  # A resume straight after the load does not take: the game runs a few seconds first.
+  - run: {seconds: 5}
+  - call: {tool: game_control, args: {domain: speed, action: resume, confirm: true}}
+  - click: {ui: "**/SecondaryRow/SpeedControlScreen/GenericIconButton_Fast"}
+  - expect_state:
+      "SpeedControlScreen.Instance.GetSpeed()": 2
+      "SpeedControlScreen.Instance.IsPaused": false
+      "Time.timeScale": [3, "== original"]
+  - call: {tool: game_control, args: {domain: speed, action: pause, confirm: true}}
+  - expect_state:
+      "SpeedControlScreen.Instance.IsPaused": true
+      "Time.timeScale": 0

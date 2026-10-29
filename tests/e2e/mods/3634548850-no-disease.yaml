@@ -1,0 +1,24 @@
+# No Disease (3634548850), class P.
+#
+# What it does: removes germs from the game: about forty prefixes skip disease emitters,
+# germ transfer (cells, conduits, storage, primary elements), infection and sickness, and
+# auto-disinfection; germs are wiped from the grid at load and from worldgen; the details
+# screen's germ panels are hidden, the germ overlay is removed from the overlay bar, the
+# Disinfect tool from the tool menu, and Duplicants spawn without sicknesses.
+# How a player reaches it: it is passive.
+# What changes: no germs, no sickness.
+#
+# The fixture's base has germs in the original game (its outhouse, the Duplicants); with the
+# mod its cells hold none, and stay so after the colony plays. The overlay bar is dumped and
+# shot: it has no germ overlay.
+from: early-base
+mods: [3634548850]
+steps:
+  - expect_state:
+      "cells:105,205..140,212::Grid.DiseaseCount.get_Item({cell})": 0
+  - run: {seconds: 30}
+  - expect_state:
+      "cells:105,205..140,212::Grid.DiseaseCount.get_Item({cell})": 0
+      "sum:Components.LiveMinionIdentities.Items[*].GetComponent<PrimaryElement>.DiseaseCount": 0
+  - ui_dump: {name: overlays, root: "**/OverlaysBarHolder/OverlaysBar"}
+  - shot: {name: overlays, crop: "**/OverlaysBarHolder/OverlaysBar", threshold: 0.04}

@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3634548850-no-disease.yaml",
+ "mods": [
+  "3634548850"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the base holds no germs before and after play; the overlay bar (no germ overlay) matches the original's",
+ "updated": "2026-10-29",
+ "commit": "2d4aca2a",
+ "mod_dlls": {
+  "3634548850": {
+   "NoDisease.dll": "7cb75692750cc8e0be4ac9e077edab301c1b8a50e8bdb1b4f3447a99f8285edc"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-071158-8a6b9b85",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T07:53:11",
+    "lane": 5,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-083519-82e8344c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T08:51:31",
+    "lane": 4,
+    "reference_run": "20261029-071158-8a6b9b85",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "overlays": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "overlays": 0.0
+    }
+   },
+   {
+    "run": "20261029-083519-82e8344c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T08:53:20",
+    "lane": 4,
+    "reference_run": "20261029-071158-8a6b9b85",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "overlays": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "overlays": 0.0
+    }
+   }
+  ]
+ }
+}

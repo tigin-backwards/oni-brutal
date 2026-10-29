@@ -1,0 +1,28 @@
+# Named Transformers (2009051942), class P.
+#
+# What it does: a postfix on PowerTransformer.OnSpawn renames each transformer as it spawns: its
+# proper name followed by a running number ("Power Transformer 1", "Power Transformer 2" ...),
+# so transformers can be told apart.
+# How a player reaches it: building transformers.
+# What changes: the transformers' names.
+#
+# Setup researches Power Regulation. A Power Transformer is ordered in the corridor west of the
+# printing pod out of copper ore and built; it is named with a number, and its details screen
+# title shows it.
+from: early-base
+mods: [2009051942]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.TryGetTechForTechItem(\"PowerTransformerSmall\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - run: {seconds: 2}
+  - build: {prefab: PowerTransformerSmall, at: [113, 206], material: Cuprite}
+  - expect: {blueprints: {PowerTransformerSmall: 1}}
+  - run: {seconds: 900, until: {buildings: {PowerTransformerSmall: 1}, pending_construction: 0}}
+  - expect_state:
+      "all:PowerTransformer::[0].GetComponent<KSelectable>.GetName()": ["== original", {contains: " 1"}]
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: PowerTransformerSmall}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "/Transformer.* \\d+$/"}

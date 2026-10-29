@@ -10,8 +10,10 @@ them in **Moono Tweaks** on the main menu. Measured gains are in
 On the main menu, **Moono Tweaks** (under Mods) lists every tweak with an on/off switch, in the
 sections below, each with a line on what it does; hovering a row says how it works, its
 measured gain where it is large enough to notice, and its launch option. A **General** section
-holds three options of the player's own: the Gassy Moo loading splash (on by default), frame
-stats in the log (off by default) and hiding personal paths in the log (on by default).
+holds four options of the player's own: the Gassy Moo loading splash (on by default), frame
+stats in the log (off by default), hiding personal paths in the log (on by default) and, for
+laptops with two GPUs, the graphics card the game draws with (default, discrete or integrated;
+default does what the original does).
 **Reset to defaults** sets every row back to its default. Changes apply when the game restarts, which the screen does for you.
 
 Your choices are kept in `oni-moono/settings.json` in the game's own data folder (usually
@@ -33,6 +35,8 @@ launch options:
 - `--frame-stats`: where each frame's time went, in the log every 60 frames.
 - `--log-paths hidden|full`: Player.log with your user folder, Documents folder and Steam ID
   replaced (`%USERPROFILE%` or `~`, `%DOCUMENTS%`, `<steam id>`), or as logged.
+- `--gpu default|discrete|integrated`: the graphics card on a laptop with two
+  ([ARCHITECTURE.md](ARCHITECTURE.md#2-process-and-assembly-structure), "The GPU option").
 
 Older setups put `--game-tweak exact` in the launch options; remove it (the setup prints the new
 line) to choose in the game instead.

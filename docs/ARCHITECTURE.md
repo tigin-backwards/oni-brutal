@@ -94,6 +94,46 @@ names (`SimDLL`, `fmodstudio`, `resonanceaudio`, `steam_api`, `cimgui`, …) to
 we never call `SetDllImportResolver` on BRUTAL assemblies. The Vulkan loader name quirk in
 `brutal-api.md` does not affect us (no Vulkan).
 
+**The Windows executable.** On Windows `OniMoono.exe` is our own native host
+(`src/OniMoono.NativeHost/host.c`, about 150 lines of C), not the .NET SDK's apphost, which
+can't export data. The drivers of hybrid-graphics laptops (NVIDIA Optimus, AMD PowerXpress) read
+two DWORD exports of the process's main executable, `NvOptimusEnablement` and
+`AmdPowerXpressRequestHighPerformance`, and pick the discrete GPU when they are nonzero. The
+original `OxygenNotIncluded.exe` exports both with the value 1, so ours does too. Otherwise it
+does what the apphost did, the documented way (dotnet/runtime's
+`docs/design/features/native-hosting.md`): `hostfxr.dll` from its own folder when it's there (the
+self-contained player of setups and releases, as the apphost looks first), else the installed
+.NET's through nethost's `get_hostfxr_path` (the framework-dependent `scripts/build-windows.sh`
+player); then `hostfxr_initialize_for_dotnet_command_line` with `OniMoono.dll` and the process's
+arguments as the C runtime split them, `hostfxr_run_app`, `hostfxr_close`, and the app's exit
+code. A failure to start goes to stderr when that is redirected, else to a message box and a
+line in the game's `Player.log`. It keeps the apphost's resources: the icon as resource 32512
+(`GlfwPlatform.SetClassIcon` loads it), the SDK's manifest (`asInvoker` only; GLFW sets the DPI
+awareness), the version information and the GUI subsystem. It is built with MSVC and the static C
+runtime by `build.cmd`, driven from WSL by `scripts/build-native-host.sh` (`build-windows.sh` and
+`release.sh` call it); `setup.ps1` builds it when the Visual Studio C++ build tools are installed
+and otherwise keeps the SDK's apphost, with a warning (that player starts the same but gives no
+GPU hint). `scripts/check-windows-host.py EXE [--like OTHER]` checks a built exe from its PE file
+alone: both exports present, writable and 1, the icon, manifest, version and subsystem.
+
+**The GPU option** (`GpuChoice`; Moono Tweaks' "Graphics card", settings.json `"gpu"`, `--gpu
+default|discrete|integrated`) is applied in `Program.Main` before the window opens, so before
+anything loads the OpenGL driver. On Windows it writes the two exports through
+`GetProcAddress(GetModuleHandle(NULL), …)`: 1 for discrete, 0 for integrated; `default` leaves
+them at 1, as the original has them. The drivers read them when the GL driver loads (not
+verifiable without a hybrid laptop), and Windows' Graphics settings page overrides them. Unity's
+Linux player sets no GPU hints, and `-force-device-index` covers Direct3D, Metal and Vulkan only,
+not ONI's OpenGL build, so on Linux `default` sets nothing. `discrete` asks for PRIME render
+offload: `__NV_PRIME_RENDER_OFFLOAD=1` and `__GLX_VENDOR_LIBRARY_NAME=nvidia` when NVIDIA's
+proprietary driver is there (`/proc/driver/nvidia/version` and a loadable `libGLX_nvidia.so.0`),
+else Mesa's `DRI_PRIME=1`; `integrated` sets `DRI_PRIME=0`. They go into the native environment
+with libc's `setenv` (.NET's `Environment.SetEnvironmentVariable` changes only .NET's copy on
+Unix, which libGL never reads) and into .NET's, for processes the player starts. A variable the
+user set is left alone; those Moono set are listed in `ONI_MOONO_GPU_ENV`, so the run
+`App.Restart` starts replaces them with its own choice. On a desktop whose display is on the
+discrete card, `DRI_PRIME=1` may pick the integrated GPU. The log has a `gpu:` line with what was
+set, then the `OpenGL:` line naming the renderer.
+
 ### 2.1 Replacing Mono: runtime compatibility (*runtime §0*)
 
 Binding and JIT are clean: every BCL reference in the game resolves on .NET 10 and all ~82k

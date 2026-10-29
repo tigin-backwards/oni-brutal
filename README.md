@@ -49,6 +49,10 @@ your home folder; the setup notices and installs the player inside the sandbox's
 You'll need an OpenGL 4.5 graphics driver. The game uses your normal Steam account, DLCs, saves,
 settings and mods.
 
+On a laptop with two GPUs, Moono Tweaks' **Graphics card** picks which one the game draws with.
+On Linux you can instead launch through your distribution's PRIME wrapper:
+`prime-run "…/OniMoono" -- %command%`.
+
 ## Performance
 
 The biggest change is swapping the very garbage Mono runtime that Unity ships for CoreCLR. On

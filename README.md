@@ -153,9 +153,7 @@ Feel free to slop. See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
 ## Issues
 
-File an issue, and please attach your log and the save you were playing. The log hides your
-user folder and Steam ID by default; if asked for the full paths, turn off **Hide personal paths
-in the log** in Moono Tweaks (or launch with `--log-paths full`) and start the game again.
+File an issue, and please attach your log and the save you were playing.
 
 The log is `Player.log` in:
 - Windows: `%USERPROFILE%\AppData\LocalLow\Klei\Oxygen Not Included\`

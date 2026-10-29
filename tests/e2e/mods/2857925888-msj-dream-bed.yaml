@@ -1,0 +1,16 @@
+# MSJ Dream bed 梦世界 漂亮床 (2857925888), class P (a reskin).
+#
+# What it does: a postfix on BedConfig.CreateBuildingDef gives the Cot the mod's
+# Dreambed_kanim animation instead of bedlg_kanim.
+# How a player reaches it: any Cot.
+# What changes: how cots look.
+#
+# The Cot's def and the fixture's built cot use Dreambed_kanim; the cot in the east corridor
+# is shot from the world, UI hidden.
+from: early-base
+mods: [2857925888]
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"Bed\").AnimFiles[0].name": Dreambed_kanim
+      "all:Bed::[0].GetComponent<KBatchedAnimController>.AnimFiles[0].name": Dreambed_kanim
+  - world_shot: {name: bed, ortho: 4, at: [132, 208]}

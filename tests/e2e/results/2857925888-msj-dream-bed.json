@@ -1,0 +1,60 @@
+{
+ "spec": "mods/2857925888-msj-dream-bed.yaml",
+ "mods": [
+  "2857925888"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the cot uses the mod's animation; the fixture's cot (world shot)",
+ "updated": "2026-10-29",
+ "commit": "2d4aca2a",
+ "mod_dlls": {
+  "2857925888": {
+   "MSJ Dream bed ├╬╩└╜τ ╞»┴┴┤▓.dll": "72b6b3696d9a6c8e998580b5258f2afcbc640150b79e8d55ffe23204c9d7e303",
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-070935-7f670b10",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T07:26:51",
+    "lane": 2,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-143747-9481627a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T14:57:55",
+    "lane": 1,
+    "reference_run": "20261029-070935-7f670b10",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "bed": 0.017056
+    }
+   },
+   {
+    "run": "20261029-143747-9481627a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T14:58:39",
+    "lane": 1,
+    "reference_run": "20261029-070935-7f670b10",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "bed": 0.017358
+    }
+   }
+  ]
+ }
+}

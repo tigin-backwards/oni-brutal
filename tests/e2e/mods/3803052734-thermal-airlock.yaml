@@ -1,0 +1,38 @@
+# 隔热隔气隔温门 Thermal Airlock (3803052734), class B.
+#
+# What it does: adds the 隔热隔气隔温门 (ThermalAirlock, 1x2, the Insulated Door's art), a door
+# for the Base menu after the Insulated Door, unlocked by Temperature Modulation. Patches on
+# Door make it block gas, liquid and heat separately (three options on it, all on by default)
+# while Duplicants still walk through; an open door pumps away the gas in its cells and seals
+# the corner cells beside it.
+# How a player reaches it: research Temperature Modulation; the Base menu.
+# What changes: a door that insulates and seals even while open.
+#
+# Temperature Modulation is researched in setup and one built in the east corridor. The Base
+# menu offers it (its card is shot); the built door has the mod's control.
+from: early-base
+mods: [3803052734]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"TemperatureModulation\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"ThermalAirlock\")", method: Build, args: [131786, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"TemperatureModulation\").unlockedItemIDs": {contains: ThermalAirlock}
+      "Assets.GetBuildingDef(\"ThermalAirlock\").WidthInCells": 1
+      "Assets.GetBuildingDef(\"ThermalAirlock\").HeightInCells": 2
+  - run: {seconds: 3}
+  - expect: {buildings: {ThermalAirlock: 1}}
+  - expect_state:
+      "count:all:Door::[*] if .GetComponent<KPrefabID>.PrefabTag.Name == ThermalAirlock": 1
+      "count:all:ThermalAirlockMod.ThermalAirlockControl::[*] if .enabled == true": 1
+  - driver: {camera.set: {cell: [113, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/ThermalAirlock Group*", cond: stable}
+  - scroll: {at: "**/PlanBuildingSelectionPanel/BuildingGroups", notches: -10}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/ThermalAirlock Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/ThermalAirlock Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}

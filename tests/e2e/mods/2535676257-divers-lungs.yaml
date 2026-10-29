@@ -1,0 +1,22 @@
+# Divers Lungs (UNSUPPORTED) (2535676257), classes P, O; PLib options.
+#
+# What it does: PLib options, one per Duplicant trait (good, bad and skill-granting ones),
+# remove the ticked traits from the pools new Duplicants roll from (a prefix on
+# Db.Initialize edits TUNING.DUPLICANTSTATS' trait lists), so the printing pod never offers
+# them.
+# How a player reaches it: the Mods screen's options; the printing pod's offers.
+# What changes: which traits Duplicants can have.
+#
+# Options here: Strongarm and Diver's Lungs removed. The good-trait pool lacks them and keeps
+# Twinkletoes.
+from: early-base
+mods: [2535676257]
+options:
+  "2535676257": {$file: DL.json, bid01: true, bid03: true}
+steps:
+  - expect_state:
+      "count:type:TUNING.DUPLICANTSTATS::GOODTRAITS[*] if .id == StrongArm": 0
+      "count:type:TUNING.DUPLICANTSTATS::GOODTRAITS[*] if .id == DiversLung": 0
+      "count:type:TUNING.DUPLICANTSTATS::GOODTRAITS[*] if .id == Twinkletoes": 1
+      "type:TUNING.DUPLICANTSTATS::GOODTRAITS.Count": "== original"
+      "type:TUNING.DUPLICANTSTATS::BADTRAITS.Count": "== original"

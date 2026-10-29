@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3738526308-super-incubator.yaml",
+ "mods": [
+  "3738526308"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Food menu card (shot); a built super incubator with its logic output",
+ "updated": "2026-10-29",
+ "commit": "0c60ca12",
+ "mod_dlls": {
+  "3738526308": {
+   "SuperIncubator.dll": "621865fd5d121bdca2164cb79fd7871b02cd78b48d944f664ef8de88a2e58c41"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-145102-18288f91",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T15:39:20",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-010732-6b6febd8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T01:11:30",
+    "lane": 16,
+    "reference_run": "20261027-145102-18288f91",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.0
+    }
+   },
+   {
+    "run": "20261029-010732-6b6febd8",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T01:12:29",
+    "lane": 16,
+    "reference_run": "20261027-145102-18288f91",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.0
+    }
+   }
+  ]
+ }
+}

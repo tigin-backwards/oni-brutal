@@ -1,0 +1,34 @@
+# [TEMP FIX] Diseases Restored (DiseasesReimagined, 3723792761), classes B, P, U; PLib.
+#
+# What it does: reworks germs and sicknesses: Duplicants integrate germ exposure over time
+# (a GermIntegrator) against contraction thresholds shown in the immune system panel, sinks
+# and showers clean only what they need, food poisoning makes Duplicants vomit, slimelung
+# coughs, sunburn reacts, germs grow differently on elements and plants, Bristle Blossoms
+# and Sporechids spread more, and a new UV Cleaner (Medicine menu, Medicine III) removes
+# almost all germs from liquids while emitting UV.
+# How a player reaches it: play; research Medicine III for the UV Cleaner.
+# What changes: a different, harsher disease model.
+#
+# Medicine III is researched in setup. Every Duplicant carries a germ integrator, and the
+# Medicine menu offers the UV Cleaner (its card).
+from: early-base
+mods: [3723792761]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"MedicineIII\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"MedicineIII\").unlockedItemIDs": {contains: UVCleaner}
+      "count:Components.LiveMinionIdentities.Items[*] if .GetComponent<DiseasesReimagined.GermIntegrator>.enabled == true": 3
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}
+  - driver: {camera.set: {cell: [113, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Medicine"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/UVCleaner Group*", cond: stable}
+  - scroll: {at: "**/PlanBuildingSelectionPanel/BuildingGroups", notches: -10}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/UVCleaner Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/UVCleaner Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}

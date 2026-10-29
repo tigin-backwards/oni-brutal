@@ -1,0 +1,23 @@
+# Variety Included! (DuplicantVariety, 3439346200), class P.
+#
+# What it does: a postfix on MinionIdentity.OnSpawn scales each Duplicant to one of six sizes
+# (60 % to 120 %; 40 % only with the Stairs mod), picked at random with weights by default
+# (config.txt beside the DLL: weighted, cycled or random, or a fixed size for all or one
+# Duplicant). Purely visual.
+# How a player reaches it: play; Duplicants come in sizes.
+# What changes: Duplicants' sizes vary.
+#
+# The sizes are random (Unity's Random at load, before a seed can be set), so the spec checks
+# that each of the base's Duplicants got one of the mod's sizes, and that they keep it while
+# playing.
+from: early-base
+mods: [3439346200]
+require_log: ['\[DuplicantVariety\] Applied size variant']
+steps:
+  - expect: {duplicants: 3}
+  - expect_state:
+      "sum:Components.LiveMinionIdentities.Items[*].transform.localScale.x if .enabled == true": [">= 1.79", "<= 3.61", {save_as: sizes}]
+      "sum:Components.LiveMinionIdentities.Items[*].transform.localScale.y if .enabled == true": "== sizes"
+  - run: {seconds: 10}
+  - expect_state:
+      "sum:Components.LiveMinionIdentities.Items[*].transform.localScale.x if .enabled == true": "== sizes"

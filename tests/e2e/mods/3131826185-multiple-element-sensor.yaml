@@ -1,0 +1,41 @@
+# Multiple Element Sensor (DLC) (3131826185), class B.
+#
+# What it does: adds element sensors and filters that take several elements at once, each
+# with a tree filter side screen: gas and liquid element sensors (Automation, Sensors), gas,
+# liquid and conveyor pipe element sensors, and gas, liquid and solid element filters.
+# A sensor sends a green signal while its cell's element is one of those checked.
+# How a player reaches it: research Sensors (and Ventilation, Liquid Tuning, Solid
+# Management, Advanced Filtration for the others); the menus.
+# What changes: sensors and filters for a set of elements.
+#
+# Sensors is researched in setup and a gas element sensor built in the corridor west of the
+# printing pod. The Automation menu offers it (its card); selected, the built one shows its
+# element filter side screen.
+from: early-base
+mods: [3131826185]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"GenericSensors\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LogicElementsSensorGas\")", method: Build, args: [131765, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"GenericSensors\").unlockedItemIDs": [{contains: LogicElementsSensorGas}, {contains: LogicElementsSensorLiquid}]
+      "Db.Get().Techs.Get(\"AdvancedFiltration\").unlockedItemIDs": [{contains: GasElementsFilter}, {contains: LiquidElementsFilter}]
+      "Assets.GetPrefab(\"LogicElementsSensorGas\").GetComponent<TreeFilterable>": exists
+  - run: {seconds: 3}
+  - driver: {camera.set: {cell: [113, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Automation"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/LogicElementsSensorGas Group*", cond: stable}
+  - scroll: {at: "**/PlanBuildingSelectionPanel/BuildingGroups", notches: -10}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/LogicElementsSensorGas Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/LogicElementsSensorGas Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - key: {code: Escape}
+  - click_world: {cell: [113, 207], select: LogicElementsSensorGas}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/TreeFilterableSideScreen*", cond: stable}
+  - shot: {name: filter, crop: "**/DetailsScreen/SideScreen/**/TreeFilterableSideScreen*", threshold: 0.04}
+  - expect_state:
+      "selected:GetComponent<TreeFilterable>": exists

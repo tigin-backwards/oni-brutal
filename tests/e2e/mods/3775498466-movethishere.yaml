@@ -1,0 +1,32 @@
+# MoveThisHere 气液移动点 (3775498466), class B.
+#
+# What it does: adds the Hauling Point (HaulingPoint, 1x1, Base menu after the Storage Bin, no
+# research, no materials): a temporary designation that Duplicants fill with bottled liquids
+# and gases up to 20 t; placed at once without construction (BuildingDef.Instantiate is
+# replaced by a build of 1 kg of diamond), it can be removed again, dropping what it holds.
+# Its card hides the material panel.
+# How a player reaches it: the Base menu; place it where liquids and gases should go.
+# What changes: a quick spot to haul bottles to.
+#
+# The Base menu offers the hauling point (its card, without a material panel); placed in the
+# corridor west of the printing pod, it stands there with its storage.
+from: early-base
+mods: [3775498466]
+steps:
+  - run: {seconds: 3}
+  - driver: {camera.set: {cell: [113, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/HaulingPoint Group*", cond: stable}
+  - scroll: {at: "**/PlanBuildingSelectionPanel/BuildingGroups", notches: -10}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/HaulingPoint Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/HaulingPoint Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - expect_ui:
+      "**/ProductInfoScreen/MaterialSelectionPanel": {active: false}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - click_world: {cell: [113, 207]}
+  - key: {code: Escape}
+  - run: {seconds: 30, until: {buildings: {HaulingPoint: 1}}}
+  - expect: {buildings: {HaulingPoint: 1}}
+  - expect_state:
+      "all:MoveThisHere.HaulingPoint::[0].totalMaxCapacity": 20000

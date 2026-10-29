@@ -1,0 +1,31 @@
+# Floating[fix] (Floatation, 3501501795), class P.
+#
+# What it does: every loose item gets a FloatationChecker; items lighter than the liquid they
+# lie in (liquid and gas bottles, and solids whose element's max mass is below the liquid's)
+# float: a prefix on GravityComponents.FixedUpdate lifts them to the liquid's surface with a
+# little sideways drift and resolves their collisions with solid cells, and floating stacks
+# of the same kind merge.
+# How a player reaches it: items in water.
+# What changes: things float instead of sinking.
+#
+# setup floods the pit in the corridor floor west of the printing pod (five cells of water)
+# and drops a bottle of polluted water into it. Every loose item carries the checker; the
+# bottle rises to the water's surface.
+from: early-base
+mods: [3501501795]
+setup:
+  - driver: {setup.call: {type: SimMessages, method: AddRemoveSubstance, args: [131126, Water, null, 1000, 300, 255, 0]}}
+  - driver: {setup.call: {type: SimMessages, method: AddRemoveSubstance, args: [131127, Water, null, 1000, 300, 255, 0]}}
+  - driver: {setup.call: {type: SimMessages, method: AddRemoveSubstance, args: [131128, Water, null, 1000, 300, 255, 0]}}
+  - driver: {setup.call: {type: SimMessages, method: AddRemoveSubstance, args: [131129, Water, null, 1000, 300, 255, 0]}}
+  - driver: {setup.call: {type: SimMessages, method: AddRemoveSubstance, args: [131130, Water, null, 1000, 300, 255, 0]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"DirtyWater\").substance", method: SpawnResource, args: [[112.5, 206.1, -12], 20, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "count:all:Pickupable::[*] if .GetComponent<Heinermann.Floating.FloatationChecker>.enabled == true": ">= 1"
+      "sum:all:Pickupable::[*].transform.position.y if .GetComponent<PrimaryElement>.ElementID == DirtyWater": {save_as: y0}
+  - run: {seconds: 15}
+  - expect_state:
+      "Grid.IsLiquid(131128)": true
+  - expect_state:
+      "sum:all:Pickupable::[*].transform.position.y if .GetComponent<PrimaryElement>.ElementID == DirtyWater": "> y0 + 0.2"

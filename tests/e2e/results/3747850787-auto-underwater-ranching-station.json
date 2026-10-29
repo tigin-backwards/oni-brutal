@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3747850787-auto-underwater-ranching-station.yaml",
+ "mods": [
+  "3747850787"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the auto stations are in their techs; a built auto ranch station selected",
+ "updated": "2026-10-29",
+ "commit": "0c60ca12",
+ "mod_dlls": {
+  "3747850787": {
+   "AutoUnderwaterStationMod.dll": "694f7cced5a63cf8034a24812cb907c96ef6b9831b9a06b10bc53ad90fff283b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-145102-18288f91",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T15:47:17",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-010732-6b6febd8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T01:18:25",
+    "lane": 16,
+    "reference_run": "20261027-145102-18288f91",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-010732-6b6febd8",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T01:19:30",
+    "lane": 16,
+    "reference_run": "20261027-145102-18288f91",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

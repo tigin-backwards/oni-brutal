@@ -1,0 +1,45 @@
+# [DLC] Interplanar Automation (2361374172), class B.
+#
+# What it does: the Conduit Teleporters (warp conduit sender and receiver) gain automation
+# ribbon ports that carry a 4-bit signal from the sender's asteroid to the receiver's; and
+# a new Interplanar Radio Tower (InterplanarRadioTower, 2x4, 1200 W), an Automation building
+# unlocked by Multiplexing, broadcasts its ribbon input to every other powered tower exposed
+# to space, which outputs the OR of all of them.
+# How a player reaches it: research Multiplexing; the Automation menu; the teleporters'
+# ports in the automation overlay.
+# What changes: logic signals between asteroids.
+#
+# Multiplexing is researched in setup and a tower built in the corridor west of the
+# printing pod. The teleporters' defs have the ribbon ports; the Automation menu offers the
+# tower (its card); selected, the built one is a tower with its two ribbon ports.
+from: early-base
+mods: [2361374172]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"Multiplexing\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"InterplanarRadioTower\")", method: Build, args: [131764, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"Multiplexing\").unlockedItemIDs": {contains: InterplanarRadioTower}
+      "Assets.GetBuildingDef(\"WarpConduitSender\").LogicInputPorts.Count": "== original"
+      "Assets.GetBuildingDef(\"WarpConduitSender\").LogicInputPorts[-1].description": "Transmited Signal"
+      "Assets.GetBuildingDef(\"WarpConduitReceiver\").LogicOutputPorts[-1].description": "Incoming Signal"
+      "Assets.GetPrefab(\"WarpConduitReceiver\").GetComponent<InterplanarAutomation.LogicRibbonWarpBridge>": exists
+  - run: {seconds: 3}
+  - driver: {camera.set: {cell: [113, 209], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Automation"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/InterplanarRadioTower Group*", cond: stable}
+  - scroll: {at: "**/PlanBuildingSelectionPanel/BuildingGroups", notches: -40}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/InterplanarRadioTower Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/InterplanarRadioTower Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - key: {code: Escape}
+  - click_world: {cell: [112, 208], select: InterplanarRadioTower}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Interplanar Radio Tower"}
+  - expect_state:
+      "selected:GetComponent<LogicPorts>.outputPortInfo.Length": 1

@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3780815871-thermal-tooltips-reworked.yaml",
+ "mods": [
+  "3780815871"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Tile's material panel lists the advanced thermal properties (dump, shot)",
+ "updated": "2026-10-29",
+ "commit": "0c60ca12",
+ "mod_dlls": {
+  "3780815871": {
+   "ThermalTooltipsReworked.dll": "04cb80ef3ca4e7b04402f5fc8aff3f0b989ec183dce4982540b7589015751b71"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-145102-18288f91",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T15:56:57",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-010732-6b6febd8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T01:20:39",
+    "lane": 16,
+    "reference_run": "20261027-145102-18288f91",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "effects": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "materials": 0.007747
+    }
+   },
+   {
+    "run": "20261029-010732-6b6febd8",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T01:21:46",
+    "lane": 16,
+    "reference_run": "20261027-145102-18288f91",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "effects": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "materials": 0.007747
+    }
+   }
+  ]
+ }
+}

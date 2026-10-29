@@ -103,10 +103,13 @@
     A float formatted to fixed decimals rounds a value exactly half-way differently
     (ARCHITECTURE D2): Mono rounds the float's 7-digit form half away from zero, .NET its exact
     value, so the Water Oxygenator's default heat production of 1.25 reads "1.3" in the
-    original and "1.2" in ours ("F1").
+    original and "1.2" in ours ("F1"); the temperature-filtering auto-sweeper's default bounds,
+    0 K and 1000 K in Celsius (-273.15f and 726.85f), read "-273.2" and "726.9" in the original
+    and "-273.1" and "726.8" in ours.
   link: tests/e2e/mods/3625551075-water-oxygenator.yaml
   component: [TMP_InputField, TextMeshProUGUI]
   fields: [text]
-  path: ['**/WaterOxygenatorCustomUI/**/TextField', '**/WaterOxygenatorCustomUI/**/TextField/Text Area/Text']
-  original: '^text="1\.3'
-  ours: '^text="1\.2'
+  path: ['**/WaterOxygenatorCustomUI/**/TextField', '**/WaterOxygenatorCustomUI/**/TextField/Text Area/Text',
+         '**/AutoSweeperTempFilterPanel/*TempField', '**/AutoSweeperTempFilterPanel/*TempField/Text Area/Text']
+  original: '^text="(1\.3|-273\.2|726\.9)'
+  ours: '^text="(1\.2|-273\.1|726\.8)'

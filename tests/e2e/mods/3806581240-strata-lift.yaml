@@ -1,0 +1,38 @@
+# Strata Lift (3806581240), classes B, U.
+#
+# What it does: adds the Strata Lift (ProjectExpeditionStrataLift, 3x4, 250 W), a Base
+# building unlocked by Durable Life Support: an elevator that teleports Duplicants between
+# lifts (a NavTeleporter), with its own door and travel animations, access control, and a
+# "Visual Settings" side screen (layer and visibility toggles); patches on the transition
+# driver animate a Duplicant riding it.
+# How a player reaches it: research Durable Life Support; the Base menu.
+# What changes: an elevator between floors.
+#
+# Durable Life Support is researched in setup and a lift built in the corridor west of the
+# printing pod. The Base menu offers it (its card); selected, the built one shows its visual
+# settings side screen.
+from: early-base
+mods: [3806581240]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"DurableLifeSupport\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"ProjectExpeditionStrataLift\")", method: Build, args: [131765, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"DurableLifeSupport\").unlockedItemIDs": {contains: ProjectExpeditionStrataLift}
+      "Assets.GetPrefab(\"ProjectExpeditionStrataLift\").GetComponent<NavTeleporter>": exists
+  - run: {seconds: 3}
+  - driver: {camera.set: {cell: [113, 209], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/ProjectExpeditionStrataLift Group*", cond: stable}
+  - scroll: {at: "**/PlanBuildingSelectionPanel/BuildingGroups", notches: -10}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/ProjectExpeditionStrataLift Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/ProjectExpeditionStrataLift Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - key: {code: Escape}
+  - click_world: {cell: [113, 208], select: ProjectExpeditionStrataLift}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/StrataLiftVisualSettings", cond: stable}
+  - ui_dump: {name: visual, root: "**/DetailsScreen/SideScreen/**/StrataLiftVisualSettings"}

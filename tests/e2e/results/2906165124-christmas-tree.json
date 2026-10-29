@@ -7,8 +7,8 @@
  "why": "a run of ours failed",
  "findings": [],
  "note": "spec fails in ours: the tree's build-menu card lacks its requirements, effects and material panes (128 px tall, 365 in the original)",
- "updated": "2026-10-27",
- "commit": "d52da26d",
+ "updated": "2026-10-29",
+ "commit": "e0b1e1de",
  "mod_dlls": {
   "2906165124": {
    "╩Ñ╡«╩≈christmas tree.dll": "438d47eba0605a105e53d542ac3cab446f22533d0ebf2878e9ebd28e67bcd066"
@@ -27,11 +27,11 @@
   ],
   "ours": [
    {
-    "run": "20261027-153635-35d5ca9b",
+    "run": "20261029-033517-7dbb305f",
     "index": 1,
     "verdict": "fail",
-    "date": "2026-10-27T16:13:14",
-    "lane": 17,
+    "date": "2026-10-29T03:35:17",
+    "lane": 16,
     "reasons": [
      "shot product: 100.00% of pixels differ (> 4%)"
     ],
@@ -44,11 +44,11 @@
     }
    },
    {
-    "run": "20261027-153635-35d5ca9b",
+    "run": "20261029-033517-7dbb305f",
     "index": 2,
     "verdict": "fail",
-    "date": "2026-10-27T16:14:06",
-    "lane": 17,
+    "date": "2026-10-29T03:36:04",
+    "lane": 16,
     "reasons": [
      "shot product: 100.00% of pixels differ (> 4%)"
     ],

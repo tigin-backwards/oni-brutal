@@ -1,0 +1,27 @@
+# Crafted Quality / 匠作品质 (3803708767), classes P, U; PLib options.
+#
+# What it does: food, artwork, furniture, beds and recreation buildings get a persistent
+# production quality (QualityComponent: a grade rolled from the maker's skill, morale and
+# an inspiration), which scales their benefits (food morale, decor, sleep, recreation) and
+# shows in their names, descriptors and the codex; Duplicants get inspirations at high
+# morale, with an icon over their heads and notifications for masterpieces.
+# How a player reaches it: build, cook and paint; select the results.
+# What changes: crafted things come in qualities.
+#
+# Its shipped config.json turns the quality system off, so the options are set here: quality
+# and inspirations on. Every Duplicant has an inspiration component; a Cot ordered in the
+# room east of the printing pod is built and gets a quality grade from its builder.
+from: early-base
+mods: [3803708767]
+options:
+  "3803708767": {EnableQualitySystem: true, EnableInspirations: true, StackSameTypeMasterpieceNotifications: false}
+steps:
+  - expect_state:
+      "count:Components.LiveMinionIdentities.Items[*] if .GetComponent<QualityMod.Core.InspirationComponent>.enabled == true": 3
+      "all:Bed::[0].GetComponent<QualityMod.Core.QualityComponent>.Kind": "== 'Bed'"
+  - build: {prefab: Bed, at: [134, 207]}
+  - expect: {blueprints: {Bed: 1}}
+  - run: {seconds: 900, until: {buildings: {Bed: 2}, pending_construction: 0}}
+  - run: {seconds: 2}
+  - expect_state:
+      "count:all:QualityMod.Core.QualityComponent::[*] if .Assigned == true": ">= 1"

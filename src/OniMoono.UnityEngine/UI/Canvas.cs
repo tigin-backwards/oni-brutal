@@ -111,13 +111,15 @@ namespace UnityEngine
         }
 
         /// Nested canvases without overrideSorting sort with the nearest enclosing canvas that
-        /// overrides sorting, or their root.
+        /// overrides sorting, or their root. The order is a 16-bit value: Unity's player keeps
+        /// the low 16 bits of what is set (100000 reads back as -31072, measured with the
+        /// Resource Calculator mod's canvas in the original), so an out-of-range order wraps.
         public int sortingOrder
         {
             get => SortingSource.SortingOrder;
             set
             {
-                Data.SortingOrder = (short)Math.Clamp(value, short.MinValue, short.MaxValue);
+                Data.SortingOrder = unchecked((short)value);
                 CanvasSystem.SortingOrderSet(Data);
             }
         }

@@ -1,0 +1,41 @@
+# God Tools - Instant Move & Delete (3630596422), class P.
+#
+# What it does: selecting any loose item (a Pickupable: debris, food, an egg) adds a
+# GodToolComponent with two user-menu buttons: GOD DELETE removes the stack at once, GOD MOVE
+# arms a move whose next click teleports the stack to the clicked cell (right-click cancels).
+# No Duplicant needed. The component subscribes as the selection's menu is built, so its
+# buttons show from the menu's next refresh on (any button of the menu refreshes it).
+# How a player reaches it: select debris; the user menu's buttons.
+# What changes: items can be deleted or moved instantly.
+#
+# setup spawns two piles that fall into the pit in the corridor floor west of the printing
+# pod: 400 kg of copper and 300 kg of steel. The copper is selected and marked for sweeping
+# (the menu refreshes: the god buttons appear, dumped), then moved by GOD MOVE to the room
+# east of the pod; the steel is selected, marked, and deleted by GOD DELETE.
+from: early-base
+mods: [3630596422]
+setup:
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Copper\").substance", method: SpawnResource, args: [[113.5, 207.5, -12], 400, 300, 255, 0]}}
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Steel\").substance", method: SpawnResource, args: [[111.5, 207.5, -12], 300, 300, 255, 0]}}
+steps:
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [118, 209], ortho: 10}}
+  - click_world: {pos: [113.5, 206.2], select: Copper}
+  - ui_wait: {path: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons/SweepButton", cond: stable}
+  - click: {ui: "**/UserMenuScreen/Buttons/SweepButton"}
+  - ui_wait: {path: "**/UserMenuScreen/Buttons/GOD MOVEButton", cond: stable}
+  - ui_dump: {name: user-menu, root: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons"}
+  - click: {ui: "**/UserMenuScreen/Buttons/GOD MOVEButton"}
+  - click_world: {cell: [133, 207]}
+  - run: {seconds: 1}
+  - expect_state:
+      "count:all:Pickupable::[*] if .GetComponent<PrimaryElement>.ElementID == Copper": 1
+      "sum:all:Pickupable::[*].transform.position.x if .GetComponent<PrimaryElement>.ElementID == Copper": ["> 132.9", "< 134.1"]
+  - click_world: {pos: [111.5, 206.2], select: Steel}
+  - ui_wait: {path: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons/SweepButton", cond: stable}
+  - click: {ui: "**/UserMenuScreen/Buttons/SweepButton"}
+  - ui_wait: {path: "**/UserMenuScreen/Buttons/GOD DELETEButton", cond: stable}
+  - click: {ui: "**/UserMenuScreen/Buttons/GOD DELETEButton"}
+  - run: {seconds: 1}
+  - expect_state:
+      "count:all:Pickupable::[*] if .GetComponent<PrimaryElement>.ElementID == Steel": 0

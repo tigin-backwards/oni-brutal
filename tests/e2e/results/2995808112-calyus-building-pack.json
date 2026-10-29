@@ -1,0 +1,65 @@
+{
+ "spec": "mods/2995808112-calyus-building-pack.yaml",
+ "mods": [
+  "2995808112"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "spec fails in ours: a TextMeshPro rebuild in the Utilities menu logs 'Mesh.vertices is too small' (TMP_MeshInfo reuses a mesh without clearing its triangles), the game's crash dialog opens",
+ "updated": "2026-10-29",
+ "commit": "0c60ca12",
+ "mod_dlls": {
+  "2995808112": {
+   "GravitasMemory.dll": "fae5a0bcb510cc7434cacba8089c8ac4cf1960b7e5c117353bf9f8f91f25c223"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-145102-18288f91",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T15:35:23",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-010732-6b6febd8",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-29T01:09:30",
+    "lane": 16,
+    "reasons": [
+     "step 13: no SongMachine selected at [113, 207] after 5 clicks (last: None)"
+    ],
+    "reference_run": "20261027-145102-18288f91",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.007747
+    }
+   },
+   {
+    "run": "20261029-010732-6b6febd8",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-29T01:10:29",
+    "lane": 16,
+    "reasons": [
+     "step 13: no SongMachine selected at [113, 207] after 5 clicks (last: None)"
+    ],
+    "reference_run": "20261027-145102-18288f91",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.007747
+    }
+   }
+  ]
+ }
+}

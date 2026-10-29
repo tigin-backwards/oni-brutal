@@ -1,0 +1,44 @@
+# CalYu's Building Pack (GravitasMemory, 2995808112), class B.
+#
+# What it does: adds six Gravitas-style buildings: the Overrider (Equipment, Robotic Tools)
+# that operates nearby Duplicant-run machines; the experimental machines P1 (Refinement,
+# refined metal back to ore with a little neutronium) and C4 (Refinement, crude oil to
+# natural gas), both from Improved Combustion; L8 (Utilities, Liquid Tuning), a liquid cooler
+# that releases no heat; the Seed Fermenter (seeds to ethanol and dirt) and the Lullaby song
+# machine that speeds up nearby eggs (an "EggCrazy" effect), both Utilities from Food
+# Repurposing.
+# How a player reaches it: research those techs; the menus.
+# What changes: six new machines.
+#
+# Food Repurposing is researched in setup and a song machine built in the corridor west of
+# the printing pod. The techs list the new buildings; the Utilities menu offers the Seed
+# Fermenter (its card); selected, the built song machine is one.
+from: early-base
+mods: [2995808112]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"FoodRepurposing\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SongMachine\")", method: Build, args: [131765, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"FoodRepurposing\").unlockedItemIDs": [{contains: SeedFermenter}, {contains: SongMachine}]
+      "Db.Get().Techs.Get(\"ImprovedCombustion\").unlockedItemIDs": [{contains: BaseP1}, {contains: GeyserC4}]
+      "Db.Get().Techs.Get(\"RoboticTools\").unlockedItemIDs": {contains: Overrider}
+      "Db.Get().effects.Get(\"EggCrazy\").duration": 1200
+  - run: {seconds: 3}
+  - driver: {camera.set: {cell: [113, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Utilities"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/SeedFermenter Group*", cond: stable}
+  - scroll: {at: "**/PlanBuildingSelectionPanel/BuildingGroups", notches: -10}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/SeedFermenter Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/SeedFermenter Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - key: {code: Escape}
+  - expect: {buildings: {SongMachine: 1}}
+  - click_world: {cell: [113, 207], select: SongMachine}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<KPrefabID>.PrefabTag.Name": SongMachine

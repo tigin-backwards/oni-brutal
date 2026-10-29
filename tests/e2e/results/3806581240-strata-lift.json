@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3806581240-strata-lift.yaml",
+ "mods": [
+  "3806581240"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Base menu card (shot); a built lift shows its visual settings side screen (dump)",
+ "updated": "2026-10-29",
+ "commit": "f9287abe",
+ "mod_dlls": {
+  "3806581240": {
+   "StrataLift.dll": "881eeb0162432704736860ef928776f11c50ae36f0a45d2e9dfd526b86628b74"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-034126-f0367a5f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T03:41:26",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-034512-d86e32c9",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T03:45:12",
+    "lane": 17,
+    "reference_run": "20261029-034126-f0367a5f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "visual": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "product": 0.0
+    }
+   },
+   {
+    "run": "20261029-034512-d86e32c9",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T03:46:02",
+    "lane": 17,
+    "reference_run": "20261029-034126-f0367a5f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "visual": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "product": 0.0
+    }
+   }
+  ]
+ }
+}

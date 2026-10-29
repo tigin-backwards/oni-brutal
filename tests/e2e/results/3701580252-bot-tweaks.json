@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3701580252-bot-tweaks.yaml",
+ "mods": [
+  "3701580252"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the All Resources screen lists a Robots category with a Sweepy row first (dump, shot)",
+ "updated": "2026-10-29",
+ "commit": "ce53c08c",
+ "mod_dlls": {
+  "3701580252": {
+   "BotTweaksMerged.dll": "6eeaf15b9e38bddf7b8605b2b6098b3b6d1aee28a6d0c04897bcb3f7b5395a17"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-032202-6356e6a7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T03:22:02",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-032525-934fbbaa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T03:25:25",
+    "lane": 16,
+    "reference_run": "20261029-032202-6356e6a7",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "robots": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "robots": 0.0
+    }
+   },
+   {
+    "run": "20261029-032525-934fbbaa",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T03:26:17",
+    "lane": 16,
+    "reference_run": "20261029-032202-6356e6a7",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "robots": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "robots": 0.0
+    }
+   }
+  ]
+ }
+}

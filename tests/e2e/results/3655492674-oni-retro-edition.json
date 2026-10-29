@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3655492674-oni-retro-edition.yaml",
+ "mods": [
+  "3655492674"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with its shipped options, the Pumping Tool dragged over a flooded pit places pump placers",
+ "updated": "2026-10-29",
+ "commit": "960fa78d",
+ "mod_dlls": {
+  "3655492674": {
+   "OniRetroEdition.dll": "f6e71584483887369e81a7d7882e316cfc2484158156c805d723135ff09d0fb4"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-010732-2e8b7c55",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T01:07:32",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-024514-537d9d0f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T02:45:14",
+    "lane": 16,
+    "reference_run": "20261029-010732-2e8b7c55",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-024514-537d9d0f",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T02:46:10",
+    "lane": 16,
+    "reference_run": "20261029-010732-2e8b7c55",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

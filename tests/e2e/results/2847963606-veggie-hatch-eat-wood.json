@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2847963606-veggie-hatch-eat-wood.yaml",
+ "mods": [
+  "2847963606"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Sage Hatch's diet has the mod's entry that takes wood, as in the original",
+ "updated": "2026-10-29",
+ "commit": "1fdd8d67",
+ "mod_dlls": {
+  "2847963606": {
+   "caohaqi.dll": "ebcb46b703632b04d495db839e7106f94412637e91b25e07837c419529d53b7e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-150642-6081766e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T15:09:39",
+    "lane": 4,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-152554-d2a50413",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T15:25:54",
+    "lane": 4,
+    "reference_run": "20261029-150642-6081766e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-152554-d2a50413",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T15:26:36",
+    "lane": 4,
+    "reference_run": "20261029-150642-6081766e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

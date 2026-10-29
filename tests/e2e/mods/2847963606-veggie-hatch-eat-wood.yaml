@@ -1,0 +1,17 @@
+# Veggie Hatch eat Wood (2847963606), class P.
+#
+# What it does: a postfix on BaseHatchConfig.VeggieDiet replaces the Sage Hatch's diet with
+# one entry that eats dirt, sand, sandstone, polluted dirt, clay or wood, at the game's
+# calories and conversion rate.
+# How a player reaches it: Sage Hatches; their diet in the codex.
+# What changes: Sage Hatches also eat wood.
+#
+# The Sage Hatch's diet holds one entry that takes wood among its others, as in the original.
+from: early-base
+mods: [2847963606]
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"HatchVeggie\").GetComponent<StateMachineController>.cmpdef.defs[17].diet.infos.Length": "== original"
+      "count:Assets.GetPrefab(\"HatchVeggie\").GetComponent<StateMachineController>.cmpdef.defs[17].diet.infos[*] if .consumedTags.Contains(\"WoodLog\") == true": [1, "== original"]
+  - expect_state:
+      "count:Assets.GetPrefab(\"HatchVeggie\").GetComponent<StateMachineController>.cmpdef.defs[17].diet.infos[*] if .consumedTags.Count == 6": "== original"

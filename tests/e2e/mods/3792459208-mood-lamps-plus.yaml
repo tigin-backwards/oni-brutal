@@ -1,0 +1,32 @@
+# Mood Lamps Plus (3792459208), class P; needs Decor Pack I (2660131829).
+#
+# What it does: registers more variants for Decor Pack I's Mood Lamp through its mod API
+# (DecorPackA_ModAPI.AddMoodLamp, at Db.Initialize): a sitting Amogus and a stickbug (unless
+# Amorbus is on), a rubber duckie (unless Bath Tub is on), a nuclear bomblet that shifts its
+# colour and a round pip. Without Decor Pack I it logs a warning and adds nothing.
+# How a player reaches it: a Mood Lamp's side screen, which lists the variants.
+# What changes: five more lamp designs.
+#
+# setup grants Interior Decor and builds a Mood Lamp in the corridor west of the printing pod,
+# selected: the side screen lists the new variants with the pack's own, and a click on the
+# nuclear bomblet picks it.
+from: early-base
+mods: [3792459208, 2660131829]
+setup:
+  - driver: {setup.call: {target: "Research.Instance.GetTechInstance(\"InteriorDecor\")", method: Purchased}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"DecorPackA_MoodLamp\")", method: Build, args: [{"$": "Grid.XYToCell(113, 206)"}, Neutral, null, [Glass], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "type:DecorPackA.ModDb::lampVariants.TryGet(\"MLP_NuclearBomblet\").Id": MLP_NuclearBomblet
+      "type:DecorPackA.ModDb::lampVariants.TryGet(\"MLP_TheBodyIsRound\").Id": MLP_TheBodyIsRound
+      "type:DecorPackA.ModDb::lampVariants.TryGet(\"AM_SittingMogus\").Id": AM_SittingMogus
+      "type:DecorPackA.ModDb::lampVariants.TryGet(\"BT_RubberDuckie\").Id": BT_RubberDuckie
+      "type:DecorPackA.ModDb::lampVariants.Count": "== original"
+  - run: {seconds: 2}
+  - expect: {buildings: {DecorPackA_MoodLamp: 1}}
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - click_world: {cell: [113, 207], select: DecorPackA_MoodLamp}
+  - ui_wait: {path: "**/DecorPackA Mood Lamp Side Screen", cond: stable}
+  - expect_ui:
+      "**/DecorPackA Mood Lamp Side Screen/Content/Scroll/Grid/ButtonPrefab": {count: ">= 40"}
+  - ui_dump: {name: grid, root: "**/DecorPackA Mood Lamp Side Screen/Content/Scroll/Grid"}

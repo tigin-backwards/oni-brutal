@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3792459208-mood-lamps-plus.yaml",
+ "mods": [
+  "3792459208",
+  "2660131829"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Decor Pack I's Mood Lamp gets the five new variants; a built lamp's variant grid matches the original's",
+ "updated": "2026-10-29",
+ "commit": "2d4aca2a",
+ "mod_dlls": {
+  "3792459208": {
+   "MoodLampsPlus.dll": "c5fb7440f1f93507b334ce5038708010c78341d15869ecdcece354b86e04b6cb"
+  },
+  "2660131829": {
+   "DecorPackA.dll": "dfe91d61d1fbd73ceeaf62077e84577c1851cf5b0b5535897c9d6a886e8959f2"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-071158-8a6b9b85",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T07:26:43",
+    "lane": 4,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-083519-82e8344c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T09:01:57",
+    "lane": 4,
+    "reference_run": "20261029-071158-8a6b9b85",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "grid": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261029-083519-82e8344c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T09:02:52",
+    "lane": 4,
+    "reference_run": "20261029-071158-8a6b9b85",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "grid": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -388,11 +388,6 @@ namespace OniMoono.Engine.Serialization
     /// the game's own (Vector2I) is; a mod's type as the root is read and written.
     internal static class JsonLayout
     {
-        public static bool Known(ValueShape shape) => shape.Kind switch
-        {
-            ValueKind.Composite => EngineConfig.BuildAssemblies == null || EngineConfig.BuildAssemblies.Contains(shape.Type.Assembly.GetName().Name),
-            ValueKind.Array or ValueKind.List => Known(shape.Element),
-            _ => true,
-        };
+        public static bool Known(ValueShape shape) => SerializedLayout.Known(shape);
     }
 }

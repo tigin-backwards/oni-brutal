@@ -358,6 +358,14 @@ MonoBehaviour (whether it is alive, its instance id, name, hide flags and `ToStr
 Awake and OnEnable run and when, what reaches the log), then Instantiate, DestroyImmediate and
 Destroy on it. `ScriptableObjectNewTests` encodes the results.
 
+With `PROBE_SCENARIO=emptycomposite` only the composite-field probe runs (`EmptyComposite.cs`,
+lines `EC …`, at the main menu; an `EmptyCompositeProbeDone` canvas appears at the end): what
+Instantiate copies of a mod MonoBehaviour's fields of the mod's own `[Serializable]` classes (with
+and without serialized fields or a parameterless constructor, null and not), struct and list of
+them, beside an int, a string, a `List<int>` and the game's `AttackEffect`. It runs through
+`scripts/e2e.py` with OniMcp's mod folder as above and a spec `from: main-menu` that waits for
+`**/EmptyCompositeProbeDone`. `InstantiateFieldTests` encodes the results (ARCHITECTURE D52).
+
 With `PROBE_SCENARIO=missingtypes` only the missing-types probe runs (`MissingTypes.cs`, lines
 `MT …`, at the main menu; a `MissingTypesProbeDone` canvas appears at the end). It is built
 against `Gone/v1`'s ProbeGone; put `Gone/v2`'s build (`dotnet build Gone/v2 -c Release`) beside

@@ -117,5 +117,60 @@ namespace OniMoono.Tests
             Assert.NotNull(outputs[1].portInfo);
             Assert.Equal(PortKind.None, outputs[1].portInfo.kind);
         }
+
+        [Serializable]
+        public class ModDiet
+        {
+            public int value;
+            public ModDiet(int value) { this.value = value; }
+        }
+
+        [Serializable]
+        public struct ModCell
+        {
+            public int value;
+        }
+
+        public class ModController : MonoBehaviour
+        {
+            public ModDiet diet;
+            public ModDiet missing;
+            public ModCell cell;
+            public List<ModDiet> diets;
+            public int threshold;
+        }
+
+        // Measured in the original player (UnityProbe's emptycomposite): a [Serializable] class or
+        // struct of an assembly the game was not built with (a mod's) is not serialized: the copy
+        // of a mod's MonoBehaviour keeps its constructor's value for such fields, the source is
+        // left as it is, and its other fields, the game's own classes among them, are copied.
+        [Fact]
+        public void ACompositeOfAnAssemblyTheGameWasNotBuiltWithIsNotCopied()
+        {
+            var saved = OniMoono.Engine.EngineConfig.BuildAssemblies;
+            // The test assembly stands for a mod's.
+            OniMoono.Engine.EngineConfig.BuildAssemblies = ["Assembly-CSharp"];
+            try
+            {
+                var prefab = new GameObject("Prefab");
+                var source = prefab.AddComponent<ModController>();
+                source.diet = new ModDiet(4);
+                source.cell = new ModCell { value = 9 };
+                source.diets = [new ModDiet(1)];
+                source.threshold = 180;
+                var copy = Object.Instantiate(prefab).GetComponent<ModController>();
+                Assert.Null(copy.diet);
+                Assert.Null(copy.missing);
+                Assert.Null(source.missing);
+                Assert.Equal(0, copy.cell.value);
+                Assert.Null(copy.diets);
+                Assert.Equal(180, copy.threshold);
+                Assert.Equal(4, source.diet.value);
+            }
+            finally
+            {
+                OniMoono.Engine.EngineConfig.BuildAssemblies = saved;
+            }
+        }
     }
 }

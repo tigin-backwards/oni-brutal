@@ -226,6 +226,11 @@ namespace SemanticsProbe
                 go.AddComponent<QuitEvents>();
                 return;
             }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "emptycomposite")
+            {
+                go.AddComponent<EmptyComposite>();
+                return;
+            }
             if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "newobject")
             {
                 go.AddComponent<NewObject>();

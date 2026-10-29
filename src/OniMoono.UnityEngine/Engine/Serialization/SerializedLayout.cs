@@ -229,7 +229,7 @@ namespace OniMoono.Engine.Serialization
                 {
                     if (!IsSerializedField(f)) continue;
                     var shape = ShapeOf(f.FieldType);
-                    if (shape == null) continue;
+                    if (shape == null || !Known(shape)) continue;
                     // Infinite recursion disqualifies a field: its composite type leads back to
                     // the type being laid out.
                     if (!stopAtEngine && CompositeTypeOf(f.FieldType) is { } composite && ReachableComposites(composite).Contains(type)) continue;
@@ -238,6 +238,24 @@ namespace OniMoono.Engine.Serialization
             }
             return result.ToArray();
         }
+
+        /// Whether Unity's serializer handles a value of this shape: a composite type (or a
+        /// collection of one) must come from an assembly the game was built with
+        /// (ScriptingAssemblies.json) or the engine's own. Measured in the original player: a mod's
+        /// [Serializable] class or struct, or a list of one, as a field of a mod's MonoBehaviour is
+        /// not copied by Instantiate (the copy keeps what its constructor gave it: null, a struct's
+        /// default) and the source is left as it is, while the game's own class as such a field
+        /// is (UnityProbe's emptycomposite; Rephysicalized's FueledDietController takes its diet
+        /// from a registry only when the field is null). JsonUtility neither writes nor reads them
+        /// either (JsonLayout). The type laid out itself is not concerned: a mod's MonoBehaviour,
+        /// or a mod's type as JsonUtility's root, has its other fields serialized.
+        public static bool Known(ValueShape shape) => shape.Kind switch
+        {
+            ValueKind.Composite => EngineConfig.BuildAssemblies == null || shape.Type.Assembly == typeof(Object).Assembly
+                || EngineConfig.BuildAssemblies.Contains(shape.Type.Assembly.GetName().Name),
+            ValueKind.Array or ValueKind.List => Known(shape.Element),
+            _ => true,
+        };
 
         /// UnityEngine's own MonoBehaviour/ScriptableObject ancestry: their state is native, not
         /// serialized fields. Engine types that are serialized as scripts (uGUI lives in

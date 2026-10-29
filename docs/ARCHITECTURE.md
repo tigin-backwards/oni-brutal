@@ -1203,6 +1203,24 @@ game or mod code can notice. Each says how it is resolved, or why it is kept.
   where Mono's is `<Module>`. `--check-types` loads a mod whose type nested in `<Module>` holds a
   type calling a private method of `<Module>` (CoreCLR alone refuses it as it is), lists its
   types and runs it.
+- **D52 Mods' serializable types in Instantiate.** Measured in the original player (UnityProbe,
+  `PROBE_SCENARIO=emptycomposite`, `EmptyComposite.cs`): Unity's serializer handles a
+  `[Serializable]` class or struct only from an assembly the game was built with
+  (`ScriptingAssemblies.json`). As a field of a mod's MonoBehaviour, a mod's class (with or
+  without serialized fields or a parameterless constructor), a mod's struct and a `List` of a mod's
+  class are not copied by Instantiate: the copy keeps what its constructor gave it (null, the
+  struct's default; no constructor of the field's type runs) and the source's field is left as it
+  is, null included. The same component's ints, strings and `List<int>` are copied, and a field of
+  the game's own class (`AttackEffect`) is copied, a null one given an instance in both (the
+  engine's rule for the game's types). The engine had applied the game's rule to every type:
+  Rephysicalized's `FueledDietController` keeps its diet, a mod class whose state is in private
+  fields and get-only properties, in a public field set on the prefab, and takes it from a
+  registry in `OnSpawn` only when the field is null; ours gave every Sea Turtle an empty diet, and
+  `TryApplyFuelConversion` threw a NullReferenceException each time one ate. **Resolved in**
+  `SerializedLayout.Known`: a field whose composite type (or collection element) is from neither
+  the game's assemblies nor the engine is not part of a script's serialized layout, for
+  Instantiate as for JsonUtility, which had the same rule measured. Not measured: a mod's enum
+  (still copied as its integer).
 
 ## 3. The engine API (`OniMoono.UnityEngine`)
 

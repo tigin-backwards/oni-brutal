@@ -1,0 +1,62 @@
+{
+ "spec": "mods/3779620887-precision-pipette-plus.yaml",
+ "mods": [
+  "3779620887"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Pipette tool (its IMGUI panel shot) moves 0.03 kg of water",
+ "updated": "2026-10-29",
+ "commit": "2d4aca2a",
+ "mod_dlls": {
+  "3779620887": {
+   "Gas Pipette.dll": "5cbf6705dc5d33a80f9f08e95a1367a30cad6d278f1e94b268f0717e881053de",
+   "PLib.dll": "c4bb22f1bc06ebcb0dbba75a7f1bc46f63eaa3dae12c22a08729f1a6d3362dda",
+   "Pipette.dll": "6c18d09a67650a493be4e5a905cd7fe49ac797538bdb128dab1e71a5ddfd6690",
+   "PrecisionPipettePlus.dll": "fb502e3f0d45a75bebff57ed3e439203093636501254e11d7589c0b3a4ac3c15"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-112259-0d44a806",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T13:04:41",
+    "lane": 1,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-143747-9481627a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T15:54:57",
+    "lane": 1,
+    "reference_run": "20261029-112259-0d44a806",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "panel": 0.007565
+    }
+   },
+   {
+    "run": "20261029-143747-9481627a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T15:55:54",
+    "lane": 1,
+    "reference_run": "20261029-112259-0d44a806",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "panel": 0.008838
+    }
+   }
+  ]
+ }
+}

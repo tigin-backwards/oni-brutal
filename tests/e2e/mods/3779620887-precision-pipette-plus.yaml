@@ -1,0 +1,32 @@
+# Precision Pipette Plus (gas & liquid) / 精准滴管增强 (3779620887), classes T, S (IMGUI), K, O.
+#
+# What it does: bundles a liquid Pipette and a Gas Pipette tool (tool menu entries, PLib key
+# bindings) that suck up an amount of the liquid or gas in a cell on mouse down and drop it
+# where the mouse is released; and an IMGUI panel shown while either tool is active, with the
+# amount (a slider, - and + buttons, a typed value; liquid 0.03 kg by default) and a
+# Chinese/English toggle, kept in a settings file.
+# How a player reaches it: the tool menu's Pipette; then drag from a cell.
+# What changes: small amounts of liquid or gas are moved by hand.
+#
+# 995 kg of water is sealed in a sandstone cell under the east corridor in setup. The Pipette
+# is picked from the tool menu: its IMGUI panel shows (the frame is shot). A drag from the
+# water to the corridor above moves 0.03 kg: the pocket weighs that much less.
+from: early-base
+mods: [3779620887]
+setup:
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [130514, Water, {"$": "CellEventLogger.Instance.DebugTool"}, 995, 300, 255, 0, -1]}}
+steps:
+  - run: {seconds: 1, speed: 1}
+  - driver: {camera.set: {cell: [134, 207], ortho: 8}}
+  - expect_state:
+      "Grid.Element[130514].id": "== 'Water'"
+      "Grid.Mass.get_Item(130514)": {save_as: before}
+  - tool: {toolbar: Pipette}
+  - expect_state:
+      "PlayerController.Instance.ActiveTool.name": PipetteTool
+  - shot: {name: panel, threshold: 0.03}
+  - drag: {from: [134, 205], to: [134, 207]}
+  - run: {seconds: 0.5, speed: 1}
+  - expect_state:
+      "Grid.Mass.get_Item(130514)": ["< before - 0.02", "> before - 0.05"]
+  - key: {code: Escape}

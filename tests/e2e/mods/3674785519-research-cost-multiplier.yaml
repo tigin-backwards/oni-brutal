@@ -1,0 +1,22 @@
+# Research Cost Multiplier (3674785519), classes P, O; PLib options.
+#
+# What it does: a postfix on Db.Initialize multiplies every tech's cost of each research type
+# by a factor (2 by default, an option from 0.1 to 10), rounded, at least 1.
+# How a player reaches it: the research screen's costs.
+# What changes: research costs more (or less).
+#
+# Options here: a factor of 3. Basic Farming costs 3 times the game's 15 points; the research
+# screen shows it.
+from: early-base
+mods: [3674785519]
+options:
+  "3674785519": {CostMultiplier: 3.0}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"FarmingTech\").costsByResearchTypeID.get_Item(\"basic\")": 45
+      "Db.Get().Techs.Get(\"Jobs\").costsByResearchTypeID.get_Item(\"basic\")": "== original"
+      "Db.Get().Techs.Get(\"AdvancedResearch\").costsByResearchTypeID.get_Item(\"basic\")": "== original"
+  - open: {management: research}
+  - ui_wait: {path: "**/FullScreenUICanvases/ResearchScreen", cond: stable}
+  - ui_wait: {path: "**/ResearchScreen/Content/ScrollRectRoot/ScrollContent", cond: stable, frames: 600}
+  - ui_dump: {name: farming, root: "**/ScrollContent/*\"FARMINGTECH\"* Panel", ignore_fields: [world, screen]}

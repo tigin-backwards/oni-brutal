@@ -1,0 +1,64 @@
+{
+ "spec": "mods/3674785519-research-cost-multiplier.yaml",
+ "mods": [
+  "3674785519"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with a factor of 3 in its options Basic Farming costs 45 and the other costs match the original's; its research panel matches but for where the tree scrolls",
+ "updated": "2026-10-29",
+ "commit": "96f94050",
+ "mod_dlls": {
+  "3674785519": {
+   "PLib.dll": "48c63fd4654b6fbb390afdac71a3d29194eeb9405eca4290cba6e4fbf60805ce",
+   "researchCostMultiplier.dll": "81b4b3dbbc7efc87ffd0a8c9b44cfb655cf1044865a4b5ddfb51d043bcd08a59"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-130335-d1da02eb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T14:05:57",
+    "lane": 4,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-150057-db480465",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T15:04:40",
+    "lane": 4,
+    "reference_run": "20261029-130335-d1da02eb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "farming": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261029-150057-db480465",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T15:05:40",
+    "lane": 4,
+    "reference_run": "20261029-130335-d1da02eb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "farming": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

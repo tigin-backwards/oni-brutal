@@ -1,0 +1,22 @@
+# 让煎蛋卷再次伟大 Good Old Omelette (3760385522), class P.
+#
+# What it does: the Fish Feeder's feeding effect becomes the mod's
+# "OldOmelette_AteFromFishFeeder" (1200 s: +5 happiness and -1/30 wildness a second, so fed
+# fish tame), and a prefix on the three Pacu morphs' CreatePrefab sets their egg mass to 2 kg
+# (more Omelette per egg).
+# How a player reaches it: a Fish Feeder; Pacu eggs.
+# What changes: fed Pacu are happier and tame; Pacu eggs weigh 2 kg.
+#
+# The effect is registered with its two modifiers, the Fish Feeder uses it, and the Pacu eggs
+# and their tuning weigh 2 kg. Its start-up line is in the log.
+from: early-base
+mods: [3760385522]
+require_log: ['\[OldOmelette\] Registered Fish Feeder effect']
+steps:
+  - expect_state:
+      "Db.Get().effects.Get(\"OldOmelette_AteFromFishFeeder\").duration": 1200
+      "Db.Get().effects.Get(\"OldOmelette_AteFromFishFeeder\").SelfModifiers.Count": 2
+      "Assets.GetPrefab(\"FishFeeder\").GetComponent<CreatureFeeder>.effectId": OldOmelette_AteFromFishFeeder
+      "PacuTuning.EGG_MASS": 2
+      "Assets.GetPrefab(\"PacuEgg\").GetComponent<PrimaryElement>.Mass": 2
+      "Assets.GetPrefab(\"PacuTropicalEgg\").GetComponent<PrimaryElement>.Mass": 2

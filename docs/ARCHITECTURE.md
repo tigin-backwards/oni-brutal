@@ -1454,6 +1454,12 @@ and scroll, hardware cursors from `Texture2D`, clipboard, focus events. Legacy I
 axes/buttons come from `globalgamemanagers` `InputManager` settings, with Unity's gravity /
 sensitivity / dead-zone smoothing.
 
+A minimized window keeps the size it had, as in Unity's player: Windows reports its framebuffer
+as 0x0, but `Screen.width`/`height`, `Display.renderingWidth`/`Height` and the cameras' pixel
+sizes stay what they were, and frames go on rendering at that size until the window is restored
+(measured in the original, windowed and fullscreen; issue #29, where the game's
+`LightBufferCompositor` asked for a temporary of `Screen.width / 8` pixels).
+
 ### 3.7 Text and fonts
 
 TMP runs as shipped. The engine provides what it needs: `Font`, `TextCore` data types,

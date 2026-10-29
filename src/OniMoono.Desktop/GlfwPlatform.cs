@@ -135,7 +135,7 @@ namespace OniMoono.Desktop
                 window.OnCursorEnter += (_, entered) => Report(() => InputState.Instance.MousePresent = entered);
             }
             window.OnClose += _ => Report(() => closeRequested = true);
-            window.OnFramebufferSize += (_, size) => Report(() => framebufferSize = window.FramebufferSize);
+            window.OnFramebufferSize += (_, size) => Report(ReadFramebufferSize);
             Glfw.MonitorCallback += (_, _) => Report(RefreshWindowState);
             // The window may have moved to another monitor.
             window.OnPosition += (_, _) => Report(RefreshWindowState);
@@ -178,10 +178,19 @@ namespace OniMoono.Desktop
 
         void RefreshWindowState()
         {
-            framebufferSize = window.FramebufferSize;
+            ReadFramebufferSize();
             desktopMode = null;
             dpi = null;
         }
+
+        void ReadFramebufferSize() => framebufferSize = KeptFramebufferSize(window.FramebufferSize, framebufferSize);
+
+        /// A minimized window's framebuffer is 0x0 (Windows), but Unity's player keeps the size
+        /// it had: measured in the original, a minimized 1280x720 window (and a minimized
+        /// 2560x1440 fullscreen one) keeps Screen.width/height, Display.renderingWidth/Height and
+        /// the cameras' pixel sizes, and frames go on, until it is restored at the same size.
+        internal static int2 KeptFramebufferSize(int2 reported, int2 last)
+            => reported.X > 0 && reported.Y > 0 || last.X <= 0 || last.Y <= 0 ? reported : last;
 
         public int FramebufferWidth => framebufferSize.X;
         public int FramebufferHeight => framebufferSize.Y;
@@ -404,7 +413,7 @@ namespace OniMoono.Desktop
             {
                 inGlfw--;
             }
-            framebufferSize = window.FramebufferSize;
+            ReadFramebufferSize();
             if (!scripted) FollowCursorOutside();
             // Each close of the window is one quit request: Application.wantsToQuit may refuse it.
             bool open = !closeRequested;
@@ -535,7 +544,7 @@ namespace OniMoono.Desktop
         Vector2 ToPixels(double2 pos)
         {
             var size = window.Size;
-            var fb = window.FramebufferSize;
+            var fb = KeptFramebufferSize(window.FramebufferSize, framebufferSize);
             float sx = size.X == 0 ? 1f : (float)fb.X / size.X, sy = size.Y == 0 ? 1f : (float)fb.Y / size.Y;
             return PointerPixels.Screen(new Vector2((float)pos.X * sx, (float)pos.Y * sy), fb.Y);
         }

@@ -1,0 +1,22 @@
+# Cheety Creety 2 (2515073640), classes P, O; PLib options.
+#
+# What it does: about a hundred patches on the critter configs make critters easier: they
+# survive wider temperature ranges (options per family), breathe and exhale chosen gases,
+# live longer and lay eggs sooner, are tamed faster (a transpiler on
+# ModifierSet.CreateCritteEffects swaps the wildness rate) and stay groomed longer; Morbs and
+# Slicksters inhale and exhale differently.
+# How a player reaches it: any critter; the PLib options.
+# What changes: critters' needs and numbers.
+#
+# The critter effects and traits it rewrites carry the same numbers as in the original, and
+# the colony plays on.
+from: early-base
+mods: [2515073640]
+steps:
+  - expect_state:
+      "sum:Db.Get().effects.Get(\"Ranched\").SelfModifiers[*].Value": "== original"
+      "Db.Get().effects.Get(\"Ranched\").duration": "== original"
+      "sum:Db.Get().traits.Get(\"HatchBaseTrait\").SelfModifiers[*].Value": "== original"
+      "sum:Db.Get().traits.Get(\"SquirrelBaseTrait\").SelfModifiers[*].Value": "== original"
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

@@ -1,0 +1,56 @@
+{
+ "spec": "mods/2515073640-cheety-creety-2.yaml",
+ "mods": [
+  "2515073640"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the critter effects and traits it rewrites match the original's; the colony plays on",
+ "updated": "2026-10-29",
+ "commit": "20364bdc",
+ "mod_dlls": {
+  "2515073640": {
+   "(Darth Nihilus)_CheetyCreety.dll": "0b64a05b1339aa3defcc99adde87a8efe4341ccb3b3452c73f7b8b0e381fdb20",
+   "PLib.dll": "893dc1ea3eddd02c85d433231aae356be27be07ddfc1a98fb2c51d84748208e8"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-130335-d1da02eb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T13:10:54",
+    "lane": 4,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-142627-ee879ee1",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T14:30:30",
+    "lane": 4,
+    "reference_run": "20261029-130335-d1da02eb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-142627-ee879ee1",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T14:31:42",
+    "lane": 4,
+    "reference_run": "20261029-130335-d1da02eb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

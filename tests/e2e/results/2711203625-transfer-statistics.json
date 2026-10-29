@@ -1,0 +1,60 @@
+{
+ "spec": "mods/2711203625-transfer-statistics.yaml",
+ "mods": [
+  "2711203625"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Liquid Meter Valve's limit goes to 50000 and its details list the cycle's transfer; the details screen matches the original's",
+ "updated": "2026-10-29",
+ "commit": "2d4aca2a",
+ "mod_dlls": {
+  "2711203625": {
+   "PLib.dll": "3b174379c1bc41e51c6771c1d5b1d66494d96c4fe9e7cb0d54ef38887d87dedb",
+   "meterstatistics.dll": "a35dd960952e57b59a96a5fc8903d17053c2938221bbb626857a34694989c4ec"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-071158-8a6b9b85",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T07:39:47",
+    "lane": 5,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-083519-82e8344c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T08:40:21",
+    "lane": 4,
+    "reference_run": "20261029-071158-8a6b9b85",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.002155
+    }
+   },
+   {
+    "run": "20261029-083519-82e8344c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T08:41:21",
+    "lane": 4,
+    "reference_run": "20261029-071158-8a6b9b85",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "details": 0.002155
+    }
+   }
+  ]
+ }
+}

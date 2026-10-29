@@ -1,0 +1,30 @@
+# Transfer Statistics (2711203625), classes P, O; PLib options.
+#
+# What it does: the Gas, Liquid and Conveyor Meter Valves (limit valves) and the Power Sensor
+# get a UsageCounter: it adds up what passes each cycle (kg, units, or kJ of power used) and
+# lists the last five cycles in the building's descriptors ("Resources transferred", "Energy
+# used"); the meter valves' limits go up to 50000 (options) with new slider ranges.
+# How a player reaches it: select a meter valve or a power sensor; its details.
+# What changes: per-cycle transfer statistics.
+#
+# setup builds a Liquid Meter Valve in the corridor west of the printing pod: its limit goes
+# to 50000 and, selected, its details list this cycle's transfer.
+from: early-base
+mods: [2711203625]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidLimitValve\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"LiquidLimitValve\").GetComponent<LimitValve>.maxLimitKg": 50000
+      "Assets.GetPrefab(\"SolidLimitValve\").GetComponent<MeterStatistics.UsageCounter>.Unit": units
+      "Assets.GetPrefab(\"LogicWattageSensor\").GetComponent<MeterStatistics.UsageCounter>.Unit": kJ
+  - run: {seconds: 2}
+  - expect: {buildings: {LiquidLimitValve: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: LiquidLimitValve}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/SimpleInfoScreen/**/Descriptors/DescLabel": {any_text: "~Resources transferred"}
+  - expect_state:
+      "selected:GetComponent<MeterStatistics.UsageCounter>.AmountUsedPerCycle.Count": 1
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}

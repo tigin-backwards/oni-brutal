@@ -70,7 +70,7 @@ namespace SemanticsProbe
             var m = new Mesh();
             m.vertices = Quads(2);
             m.normals = Enumerable.Repeat(new Vector3(0, 0, -1), 8).ToArray();
-            m.uv = new Vector2[8];
+            m.uv = Enumerable.Repeat(new Vector2(0.25f, 0.75f), 8).ToArray();
             m.colors32 = Enumerable.Repeat(new Color32(255, 255, 255, 255), 8).ToArray();
             m.triangles = Tris(2);
             return m;
@@ -85,7 +85,20 @@ namespace SemanticsProbe
                 + " c=" + m.colors32.Length + " t=" + tris.Length + " tmax=" + (tris.Length == 0 ? -1 : tris.Max())
                 + " sub=" + m.subMeshCount + " ic=" + (m.subMeshCount > 0 ? m.GetTriangles(0).Length : 0)
                 + " b=" + F(b.center.x) + "," + F(b.center.y) + "/" + F(b.size.x) + "," + F(b.size.y)
-                + " v0=" + (m.vertices.Length > 0 ? F(m.vertices[0].x) + "," + F(m.vertices[0].y) : "-");
+                + " v0=" + (m.vertices.Length > 0 ? F(m.vertices[0].x) + "," + F(m.vertices[0].y) : "-")
+                + " tan=" + m.tangents.Length + Values(m);
+        }
+
+        // The channels' first and last values: kept, zeroed or defaulted after a change.
+        static string Values(Mesh m)
+        {
+            var n = m.normals; var uv = m.uv; var c = m.colors32;
+            string Nv(Vector3 v) => F(v.x) + "," + F(v.y) + "," + F(v.z);
+            string Uv(Vector2 v) => F(v.x) + "," + F(v.y);
+            string Cv(Color32 v) => v.r + "," + v.g + "," + v.b + "," + v.a;
+            return (n.Length > 0 ? " n0=" + Nv(n[0]) + " nL=" + Nv(n[n.Length - 1]) : "")
+                + (uv.Length > 0 ? " uv0=" + Uv(uv[0]) + " uvL=" + Uv(uv[uv.Length - 1]) : "")
+                + (c.Length > 0 ? " c0=" + Cv(c[0]) + " cL=" + Cv(c[c.Length - 1]) : "");
         }
 
         static void Step(string name, Mesh m, System.Action a)
@@ -112,6 +125,10 @@ namespace SemanticsProbe
             m = Two(); Step("clear.vertices4", m, () => { m.Clear(); m.vertices = Quads(1); });
             m = Two(); Step("clearKeep.vertices4", m, () => { m.Clear(true); m.vertices = Quads(1); });
             m = Two(); Step("clearNoKeep.vertices4", m, () => { m.Clear(false); m.vertices = Quads(1); });
+            m = Two(); Step("clear", m, () => m.Clear());
+            m = Two(); Step("clear.vertices12", m, () => { m.Clear(); m.vertices = Quads(3); });
+            m = Two(); Step("clear.vertices4.vertices8", m, () => { m.Clear(); m.vertices = Quads(1); m.vertices = Quads(2); });
+            m = Two(); Step("clear.vertices4.colors4", m, () => { m.Clear(); m.vertices = Quads(1); m.colors32 = new Color32[4]; });
             m = Two(); Step("triangles.then.vertices4", m, () => { m.triangles = Tris(1); m.vertices = Quads(1); });
             m = Two(); Step("vertices4.then.normals4", m, () => { m.vertices = Quads(1); m.normals = new Vector3[4]; });
             m = Two(); Step("normals4", m, () => m.normals = new Vector3[4]);

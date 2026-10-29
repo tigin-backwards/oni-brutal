@@ -44,8 +44,9 @@ namespace UnityEngine
 
         public void Clear() => Clear(true);
 
-        /// Removes all vertex data and indices (one empty submesh remains).
-        public void Clear(bool keepVertexLayout) => Data.Clear();
+        /// Removes all vertex data and indices (one empty submesh remains). With
+        /// `keepVertexLayout` the channels the mesh had come back with the next vertices.
+        public void Clear(bool keepVertexLayout) => Data.Clear(keepVertexLayout);
 
         public void RecalculateBounds() => Data.RecalculateBounds();
 
@@ -111,28 +112,14 @@ namespace UnityEngine
                 return;
             }
             bool resized = count != m.VertexCount;
-            if (resized)
-            {
-                // Other channels follow the new vertex count, keeping their leading values.
-                m.Normals = Resize(m.Normals, count);
-                m.Tangents = Resize(m.Tangents, count);
-                m.Colors = Resize(m.Colors, count);
-                for (int i = 0; i < MeshNative.UvChannels; i++) m.Uvs[i] = Resize(m.Uvs[i], count);
-            }
+            // Other channels follow the new vertex count, keeping their leading values.
+            if (resized) m.ResizeChannels(count);
             m.VertexCount = count;
             m.Positions = count == 0 ? null : Slice(values, start, count);
             // The bounds follow the vertices only when their number changes (measured in the
             // original player: the same number of new positions keeps the bounds).
             if (resized && (flags & MeshUpdateFlags.DontRecalculateBounds) == 0) m.RecalculateBounds();
             else m.Changed();
-        }
-
-        static T[] Resize<T>(T[] array, int count)
-        {
-            if (array == null) return null;
-            if (count == 0) return null;
-            Array.Resize(ref array, count);
-            return array;
         }
 
         public Vector3[] vertices

@@ -2929,18 +2929,23 @@ with 8 vertices and the triangles of two quads (indices up to 7) refuses 4 verti
 and keeps its 8 vertices. After `Clear()` (or `triangles` set first to one quad) the same 4
 vertices are taken without a log. Then, on the shipped package:
 - `new TMP_MeshInfo(mesh, 1)` on that two-quad mesh logs nothing. The mesh afterwards has 4
-  vertices, 4 normals and 6 triangle indices (one quad, up to index 3), and bounds of zero
-  centre and size. The buffer's `mesh` is the mesh passed in.
+  vertices, 4 normals of (0, 0, -1), 4 tangents and 6 triangle indices (one quad, up to index
+  3), and bounds of zero centre and size. The buffer's `mesh` is the mesh passed in.
 - On a mesh that had no uv or colour channel (5 quads of positions and triangles, or a new
-  empty mesh), the new buffer's mesh has positions, normals and triangles but no uv and no
-  colours (`uv` and `colors32` read empty). On the two-quad mesh above, which had uv and
-  colours, they read 4 entries after the constructor: they were resized, not set.
+  empty mesh), the new buffer's mesh has positions, normals, tangents and triangles but no uv
+  and no colours (`uv` and `colors32` read empty). On the two-quad mesh above, which had uv
+  and colours, they read 4 entries of leftover memory after the constructor (uv
+  (-431602080, -431602080), colours (205, 205, 205, 205)): kept by the clear, not set. With 2
+  quads, the size the mesh already had, they keep their old values.
 - Constructors in a row on one mesh (1, 4, then 1 quads) and `ResizeMeshInfo` from 4 to 1 and
-  from 1 to 8 quads log nothing either; the mesh holds 4, 16, 4, 4 and 32 vertices.
+  from 1 to 8 quads log nothing either; the mesh holds 4, 16, 4, 4 and 32 vertices, with
+  normals and tangents, and no uv or colours when the first constructor's mesh had none.
 
-So the shipped constructor empties the mesh before it sets the new buffer's positions, normals
-(and tangents, not measured) and triangles, and does not hand the mesh its uv or colours. Read as the engine's `Mesh` behaves: the observations match a
-`Clear()` (the vertex layout kept) followed by those setters.
+So the shipped constructor empties the mesh, keeping its vertex layout, before it sets the new
+buffer's positions, normals, tangents and triangles, and does not hand the mesh its uv or
+colours. The probe's `clear*` lines show the engine's side of that: `Clear()` and `Clear(true)`
+keep the channels the mesh had, which the next vertices give the new vertex count, and
+`Clear(false)` drops them (this engine follows it since 2026-10-29).
 
 **This implementation** sets the positions on the mesh without emptying it first, so a mesh that
 held more quads than the new buffer refuses them and the error is logged; it also sets uv, uv2

@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using OniMoono.Engine;
 using OniMoono.Engine.Rendering;
 using UnityEngine;
@@ -127,6 +129,97 @@ namespace OniMoono.Tests
             mesh.Clear();
             Assert.Equal(0, mesh.vertexCount);
             Assert.Equal(1, mesh.subMeshCount);
+        }
+
+        // Measured in the original player (UnityProbe meshshrink: clear.vertices4,
+        // clearKeep.vertices4, clearNoKeep.vertices4, clear.vertices12, clear).
+        static Mesh TwoQuads()
+        {
+            var mesh = new Mesh();
+            mesh.vertices = new Vector3[8];
+            mesh.normals = Enumerable.Repeat(new Vector3(0f, 0f, -1f), 8).ToArray();
+            mesh.uv = Enumerable.Repeat(new Vector2(0.25f, 0.75f), 8).ToArray();
+            mesh.colors32 = Enumerable.Repeat(new Color32(255, 255, 255, 255), 8).ToArray();
+            mesh.triangles = [0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4];
+            return mesh;
+        }
+
+        [Fact]
+        public void MeshClearKeepsTheVertexLayoutUnlessToldNot()
+        {
+            // Clear() and Clear(true): the channels come back with the next vertices, which a
+            // mesh that still held the old triangles would have refused.
+            foreach (var keep in new bool?[] { null, true })
+            {
+                var mesh = TwoQuads();
+                if (keep == null) mesh.Clear(); else mesh.Clear(true);
+                Assert.Equal(0, mesh.vertexCount);
+                Assert.Empty(mesh.normals);
+                Assert.Empty(mesh.uv);
+                Assert.Empty(mesh.colors32);
+                Assert.Empty(mesh.triangles);
+                mesh.vertices = new Vector3[4];
+                Assert.Equal(4, mesh.vertexCount);
+                Assert.Equal(4, mesh.normals.Length);
+                Assert.Equal(4, mesh.uv.Length);
+                Assert.Equal(4, mesh.colors32.Length);
+                Assert.Empty(mesh.tangents);
+                mesh.vertices = new Vector3[12];
+                Assert.Equal(12, mesh.normals.Length);
+                Assert.Equal(12, mesh.colors32.Length);
+            }
+
+            // Kept channels left unread are not made: a cloned mesh keeps them pending too.
+            var pending = TwoQuads();
+            pending.Clear();
+            pending.vertices = new Vector3[4];
+            var copy = Object.Instantiate(pending);
+            Assert.Equal(4, copy.uv.Length);
+
+            // Clear(false) drops the channels.
+            var bare = TwoQuads();
+            bare.Clear(false);
+            bare.vertices = new Vector3[4];
+            Assert.Equal(4, bare.vertexCount);
+            Assert.Empty(bare.normals);
+            Assert.Empty(bare.uv);
+            Assert.Empty(bare.colors32);
+        }
+
+        // uGUI rebuilds a dirty graphic's mesh as Clear, SetVertices, then every channel: the
+        // channels a Clear keeps must not be made at the new count only to be replaced.
+        [Fact]
+        public void MeshRebuiltAfterClearAllocatesNoDroppedChannels()
+        {
+            var positions = new List<Vector3>(new Vector3[12]);
+            var colors = new List<Color32>(new Color32[12]);
+            var uvs = new List<Vector4>(new Vector4[12]);
+            var normals = new List<Vector3>(new Vector3[12]);
+            var tangents = new List<Vector4>(new Vector4[12]);
+            var indices = new List<int> { 0, 1, 2, 2, 3, 0 };
+            long Rebuild(Mesh mesh)
+            {
+                long before = System.GC.GetAllocatedBytesForCurrentThread();
+                mesh.Clear();
+                mesh.SetVertices(positions);
+                mesh.SetColors(colors);
+                mesh.SetUVs(0, uvs);
+                mesh.SetUVs(1, uvs);
+                mesh.SetNormals(normals);
+                mesh.SetTangents(tangents);
+                mesh.SetTriangles(indices, 0);
+                return System.GC.GetAllocatedBytesForCurrentThread() - before;
+            }
+            var fresh = new Mesh();
+            var reused = new Mesh();
+            Rebuild(fresh);
+            Rebuild(reused);
+            Rebuild(new Mesh());
+            // A mesh that held all those channels allocates what a new one does: only the new
+            // channel arrays themselves.
+            long expected = Rebuild(new Mesh());
+            Assert.Equal(expected, Rebuild(reused));
+            Assert.Equal(12, reused.uv2.Length);
         }
 
         [Fact]

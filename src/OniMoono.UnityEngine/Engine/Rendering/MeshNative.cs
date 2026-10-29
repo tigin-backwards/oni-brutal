@@ -27,10 +27,53 @@ namespace OniMoono.Engine.Rendering
 
         public int VertexCount;
         public Vector3[] Positions;
-        public Vector3[] Normals;
-        public Vector4[] Tangents;
-
+        Vector3[] normals;
+        Vector4[] tangents;
         Color[] colors;
+        Color32[] colors32;
+
+        // Channels a layout-keeping Clear left without data: each comes back at the vertex count
+        // when something reads it before it is set again (measured in the original player: after
+        // Clear() and 4 new positions a mesh that had normals, uv and colours reads 4 of each,
+        // their values whatever memory held; here zeros). Made only when read, so the usual
+        // Clear, SetVertices, SetColors, SetUVs sequence allocates nothing it then drops.
+        int kept;
+        const int KeptNormals = 1, KeptTangents = 2, KeptColors = 4, KeptColorBytes = 8, KeptUv0 = 16;
+
+        T[] Materialize<T>(int bit)
+        {
+            if (VertexCount == 0) return null;
+            kept &= ~bit;
+            return new T[VertexCount];
+        }
+
+        public Vector3[] Normals
+        {
+            get
+            {
+                if ((kept & KeptNormals) != 0) normals = Materialize<Vector3>(KeptNormals);
+                return normals;
+            }
+            set { normals = value; kept &= ~KeptNormals; }
+        }
+
+        public Vector4[] Tangents
+        {
+            get
+            {
+                if ((kept & KeptTangents) != 0) tangents = Materialize<Vector4>(KeptTangents);
+                return tangents;
+            }
+            set { tangents = value; kept &= ~KeptTangents; }
+        }
+
+        void MaterializeColors()
+        {
+            if ((kept & KeptColors) == 0 || VertexCount == 0) return;
+            if ((kept & KeptColorBytes) != 0) colors32 = new Color32[VertexCount];
+            else colors = new Color[VertexCount];
+            kept &= ~(KeptColors | KeptColorBytes);
+        }
 
         /// The vertex colours. Colours given as bytes (SetColors32) are kept as given and turned
         /// into Colors only when something reads them: the device uploads the bytes.
@@ -38,10 +81,11 @@ namespace OniMoono.Engine.Rendering
         {
             get
             {
-                if (colors == null && Colors32 != null)
+                MaterializeColors();
+                if (colors == null && colors32 != null)
                 {
-                    var expanded = new Color[Colors32.Length];
-                    for (int i = 0; i < expanded.Length; i++) expanded[i] = Colors32[i];
+                    var expanded = new Color[colors32.Length];
+                    for (int i = 0; i < expanded.Length; i++) expanded[i] = colors32[i];
                     colors = expanded;
                 }
                 return colors;
@@ -49,22 +93,55 @@ namespace OniMoono.Engine.Rendering
             set
             {
                 colors = value;
-                Colors32 = null;
+                colors32 = null;
+                kept &= ~(KeptColors | KeptColorBytes);
             }
         }
 
         /// The colours as given in bytes, or null when they were given otherwise.
-        public Color32[] Colors32 { get; private set; }
+        public Color32[] Colors32
+        {
+            get
+            {
+                MaterializeColors();
+                return colors32;
+            }
+        }
 
         public void SetColors32(Color32[] values)
         {
             colors = null;
-            Colors32 = values;
+            colors32 = values;
+            kept &= ~(KeptColors | KeptColorBytes);
+        }
+
+        /// The UV channels by index; a channel kept by a layout-keeping Clear comes back when read.
+        internal sealed class UvSet
+        {
+            readonly MeshNative owner;
+            internal readonly Vector4[][] Raw = new Vector4[UvChannels][];
+            public UvSet(MeshNative owner) => this.owner = owner;
+            public int Length => UvChannels;
+
+            public Vector4[] this[int i]
+            {
+                get
+                {
+                    int bit = KeptUv0 << i;
+                    if ((owner.kept & bit) != 0) Raw[i] = owner.Materialize<Vector4>(bit);
+                    return Raw[i];
+                }
+                set
+                {
+                    Raw[i] = value;
+                    owner.kept &= ~(KeptUv0 << i);
+                }
+            }
         }
 
         /// Colours were given as Color32 (UNorm8 storage).
         public bool ColorsAreBytes;
-        public readonly Vector4[][] Uvs = new Vector4[UvChannels][];
+        public readonly UvSet Uvs;
         public readonly int[] UvDimensions = new int[UvChannels];
         public List<SubMeshData> SubMeshes = new() { new SubMeshData() };
         public Bounds Bounds;
@@ -76,21 +153,57 @@ namespace OniMoono.Engine.Rendering
         public int Version;
         public object Gpu;
 
+        public MeshNative() => Uvs = new UvSet(this);
+
         public void Changed() => Version++;
 
-        public void Clear()
+        /// Removes the vertices and indices. With `keepVertexLayout` the channels the mesh had
+        /// are kept without data (see `kept`); without, they are dropped.
+        public void Clear(bool keepVertexLayout = false)
         {
             VertexCount = 0;
             Positions = null;
-            Normals = null;
-            Tangents = null;
-            Colors = null;
-            ColorsAreBytes = false;
-            Array.Clear(Uvs);
-            Array.Clear(UvDimensions);
+            if (keepVertexLayout)
+            {
+                if (normals != null) kept |= KeptNormals;
+                if (tangents != null) kept |= KeptTangents;
+                if (colors32 != null) kept |= KeptColors | KeptColorBytes;
+                else if (colors != null) kept |= KeptColors;
+                for (int i = 0; i < UvChannels; i++)
+                    if (Uvs.Raw[i] != null) kept |= KeptUv0 << i;
+            }
+            else
+            {
+                kept = 0;
+                ColorsAreBytes = false;
+                Array.Clear(UvDimensions);
+            }
+            normals = null;
+            tangents = null;
+            colors = null;
+            colors32 = null;
+            Array.Clear(Uvs.Raw);
             SubMeshes = new List<SubMeshData> { new SubMeshData() };
             // The bounds stay (measured in the original player).
             Changed();
+        }
+
+        /// Gives the channels that hold data the new vertex count, keeping their leading values
+        /// (new ones zero). Kept channels without data stay so: they are made at the count when read.
+        public void ResizeChannels(int count)
+        {
+            normals = Resize(normals, count);
+            tangents = Resize(tangents, count);
+            colors = Resize(colors, count);
+            colors32 = Resize(colors32, count);
+            for (int i = 0; i < UvChannels; i++) Uvs.Raw[i] = Resize(Uvs.Raw[i], count);
+        }
+
+        static T[] Resize<T>(T[] array, int count)
+        {
+            if (array == null || count == 0) return null;
+            Array.Resize(ref array, count);
+            return array;
         }
 
         public void RecalculateBounds()
@@ -133,14 +246,15 @@ namespace OniMoono.Engine.Rendering
         {
             VertexCount = o.VertexCount;
             Positions = (Vector3[])o.Positions?.Clone();
-            Normals = (Vector3[])o.Normals?.Clone();
-            Tangents = (Vector4[])o.Tangents?.Clone();
-            if (o.Colors32 != null) SetColors32((Color32[])o.Colors32.Clone());
-            else Colors = (Color[])o.Colors?.Clone();
+            normals = (Vector3[])o.normals?.Clone();
+            tangents = (Vector4[])o.tangents?.Clone();
+            colors32 = (Color32[])o.colors32?.Clone();
+            colors = colors32 != null ? null : (Color[])o.colors?.Clone();
+            kept = o.kept;
             ColorsAreBytes = o.ColorsAreBytes;
             for (int i = 0; i < UvChannels; i++)
             {
-                Uvs[i] = (Vector4[])o.Uvs[i]?.Clone();
+                Uvs.Raw[i] = (Vector4[])o.Uvs.Raw[i]?.Clone();
                 UvDimensions[i] = o.UvDimensions[i];
             }
             SubMeshes = o.SubMeshes.ConvertAll(s => new SubMeshData { Indices = (int[])s.Indices.Clone(), Topology = s.Topology, BaseVertex = s.BaseVertex, Bounds = s.Bounds });

@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3784380147-game-speed-control.yaml",
+ "mods": [
+  "3784380147"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "its 10x button runs the game at 10x (top-left row dump, shot)",
+ "updated": "2026-10-29",
+ "commit": "2d4aca2a",
+ "mod_dlls": {
+  "3784380147": {
+   "CustomSpeed_20260815.dll": "ee02ecac328f7b580030528cf4962b016fb3f70889fd0b29d5efc16c53c0234f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-134140-71c6d6eb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T14:14:57",
+    "lane": 1,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-143747-9481627a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T15:56:52",
+    "lane": 1,
+    "reference_run": "20261029-134140-71c6d6eb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "topleft": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "topleft": 0.0
+    }
+   },
+   {
+    "run": "20261029-143747-9481627a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T15:57:54",
+    "lane": 1,
+    "reference_run": "20261029-134140-71c6d6eb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "topleft": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "topleft": 0.0
+    }
+   }
+  ]
+ }
+}

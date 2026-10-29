@@ -1,0 +1,31 @@
+# 游戏速度控制 Game speed control (3784380147), class S.
+#
+# What it does: adds three buttons, 5×, 10× and 20×, beside the sandbox toggle of the top-left
+# control screen (copies of it, CustomSpeed_5× and so on), and a button holding a legacy uGUI
+# InputField in the built-in Arial font for any speed. A button sets Time.timeScale to its speed
+# while the game runs (the choice is kept in PlayerPrefs); the game's own speed buttons clear it.
+# How a player reaches it: the top-left control screen.
+# What changes: the game runs at 5x, 10x, 20x or any typed speed.
+#
+# The top-left row is dumped and shot. A click on 10× and resuming run the game at 10x; the
+# game's slow speed button clears it (1x).
+from: early-base
+mods: [3784380147]
+steps:
+  - ui_wait: {path: "**/CustomSpeed_10×", cond: stable}
+  - ui_dump: {name: topleft, root: "**/TopLeftControlPanel(Clone)/SecondaryRow"}
+  - shot: {name: topleft, crop: "**/TopLeftControlPanel(Clone)/SecondaryRow", threshold: 0.04}
+  # A resume straight after the load does not take: the game runs a few seconds first.
+  - run: {seconds: 5}
+  - call: {tool: game_control, args: {domain: speed, action: resume, confirm: true}}
+  - click: {ui: "**/CustomSpeed_10×"}
+  - expect_state:
+      "type:CustomSpeed.SpeedController::IsCustomSpeedActive": true
+      "type:CustomSpeed.SpeedController::CurrentSpeed": 10
+      "SpeedControlScreen.Instance.IsPaused": false
+      "Time.timeScale": 10
+  - click: {ui: "**/SecondaryRow/SpeedControlScreen/GenericIconButton_Slow"}
+  - expect_state:
+      "Time.timeScale": 1
+      "type:CustomSpeed.SpeedController::IsCustomSpeedActive": false
+  - call: {tool: game_control, args: {domain: speed, action: pause, confirm: true}}

@@ -1,0 +1,60 @@
+{
+ "spec": "mods/2984783787-super-mini-water-purifier.yaml",
+ "mods": [
+  "2984783787"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Refinement menu card (shot); a built purifier with its 20 outputs",
+ "updated": "2026-10-29",
+ "commit": "2d4aca2a",
+ "mod_dlls": {
+  "2984783787": {
+   "AlgaeDistilleryProcessingArrays.dll": "4ccd4a6f9195df43a7dd0fe71f92414fd937e9e2f3b35f68f7128f707631d065",
+   "SupperMiniWaterPurifier.dll": "104ac89aa1a8f1a5b0d53d847f29296c10efef76beef398f3d33c9996928e2e3"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-112259-0d44a806",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T11:48:19",
+    "lane": 1,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-143747-9481627a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T15:09:03",
+    "lane": 1,
+    "reference_run": "20261029-112259-0d44a806",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.007747
+    }
+   },
+   {
+    "run": "20261029-143747-9481627a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T15:09:54",
+    "lane": 1,
+    "reference_run": "20261029-112259-0d44a806",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.007747
+    }
+   }
+  ]
+ }
+}

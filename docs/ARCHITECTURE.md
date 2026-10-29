@@ -342,7 +342,19 @@ game or mod code can notice. Each says how it is resolved, or why it is kept.
   replacement, each patch method of a mod is marked not to be inlined (MonoMod's
   `TryDisableInlining`, which Harmony applies to the patched method itself); this project's own
   patches are left as they were. `--check-types` calls `GetCallingAssembly` from a helper an
-  emitted mod's postfix calls.
+  emitted mod's postfix calls. The replacement's own frame goes too when its last call is a patch
+  method: a postfix of a method returning nothing is called right before the replacement's `ret`,
+  and the JIT (replacements are compiled fully optimized) makes that call a tail call. Mono makes
+  no implicit tail calls. Cold Wheat Seed Drop's postfix of `SeedProducer.CropPicked` names the
+  type `Worker`, gone from the game, and throws when a crop is picked in both players (D40); the
+  original's trace starts with the replacement (`CropPicked_Patch1`, read as
+  `SeedProducer.CropPicked`), ours with the game's lambda that called it, a log signature the
+  original lacks. `PatchFrames` therefore follows each call of a mod's patch method that the
+  replacement's `ret` follows (past `nop`s) with `ldc.i4.0; pop` (in `FaultBlockRewriter.Rewrite`,
+  the last step before Harmony emits the replacement), which the JIT compiles to nothing and
+  which takes the call out of tail position. Calls elsewhere keep their tail calls.
+  `--check-types` patches a method returning nothing with a mod's postfix that throws, and finds
+  the replacement's frame under the postfix's.
 - **D20 Patching a P/Invoke whose export is missing.** MonoMod prepares a method before
   detouring it; for a P/Invoke, CoreCLR then binds the native export, and a missing one fails the
   patch. Mono binds a P/Invoke at its first call, so mods patch one the platform lacks to keep it

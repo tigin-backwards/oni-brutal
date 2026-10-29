@@ -470,6 +470,37 @@ namespace OniMoono.Host
                 }
                 return results.Count == 1 && results.Contains("CheckMod") ? "the postfix's assembly calls, as in Mono" : throw new InvalidOperationException($"the caller was {string.Join(", ", results)}");
             });
+            Check("The frame of a replacement whose last call is a mod's postfix (PatchFrames)", () =>
+            {
+                PatchFrames.Install();
+                // As Cold Wheat Seed Drop's postfix of SeedProducer.CropPicked, which returns nothing:
+                // the postfix throws, and the replacement's frame is in the trace, as on Mono.
+                System.Reflection.Emit.ModuleBuilder Module(string name) => System.Reflection.Emit.AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(name), System.Reflection.Emit.AssemblyBuilderAccess.Run).DefineDynamicModule(name);
+                var a = Module("CheckTailTarget").DefineType("TailTarget", TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed);
+                var picked = a.DefineMethod("Picked", MethodAttributes.Public | MethodAttributes.Static, typeof(void), [typeof(int)]);
+                var il = picked.GetILGenerator();
+                il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                var target = a.CreateType();
+                var c = Module("CheckTailMod").DefineType("TailMod", TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed);
+                var postfix = c.DefineMethod("Postfix", MethodAttributes.Public | MethodAttributes.Static, typeof(void), [typeof(int)]);
+                postfix.DefineParameter(1, ParameterAttributes.None, "__0");
+                il = postfix.GetILGenerator();
+                il.Emit(System.Reflection.Emit.OpCodes.Ldstr, "check"); il.Emit(System.Reflection.Emit.OpCodes.Newobj, typeof(TypeLoadException).GetConstructor([typeof(string)])!); il.Emit(System.Reflection.Emit.OpCodes.Throw);
+                var mod = c.CreateType();
+                new HarmonyLib.Harmony("OniMoono.Host.Check").Patch(target.GetMethod("Picked"), postfix: new HarmonyLib.HarmonyMethod(mod.GetMethod("Postfix")));
+                var call = target.GetMethod("Picked")!.CreateDelegate<Action<int>>();
+                try
+                {
+                    call(1);
+                    throw new InvalidOperationException("the postfix did not throw");
+                }
+                catch (TypeLoadException e)
+                {
+                    var frames = new System.Diagnostics.StackTrace(e, false).GetFrames().Select(f => f.GetMethod()).ToList();
+                    return frames.Count >= 2 && frames[0]?.Name == "Postfix" && frames[1] is System.Reflection.Emit.DynamicMethod { Name: var name } && name.Contains("Picked")
+                        ? "the replacement's frame is under the postfix's, as on Mono" : throw new InvalidOperationException($"frames: {string.Join(", ", frames.Select(m => m?.Name ?? "?"))}");
+                }
+            });
             Check("Harmony prefixes on P/Invokes, one whose export is missing (PInvokePatches)", () =>
             {
                 PInvokePatches.Install();

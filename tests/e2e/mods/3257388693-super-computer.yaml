@@ -1,0 +1,32 @@
+# 超级计算机 (3257388693), class P.
+#
+# What it does: rebuilds the Super Computer (AdvancedResearchCenter): it needs no power and
+# gives off no heat, decorates (+200 decor, radius 20), may be built anywhere, takes any water
+# from a liquid pipe (up to 10,000 kg stored) and spends 5 kg of it per advanced research point,
+# and while it works it also gives off coal, refined carbon, another mineral and oxylite.
+# How a player reaches it: the Super Computer, after Advanced Research.
+# What changes: a free, decorative research station that makes resources.
+#
+# The Super Computer's def and prefab carry the changes. Setup builds one in the corridor west
+# of the printing pod; it is operational without power, and selected it shows its water input.
+from: early-base
+mods: [3257388693]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"AdvancedResearchCenter\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"AdvancedResearchCenter\").RequiresPowerInput": false
+      "Assets.GetBuildingDef(\"AdvancedResearchCenter\").InputConduitType": Liquid
+      "Assets.GetBuildingDef(\"AdvancedResearchCenter\").BaseDecor": 200
+      "Assets.GetBuildingDef(\"AdvancedResearchCenter\").BuildLocationRule": Anywhere
+      "Assets.GetPrefab(\"AdvancedResearchCenter\").GetComponent<ResearchCenter>.mass_per_point": 5
+      "Assets.GetPrefab(\"AdvancedResearchCenter\").GetComponent<ElementConverter>.outputElements.Length": 4
+      "Assets.GetPrefab(\"AdvancedResearchCenter\").GetComponent<ElementConverter>.outputElements[3].elementHash": OxyRock
+  - run: {seconds: 2}
+  - expect: {buildings: {AdvancedResearchCenter: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: AdvancedResearchCenter}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<EnergyConsumer>": missing
+      "selected:GetComponent<ConduitConsumer>.conduitType": Liquid

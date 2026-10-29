@@ -1,0 +1,35 @@
+# Chlorine Cooling (3538456497), class B.
+#
+# What it does: two buildings in the Utilities menu, researched with HVAC: the 5x3 Chlorine
+# Compressor (120 W, a gas input and a liquid output) turns 5 kg of piped chlorine gas at a
+# time into liquid chlorine in its output pipe, cooling it; the 2x3 Chlorine Expansion Valve
+# turns piped liquid chlorine back into gas in a gas pipe. Prefixes on ConduitFlow's
+# MeltConduitContents and its freezing counterpart keep pipes carrying chlorine from being
+# damaged by boiling or freezing.
+# How a player reaches it: the build menu (Utilities), after the research.
+# What changes: a chlorine refrigeration cycle.
+#
+# The research lists both; a compressor and a valve built by setup in the corridor west of the
+# printing pod are selected (their titles dumped): they have the mod's logic components.
+from: early-base
+mods: [3538456497]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"ChlorineCompressor\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"ChlorineExpansionValve\")", method: Build, args: [{"$": "Grid.XYToCell(116, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"HVAC\").unlockedItemIDs": [{contains: ChlorineCompressor}, {contains: ChlorineExpansionValve}]
+      "Assets.GetBuildingDef(\"ChlorineCompressor\").EnergyConsumptionWhenActive": 120
+  - run: {seconds: 2}
+  - expect: {buildings: {ChlorineCompressor: 1, ChlorineExpansionValve: 1}}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [113, 208], select: ChlorineCompressor}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: compressor, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}
+  - expect_state:
+      "selected:GetComponent<Chlorine_Cooling.Buildings.ChlorineCompressorLogic>": exists
+  - click_world: {cell: [116, 208], select: ChlorineExpansionValve}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: valve, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}
+  - expect_state:
+      "selected:GetComponent<Chlorine_Cooling.Buildings.ChlorineExpansionLogic>": exists

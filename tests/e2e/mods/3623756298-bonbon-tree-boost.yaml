@@ -1,0 +1,26 @@
+# Bonbon Tree Boost (3623756298), class P (PLib options).
+#
+# What it does: the Bonbon Tree (SpaceTree) and its branches: nectar production, trunk and
+# branch growth rates and fertilizer use scaled by options, separately for wild and
+# domesticated trees (prefixes and postfixes on EntityTemplates.ExtendPlantToFertilizable,
+# the branch's prefab, its and Growing's state machine instances), and an option to keep
+# branches from being harvested for wood.
+# How a player reaches it: the mod's options; growing Bonbon Trees.
+# What changes: richer, faster Bonbon Trees.
+#
+# The options are set explicitly (branches 2x wild, 3x domesticated): the branch prefab
+# carries them, and a Bonbon Tree dropped by setup in the corridor west of the printing pod
+# grows on, as in the original.
+from: early-base
+mods: [3623756298]
+options:
+  "3623756298": {WildBranchGrowthRate: 2.0, DomesticBranchGrowthRate: 3.0, WildTrunkGrowthRate: 1.0, DomesticTrunkGrowthRate: 1.0}
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(0, 113, 207, \"SpaceTree\", \"BuildingBack\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"SpaceTreeBranch\").GetComponent<BonbonTreeBoost.GrowthMultiplierData>.WildBranchMultiplier": 2
+      "Assets.GetPrefab(\"SpaceTreeBranch\").GetComponent<BonbonTreeBoost.GrowthMultiplierData>.DomesticBranchMultiplier": 3
+  - run: {seconds: 10}
+  - expect_state:
+      "count:all:Growing::[*] if .name == SpaceTree": "== original"

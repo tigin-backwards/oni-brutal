@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3212502461-deconstruct-rover-on-shut-down.yaml",
+ "mods": [
+  "3212502461"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Rover whose battery runs dry is marked for deconstruction",
+ "updated": "2026-10-29",
+ "commit": "f4926fda",
+ "mod_dlls": {
+  "3212502461": {
+   "DeconstructRoverOnDeath.dll": "be3334d5a33f0b5cce6f97a760ba1f8ec32e555f0ec78dbcb9013c1648a7f44d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-094232-ff065a0d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T09:47:26",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-155155-a4fb72b8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T15:51:55",
+    "lane": 7,
+    "reference_run": "20261029-094232-ff065a0d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-155155-a4fb72b8",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T15:52:50",
+    "lane": 7,
+    "reference_run": "20261029-094232-ff065a0d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

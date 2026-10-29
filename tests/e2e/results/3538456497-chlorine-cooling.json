@@ -1,0 +1,69 @@
+{
+ "spec": "mods/3538456497-chlorine-cooling.yaml",
+ "mods": [
+  "3538456497"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "compressor and expansion valve built and selected with the mod's logic; title dumps match",
+ "updated": "2026-10-29",
+ "commit": "6d2d76a8",
+ "mod_dlls": {
+  "3538456497": {
+   "Chlorine Cooling.dll": "ac34e95238b38f8a97709a56b52c368971c3bfcdb737356e9a58bfccc9de153b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-094232-ff065a0d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T11:18:48",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-161729-7890d4e8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T16:17:29",
+    "lane": 7,
+    "reference_run": "20261029-094232-ff065a0d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "compressor": {
+      "differences": 0
+     },
+     "valve": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261029-161729-7890d4e8",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T16:18:24",
+    "lane": 7,
+    "reference_run": "20261029-094232-ff065a0d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "compressor": {
+      "differences": 0
+     },
+     "valve": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

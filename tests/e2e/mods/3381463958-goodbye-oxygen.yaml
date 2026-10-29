@@ -1,0 +1,19 @@
+# GOODBYE Oxygen (3381463958), class P (a game setting).
+#
+# What it does: a custom game setting, "Enable Oxygen Consumption" (DisableOxygenConsumption),
+# added in CustomGameSettings.OnPrefabInit. At its "Enabled" level, Duplicants stop breathing:
+# a prefix skips OxygenBreather.Sim200ms, the suffocation monitor stays satisfied, and the
+# breathing and CO2 status items are removed.
+# How a player reaches it: the new game's custom settings.
+# What changes: no oxygen consumption, no suffocation.
+#
+# A colony from before the mod: the setting is listed with the level it reads as in the
+# original, and the colony plays on with three Duplicants either way.
+from: early-base
+mods: [3381463958]
+steps:
+  - expect_state:
+      "CustomGameSettings.Instance.QualitySettings[\"DisableOxygenConsumption\"]": exists
+      "CustomGameSettings.Instance.GetCurrentQualitySetting(\"DisableOxygenConsumption\").id": "== original"
+  - run: {seconds: 30}
+  - expect: {duplicants: 3}

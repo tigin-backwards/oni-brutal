@@ -1,0 +1,56 @@
+{
+ "spec": "mods/3647713426-high-precision-temperature-fixed.yaml",
+ "mods": [
+  "3647713426"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "temperatures read with four decimals, in the hover card too",
+ "updated": "2026-10-29",
+ "commit": "6d2d76a8",
+ "mod_dlls": {
+  "3647713426": {
+   "HighPrecisionTemperatureFIXED.dll": "9cca66d25ceb98508021c754a84387539674abc9f210a26b65ab7e7630f021fb",
+   "PLib.dll": "48c63fd4654b6fbb390afdac71a3d29194eeb9405eca4290cba6e4fbf60805ce"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-094232-ff065a0d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T11:37:56",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-163058-35690c0c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T16:30:58",
+    "lane": 7,
+    "reference_run": "20261029-094232-ff065a0d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-163058-35690c0c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T16:31:50",
+    "lane": 7,
+    "reference_run": "20261029-094232-ff065a0d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

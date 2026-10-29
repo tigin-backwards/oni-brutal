@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3627499096-temp-modulation-gadget.yaml",
+ "mods": [
+  "3627499096"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "one built pulls its cell to about 20 °C in 40 s; title dump matches",
+ "updated": "2026-10-29",
+ "commit": "6d2d76a8",
+ "mod_dlls": {
+  "3627499096": {
+   "TempAdjustGadget.dll": "5dec4f47f6098faaaa0175cda15cd5102772fe9305af7eb7f9f487b0c83f7c1d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-094232-ff065a0d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T11:32:59",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-162700-6260b79b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T16:27:00",
+    "lane": 7,
+    "reference_run": "20261029-094232-ff065a0d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261029-162700-6260b79b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T16:28:59",
+    "lane": 7,
+    "reference_run": "20261029-094232-ff065a0d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

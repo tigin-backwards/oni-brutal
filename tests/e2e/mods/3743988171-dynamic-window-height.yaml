@@ -1,0 +1,30 @@
+# Dynamic Window Height (3743988171), class S (Unity UI).
+#
+# What it does: a postfix on KScreen.OnSpawn adds a DynamicResizeHandler to the DetailsScreen
+# (the selection details window): each frame it measures the screen's scroll rects' content and
+# grows the window (and its scroll viewport's layout elements) to fit it, up to the space above
+# the HUD's bottom bar, hiding the scroll bars; a postfix on DetailsScreen.OnSelectObject puts
+# the vanilla sizes back before the next selection is measured.
+# How a player reaches it: selecting anything.
+# What changes: the details window's height follows its content instead of scrolling.
+#
+# The research station east of the printing pod is selected (paused): the details window, its
+# rects and texts dumped (numbers masked) and shot, comes out as the original's.
+from: early-base
+mods: [3743988171]
+require_log: ['\[DynamicWindowHeight\] Attached to DetailsScreen']
+mask_text: ['-?\d+(\.\d+)?']
+steps:
+  - driver: {camera.set: {cell: [128, 208], ortho: 8}}
+  - click_world: {cell: [127, 207], select: ResearchCenter}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable, frames: 120}
+  - expect_state:
+      "DetailsScreen.Instance.GetComponent<DynamicWindowHeight.DynamicResizeHandler>": exists
+  - ui_dump: {name: details, root: "**/DetailsScreen"}
+  - shot: {name: details, crop: "**/DetailsScreen", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [133, 208], ortho: 8}}
+  - click_world: {cell: [132, 207], select: Bed}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable, frames: 120}
+  - ui_dump: {name: cot, root: "**/DetailsScreen"}
+  - shot: {name: cot, crop: "**/DetailsScreen", threshold: 0.04}

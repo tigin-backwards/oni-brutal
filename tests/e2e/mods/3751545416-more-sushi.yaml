@@ -1,0 +1,28 @@
+# 更多寿司 (More Sushi) (3751545416), class B (food items and recipes).
+#
+# What it does: three sushi dishes for the Sushi Bar: Super Maki (fish, squid, caviar, nori and
+# a meal lice bar), Grilled Fish Sushi (cooked fish and a meal lice bar) and a Sashimi Platter
+# (fish, urchin and shellfish meat), as new food items with their recipes (a postfix on
+# SushiBarConfig.ConfigureBuildingTemplate).
+# How a player reaches it: the Sushi Bar's recipe list.
+# What changes: more sushi to make.
+#
+# The dishes exist with their recipes; a Sushi Bar built by setup west of the printing pod is
+# selected: its recipe list is dumped and shot.
+from: early-base
+mods: [3751545416]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SushiBar\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"SuperMaki\")": exists
+      "Assets.GetPrefab(\"GrilledFishSushi\")": exists
+      "Assets.GetPrefab(\"SashimiPlatter\")": exists
+      "count:ComplexRecipeManager.Get().recipes[*] if .results[0].material.Name == SuperMaki and .fabricators[0].Name == SushiBar": ">= 1"
+  - run: {seconds: 2}
+  - expect: {buildings: {SushiBar: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: SushiBar}
+  - ui_wait: {path: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView", cond: stable}
+  - ui_dump: {name: recipes, root: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView"}
+  - shot: {name: recipes, crop: "**/DetailsScreen", threshold: 0.04}

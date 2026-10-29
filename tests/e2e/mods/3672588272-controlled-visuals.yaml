@@ -1,0 +1,24 @@
+# Controlled Visuals (3672588272), classes P, V (PLib options).
+#
+# What it does: items riding conveyor rails are kept on the scene layer behind walls (a
+# postfix on SolidConduitFlow.RenderEveryTick); its options reduce the pipe flow animation's
+# update rate, convert a save's natural neutronium edges to abyssalite once ("Clean Edges",
+# off by default), and, with "Show all temperature units", add the other two units after a
+# temperature (a postfix on GameUtil.GetFormattedTemperature: 26.9 °C (80.3 °F, 300 K)).
+# How a player reaches it: the mod's options; anywhere a temperature is shown.
+# What changes: conveyor items' draw order, temperature texts.
+#
+# The options turn the temperature units on: a formatted temperature reads as in the
+# original, with all three units, and so does the hover card over a corridor cell.
+from: early-base
+mods: [3672588272]
+options:
+  "3672588272": {ShowAllTemperatureUnits: true, EnableCleanEdges: false}
+steps:
+  - expect_state:
+      "GameUtil.GetFormattedTemperature(300.0)": [{contains: "("}, "== original"]
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [114, 208]}
+  - expect_ui:
+      "**/HoverTextScreen/LocText/Text": {any_text: "/ºC \\(.*ºF, .*K\\)$/"}

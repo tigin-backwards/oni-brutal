@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3381463958-goodbye-oxygen.yaml",
+ "mods": [
+  "3381463958"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "its game setting is listed at the original's level; the colony plays on",
+ "updated": "2026-10-29",
+ "commit": "f4926fda",
+ "mod_dlls": {
+  "3381463958": {
+   "GOODBYE_Oxygen.dll": "8666027076cc07e8cbe41da49ff3774776140d606da03b82b4627d4ee8156902"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-094232-ff065a0d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T10:09:16",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-160142-dc536b74",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T16:01:42",
+    "lane": 7,
+    "reference_run": "20261029-094232-ff065a0d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-160142-dc536b74",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T16:03:15",
+    "lane": 7,
+    "reference_run": "20261029-094232-ff065a0d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

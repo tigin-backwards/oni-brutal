@@ -1,0 +1,79 @@
+{
+ "spec": "mods/3751545416-more-sushi.yaml",
+ "mods": [
+  "3751545416"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "the sushi dishes and recipes exist; the Sushi Bar's recipe list dump and shot match",
+ "updated": "2026-10-29",
+ "commit": "6d2d76a8",
+ "mod_dlls": {
+  "3751545416": {
+   "MORE SUSHI.dll": "2a3b9ee47ea9a1940feaa4cdfefd34192cc5a8b173e149416e3f9b1bf73151b2"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-094232-ff065a0d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T12:01:54",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-163823-2c53dc5b",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-29T16:38:23",
+    "lane": 7,
+    "reference_run": "20261029-094232-ff065a0d",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "recipes": 0.0
+    }
+   },
+   {
+    "run": "20261029-163823-2c53dc5b",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-29T16:39:24",
+    "lane": 7,
+    "reference_run": "20261029-094232-ff065a0d",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "recipes": 0.0
+    }
+   }
+  ]
+ }
+}

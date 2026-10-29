@@ -1,0 +1,27 @@
+# 酒羊豆浆机 (Jiuyang Soybean Milk Machine) (3336798970), class B.
+#
+# What it does: a Soybean Milk Machine (SoybeanMilkMachine) in the Refining menu, researched
+# with Food Repurposing: a copy of the Plant Pulverizer (Milk Press) that needs no Duplicant to
+# operate it and works twice as fast, with the press's recipes.
+# How a player reaches it: the build menu (Refining), after the research; its recipe list.
+# What changes: automatic milk pressing.
+#
+# The research lists it; one built by setup west of the printing pod is selected: it is not
+# Duplicant-operated, and its recipe list is dumped and shot.
+from: early-base
+mods: [3336798970]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SoybeanMilkMachine\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"FoodRepurposing\").unlockedItemIDs": {contains: SoybeanMilkMachine}
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0].Name == SoybeanMilkMachine": [">= 1", "== original"]
+  - run: {seconds: 2}
+  - expect: {buildings: {SoybeanMilkMachine: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: SoybeanMilkMachine}
+  - expect_state:
+      "selected:GetComponent<ComplexFabricator>.duplicantOperated": false
+  - ui_wait: {path: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView", cond: stable}
+  - ui_dump: {name: recipes, root: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView"}
+  - shot: {name: recipes, crop: "**/DetailsScreen", threshold: 0.04}

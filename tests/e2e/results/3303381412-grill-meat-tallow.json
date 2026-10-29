@@ -1,0 +1,79 @@
+{
+ "spec": "mods/3303381412-grill-meat-tallow.yaml",
+ "mods": [
+  "3303381412"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "the meat to tallow recipe is registered; the Electric Grill's recipe list dump and shot match",
+ "updated": "2026-10-29",
+ "commit": "f4926fda",
+ "mod_dlls": {
+  "3303381412": {
+   "╡τ╢»┐╛┬»╚Γ│÷╢»╬∩╙═╓¼.dll": "8311ec2efe7f4bd2ba14b3dfd4d466e8c4b70572dcec1c4667019bf335df8f63"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-094232-ff065a0d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T09:54:22",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-155532-b8889dcd",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-29T15:55:32",
+    "lane": 7,
+    "reference_run": "20261029-094232-ff065a0d",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "recipes": 0.0
+    }
+   },
+   {
+    "run": "20261029-155532-b8889dcd",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-29T15:56:26",
+    "lane": 7,
+    "reference_run": "20261029-094232-ff065a0d",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "recipes": 0.0
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3589783089-water-sieve-no-germs.yaml",
+ "mods": [
+  "3589783089"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Water Sieve carries no germs and outputs the mod's rates; title dump matches",
+ "updated": "2026-10-29",
+ "commit": "6d2d76a8",
+ "mod_dlls": {
+  "3589783089": {
+   "╛╗╦«╞≈▓╗░ß╘╦▓í╛·.dll": "880e952e3d840bb8973d71533e0b20908a9b11080c2f2d959996d7e9e9161e38"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-094232-ff065a0d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T11:22:24",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-161915-4c69006e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T16:19:15",
+    "lane": 7,
+    "reference_run": "20261029-094232-ff065a0d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261029-161915-4c69006e",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T16:20:06",
+    "lane": 7,
+    "reference_run": "20261029-094232-ff065a0d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

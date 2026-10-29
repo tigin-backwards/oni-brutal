@@ -1,0 +1,31 @@
+# Shared Bedroom (3752782665), classes P, S.
+#
+# What it does: cots, comfy beds and ladder beds can be public, like mess tables, and beds and
+# mess tables can be assigned to several Duplicants at once: a prefix on
+# AssignableSideScreen.OnRowClicked toggles a clicked Duplicant in the building's shared
+# assignment group (SharedAssignableGroup) instead of reassigning it, the Public row clears the
+# group, and a postfix on AssignableSideScreenRow.Refresh shows every member as assigned; the
+# sleep chores, reservations and room checks follow (a bed is reserved while in use).
+# How a player reaches it: a bed's or table's assignment side screen.
+# What changes: beds shared between Duplicants.
+#
+# early-base's cot east of the printing pod is selected: it can be public, and its assignment
+# side screen (dumped, names masked) lists the Duplicants; clicks on two of them put both in
+# the cot's shared group, as in the original.
+from: early-base
+mods: [3752782665]
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"Bed\").GetComponent<Ownable>.canBePublic": true
+  - driver: {camera.set: {cell: [133, 208], ortho: 8}}
+  - click_world: {cell: [132, 207], select: Bed}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<SharedBed.SharedAssignableGroup>": exists
+  - ui_wait: {path: "**/AssignableSideScreen/ValidContent/Contents/ContentScrollRect/RowContainer/Rows", cond: stable}
+  - ui_dump: {name: assign, root: "**/AssignableSideScreen", mask_text: ['.+']}
+  - click: {ui: "**/AssignableSideScreen/ValidContent/Contents/ContentScrollRect/RowContainer/Rows/AssignableSideScreenRow", index: 1}
+  - click: {ui: "**/AssignableSideScreen/ValidContent/Contents/ContentScrollRect/RowContainer/Rows/AssignableSideScreenRow", index: 2}
+  - expect_state:
+      "selected:GetComponent<SharedBed.SharedAssignableGroup>.MemberCount": [">= 1", "== original"]
+      "selected:GetComponent<Ownable>.assignee.GetType().Name": "== original"

@@ -1,0 +1,22 @@
+# High Precision Temperature FIXED (3647713426), class P.
+#
+# What it does: a prefix replacing GameUtil.AppendFormattedTemperature writes every
+# temperature with up to four decimals ("{0:##0.####}" after the unit conversion), with its
+# unit and time-slice suffix: 26.9734 °C where the game shows 27 °C. A fixed update of High
+# Precision Temperature (3022469420).
+# How a player reaches it: anywhere a temperature is shown (hover card, details screen).
+# What changes: the temperature texts.
+#
+# A formatted temperature keeps four decimals, and the hover card over a corridor cell shows
+# its gas temperature with decimals.
+from: early-base
+mods: [3647713426]
+steps:
+  - expect_state:
+      "GameUtil.GetFormattedTemperature(300.1234)": "== '26.9734 ºC'"
+      "GameUtil.GetFormattedTemperature(310.0)": "== '36.85 ºC'"
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [114, 208]}
+  - expect_ui:
+      "**/HoverTextScreen/LocText/Text": {any_text: "/^-?\\d+\\.\\d{2,4} ºC$/"}

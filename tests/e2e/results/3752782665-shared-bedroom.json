@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3752782665-shared-bedroom.yaml",
+ "mods": [
+  "3752782665"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the cot can be public; two Duplicants clicked join its shared group; side screen dump matches",
+ "updated": "2026-10-29",
+ "commit": "6d2d76a8",
+ "mod_dlls": {
+  "3752782665": {
+   "SharedBed.dll": "a64b21a40b78d91a374c568ead9f877813f2be2d14a040553a48382590818d63"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-094232-ff065a0d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T12:20:52",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-171137-1f620d97",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T17:11:37",
+    "lane": 7,
+    "reference_run": "20261029-094232-ff065a0d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "assign": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261029-171137-1f620d97",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T17:12:29",
+    "lane": 7,
+    "reference_run": "20261029-094232-ff065a0d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "assign": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

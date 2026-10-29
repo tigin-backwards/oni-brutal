@@ -1,0 +1,24 @@
+# No Useless Notifications (3752732754), class P (PLib options).
+#
+# What it does: a prefix on Notifier.Add drops every notification whose title contains one of
+# the phrases in its options (by default "report ready" and "Attribute increase", case
+# insensitive); an option logs every notification title to the player log.
+# How a player reaches it: playing; the mod's options on the Mods screen.
+# What changes: no "Cycle N report ready" or attribute-increase notifications.
+#
+# The options keep the default phrases and log titles. The colony is played into cycle 2: the
+# end of cycle 1 shows no "Cycle 1 report ready" notification, though the title was logged
+# as it was offered.
+from: early-base
+mods: [3752732754]
+options:
+  "3752732754": {SuppressedTitles: "report ready;Attribute increase", CaseSensitive: false, LogAllTitles: true}
+require_log: ['\[noUselessNotifications\] Notification title: "Cycle 1 report ready"']
+steps:
+  - expect_state:
+      "GameClock.Instance.GetCycle()": 0
+  - run: {seconds: 900, until: {cycle: 2}}
+  - expect_state:
+      "count:NotificationManager.Instance.notifications[*] if .titleText.Contains(\"report ready\") == true": 0
+      "count:NotificationManager.Instance.pendingNotifications[*] if .titleText.Contains(\"report ready\") == true": 0
+      "count:NotificationManager.Instance.notifications[*] if .titleText.Contains(\"Attribute increase\") == true": 0

@@ -1,0 +1,64 @@
+{
+ "spec": "mods/3495836420-max-radbolt-generator.yaml",
+ "mods": [
+  "3495836420"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "transpiler logs; a powered Radbolt Generator by uranium ore stores radbolts",
+ "updated": "2026-10-29",
+ "commit": "f4926fda",
+ "mod_dlls": {
+  "3495836420": {
+   "MaxRadbolt.dll": "eca5585b1e24105da63e8faa81d6e656a7a76655b3c41f86d3456d30085268fe",
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-094232-ff065a0d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T10:21:01",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-161231-c3269c08",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T16:12:31",
+    "lane": 7,
+    "reference_run": "20261029-094232-ff065a0d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261029-161231-c3269c08",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T16:14:56",
+    "lane": 7,
+    "reference_run": "20261029-094232-ff065a0d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,30 @@
+# 可配置兴趣数量和加成 (Configurable Aptitudes) (3688438313), class P (PLib options).
+#
+# What it does: a prefix replacing MinionStartingStats.GenerateAptitudes gives each new
+# Duplicant between MinAptitudes and MaxAptitudes interests (the game gives 1 to 3), and at
+# Db.Initialize every interest's attribute bonus becomes AptitudeAttributeBonus (15 entries
+# of DUPLICANTSTATS.APTITUDE_ATTRIBUTE_BONUSES); PLib options, restart required.
+# How a player reaches it: the mod's options; the Printing Pod's new Duplicants.
+# What changes: Duplicants with more, stronger interests.
+#
+# The options are set explicitly (3 to 3 interests, +9 each): the bonuses read 9, and the
+# Printing Pod's immigrant screen (made ready by setup) offers Duplicants with three interests
+# each.
+from: early-base
+mods: [3688438313]
+options:
+  "3688438313": {MinAptitudes: 3, MaxAptitudes: 3, AptitudeAttributeBonus: 9}
+setup:
+  - driver: {setup.call: {target: "Immigration.Instance", method: "Sim200ms", args: [100000]}}
+steps:
+  - expect_state:
+      "TUNING.DUPLICANTSTATS.APTITUDE_ATTRIBUTE_BONUSES[0]": 9
+      "TUNING.DUPLICANTSTATS.APTITUDE_ATTRIBUTE_BONUSES.Length": 15
+  - expect_state: {"Immigration.Instance.ImmigrantsAvailable": true}
+  - call: {tool: building_control, args: {domain: side_surface, surface: facility, kind: telepad, action: open_immigrants, confirm: true}}
+  - ui_wait: {path: "**/ImmigrantScreen/Layout", cond: stable}
+  - expect_state:
+      "count:all:CharacterContainer::[*] if .stats.personality.model.Name == Minion": {save_as: dupes}
+  - expect_state:
+      "count:all:CharacterContainer::[*] if .stats.personality.model.Name == Minion and .stats.skillAptitudes.Count == 3": "== dupes"
+  - expect_ui: {"**/ImmigrantScreen/Layout/Content/CharacterContainer/Details/**": {any_text: "INTERESTS"}}

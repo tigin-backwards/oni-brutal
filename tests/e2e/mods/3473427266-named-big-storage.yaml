@@ -1,0 +1,30 @@
+# Named Big Storage (3473427266), class P.
+#
+# What it does: storage buildings (storage bins, smart bins, fridges, ration boxes, critter and
+# fish feeders, dispensers, conveyor loaders, bottle emptiers, and Big Storage Restoraged's
+# when installed) are renamed after their filter: a postfix on TreeFilterable.UpdateFilters
+# names the building "[Filter]Name" when it accepts one item or one whole category, and keeps
+# the plain name otherwise. A fork of Named Storage.
+# How a player reaches it: changing a storage's filter.
+# What changes: the storage's name, everywhere it shows.
+#
+# A Storage Bin built by setup west of the printing pod is selected: it has the mod's
+# component; ticking "all standard items" in its filter names it as the original does.
+from: early-base
+mods: [3473427266]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"StorageLocker\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {StorageLocker: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 208], select: StorageLocker}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<NamedBigStorage.NamedStorageImplement>": exists
+  - ui_wait: {path: "**/TreeFilterableSideScreen/**/AllStandardItemsRowHeader/HorizontalContent/CheckBox", cond: stable}
+  - click: {ui: "**/TreeFilterableSideScreen/**/AllStandardItemsRowHeader/HorizontalContent/CheckBox"}
+  - expect_state:
+      "selected:TreeFilterable.AcceptedTags": {contains: SandStone}
+      "selected:GetComponent<KSelectable>.GetName()": "== original"
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}

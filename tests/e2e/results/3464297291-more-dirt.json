@@ -1,0 +1,56 @@
+{
+ "spec": "mods/3464297291-more-dirt.yaml",
+ "mods": [
+  "3464297291"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "option set: the Wood Deer's dirt multiplier reads the option; a dropped deer lives on",
+ "updated": "2026-10-29",
+ "commit": "f4926fda",
+ "mod_dlls": {
+  "3464297291": {
+   "PLib.dll": "93073fdf44dbe9fd7c0afe19e56341be862cc2d732090dee30999cf60e2e160d",
+   "║ⁿ┬╣-─α═┴╟┐╗».dll": "22e24b1907b495e7f863edaec77eceb580fa48c99dec3d6be064338a7ed82e01"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-094232-ff065a0d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T10:13:55",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-160448-9719348d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T16:04:48",
+    "lane": 7,
+    "reference_run": "20261029-094232-ff065a0d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-160448-9719348d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T16:09:52",
+    "lane": 7,
+    "reference_run": "20261029-094232-ff065a0d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

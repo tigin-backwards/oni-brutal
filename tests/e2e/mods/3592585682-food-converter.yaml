@@ -1,0 +1,26 @@
+# 食物转换器（Food Convert） (3592585682), class B.
+#
+# What it does: a Food Converter (FoodConverter) in the Food menu, researched with Advanced
+# Distillation (as the Emulsifier): a fabricator whose recipes turn food into crude oil,
+# ethanol, biodiesel or resin (registered in an EntityConfigManager.LoadGeneratedEntities
+# postfix).
+# How a player reaches it: the build menu (Food), after the research; its recipe list.
+# What changes: surplus food becomes industrial resources.
+#
+# The research lists it and its recipes exist; one built by setup west of the printing pod is
+# selected: its recipe list is dumped and shot.
+from: early-base
+mods: [3592585682]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"FoodConverter\")", method: Build, args: [{"$": "Grid.XYToCell(113, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"AdvancedDistillation\").unlockedItemIDs": {contains: FoodConverter}
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0].Name == FoodConverter": [">= 4", "== original"]
+  - run: {seconds: 2}
+  - expect: {buildings: {FoodConverter: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: FoodConverter}
+  - ui_wait: {path: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView", cond: stable}
+  - ui_dump: {name: recipes, root: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView"}
+  - shot: {name: recipes, crop: "**/DetailsScreen", threshold: 0.04}

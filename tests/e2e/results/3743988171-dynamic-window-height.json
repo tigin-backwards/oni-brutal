@@ -1,0 +1,103 @@
+{
+ "spec": "mods/3743988171-dynamic-window-height.yaml",
+ "mods": [
+  "3743988171"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "fails in ours: after a reselection the details screen's forced layout rebuild reads 510 high with a 210 scroll area (541 and 356 in the original), so the mod sizes the window smaller; dumps and shots differ",
+ "updated": "2026-10-29",
+ "commit": "6d2d76a8",
+ "mod_dlls": {
+  "3743988171": {
+   "DynamicWindowHeight.dll": "96208d7281a0a2c4ab8d2628cee6673aa2717e722a74a10108778135c863226b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-094232-ff065a0d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T11:54:59",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-163627-968d70e1",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-29T16:36:27",
+    "lane": 7,
+    "reasons": [
+     "ui_dump details: 157 difference(s)",
+     "shot details: 100.00% of pixels differ (> 4%)"
+    ],
+    "reference_run": "20261029-094232-ff065a0d",
+    "new_signatures": 0,
+    "findings": [
+     "float-tostring-shortest",
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "details": {
+      "differences": 157,
+      "known": {
+       "float-tostring-shortest": 10,
+       "scroll-normalized-position": 1
+      }
+     },
+     "cot": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "details": 1.0,
+     "cot": 0.002155
+    }
+   },
+   {
+    "run": "20261029-163627-968d70e1",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-29T16:37:26",
+    "lane": 7,
+    "reasons": [
+     "ui_dump details: 157 difference(s)",
+     "shot details: 100.00% of pixels differ (> 4%)"
+    ],
+    "reference_run": "20261029-094232-ff065a0d",
+    "new_signatures": 0,
+    "findings": [
+     "float-tostring-shortest",
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "details": {
+      "differences": 157,
+      "known": {
+       "float-tostring-shortest": 10,
+       "scroll-normalized-position": 1
+      }
+     },
+     "cot": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "details": 1.0,
+     "cot": 0.002155
+    }
+   }
+  ]
+ }
+}

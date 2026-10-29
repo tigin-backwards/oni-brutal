@@ -1,0 +1,29 @@
+# 材料研究终端 (Material Research Terminal) (3257389066), class P.
+#
+# What it does: rewrites the Materials Study Terminal (NuclearResearchCenter): a postfix on
+# its CreateBuildingDef gives it +20 decor in a radius of 20, no power use or heat, no thermal
+# conductivity, rotation and placement anywhere; a prefix replacing ConfigureBuildingTemplate
+# gives it a 100000-radbolt storage that fills by itself.
+# How a player reaches it: building a Materials Study Terminal (Stations menu).
+# What changes: a free, decorative research terminal with a huge radbolt store.
+#
+# The definition carries the new values; one built by setup in the corridor west of the
+# printing pod is selected (its title dumped): its radbolt storage holds 100000.
+from: early-base
+mods: [3257389066]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"NuclearResearchCenter\")", method: Build, args: [{"$": "Grid.XYToCell(113, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"NuclearResearchCenter\").BaseDecor": 20
+      "Assets.GetBuildingDef(\"NuclearResearchCenter\").RequiresPowerInput": false
+      "Assets.GetBuildingDef(\"NuclearResearchCenter\").BuildLocationRule": Anywhere
+  - run: {seconds: 2}
+  - expect: {buildings: {NuclearResearchCenter: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 208], select: NuclearResearchCenter}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}
+  - expect_state:
+      "selected:GetComponent<HighEnergyParticleStorage>.capacity": 100000
+      "selected:GetComponent<HighEnergyParticleStorage>.autoStore": true

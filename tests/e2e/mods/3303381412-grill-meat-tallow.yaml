@@ -1,0 +1,25 @@
+# 电动烤炉肉出动物油脂 (Electric Grill renders meat into tallow) (3303381412), class B (a recipe).
+#
+# What it does: a postfix on CookingStationConfig.ConfigureBuildingTemplate adds an Electric
+# Grill recipe that renders 1 kg of meat into 100 kg of tallow and sets the grill's heated
+# temperature to 25 °C; transpilers on the grill's constructor and SpawnOrderProduct and on
+# ComplexFabricator.SpawnOrderProduct change how germs carry over to the product.
+# How a player reaches it: the Electric Grill's recipe list.
+# What changes: tallow from meat.
+#
+# The recipe is registered; an Electric Grill built by setup west of the printing pod is
+# selected: its recipe list is dumped and shot.
+from: early-base
+mods: [3303381412]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"CookingStation\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "count:ComplexRecipeManager.Get().recipes[*] if .results[0].material.Name == Tallow and .fabricators[0].Name == CookingStation": ">= 1"
+      "Assets.GetPrefab(\"CookingStation\").GetComponent<CookingStation>.heatedTemperature": 298.15
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: CookingStation}
+  - ui_wait: {path: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView", cond: stable}
+  - ui_dump: {name: recipes, root: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView"}
+  - shot: {name: recipes, crop: "**/DetailsScreen", threshold: 0.04}

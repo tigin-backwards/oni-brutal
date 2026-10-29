@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3752732754-no-useless-notifications.yaml",
+ "mods": [
+  "3752732754"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "played into cycle 2: no report-ready notification, its title logged",
+ "updated": "2026-10-29",
+ "commit": "6d2d76a8",
+ "mod_dlls": {
+  "3752732754": {
+   "noUselessNotifications.dll": "f48ecee326f2b9f37df21d933b9596d129efd93adfa2fe89936a8dccd3e3dc0c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-094232-ff065a0d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T12:05:36",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-164022-9fcfea20",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T16:40:22",
+    "lane": 7,
+    "reference_run": "20261029-094232-ff065a0d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-164022-9fcfea20",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T17:03:58",
+    "lane": 7,
+    "reference_run": "20261029-094232-ff065a0d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

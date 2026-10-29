@@ -1,0 +1,27 @@
+# Refrigerator Calorie Logic (3177244670), classes P, S.
+#
+# What it does: the Refrigerator's automation output follows the calories it holds instead of
+# its fullness: a postfix on RefrigeratorConfig adds a StorageCalorieLogic (an
+# IThresholdSwitch: a threshold side screen in kcal, above or below) and relabels its output
+# port; a prefix skips Refrigerator.UpdateLogicCircuit.
+# How a player reaches it: a Refrigerator's threshold side screen; its automation port.
+# What changes: a fridge that signals by calories.
+#
+# A Refrigerator built by setup west of the printing pod is selected: it has the mod's
+# component, and its threshold side screen (dumped, numbers masked) measures stored kcal.
+from: early-base
+mods: [3177244670]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Refrigerator\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {Refrigerator: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: Refrigerator}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<RazorspinMods_ONI.StorageCalorieLogic>": exists
+  - ui_wait: {path: "**/ThresholdSwitchSideScreen", cond: stable}
+  - ui_dump: {name: threshold, root: "**/ThresholdSwitchSideScreen", mask_text: ['-?\d+(\.\d+)?']}
+  - expect_ui:
+      "**/ThresholdSwitchSideScreen/**": {any_text: "~KCalories"}

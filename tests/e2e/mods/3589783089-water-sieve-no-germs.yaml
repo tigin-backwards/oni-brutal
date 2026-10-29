@@ -1,0 +1,27 @@
+# 净水器不搬运病菌 (Water Sieve does not carry germs) (3589783089), class P.
+#
+# What it does: a postfix on WaterPurifierConfig.DoPostConfigureComplete stops the Water
+# Sieve's storage from passing germs on (doDiseaseTransfer off; its contents sealed,
+# insulated, hidden and preserved) and makes its converter output 5 kg/s of clean water and
+# 0.2 kg/s of polluted dirt at 20 °C, carrying no germs.
+# How a player reaches it: building a Water Sieve (Plumbing menu).
+# What changes: germ-free clean water.
+#
+# A Water Sieve built by setup west of the printing pod is selected (its title dumped): its
+# storage and converter are the mod's.
+from: early-base
+mods: [3589783089]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"WaterPurifier\")", method: Build, args: [{"$": "Grid.XYToCell(113, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {WaterPurifier: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: WaterPurifier}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}
+  - expect_state:
+      "selected:GetComponent<Storage>.doDiseaseTransfer": false
+      "selected:GetComponent<ElementConverter>.outputElements[0].massGenerationRate": 5
+      "selected:GetComponent<ElementConverter>.outputElements[1].massGenerationRate": 0.2
+      "selected:GetComponent<ElementConverter>.outputElements[0].elementHash": Water

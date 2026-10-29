@@ -1,0 +1,61 @@
+{
+ "spec": "mods/3316378973-other-clusters.yaml",
+ "mods": [
+  "3316378973"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "new game of the Terra variant (SNDST-N78): the mod's worlds generate with its start moonlet, tear and geysers; asteroid list dump matches",
+ "updated": "2026-10-29",
+ "commit": "f4926fda",
+ "mod_dlls": {
+  "3316378973": {}
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-094232-ff065a0d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T09:58:01",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-155721-eb7f8ea4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T15:57:21",
+    "lane": 7,
+    "reference_run": "20261029-094232-ff065a0d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261029-155721-eb7f8ea4",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T15:58:39",
+    "lane": 7,
+    "reference_run": "20261029-094232-ff065a0d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

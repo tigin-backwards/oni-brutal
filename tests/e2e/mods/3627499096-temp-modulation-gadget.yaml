@@ -1,0 +1,30 @@
+# 控温装置(Temp. Modulation Gadget) (3627499096), classes B, S.
+#
+# What it does: a 1x1 Temp. Modulation Gadget (PiapiTempAdjustGadget) in the Utilities menu,
+# researched with Temperature Modulation, buildable anywhere and drag-built, with no power: every
+# 4 s it pulls its cell's temperature two thirds of the way to its target (20 °C by default,
+# set with a slider side screen), keeping the cell's element and mass; an automation input
+# switches it.
+# How a player reaches it: the build menu (Utilities), after the research; its slider.
+# What changes: a free, local thermostat.
+#
+# The research lists it. One built by setup in the corridor west of the printing pod is
+# selected (its title dumped, the slider at 20 °C); played 40 s, its cell sits near 20 °C.
+from: early-base
+mods: [3627499096]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"PiapiTempAdjustGadget\")", method: Build, args: [{"$": "Grid.XYToCell(112, 208)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"TemperatureModulation\").unlockedItemIDs": {contains: PiapiTempAdjustGadget}
+  - run: {seconds: 2}
+  - expect: {buildings: {PiapiTempAdjustGadget: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 208], select: PiapiTempAdjustGadget}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}
+  - expect_state:
+      "selected:GetComponent<TempAdjustGadget.TempAdjustGadget>.GetSliderValue(0)": 20
+  - run: {seconds: 40}
+  - expect_state:
+      "Grid.Temperature.get_Item(132400)": ["> 288.15", "< 298.15"]

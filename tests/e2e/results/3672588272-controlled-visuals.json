@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3672588272-controlled-visuals.yaml",
+ "mods": [
+  "3672588272"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "option set: temperatures read in all three units, in the hover card too",
+ "updated": "2026-10-29",
+ "commit": "6d2d76a8",
+ "mod_dlls": {
+  "3672588272": {
+   "ControlledVisuals.dll": "c2328898e2d2ea9247542891cb8e0877f9763005f7fc9454c5024560190b263c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-094232-ff065a0d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T11:48:32",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-163248-607d3f51",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T16:32:48",
+    "lane": 7,
+    "reference_run": "20261029-094232-ff065a0d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-163248-607d3f51",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T16:33:44",
+    "lane": 7,
+    "reference_run": "20261029-094232-ff065a0d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

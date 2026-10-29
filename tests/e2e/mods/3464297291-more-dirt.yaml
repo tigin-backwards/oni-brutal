@@ -1,0 +1,24 @@
+# 狐鹿-泥土强化 More Dirt (3464297291), class P (PLib options).
+#
+# What it does: a prefix on WoodDeerConfig.CreatePrefab sets the Wood Deer's poop conversion
+# multiplier (WoodDeerConfig.POOP_MASS_CONVERSION_MULTIPLIER) from its option, the dirt a deer
+# makes per cycle (20 kg by default; multiplier = kg x 4 / 20 x 8.333), so deer make more dirt
+# from what they eat.
+# How a player reaches it: the mod's options; ranching Wood Deer.
+# What changes: the Wood Deer's dirt output.
+#
+# The option is set explicitly (40 kg a cycle): the multiplier reads 66.67, as in the
+# original, and a Wood Deer dropped by setup into the corridor west of the printing pod has
+# the diet made from it.
+from: early-base
+mods: [3464297291]
+options:
+  "3464297291": {PoopPerCycle: 40.0}
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(0, 112, 207, \"WoodDeer\", \"Creatures\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "type:WoodDeerConfig::POOP_MASS_CONVERSION_MULTIPLIER": [">= 66.6", "<= 66.7", "== original"]
+  - run: {seconds: 2}
+  - expect_state:
+      "count:all:CreatureBrain::[*] if .name == WoodDeer": 1

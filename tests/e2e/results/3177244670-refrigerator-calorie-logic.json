@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3177244670-refrigerator-calorie-logic.yaml",
+ "mods": [
+  "3177244670"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Refrigerator gets the calorie logic; its threshold side screen in kcal dump matches",
+ "updated": "2026-10-29",
+ "commit": "f4926fda",
+ "mod_dlls": {
+  "3177244670": {
+   "RefrigeratorCalorieLogic.dll": "4e7d193b4af89e7b1760ebfdc724d5fcf8234136245e2109785fa537f958117f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-094232-ff065a0d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T09:42:32",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-155008-8c7e25dd",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T15:50:08",
+    "lane": 7,
+    "reference_run": "20261029-094232-ff065a0d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "threshold": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261029-155008-8c7e25dd",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T15:51:03",
+    "lane": 7,
+    "reference_run": "20261029-094232-ff065a0d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "threshold": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

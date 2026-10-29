@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3473427266-named-big-storage.yaml",
+ "mods": [
+  "3473427266"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Storage Bin's filter ticked renames it as in the original; title dump matches",
+ "updated": "2026-10-29",
+ "commit": "f4926fda",
+ "mod_dlls": {
+  "3473427266": {
+   "NamedBigStorage.dll": "50b6dfd38598eb001ef5fdedee86980d736d6ac31c53a9c72989a667380fff4a"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-094232-ff065a0d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T10:17:17",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-161041-c085d182",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T16:10:41",
+    "lane": 7,
+    "reference_run": "20261029-094232-ff065a0d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261029-161041-c085d182",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T16:11:36",
+    "lane": 7,
+    "reference_run": "20261029-094232-ff065a0d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

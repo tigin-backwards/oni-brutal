@@ -1,0 +1,39 @@
+# high Radbolt 强力辐射粒子发生器 (Max Radbolt Generator) (3495836420), class P (PLib options).
+#
+# What it does: a transpiler on HighEnergyParticleSpawner.LauncherUpdate replaces the 0.1
+# factor by which the Radbolt Generator turns absorbed radiation into radbolts with its
+# option (0.5 by default, restart required): five times the radbolts.
+# How a player reaches it: a Radbolt Generator in radiation.
+# What changes: the generator's radbolt yield.
+#
+# The transpiler logs its change. setup builds a Radbolt Generator in the corridor west of the
+# printing pod, powers it from a dev generator beside it (two wire cells joined) and turns the
+# wall cell west of it into uranium ore; played a minute, the generator has absorbed
+# radiation and stored radbolts.
+from: early-base
+mods: [3495836420]
+options:
+  "3495836420": {MaxRadboltGen: 0.5}
+require_log: ['\[MaxRadboltGen\] Changed 0\.1 to 0\.5']
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"HighEnergyParticleSpawner\")", method: Build, args: [{"$": "Grid.XYToCell(110, 207)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"DevGenerator\")", method: Build, args: [{"$": "Grid.XYToCell(111, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [{"$": "Grid.XYToCell(110, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Wire\")", method: Build, args: [{"$": "Grid.XYToCell(111, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: [Right, {"$": "Grid.XYToCell(110, 207)"}, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: SetConnections, args: [Left, {"$": "Grid.XYToCell(111, 207)"}, true]}}
+  - driver: {setup.call: {target: "Game.Instance.electricalConduitSystem", method: ForceRebuildNetworks}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(109, 207)"}, UraniumOre, {"$": "CellEventLogger.Instance.DebugTool"}, 2000, 300]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [{"$": "Grid.XYToCell(109, 208)"}, UraniumOre, {"$": "CellEventLogger.Instance.DebugTool"}, 2000, 300]}}
+steps:
+  - run: {seconds: 3}
+  - expect: {buildings: {HighEnergyParticleSpawner: 1, DevGenerator: 1}}
+  - expect_state:
+      "Grid.Radiation.get_Item(131762)": "> 0"
+  - run: {seconds: 60}
+  - expect_state:
+      "all:HighEnergyParticleSpawner::[0].GetComponent<HighEnergyParticleStorage>.Particles": "> 0"
+  - driver: {camera.set: {cell: [110, 208], ortho: 8}}
+  - click_world: {cell: [110, 208], select: HighEnergyParticleSpawner}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}

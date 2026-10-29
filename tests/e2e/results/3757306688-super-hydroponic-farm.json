@@ -1,0 +1,70 @@
+{
+ "spec": "mods/3757306688-super-hydroponic-farm.yaml",
+ "mods": [
+  "3757306688"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "one built is selected; its code-built slider side screen dump matches and a click sets the wattage",
+ "updated": "2026-10-29",
+ "commit": "6d2d76a8",
+ "mod_dlls": {
+  "3757306688": {
+   "PLib.dll": "893dc1ea3eddd02c85d433231aae356be27be07ddfc1a98fb2c51d84748208e8",
+   "SuperHydroponicFarm.dll": "fdc0a9dc89586e8a483878c92c06b0b30c7b463b90155a7b575d9c57b7c05607"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-094232-ff065a0d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T12:24:21",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-171320-f54fd396",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T17:13:20",
+    "lane": 7,
+    "reference_run": "20261029-094232-ff065a0d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     },
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261029-171320-f54fd396",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T17:14:12",
+    "lane": 7,
+    "reference_run": "20261029-094232-ff065a0d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     },
+     "slider": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

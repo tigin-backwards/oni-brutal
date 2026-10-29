@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3623756298-bonbon-tree-boost.yaml",
+ "mods": [
+  "3623756298"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "options set: the branch prefab carries the multipliers; a dropped Bonbon Tree grows on",
+ "updated": "2026-10-29",
+ "commit": "6d2d76a8",
+ "mod_dlls": {
+  "3623756298": {
+   "BonbonTreeBoost.dll": "091fe46b60655fbdd387d01310774b8befa52344003081568e6a86ce76d00917"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-094232-ff065a0d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T11:29:37",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-162446-f0649742",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T16:24:46",
+    "lane": 7,
+    "reference_run": "20261029-094232-ff065a0d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-162446-f0649742",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T16:25:53",
+    "lane": 7,
+    "reference_run": "20261029-094232-ff065a0d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

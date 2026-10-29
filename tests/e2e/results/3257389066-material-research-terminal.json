@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3257389066-material-research-terminal.yaml",
+ "mods": [
+  "3257389066"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Materials Study Terminal needs no power, decor 20, a 100000 radbolt store; title dump matches",
+ "updated": "2026-10-29",
+ "commit": "f4926fda",
+ "mod_dlls": {
+  "3257389066": {
+   "▓─┴╧╤╨╛┐╓╒╢╦.dll": "a4a167f0bc630a5d81309808d7293fb649f98b164f720d3bf8eb7cd60b2e5996"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-094232-ff065a0d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T09:50:52",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-155346-56f6ad05",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T15:53:46",
+    "lane": 7,
+    "reference_run": "20261029-094232-ff065a0d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261029-155346-56f6ad05",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T15:54:38",
+    "lane": 7,
+    "reference_run": "20261029-094232-ff065a0d",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

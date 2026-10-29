@@ -1,0 +1,35 @@
+# 超级液培砖 Super Hydroponic Farm (3757306688), classes B, S.
+#
+# What it does: a 1x1 hydroponic farm tile (SuperHydroponicFarm) in the Food menu, researched
+# with Agriculture: a powered planter tile with a liquid input. A plant growing on it gets a
+# growth-rate modifier (a postfix on Growing.OnSpawn): 1.5x unpowered, 2x at the 10 W
+# reference, more with more power (diminishing). A side screen the mod builds in code
+# (registered in a DetailsScreen.OnPrefabInit postfix) has a slider for its wattage, 10 to
+# 480 W by default (PLib options).
+# How a player reaches it: the build menu (Food), after the research; its side screen.
+# What changes: faster crops for power.
+#
+# The research lists it; one built by setup in the corridor west of the printing pod is
+# selected: its side screen (dumped) shows the slider at 10 W, and a click on the slider's
+# middle sets the farm's wattage, as in the original.
+from: early-base
+mods: [3757306688]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SuperHydroponicFarm\")", method: Build, args: [{"$": "Grid.XYToCell(112, 208)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"Agriculture\").unlockedItemIDs": {contains: SuperHydroponicFarm}
+  - run: {seconds: 2}
+  - expect: {buildings: {SuperHydroponicFarm: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 208], select: SuperHydroponicFarm}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}
+  - expect_state:
+      "selected:GetComponent<SuperHydroponicFarm.SuperHydroponicFarmPowerSlider>.GetPowerWatts()": 10
+  - ui_wait: {path: "**/SuperHydroponicFarmSideScreen*/**/Slider", cond: stable}
+  - ui_dump: {name: slider, root: "**/SuperHydroponicFarmSideScreen*"}
+  - click: {ui: "**/SuperHydroponicFarmSideScreen*/**/Slider"}
+  - expect_state:
+      "selected:GetComponent<SuperHydroponicFarm.SuperHydroponicFarmPowerSlider>.GetPowerWatts()": ["> 100", "== original"]
+      "selected:GetComponent<EnergyConsumer>.BaseWattageRating": "== original"

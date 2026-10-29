@@ -1,0 +1,24 @@
+# Deconstruct Rover chore on shut down (3212502461), class P.
+#
+# What it does: a postfix on ScoutRoverConfig.OnSpawn subscribes each Rover to its Died
+# event; when a Rover dies (its battery runs out), the mod marks it for deconstruction, so a
+# Duplicant comes to take it apart instead of the player having to order it.
+# How a player reaches it: a Rover whose battery runs dry.
+# What changes: dead Rovers are deconstructed by themselves.
+#
+# setup drops a Rover on the floor of the corridor west of the printing pod and empties its
+# battery. Played a moment, the Rover dies and is marked for deconstruction.
+from: early-base
+mods: [3212502461]
+setup:
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [0, 111, 207, ScoutRover, Creatures]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "Db.Get().Amounts.InternalChemicalBattery", method: Lookup, args: [{"$": "last:"}]}}
+  - driver: {setup.call: {target: "last:", method: SetValue, args: [0]}}
+steps:
+  - expect_state:
+      "count:all:Deconstructable::[*] if .IsMarkedForDeconstruction() == true": 0
+  - run: {seconds: 5}
+  - expect_state:
+      "count:all:Deconstructable::[*] if .IsMarkedForDeconstruction() == true": 1
+      "count:all:Deconstructable::[*] if .IsMarkedForDeconstruction() == true and .looseEntityDeconstructable == true": 1

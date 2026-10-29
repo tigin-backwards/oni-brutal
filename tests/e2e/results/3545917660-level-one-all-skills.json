@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3545917660-level-one-all-skills.yaml",
+ "mods": [
+  "3545917660"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "in the Skills screen Nikola learns Hard Digging and gets every digging perk",
+ "updated": "2026-10-29",
+ "commit": "b7860c06",
+ "mod_dlls": {
+  "3545917660": {
+   "╨í╚╦╥╗╝╢╚½╝╝─▄.dll": "81aac271dd506bb350f319a74158a8a9a2d8d332fe5a5105872d36c7524dacfd"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-032822-8856a8f4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T03:28:22",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-033139-1d4f3ce7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T03:31:39",
+    "lane": 17,
+    "reference_run": "20261029-032822-8856a8f4",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-033139-1d4f3ce7",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T03:32:21",
+    "lane": 17,
+    "reference_run": "20261029-032822-8856a8f4",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

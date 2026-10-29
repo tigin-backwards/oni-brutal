@@ -2910,6 +2910,48 @@ descender plus the primary font's line gap at the text's size, take the line's h
 ascender as separate maximums, and space the lines by the interval above. Compute the preferred
 height with the extra bottom candidate above.
 
+### Mesh buffers made on a mesh that holds more (measured 2026-10-29)
+
+**Why:** CalYu's Building Pack (2995808112, `tests/e2e/mods/2995808112-calyus-building-pack.yaml`)
+names its buildings in Chinese, so the build menu's and the product card's `LocText`s draw
+characters from fallback fonts in sub-meshes. When a text is rebuilt with a new buffer
+(`new TMP_MeshInfo(mesh, size)`) on a mesh that already holds the triangles of more quads than
+the new buffer, this implementation logs the engine's error `Mesh.vertices is too small. The
+supplied vertex array has less vertices than are referenced by the triangles array.` (from
+`TMP_MeshInfo..ctor` under `TMP_Text.BuildGeometry`, `TextMeshProUGUI.Rebuild`,
+`CanvasUpdateRegistry`), followed by `Mesh.normals is out of bounds …` and the same for
+tangents, uv and colors, and the game opens its crash dialog. The shipped package logs nothing.
+
+**Measured** with `PROBE_SCENARIO=meshshrink` (`tools/UnityProbe/MeshShrink.cs`, lines `MS …`,
+10 s into the main menu). The engine's `Mesh` is not the difference: in both players a mesh
+with 8 vertices and the triangles of two quads (indices up to 7) refuses 4 vertices through the
+`vertices` setter and every `SetVertices` overload (`DontValidateIndices` too) with that error,
+and keeps its 8 vertices. After `Clear()` (or `triangles` set first to one quad) the same 4
+vertices are taken without a log. Then, on the shipped package:
+- `new TMP_MeshInfo(mesh, 1)` on that two-quad mesh logs nothing. The mesh afterwards has 4
+  vertices, 4 normals and 6 triangle indices (one quad, up to index 3), and bounds of zero
+  centre and size. The buffer's `mesh` is the mesh passed in.
+- On a mesh that had no uv or colour channel (5 quads of positions and triangles, or a new
+  empty mesh), the new buffer's mesh has positions, normals and triangles but no uv and no
+  colours (`uv` and `colors32` read empty). On the two-quad mesh above, which had uv and
+  colours, they read 4 entries after the constructor: they were resized, not set.
+- Constructors in a row on one mesh (1, 4, then 1 quads) and `ResizeMeshInfo` from 4 to 1 and
+  from 1 to 8 quads log nothing either; the mesh holds 4, 16, 4, 4 and 32 vertices.
+
+So the shipped constructor empties the mesh before it sets the new buffer's positions, normals
+(and tangents, not measured) and triangles, and does not hand the mesh its uv or colours. Read as the engine's `Mesh` behaves: the observations match a
+`Clear()` (the vertex layout kept) followed by those setters.
+
+**This implementation** sets the positions on the mesh without emptying it first, so a mesh that
+held more quads than the new buffer refuses them and the error is logged; it also sets uv, uv2
+and colours in the constructor.
+
+**Requirement:** a new `TMP_MeshInfo(mesh, size)` given a mesh must leave that mesh holding the
+new buffer's quads whatever the mesh held before, without any log: positions, normals, tangents
+and the quads' triangles, bounds zero, and uv and colours not set by the constructor. Check it
+with the probe's `tmp.*` lines (`diff` of the two players' `MS` lines shows no difference in
+them) and with the spec above, which must reach its last step without the crash dialog.
+
 ## Verification
 
 1. **Build:**

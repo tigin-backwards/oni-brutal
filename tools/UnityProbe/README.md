@@ -492,6 +492,14 @@ the player's (it focuses the largest mapped window). Check the rules with
 `tools/UnityProbe/tt-check.py rule LOG`, and compare the players with `tt-check.py diff ORIG
 OURS`. `docs/cleanroom/imgui.md` ("GUI.tooltip") records what it measured.
 
+With `PROBE_SCENARIO=meshshrink` only the mesh probe runs (`MeshShrink.cs`, lines `MS …`, 10 s
+into the main menu, a few frames). A mesh with the triangles of two quads gets fewer vertices
+(the setter, every `SetVertices` overload, after `Clear`), channels of the wrong length and
+triangles past its vertices; each step logs what the player logged and the mesh after it. Then
+TextMeshPro's `TMP_MeshInfo` constructor and `ResizeMeshInfo` on meshes that hold more quads
+than the new buffer. Diff the two players' `MS` lines; `textmeshpro.md` ("Mesh buffers made on a
+mesh that holds more") records what it measured.
+
 With `PROBE_SCENARIO=guilayout` only the GUILayout probe runs (`GuiLayout.cs`, lines `GL …`, 10 s
 into the main menu, about 80 s; `PROBE_GL_PART=size`, `wsize`, `order` or `mm` runs one part).
 `size` logs the default skin's styles and the rects GUILayout gives: every control kind with

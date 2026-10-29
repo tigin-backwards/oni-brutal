@@ -282,6 +282,11 @@ namespace SemanticsProbe
                 go.AddComponent<UpdateOrder>();
                 return;
             }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "meshshrink")
+            {
+                go.AddComponent<MeshShrink>();
+                return;
+            }
             if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "guilayout")
             {
                 go.AddComponent<GuiLayout>();

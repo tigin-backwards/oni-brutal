@@ -1,0 +1,41 @@
+# Shinebug Jar (3818420082), classes B, S, O; PLib options.
+#
+# What it does: adds the Shinebug Jar (ShinebugJar, 3x3 of glass, Power menu, researched
+# with the tech that unlocks the Solar Panel): a generator that holds shinebugs (or their
+# eggs, a side-screen checkbox), 10 W for each, up to 114 (an option, up to 456). Bugs
+# delivered to its storage are absorbed into a count; the jar lights while it holds any, and
+# with radiation on emits rads (a logic port). A capacity side screen sets how many it
+# wants; its user menu toggles auto-wrangling and releases one bug.
+# How a player reaches it: the Power menu; the jar's side screen and user menu.
+# What changes: shinebugs as a power source.
+#
+# setup builds a jar in the corridor west of the printing pod and stores a shinebug in it:
+# the jar absorbs it, lights and offers 10 W. Selected, its user menu releases the bug.
+from: early-base
+mods: [3818420082]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"ShinebugJar\")", method: Build, args: [{"$": "Grid.XYToCell(113, 206)"}, Neutral, null, [Glass, Glass], 293.15, DEFAULT_FACADE]}}
+  - driver: {ui.wait: {path: "**/E2eNothing", cond: gone, frames: 30}}
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [131762, 0, 0, LightBug, Creatures]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "all:ShinebugJar.ShinebugJar::[0].GetComponent<Storage>", method: Store, args: [{"$": "last:"}]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"ShinebugJar\").GeneratorWattageRating": 1140
+  - run: {seconds: 3}
+  - expect: {buildings: {ShinebugJar: 1}}
+  - expect_state:
+      "all:ShinebugJar.ShinebugJar::[0].BugCount": 1
+      "all:ShinebugJar.ShinebugJar::[0].CurrentWattage": 10
+      "all:ShinebugJar.ShinebugJar::[0].GetComponent<Light2D>.enabled": true
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: ShinebugJar}
+  - ui_wait: {path: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons", cond: stable}
+  - ui_dump: {name: user-menu, root: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons"}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen", cond: stable}
+  - shot: {name: side, crop: "**/DetailsScreen/SideScreen", threshold: 0.04}
+  - click: {ui: "**/UserMenuScreen/Buttons/Release ShinebugButton"}
+  - run: {seconds: 2}
+  - expect_state:
+      "all:ShinebugJar.ShinebugJar::[0].BugCount": 0
+      "all:ShinebugJar.ShinebugJar::[0].GetComponent<Light2D>.enabled": false

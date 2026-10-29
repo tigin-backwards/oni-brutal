@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3818420082-shinebug-jar.yaml",
+ "mods": [
+  "3818420082"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a shinebug stored in a built jar is absorbed, lights it and gives 10 W; the user menu releases it",
+ "updated": "2026-10-29",
+ "commit": "20364bdc",
+ "mod_dlls": {
+  "3818420082": {
+   "ShinebugJar.dll": "965983ad662d9bb30b2531f680c4cf3d97cab2a3ea8db575af26fed73cf729d1"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-130335-d1da02eb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T14:22:38",
+    "lane": 4,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-142627-ee879ee1",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T14:58:04",
+    "lane": 4,
+    "reference_run": "20261029-130335-d1da02eb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "side": 0.003708
+    }
+   },
+   {
+    "run": "20261029-142627-ee879ee1",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T14:59:00",
+    "lane": 4,
+    "reference_run": "20261029-130335-d1da02eb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "side": 0.003708
+    }
+   }
+  ]
+ }
+}

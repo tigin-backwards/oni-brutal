@@ -1,0 +1,23 @@
+# Challenge Collection (2014940545), class P; needs Lua Scripting Engine (1812965265).
+#
+# What it does: Lua scripts for the Lua Scripting Engine (its DLL is an empty UserMod2): at
+# load, init.lua starts the registration and settings controller scripts, which register
+# settings pages (general settings, technology, twenty map transformation panels) and hook
+# scripts to game events: element transformations, an immigration timer, map size, tech
+# level and difficulty, buildings enabled at the start. Other challenges (temperature,
+# seasons, race against time) ship disabled.
+# How a player reaches it: the Lua engine's settings pages; the game it changes.
+# What changes: scripted game settings and challenges.
+#
+# Both mods load into the colony: the configurator's script logs its start, the techs cost
+# what they cost in the original, and the colony plays on.
+from: early-base
+mods: [2014940545, 1812965265]
+require_log: ['Lua successfully loaded the Game configurator']
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"FarmingTech\").costsByResearchTypeID.get_Item(\"basic\")": "== original"
+      "Db.Get().Techs.Get(\"Jobs\").costsByResearchTypeID.get_Item(\"basic\")": "== original"
+      "Immigration.Instance.timeBeforeSpawn": "== original"
+  - run: {seconds: 20}
+  - expect: {duplicants: 3}

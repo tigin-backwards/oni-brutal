@@ -1,0 +1,62 @@
+{
+ "spec": "mods/2014940545-challenge-collection.yaml",
+ "mods": [
+  "2014940545",
+  "1812965265"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "both mods (with Lua Scripting Engine) load into the colony; the configurator's script starts, tech costs and the immigration timer match the original's",
+ "updated": "2026-10-29",
+ "commit": "2d4aca2a",
+ "mod_dlls": {
+  "2014940545": {
+   "LuaEntryPoint.dll": "88aba3610d3ac1b4df780c905b0043b9ec12c7df9745395350b321c430abbf35"
+  },
+  "1812965265": {
+   "LuaCore.dll": "3a9b9bbfdce806de1f9012060a4092012e3c1bfb6bbd38ebbfc6b3c6d41c495f",
+   "LuaEntryPoint-blueprint.dll": "3750d47013509c45405e07bd70df40582d4d82e996a01c158a63f92fb609a0ae",
+   "MoonSharp.Interpreter.dll": "97f3207a579d19235fc68f742a9e5f2431c5035f309b7b3a4371b48886442a87",
+   "RainbowCommons.dll": "284e5ba2da33b556a8d8d5b02dc522eef1ae28f062fb6a100665c0a93151bca7"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-071158-8a6b9b85",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T07:49:13",
+    "lane": 5,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-083519-82e8344c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T08:35:19",
+    "lane": 4,
+    "reference_run": "20261029-071158-8a6b9b85",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-083519-82e8344c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T08:39:07",
+    "lane": 4,
+    "reference_run": "20261029-071158-8a6b9b85",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

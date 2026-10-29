@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3546375849-fusion-energy-project.yaml",
+ "mods": [
+  "3546375849"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "tritium elements and techs; the Laser Heater's Utilities card (shot); a built heater",
+ "updated": "2026-10-29",
+ "commit": "960fa78d",
+ "mod_dlls": {
+  "3546375849": {
+   "FusionEnergyProject.dll": "caafd26d38efc373f104bd5834f49bc6c3b7de93f81069616afdd6d97a2c019b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-010732-2e8b7c55",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T01:52:52",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-024514-537d9d0f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T02:52:32",
+    "lane": 16,
+    "reference_run": "20261029-010732-2e8b7c55",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.0
+    }
+   },
+   {
+    "run": "20261029-024514-537d9d0f",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T02:53:29",
+    "lane": 16,
+    "reference_run": "20261029-010732-2e8b7c55",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.0
+    }
+   }
+  ]
+ }
+}

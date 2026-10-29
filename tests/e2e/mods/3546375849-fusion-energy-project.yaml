@@ -1,0 +1,41 @@
+# Fusion Energy Project (3546375849), classes B, E.
+#
+# What it does: adds tritium (gas, liquid and solid elements) and four buildings: the Laser
+# Heater (Utilities, Temperature Modulation) heating gas with radbolts, the Gas Centrifuge
+# (Refinement, Nuclear Refinement) separating tritium from hydrogen, the Fusion Reactor
+# (Radiation, Nuclear Refinement) that fuses tritium above 5000 °C into liquid nuclear waste
+# for enormous heat, and a Nuclear Bomb rocket module (Advanced Nuclear Research) that can
+# delete a world; settings from config.txt.
+# How a player reaches it: research those techs; the menus.
+# What changes: a late-game fusion chain.
+#
+# Temperature Modulation is researched in setup and a Laser Heater built in the corridor
+# west of the printing pod. The tritium elements exist; the Utilities menu offers the heater
+# (its card); selected, the built one is a laser heater.
+from: early-base
+mods: [3546375849]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"TemperatureModulation\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LaserHeater\")", method: Build, args: [131765, Neutral, null, [Steel], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "ElementLoader.FindElementByName(\"Tritium\").IsGas": true
+      "ElementLoader.FindElementByName(\"LiquidTritium\").IsLiquid": true
+      "Db.Get().Techs.Get(\"TemperatureModulation\").unlockedItemIDs": {contains: LaserHeater}
+      "Db.Get().Techs.Get(\"NuclearRefinement\").unlockedItemIDs": [{contains: GasCentrifuge}, {contains: FusionReactor}]
+  - run: {seconds: 3}
+  - driver: {camera.set: {cell: [113, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Utilities"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/LaserHeater Group*", cond: stable}
+  - scroll: {at: "**/PlanBuildingSelectionPanel/BuildingGroups", notches: -10}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/LaserHeater Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/LaserHeater Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - key: {code: Escape}
+  - expect: {buildings: {LaserHeater: 1}}
+  - expect_state:
+      "all:FusionEnergyProject.LaserHeater::[0]": exists

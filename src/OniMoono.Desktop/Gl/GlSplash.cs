@@ -13,7 +13,7 @@ namespace OniMoono.Desktop.Gl
     {
         readonly SplashRain rain;
         uint program, texture, buffer, vertexArray;
-        int sizeLocation;
+        int sizeLocation, flipLocation;
 
         public GlSplash(Task<SplashArt> art) => rain = new SplashRain(art);
 
@@ -28,7 +28,7 @@ namespace OniMoono.Desktop.Gl
             if (program != 0) return true;
             var a = rain.Art;
             if (a == null) return false;
-            const string vs = "#version 330 core\nlayout(location = 0) in vec2 pos;\nlayout(location = 1) in vec3 uva;\nuniform vec2 size;\nout vec3 v;\nvoid main() { v = uva; gl_Position = vec4(pos.x / size.x * 2.0 - 1.0, 1.0 - pos.y / size.y * 2.0, 0.0, 1.0); }\n";
+            const string vs = "#version 330 core\nlayout(location = 0) in vec2 pos;\nlayout(location = 1) in vec3 uva;\nuniform vec2 size;\nuniform float flip;\nout vec3 v;\nvoid main() { v = uva; gl_Position = vec4(pos.x / size.x * 2.0 - 1.0, (1.0 - pos.y / size.y * 2.0) * flip, 0.0, 1.0); }\n";
             const string fs = "#version 330 core\nin vec3 v;\nuniform sampler2D atlas;\nout vec4 color;\nvoid main() { vec4 c = texture(atlas, v.xy); color = c * v.z; }\n";
             uint v = GlApi.CompileShader(VertexShader, vs, out var vlog), f = GlApi.CompileShader(FragmentShader, fs, out var flog);
             program = v != 0 && f != 0 ? GlApi.LinkProgram(v, f, 0, out _) : 0;
@@ -40,6 +40,7 @@ namespace OniMoono.Desktop.Gl
                 return false;
             }
             sizeLocation = GlApi.UniformLocation(program, "size");
+            flipLocation = GlApi.UniformLocation(program, "flip");
             texture = GlApi.GenTexture();
             N.glBindTexture(TexTarget2D, texture);
             var texels = SplashRain.PremultipliedTexels(a);
@@ -66,7 +67,8 @@ namespace OniMoono.Desktop.Gl
         readonly List<SplashRain.BarRect> bar = new();
 
         /// Draws the comets into the window's framebuffer (bound), `width`×`height` pixels.
-        public void Draw(int width, int height)
+        /// `flip`: its rows run top-down (the DXGI target's).
+        public void Draw(int width, int height, bool flip = false)
         {
             if (!Ready() || !Active || width <= 0 || height <= 0) return;
             float fade = rain.Vertices(width, height, vertices);
@@ -77,7 +79,7 @@ namespace OniMoono.Desktop.Gl
                 GlApi.Enable(ScissorTest, true);
                 foreach (var r in bar)
                 {
-                    N.glScissor(r.X, r.Y, r.Width, r.Height);
+                    N.glScissor(r.X, flip ? height - r.Y - r.Height : r.Y, r.Width, r.Height);
                     N.glClearColor(r.R, r.G, r.B, 1f);
                     N.glClear(ColorBufferBit);
                 }
@@ -92,6 +94,7 @@ namespace OniMoono.Desktop.Gl
             N.glBlendFuncSeparate(One, OneMinusSrcAlpha, One, OneMinusSrcAlpha);
             N.glUseProgram(new GlProgram(program));
             N.glUniform2f(sizeLocation, width, height);
+            N.glUniform1f(flipLocation, flip ? -1f : 1f);
             N.glActiveTexture(Texture0);
             N.glBindTexture(TexTarget2D, texture);
             N.glBindVertexArray(new GlVertexArray(vertexArray));

@@ -1,0 +1,23 @@
+# Remove Puft Prince (2807313402), class P.
+#
+# What it does: at load it removes three of the critters' egg-chance modifiers (the ones that
+# turn Puft eggs into Puft Prince eggs) and rewrites the Puft morphs' base egg chances with a
+# Puft Prince weight of 0.
+# How a player reaches it: breeding Pufts.
+# What changes: Pufts never lay Puft Prince eggs.
+#
+# The tuning tables read the mod's weights, and the modifier list is three shorter (as in the
+# original).
+from: early-base
+mods: [2807313402]
+steps:
+  - expect_state:
+      "PuftTuning.EGG_CHANCES_BASE.Count": 4
+      "PuftTuning.EGG_CHANCES_BASE[1].egg.Name": PuftAlphaEgg
+      "PuftTuning.EGG_CHANCES_BASE[1].weight": 0
+      "PuftTuning.EGG_CHANCES_BASE[0].weight": 0.8
+      "PuftTuning.EGG_CHANCES_OXYLITE[1].weight": 0
+      "PuftTuning.EGG_CHANCES_BLEACHSTONE[1].weight": 0
+      "TUNING.CREATURES.EGG_CHANCE_MODIFIERS.MODIFIER_CREATORS.Count": "== original"
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

@@ -1050,7 +1050,11 @@ citing why.
     component's first update callback, at the next Start pass or that callback, whichever
     comes first (§3.3). Activation and deactivation
     recurse in Unity's order (Awake/OnEnable for the whole subtree, parent first; OnDisable
-    children-first when deactivating).
+    children-first when deactivating). Deactivation, and the same step of a destruction, walks
+    the subtree: an object's `activeInHierarchy` turns false when the walk reaches it, then its
+    children are walked, then its own `OnDisable`s run. While one object's `OnDisable` runs, its
+    later siblings still read active, and deactivating one of them disables it there and then
+    (UnityProbe's deactorder; the details panel's storage rows, issue #23).
   - `Destroy` is deferred to the end of the frame; `DestroyImmediate` is synchronous,
     children first, with `OnDisable` then `OnDestroy`. The GameObject passed to either turns
     inactive itself (`activeSelf` false) before its subtree's callbacks, its descendants keeping

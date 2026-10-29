@@ -1,0 +1,24 @@
+# (DLC) Mutant Plants Rebalanced (3025506650), class P.
+#
+# What it does: a prefix on PlantMutation.AttributeModifier rewrites the amounts the game's
+# mutations are built with, so each is about as desirable: most need no radiation; Leafy
+# (moderatelyLoose) loses its yield penalty, Wild/Squished (moderatelyTight, extremelyTight)
+# need 50 and 150 rads for +1 and +3 yield, Sunny Speed needs 1800 lux and grows 75 % faster,
+# Slow Burn uses no fertilizer at double growth time, Blooms gives 120 decor; a prefix on
+# AddDiseaseToHarvest gives Rotten Heaps a million germs.
+# How a player reaches it: mutant seeds (Spaced Out with radiation).
+# What changes: the mutations' numbers.
+#
+# The mutations in Db.PlantMutations carry the mod's numbers.
+from: early-base
+mods: [3025506650]
+steps:
+  - expect_state:
+      "count:Db.Get().PlantMutations.Get(\"blooms\").SelfModifiers[*] if .AttributeId == Decor and .Value == 120.0": 1
+      "count:Db.Get().PlantMutations.Get(\"sunnySpeed\").SelfModifiers[*] if .AttributeId == MinLightLux and .Value == 1800.0": 1
+      "count:Db.Get().PlantMutations.Get(\"slowBurn\").SelfModifiers[*] if .AttributeId == FertilizerUsageMod and .Value == -1.0": 1
+      "count:Db.Get().PlantMutations.Get(\"extremelyTight\").SelfModifiers[*] if .AttributeId == MinRadiationThreshold and .Value == 150.0": 1
+      "count:Db.Get().PlantMutations.Get(\"heavyFruit\").SelfModifiers[*] if .AttributeId == MinRadiationThreshold and .Value != 0.0": 0
+  - expect_state:
+      "Db.Get().PlantMutations.Get(\"sunnySpeed\").SelfModifiers.Count": "== original"
+      "Db.Get().PlantMutations.Get(\"moderatelyLoose\").SelfModifiers.Count": "== original"

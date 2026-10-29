@@ -1,0 +1,32 @@
+# Mafic Pipes (2514097176), class P.
+#
+# What it does: a postfix on ElementLoader.FinaliseElementsTable adds the Plumbable tag to
+# mafic rock, so pipes (Liquid Pipe, Gas Pipe and the other plumbable buildings) can be built
+# of it.
+# How a player reaches it: the build menu's pipes; their material choice.
+# What changes: pipes of mafic rock.
+#
+# Plumbing is researched in setup. Mafic rock is plumbable; a Liquid Pipe is built of it in the corridor west of the printing
+# pod. The Plumbing menu's Liquid Pipe card is shot.
+from: early-base
+mods: [2514097176]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.TryGetTechForTechItem(\"LiquidConduit\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidConduit\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [MaficRock], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "ElementLoader.FindElementByName(\"MaficRock\").oreTags": {contains: Plumbable}
+      "ElementLoader.FindElementByName(\"Granite\").oreTags": {contains: Plumbable}
+  - run: {seconds: 3}
+  - expect: {buildings: {LiquidConduit: ">= 1"}}
+  - expect_state:
+      "count:all:Building::[*] if .Def.PrefabID == LiquidConduit and .GetComponent<PrimaryElement>.ElementID == MaficRock": 1
+  - driver: {camera.set: {cell: [113, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Plumbing"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/LiquidConduit Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/LiquidConduit Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen/MaterialSelectionPanel", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}

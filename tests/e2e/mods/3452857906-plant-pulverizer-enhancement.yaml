@@ -1,0 +1,22 @@
+# 植物粉碎机改进(修复) Plant Pulverizer Enhancement (3452857906), classes P, O.
+#
+# What it does: the Plant Pulverizer (MilkPress) gets a liquid input pipe (at 1,1) that fills
+# its ingredient storage with water; with its PLib option "Add recipe" on
+# (enhancement.json), every seed but Sleet Wheat and Nosh Bean gets a recipe there: 10 seeds
+# and 15 kg of water make 20 kg of Brackene (milk).
+# How a player reaches it: the Mods screen's options; the Plant Pulverizer's recipes and its
+# pipe port.
+# What changes: water by pipe, and milk from almost any seed.
+#
+# Options here: Add recipe on. The pulverizer's def has a liquid input; it has the mod's
+# recipes (one per seed, as many as in the original), among them one for Mealwood seeds.
+from: early-base
+mods: [3452857906]
+options:
+  CalYu.PlantPulverizerEnhancement: {$file: enhancement.json, AddRecipe: true}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"MilkPress\").InputConduitType": "== 'Liquid'"
+      "Assets.GetPrefab(\"MilkPress\").GetComponent<ConduitConsumer>.capacityKG": 100
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0].Name == MilkPress": [">= 8", "== original"]
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0].Name == MilkPress and .ingredients[0].material.Name == BasicSingleHarvestPlantSeed": 1

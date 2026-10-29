@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2790414858-early-game-nosh-beans.yaml",
+ "mods": [
+  "2790414858"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Nosh Sprout's temperature range is the mod's, as in the original",
+ "updated": "2026-10-29",
+ "commit": "20364bdc",
+ "mod_dlls": {
+  "2790414858": {
+   "early_game_nosh.dll": "e125140f1519979fa66c2c43d50eda6fc105de1a75bf3b6823897ba32a0fd779"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-130335-d1da02eb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T13:21:09",
+    "lane": 4,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-142627-ee879ee1",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T14:34:53",
+    "lane": 4,
+    "reference_run": "20261029-130335-d1da02eb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-142627-ee879ee1",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T14:35:44",
+    "lane": 4,
+    "reference_run": "20261029-130335-d1da02eb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,18 @@
+# Early Game Nosh Beans (2790414858), class P.
+#
+# What it does: a postfix on BeanPlantConfig.CreatePrefab reconfigures the Nosh Sprout's
+# temperature range: lethal below 248.15 K and above 343.15 K, its warning bounds 198.15 and
+# 293.15 K (the arguments of Configure in the order warning low, lethal low, warning high,
+# lethal high; the game keeps it cold, below about 5 °C).
+# How a player reaches it: plant Nosh Beans.
+# What changes: Nosh Sprouts grow at room temperature.
+#
+# The Nosh Sprout's prefab has the mod's range.
+from: early-base
+mods: [2790414858]
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"BeanPlant\").GetComponent<TemperatureVulnerable>.TemperatureLethalLow": 248.15
+      "Assets.GetPrefab(\"BeanPlant\").GetComponent<TemperatureVulnerable>.TemperatureLethalHigh": 343.15
+      "Assets.GetPrefab(\"BeanPlant\").GetComponent<TemperatureVulnerable>.TemperatureWarningLow": "== original"
+      "Assets.GetPrefab(\"BeanPlant\").GetComponent<TemperatureVulnerable>.TemperatureWarningHigh": "== original"

@@ -1,0 +1,19 @@
+# Reduce time cost of tinker Microchip (3128126787), class P.
+#
+# What it does: a postfix on Tinkerable.MakePowerTinkerable sets the work time of installing a
+# Microchip in a generator to 20 s (the game's 30 s).
+# How a player reaches it: a Duplicant with the Electrical Engineering skill tinkers a generator
+# from a Power Control Station's Microchips.
+# What changes: the tinker errand on each power generator is shorter.
+#
+# The Coal Generator's and Hydrogen Generator's Tinkerable work times read 20 s, the same in
+# the original, and the colony runs.
+from: early-base
+mods: [3128126787]
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"Generator\").BuildingComplete.GetComponent<Tinkerable>.workTime": 20
+      "Assets.GetBuildingDef(\"HydrogenGenerator\").BuildingComplete.GetComponent<Tinkerable>.workTime": 20
+      "Assets.GetBuildingDef(\"Generator\").BuildingComplete.GetComponent<Tinkerable>.tinkerMaterialTag.Name": "== original"
+  - run: {seconds: 30}
+  - expect: {duplicants: 3, buildings: {Outhouse: 1, ResearchCenter: 1, ManualGenerator: 1, Bed: 1}}

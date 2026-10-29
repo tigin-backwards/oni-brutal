@@ -1,0 +1,67 @@
+{
+ "spec": "mods/2963065993-magical-girl-go.yaml",
+ "mods": [
+  "2963065993"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "one built is selected: a recreation decoration; title dump and world shot match",
+ "updated": "2026-10-29",
+ "commit": "8103f113",
+ "mod_dlls": {
+  "2963065993": {
+   "─º╖¿╔┘┼«ú¼╞⌠╢».dll": "6216946533202b06ec4186cbedb9fff64720b25e5fb793e594f83aa4542aa9c8"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-073906-4ac6cb82",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T08:17:44",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-092603-30335d2b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T09:26:03",
+    "lane": 7,
+    "reference_run": "20261029-073906-4ac6cb82",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "figure": 0.037965
+    }
+   },
+   {
+    "run": "20261029-092603-30335d2b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T09:26:59",
+    "lane": 7,
+    "reference_run": "20261029-073906-4ac6cb82",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "figure": 0.0205
+    }
+   }
+  ]
+ }
+}

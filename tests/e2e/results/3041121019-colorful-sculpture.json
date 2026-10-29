@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3041121019-colorful-sculpture.yaml",
+ "mods": [
+  "3041121019"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Marble Sculpture gets the mod's tinting component; title dump matches",
+ "updated": "2026-10-29",
+ "commit": "8103f113",
+ "mod_dlls": {
+  "3041121019": {
+   "╔┴╦╕╡─╡±╦▄ Sparkling Sculpture.dll": "857c65583bfca70e8c3c5f6f3c56d185e55925e4263474d062abc09dbc36630f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-073906-4ac6cb82",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T08:28:11",
+    "lane": 8,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-093423-f7362be8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T09:34:23",
+    "lane": 7,
+    "reference_run": "20261029-073906-4ac6cb82",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261029-093423-f7362be8",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T09:35:14",
+    "lane": 7,
+    "reference_run": "20261029-073906-4ac6cb82",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

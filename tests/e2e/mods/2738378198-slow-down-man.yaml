@@ -1,0 +1,22 @@
+# Slow Down, Man (2738378198), class P.
+#
+# What it does: cycles last 2.5 times longer (1500 s): prefixes replacing GameClock.AddTime
+# and OnDeserialized, and postfixes on GetTime, GetCurrentCycleAsPercentage and
+# GetTimeSinceStartOfReport, count cycles of that length; per-cycle rates are scaled to match
+# (time-sliced texts, reports, effects and attribute converters, battery leakage, ages, the
+# Printing Pod's wait, decor averages).
+# How a player reaches it: playing; the clock.
+# What changes: longer days and nights, with per-cycle costs unchanged.
+#
+# Played 150 s, the clock moves a tenth of a cycle (a quarter in the game alone), and the
+# battery's leak is divided by 2.5.
+from: early-base
+mods: [2738378198]
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"Battery\").GetComponent<Battery>.joulesLostPerSecond": "== original"
+      "GameClock.Instance.GetCycle()": "== original"
+      "GameClock.Instance.GetCurrentCycleAsPercentage()": [{save_as: before}, "< 0.85"]
+  - run: {seconds: 150}
+  - expect_state:
+      "GameClock.Instance.GetCurrentCycleAsPercentage()": ["> before + 0.08", "< before + 0.12"]

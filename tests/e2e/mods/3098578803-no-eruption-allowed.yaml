@@ -1,0 +1,23 @@
+# 沉默喷泉No eruption allowed -K25 (3098578803), class P.
+#
+# What it does: postfixes on GeyserInstanceConfiguration.GetIterationPercent and
+# GetYearPercent return 0, so every geyser's erupting share of its cycle and its active share
+# of its year read as nothing: geysers stay dormant and never erupt.
+# How a player reaches it: any geyser.
+# What changes: no geyser output.
+#
+# setup places a steam geyser beside the printing pod (the same seed in both players): its
+# configuration's shares are 0, and, played a minute, it is not erupting, as in the original.
+from: early-base
+mods: [3098578803]
+setup:
+  - driver: {seed: 12345}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131124, 0, 0, \"GeyserGeneric_steam\", \"BuildingBack\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "all:Geyser::[0].configuration.GetIterationPercent()": 0
+      "all:Geyser::[0].configuration.GetYearPercent()": 0
+  - run: {seconds: 60}
+  - expect_state:
+      "all:Geyser::[0].configuration.GetIterationPercent()": 0
+      "all:Geyser::[0].smi.GetCurrentState().name": ["!= 'root.erupt'", "== original"]

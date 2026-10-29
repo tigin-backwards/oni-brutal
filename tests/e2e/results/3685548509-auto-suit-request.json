@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3685548509-auto-suit-request.yaml",
+ "mods": [
+  "3685548509"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a new Atmo Suit dock is configured and waiting for a suit by itself; title dump matches",
+ "updated": "2026-10-29",
+ "commit": "8103f113",
+ "mod_dlls": {
+  "3685548509": {
+   "AutoSuitRequest.dll": "a05d0096bd2c7c3d149827208d4c0b63c2d82f31e19063014364b2c8557cad87"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-070726-6bd2020b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T07:16:54",
+    "lane": 8,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-085150-004d565c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T08:51:50",
+    "lane": 7,
+    "reference_run": "20261029-070726-6bd2020b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261029-085150-004d565c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T09:00:47",
+    "lane": 7,
+    "reference_run": "20261029-070726-6bd2020b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

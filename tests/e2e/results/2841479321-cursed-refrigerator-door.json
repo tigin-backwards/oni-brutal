@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2841479321-cursed-refrigerator-door.yaml",
+ "mods": [
+  "2841479321"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Refrigerator cools (-10 kDTU/s, 180 W) and works down to -200 °C; title dump matches",
+ "updated": "2026-10-29",
+ "commit": "8103f113",
+ "mod_dlls": {
+  "2841479321": {
+   "▒╗╫τ╓Σ╡─▒∙╧Σ├┼The refrigerator door is broken.dll": "8aa70e89cb7edaafca5cbc9f9ad72bf4c1d605b01deb874996af7adcc593f920"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-073906-4ac6cb82",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T08:06:00",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-091907-a9f9c763",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T09:19:07",
+    "lane": 7,
+    "reference_run": "20261029-073906-4ac6cb82",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261029-091907-a9f9c763",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T09:20:04",
+    "lane": 7,
+    "reference_run": "20261029-073906-4ac6cb82",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

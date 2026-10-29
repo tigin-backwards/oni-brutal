@@ -1,0 +1,26 @@
+# Better Rad Pill (2972282656), class P (PLib options).
+#
+# What it does: a postfix on MedicinalPillWorkable.CanBeTakenBy keeps a Duplicant from taking
+# a Rad Pill (BasicRadPill) until their radiation balance reaches the threshold option (33
+# rads by default), and with "Faster animation" a postfix on its OnSpawn makes taking one a
+# 1 s errand instead of 10 s.
+# How a player reaches it: Rad Pills in the colony.
+# What changes: pills wait for need, and go down faster.
+#
+# The options are set explicitly (100 rads, faster on). A Rad Pill dropped by setup in the
+# corridor west of the printing pod takes 1 s to take; played a while, no Duplicant (none
+# irradiated) has taken it.
+from: early-base
+mods: [2972282656]
+options:
+  "2972282656": {Rads: 100.0, FasterAnim: true}
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(0, 112, 207, \"BasicRadPill\", \"Ore\")", method: SetActive, args: [true]}}
+steps:
+  - run: {seconds: 2}
+  - expect_state:
+      "all:MedicinalPillWorkable::[0].workTime": 1
+      "type:RadPillThreshold.Patches+BetterRadPills::Settings.Rads": 100
+  - run: {seconds: 60}
+  - expect_state:
+      "count:all:MedicinalPillWorkable::[*] if .pill.info.id == BasicRadPill": 1

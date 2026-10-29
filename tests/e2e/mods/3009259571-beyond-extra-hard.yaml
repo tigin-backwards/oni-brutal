@@ -1,0 +1,22 @@
+# Beyond Extra Hard (3009259571), class P (game settings).
+#
+# What it does: five custom game settings (BEH.Power, BEH.Oxygen, BEH.Health, BEH.Tech,
+# BEH.Mass), added to CustomGameSettings in its OnPrefabInit and applied when the game spawns
+# and for each Duplicant: weaker generators (or some hidden from the build menu), less oxygen
+# production, lower Duplicant health, costlier research, less mass from digging and
+# deconstruction (prefixes on WorldDamage.OnDigComplete and Deconstructable.SpawnItem).
+# How a player reaches it: the new game's custom settings; then playing.
+# What changes: a harder colony, by the settings chosen.
+#
+# A colony from before the mod: its settings include the mod's five at their current levels,
+# as in the original.
+from: early-base
+mods: [3009259571]
+steps:
+  - expect_state:
+      "count:CustomGameSettings.Instance.QualitySettings.Keys[*] if .StartsWith(\"BEH.\") == true": 5
+      "CustomGameSettings.Instance.GetCurrentQualitySetting(\"BEH.Power\").id": "== original"
+      "CustomGameSettings.Instance.GetCurrentQualitySetting(\"BEH.Mass\").id": "== original"
+      "CustomGameSettings.Instance.GetCurrentQualitySetting(\"BEH.Tech\").id": "== original"
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

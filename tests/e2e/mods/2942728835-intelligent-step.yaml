@@ -1,0 +1,28 @@
+# 智能台阶Intelligent step (2942728835), class B.
+#
+# What it does: a 1x1 Intelligent Step (INTELLIGENTSTEP20230305) in the Base menu, buildable
+# anywhere: a Duplicant sensor of range 1 (green while a Duplicant is on its tile) that adds
+# a fake floor in the cell below it (FakeFloorAdder), so Duplicants walk on air there.
+# How a player reaches it: the build menu (Base).
+# What changes: a step that holds Duplicants up, and an automation signal.
+#
+# One built by setup in the corridor west of the printing pod, a cell above the floor, is
+# selected (its title dumped): it is the mod's sensor with its fake floor.
+from: early-base
+mods: [2942728835]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"INTELLIGENTSTEP20230305\")", method: Build, args: [{"$": "Grid.XYToCell(112, 208)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"INTELLIGENTSTEP20230305\").BuildLocationRule": Anywhere
+  - run: {seconds: 2}
+  - expect: {buildings: {INTELLIGENTSTEP20230305: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 208], select: INTELLIGENTSTEP20230305}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Intelligent Step"}
+  - expect_state:
+      "selected:GetComponent<LogicDuplicantSensor>.pickupRange": 1
+      "selected:GetComponent<FakeFloorAdder>.floorOffsets.Length": 1

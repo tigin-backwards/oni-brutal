@@ -1,0 +1,28 @@
+# 魔法少女，启动 (Magical Girl, GO! GO! GO!) (2963065993), class B.
+#
+# What it does: a 1x1 decoration (MM20230416001), "Magical Girl, GO! GO! GO!", in the Furniture
+# menu, buildable anywhere: +6 decor in a radius of 6, a recreation building for the Rec Room,
+# with an automation input that turns it on and off (its animation).
+# How a player reaches it: the build menu (Furniture).
+# What changes: a decorative figure.
+#
+# One built by setup in the corridor west of the printing pod is selected (its title dumped),
+# and a paused shot of it matches the original's.
+from: early-base
+mods: [2963065993]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"MM20230416001\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"MM20230416001\").BaseDecor": 6
+      "Assets.GetBuildingDef(\"MM20230416001\").BuildLocationRule": Anywhere
+  - run: {seconds: 2}
+  - expect: {buildings: {MM20230416001: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: MM20230416001}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}
+  - expect_state:
+      "selected:GetComponent<LogicOperationalController>": exists
+      "selected:GetComponent<KPrefabID>.HasTag(\"RecBuilding\")": true
+  - world_shot: {name: figure, ortho: 2, at: [112, 208], hide_ui: true, mask: [[0, 400, 1280, 320]]}

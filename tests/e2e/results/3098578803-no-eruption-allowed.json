@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3098578803-no-eruption-allowed.yaml",
+ "mods": [
+  "3098578803"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a placed steam geyser's eruption shares read 0 and it does not erupt in a minute",
+ "updated": "2026-10-29",
+ "commit": "8103f113",
+ "mod_dlls": {
+  "3098578803": {
+   "K-25-│┴─¼┼τ╚¬.dll": "176dabf69c6b478ece120ff8f4bbd315b51f612a80a4a2d3c9f9b546bce30794"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-073906-4ac6cb82",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T08:30:40",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-093755-99546e4d",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T09:37:55",
+    "lane": 7,
+    "reference_run": "20261029-073906-4ac6cb82",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-093755-99546e4d",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T09:40:03",
+    "lane": 7,
+    "reference_run": "20261029-073906-4ac6cb82",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

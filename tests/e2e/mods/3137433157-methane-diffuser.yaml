@@ -1,0 +1,27 @@
+# Methane diffuser（甲烷扩散器） (3137433157), class B.
+#
+# What it does: a 2x2 Methane diffuser (Electrolyzer9) in the Oxygen menu, built on the
+# Electrolyzer's art and needing no power: it takes sour gas by gas pipe (1 kg/s) and releases
+# 0.999 kg/s of methane at 300 K above itself; an automation input switches it.
+# How a player reaches it: the build menu (Oxygen).
+# What changes: sour gas turned back into methane.
+#
+# One built by setup in the corridor west of the printing pod is selected (its title dumped):
+# it has the mod's converter and gas input.
+from: early-base
+mods: [3137433157]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Electrolyzer9\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"Electrolyzer9\").RequiresPowerInput": false
+  - run: {seconds: 2}
+  - expect: {buildings: {Electrolyzer9: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: Electrolyzer9}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}
+  - expect_state:
+      "selected:GetComponent<ElementConverter>.outputElements[0].elementHash": Methane
+      "selected:GetComponent<ElementConverter>.outputElements[0].massGenerationRate": 0.999
+      "selected:GetComponent<ConduitConsumer>.consumptionRate": 1

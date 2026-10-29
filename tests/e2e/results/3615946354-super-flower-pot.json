@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3615946354-super-flower-pot.yaml",
+ "mods": [
+  "3615946354"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "one built is selected: its plot takes no fertilizer or irrigation; title dump matches",
+ "updated": "2026-10-29",
+ "commit": "8103f113",
+ "mod_dlls": {
+  "3615946354": {
+   "SuperFlowerPot.dll": "d7da52439c850f57415176d00c5866dba98eecb39df42a0124b3d394b2a6c1b6"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-070726-6bd2020b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T07:13:18",
+    "lane": 8,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-084648-56aba672",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T08:46:48",
+    "lane": 7,
+    "reference_run": "20261029-070726-6bd2020b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261029-084648-56aba672",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T08:47:40",
+    "lane": 7,
+    "reference_run": "20261029-070726-6bd2020b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

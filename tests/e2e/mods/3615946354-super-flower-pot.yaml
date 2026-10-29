@@ -1,0 +1,29 @@
+# Super Flower Pot (3615946354), class B.
+#
+# What it does: a 1x1 Super Flower Pot (SuperFlowerPot) in the Furniture menu, researched with
+# Basic Farming: a planter that takes crop, decor and water seeds and never asks for
+# fertilizer or irrigation (its PlantablePlot's fertilization flags are off), so plants grow
+# in it wild.
+# How a player reaches it: the build menu (Furniture), after the research.
+# What changes: a pot whose plants need no care.
+#
+# The research lists it; one built by setup on the floor of the corridor west of the printing
+# pod is selected (its title dumped): its plot takes no fertilizer.
+from: early-base
+mods: [3615946354]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SuperFlowerPot\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"FarmingTech\").unlockedItemIDs": {contains: SuperFlowerPot}
+      "Assets.GetBuildingDef(\"SuperFlowerPot\").AnimFiles[0].name": flowervase_kanim
+  - run: {seconds: 2}
+  - expect: {buildings: {SuperFlowerPot: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: SuperFlowerPot}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}
+  - expect_state:
+      "selected:GetComponent<PlantablePlot>.accepts_fertilizer": false
+      "selected:GetComponent<PlantablePlot>.has_liquid_pipe_input": false
+      "selected:GetComponent<PlantablePlot>.possibleDepositObjectTags.Count": 4

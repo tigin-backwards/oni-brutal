@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3009259571-beyond-extra-hard.yaml",
+ "mods": [
+  "3009259571"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "its five custom game settings are listed at the original's levels",
+ "updated": "2026-10-29",
+ "commit": "8103f113",
+ "mod_dlls": {
+  "3009259571": {
+   "BeyondExtraHardMerged.dll": "37ec47c921eb0c00c9ef07b5f1ece25b9a593d99ea4b583a101340dc7ec648e1"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-073906-4ac6cb82",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T08:27:07",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-093222-753f6443",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T09:32:22",
+    "lane": 7,
+    "reference_run": "20261029-073906-4ac6cb82",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-093222-753f6443",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T09:33:21",
+    "lane": 7,
+    "reference_run": "20261029-073906-4ac6cb82",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

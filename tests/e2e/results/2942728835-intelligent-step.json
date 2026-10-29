@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2942728835-intelligent-step.yaml",
+ "mods": [
+  "2942728835"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "one built in the air is selected: a Duplicant sensor with a fake floor; title dump matches",
+ "updated": "2026-10-29",
+ "commit": "8103f113",
+ "mod_dlls": {
+  "2942728835": {
+   "╓╟─▄╠¿╜╫Intelligent step.dll": "27710a807c9ad6c5cfc8c9160ef305642ae3a43fb8b818900e817113de1261db"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-070726-6bd2020b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T07:13:21",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-084833-c3ed6928",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T08:48:33",
+    "lane": 7,
+    "reference_run": "20261029-070726-6bd2020b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261029-084833-c3ed6928",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T08:49:25",
+    "lane": 7,
+    "reference_run": "20261029-070726-6bd2020b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

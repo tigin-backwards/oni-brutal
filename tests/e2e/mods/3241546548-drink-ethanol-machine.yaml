@@ -1,0 +1,33 @@
+# 醉酒机 (Drink Ethanol Machine) (3241546548), class B.
+#
+# What it does: a 2x2 recreation building (DrinkEthanolMachine) in the Furniture menu,
+# researched with Food Repurposing: 480 W, a liquid input for water and a delivery of up to
+# 60 kg of ethanol; a Duplicant's stress-heal errand there (30 s) takes 3 kg of ethanol and
+# 2 kg of water and gives a "drunk" effect (stress relief, lower skills). It counts as a
+# recreation building for the Rec Room.
+# How a player reaches it: the build menu (Furniture), after the research.
+# What changes: a new way to relieve stress.
+#
+# The research lists it; one built by setup in the dug-out corridor west of the printing pod
+# is selected (its title dumped): it has the mod's machine, its workable and its ethanol
+# delivery.
+from: early-base
+mods: [3241546548]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"DrinkEthanolMachine\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"FoodRepurposing\").unlockedItemIDs": {contains: DrinkEthanolMachine}
+      "Assets.GetBuildingDef(\"DrinkEthanolMachine\").EnergyConsumptionWhenActive": 480
+  - run: {seconds: 2}
+  - expect: {buildings: {DrinkEthanolMachine: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: DrinkEthanolMachine}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}
+  - expect_state:
+      "selected:GetComponent<DrinkEthanolMachine.DrinkEthanolMachine>.waterMassPerUse": 2
+      "selected:GetComponent<DrinkEthanolMachine.DrinkEthanolMachine>.ingredientMassesPerUse[0]": 3
+      "selected:GetComponent<DrinkEthanolMachine.DrinkEthanolMachineWorkable>": exists
+      "selected:GetComponent<ManualDeliveryKG>.capacity": 60
+      "selected:GetComponent<ManualDeliveryKG>.RequestedItemTag.Name": Ethanol

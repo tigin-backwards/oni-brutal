@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2964859765-dream-bed.yaml",
+ "mods": [
+  "2964859765"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the cot uses the mod's animation; a paused world shot of it matches",
+ "updated": "2026-10-29",
+ "commit": "8103f113",
+ "mod_dlls": {
+  "2964859765": {
+   "├╬┐╔┤▓ Dream Bed.dll": "14411aae067c394801dbf56872f0ddb7fc1565ce6358961dc094ccee56f6bf3b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-065930-d09166fc",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T06:59:31",
+    "lane": 8,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-083837-94bebcbe",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T08:38:37",
+    "lane": 7,
+    "reference_run": "20261029-065930-d09166fc",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "cot": 0.03235
+    }
+   },
+   {
+    "run": "20261029-083837-94bebcbe",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T08:42:24",
+    "lane": 7,
+    "reference_run": "20261029-065930-d09166fc",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "cot": 0.029212
+    }
+   }
+  ]
+ }
+}

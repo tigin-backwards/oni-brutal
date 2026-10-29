@@ -1,0 +1,30 @@
+# Isoresin Refiner (3195409590), class B.
+#
+# What it does: a 3x3 Isoresin Refiner (IsoresinRefiner) in the Refining menu after the Oil
+# Refinery, researched with Catalytics: 100 W, a liquid input and output and an automation
+# port; it consumes 1 kg/s of liquid resin and makes 0.25 kg/s of isoresin (dropped as
+# debris, through a Polymerizer) and 0.75 kg/s of steam (piped out).
+# How a player reaches it: the build menu (Refining), after the research.
+# What changes: a resin to isoresin conversion.
+#
+# The research lists it; one built by setup in the dug-out corridor west of the printing pod
+# is selected (its title dumped): it has the mod's converter.
+from: early-base
+mods: [3195409590]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"IsoresinRefiner\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"Catalytics\").unlockedItemIDs": {contains: IsoresinRefiner}
+      "Assets.GetBuildingDef(\"IsoresinRefiner\").EnergyConsumptionWhenActive": 100
+  - run: {seconds: 2}
+  - expect: {buildings: {IsoresinRefiner: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 208], select: IsoresinRefiner}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}
+  - expect_state:
+      "selected:GetComponent<ElementConverter>.outputElements[0].massGenerationRate": 0.25
+      "selected:GetComponent<ElementConverter>.outputElements[1].massGenerationRate": 0.75
+      "selected:GetComponent<ElementConverter>.consumedElements[0].MassConsumptionRate": 1
+      "selected:GetComponent<Polymerizer>.emitMass": 5

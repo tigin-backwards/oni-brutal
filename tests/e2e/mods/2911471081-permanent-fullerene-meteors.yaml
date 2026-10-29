@@ -1,0 +1,21 @@
+# Permanent Fullerene Meteors (2911471081), class P.
+#
+# What it does: once the Temporal Tear is open, a prefix/postfix pair on
+# GameplaySeasonManager.Instance.Initialize keeps the fullerene meteor shower season active on
+# the Tundra moonlet across reloads (re-instantiating it when the save lost it), a postfix on
+# StartNewSeason tracks it, and a postfix on SpaceScannerNetworkManager.IsDetectingAnyMeteorShower
+# lets space scanners warn of its showers.
+# How a player reaches it: opening the Temporal Tear in a cluster with the Tundra moonlet.
+# What changes: the fullerene showers keep coming.
+#
+# early-base has no open Temporal Tear: the mod's patches leave every world's seasons alone,
+# its tracked season stays unset, and the colony plays on with the original's seasons.
+from: early-base
+mods: [2911471081]
+steps:
+  - expect_state:
+      "ClusterManager.Instance.GetComponent<ClusterPOIManager>.IsTemporalTearOpen()": false
+      "type:PermanentFullereneMeteors.GlobalPatchVariables::mTearMeteorSeason": missing
+  - run: {seconds: 30}
+  - expect_state:
+      "type:PermanentFullereneMeteors.GlobalPatchVariables::mTearMeteorSeason": missing

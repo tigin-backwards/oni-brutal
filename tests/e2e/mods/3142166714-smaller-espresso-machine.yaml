@@ -1,0 +1,28 @@
+# 更小的咖啡机 (Smaller Espresso Machine) (3142166714), class V (a building's size and art).
+#
+# What it does: a postfix on EspressoMachineConfig.CreateBuildingDef replaces the Espresso
+# Machine's definition with a 2x2 one (the game's is 3x3) using the mod's se_kanim, its
+# liquid input and power input both at (1, 1); power and heat stay the game's.
+# How a player reaches it: building an Espresso Machine (Furniture menu).
+# What changes: a smaller espresso machine.
+#
+# One built by setup in the corridor west of the printing pod is selected: it is 2x2 with the
+# mod's animation, and a paused shot of it matches the original's.
+from: early-base
+mods: [3142166714]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"EspressoMachine\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"EspressoMachine\").WidthInCells": 2
+      "Assets.GetBuildingDef(\"EspressoMachine\").HeightInCells": 2
+      "Assets.GetBuildingDef(\"EspressoMachine\").AnimFiles[0].name": se_kanim
+  - run: {seconds: 2}
+  - expect: {buildings: {EspressoMachine: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: EspressoMachine}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}
+  - expect_state:
+      "selected:GetComponent<KBatchedAnimController>.AnimFiles[0].name": se_kanim
+  - world_shot: {name: machine, ortho: 2, at: [113, 208], hide_ui: true, mask: [[0, 360, 1280, 360]]}

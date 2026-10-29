@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3142166714-smaller-espresso-machine.yaml",
+ "mods": [
+  "3142166714"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Espresso Machine is 2x2 with the mod's animation; a paused world shot of one matches",
+ "updated": "2026-10-29",
+ "commit": "8103f113",
+ "mod_dlls": {
+  "3142166714": {
+   "SmallerEspressoMachine.dll": "7012ce26812c4ebb13cc509b22fb539a6a8f12913090c7cfc8aa81a1cec6f4c3"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-070726-6bd2020b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T07:20:39",
+    "lane": 8,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-090305-b8cb0a70",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T09:03:05",
+    "lane": 7,
+    "reference_run": "20261029-070726-6bd2020b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "machine": 0.018845
+    }
+   },
+   {
+    "run": "20261029-090305-b8cb0a70",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T09:04:01",
+    "lane": 7,
+    "reference_run": "20261029-070726-6bd2020b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "machine": 0.028694
+    }
+   }
+  ]
+ }
+}

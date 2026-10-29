@@ -1,0 +1,21 @@
+# 梦可床 Dream Bed (2964859765), class V (a building's art).
+#
+# What it does: a postfix on BedConfig.CreateBuildingDef gives the Cot (Bed) the mod's
+# UI20230420001_kanim instead of bed_kanim. Nothing else changes.
+# How a player reaches it: building a Cot (Furniture menu).
+# What changes: how the cot looks.
+#
+# early-base's cot, east of the printing pod, is selected: it uses the mod's animation, and a
+# paused shot of it matches the original's.
+from: early-base
+mods: [2964859765]
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"Bed\").AnimFiles[0].name": UI20230420001_kanim
+  - driver: {camera.set: {cell: [133, 208], ortho: 8}}
+  - click_world: {cell: [132, 207], select: Bed}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<KBatchedAnimController>.AnimFiles[0].name": UI20230420001_kanim
+  # Its lower half is masked: Duplicants walk past it.
+  - world_shot: {name: cot, ortho: 2, at: [133, 208], hide_ui: true, mask: [[0, 360, 1280, 360]]}

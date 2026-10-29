@@ -1,0 +1,21 @@
+# yo超级小人 (yo Super Duplicant) (3748520836), class P (PLib options).
+#
+# What it does: at load it sets the attribute bonus of a Duplicant's first, second and third
+# interest (DUPLICANTSTATS.APTITUDE_ATTRIBUTE_BONUSES, by default 7, 3, 1), the highest level
+# an attribute can gain (50), the cycles to reach it (200) and the experience multiplier (5)
+# from its PLib options (restart required).
+# How a player reaches it: the mod's options on the Mods screen; new Duplicants' interests.
+# What changes: stronger interests and faster attribute levelling.
+#
+# The options are set explicitly (9, 4, 2; 60 levels, 100 cycles, 3x): the tuning values carry
+# them once the colony has loaded.
+from: early-base
+mods: [3748520836]
+options:
+  "3748520836": {AptitudeBonus1: 9, AptitudeBonus2: 4, AptitudeBonus3: 2, MaxGainedAttributeLevel: 60, TargetMaxLevelCycle: 100, FullExperience: 3.0}
+steps:
+  - expect_state:
+      "TUNING.DUPLICANTSTATS.APTITUDE_ATTRIBUTE_BONUSES": {equals: [9, 4, 2]}
+      "TUNING.DUPLICANTSTATS.ATTRIBUTE_LEVELING.MAX_GAINED_ATTRIBUTE_LEVEL": 60
+      "TUNING.DUPLICANTSTATS.ATTRIBUTE_LEVELING.TARGET_MAX_LEVEL_CYCLE": 100
+      "TUNING.DUPLICANTSTATS.ATTRIBUTE_LEVELING.FULL_EXPERIENCE": 3

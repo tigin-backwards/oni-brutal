@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3241546548-drink-ethanol-machine.yaml",
+ "mods": [
+  "3241546548"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "one built is selected: the mod's machine, workable and ethanol delivery; title dump matches",
+ "updated": "2026-10-29",
+ "commit": "8103f113",
+ "mod_dlls": {
+  "3241546548": {
+   "DrinkEthanolMachine.dll": "5372d836d7b62fa6589e80dd926ff2bd6e7d26c393966acbd8f41fc4ffcb573c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-070726-6bd2020b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T07:07:27",
+    "lane": 8,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-084500-d2070a75",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T08:45:00",
+    "lane": 7,
+    "reference_run": "20261029-070726-6bd2020b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261029-084500-d2070a75",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T08:45:55",
+    "lane": 7,
+    "reference_run": "20261029-070726-6bd2020b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

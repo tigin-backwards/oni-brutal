@@ -1,0 +1,28 @@
+# OBJN RECIPE THAI FOOD (2850593098), class B (food items and recipes).
+#
+# What it does: nine Thai dishes as new food items with their recipes (an
+# EntityConfigManager.LoadGeneratedEntities patch registers them): Thai curry paste at the
+# Microbe Musher; som tum, pa ra a nua, grilled mushroom with salt, Chiang Mai and Esan
+# sausages, curried meat, roasted sweet potatoes and tom yum shrimp at the Electric Grill.
+# How a player reaches it: the fabricators' recipe lists.
+# What changes: more foods to cook.
+#
+# The dishes exist with their Grill recipes; an Electric Grill built by setup west of the
+# printing pod is selected: its recipe list (dumped and shot) holds them.
+from: early-base
+mods: [2850593098]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"CookingStation\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"Somtum\")": exists
+      "Assets.GetPrefab(\"tom_yum_shrimp\")": exists
+      "Assets.GetPrefab(\"thai_curry_paste\")": exists
+      "count:ComplexRecipeManager.Get().recipes[*] if .results[0].material.Name == Somtum and .fabricators[0].Name == CookingStation": ">= 1"
+      "count:ComplexRecipeManager.Get().recipes[*] if .results[0].material.Name == thai_curry_paste and .fabricators[0].Name == MicrobeMusher": ">= 1"
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: CookingStation}
+  - ui_wait: {path: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView", cond: stable}
+  - ui_dump: {name: recipes, root: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView"}
+  - shot: {name: recipes, crop: "**/DetailsScreen", threshold: 0.04}

@@ -1,0 +1,26 @@
+# Gantry Doesn't Need Power (2571093570), class P.
+#
+# What it does: a postfix on GantryConfig.CreateBuildingDef makes the Gantry need no power
+# (no power input, 0 W).
+# How a player reaches it: building a Gantry (Rocketry menu).
+# What changes: a gantry that extends without a power connection.
+#
+# The definition needs no power; a Gantry built by setup west of the printing pod is selected
+# (its title dumped): it is operational without a wire, as in the original.
+from: early-base
+mods: [2571093570]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Gantry\")", method: Build, args: [{"$": "Grid.XYToCell(113, 207)"}, Neutral, null, [Steel], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"Gantry\").RequiresPowerInput": false
+      "Assets.GetBuildingDef(\"Gantry\").EnergyConsumptionWhenActive": 0
+  - run: {seconds: 2}
+  - expect: {buildings: {Gantry: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: Gantry}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}
+  - expect_state:
+      "selected:GetComponent<EnergyConsumer>": missing
+      "selected:GetComponent<Operational>.IsOperational": "== original"

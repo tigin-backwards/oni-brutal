@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3497514745-skill-tree-modifier.yaml",
+ "mods": [
+  "3497514745"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "attribute perks read ten times the game's (+20 digging) and the Skills screen opens",
+ "updated": "2026-10-29",
+ "commit": "8103f113",
+ "mod_dlls": {
+  "3497514745": {
+   "SkillsMultiplier.dll": "8b0f3e197850dd14c75e87b521e9e340ff6737e3efa08697bbcd14bfd644a459"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-070726-6bd2020b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T07:16:55",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-085017-793bde6c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T08:50:17",
+    "lane": 7,
+    "reference_run": "20261029-070726-6bd2020b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-085017-793bde6c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T08:51:03",
+    "lane": 7,
+    "reference_run": "20261029-070726-6bd2020b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

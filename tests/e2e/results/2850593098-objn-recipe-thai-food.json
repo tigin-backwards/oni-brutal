@@ -1,0 +1,79 @@
+{
+ "spec": "mods/2850593098-objn-recipe-thai-food.yaml",
+ "mods": [
+  "2850593098"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "the Thai dishes and their recipes exist; the Electric Grill's recipe list dump and shot match",
+ "updated": "2026-10-29",
+ "commit": "8103f113",
+ "mod_dlls": {
+  "2850593098": {
+   "Objn recipe food.dll": "1dd96822cbc60fb746a41b30daa446a206195bc34442a3f49174c2ca2d2480a5"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-073906-4ac6cb82",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T08:09:42",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-092058-0500dd84",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-29T09:20:58",
+    "lane": 7,
+    "reference_run": "20261029-073906-4ac6cb82",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 2
+      }
+     }
+    },
+    "shots": {
+     "recipes": 0.0
+    }
+   },
+   {
+    "run": "20261029-092058-0500dd84",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-29T09:21:52",
+    "lane": 7,
+    "reference_run": "20261029-073906-4ac6cb82",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 2
+      }
+     }
+    },
+    "shots": {
+     "recipes": 0.0
+    }
+   }
+  ]
+ }
+}

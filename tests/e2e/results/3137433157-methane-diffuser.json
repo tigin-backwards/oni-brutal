@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3137433157-methane-diffuser.yaml",
+ "mods": [
+  "3137433157"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "one built is selected: an unpowered sour gas to methane converter; title dump matches",
+ "updated": "2026-10-29",
+ "commit": "8103f113",
+ "mod_dlls": {
+  "3137433157": {
+   "Test1.dll": "0124eddad421423e15e962da1fea57eeee892f685a33b9cc6f5e4bf75042a0d2"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-073906-4ac6cb82",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T08:31:42",
+    "lane": 8,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-093612-fe909898",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T09:36:12",
+    "lane": 7,
+    "reference_run": "20261029-073906-4ac6cb82",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261029-093612-fe909898",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T09:37:02",
+    "lane": 7,
+    "reference_run": "20261029-073906-4ac6cb82",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

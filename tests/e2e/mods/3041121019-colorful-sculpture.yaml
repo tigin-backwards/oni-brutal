@@ -1,0 +1,24 @@
+# 多彩的雕塑Colorful Sculpture (3041121019), class V.
+#
+# What it does: a postfix on MarbleSculptureConfig.DoPostConfigureComplete gives the Marble
+# Sculpture a component (CC1MM20230924GG1) that tints it a random colour every ten minutes of
+# wall-clock time (at minute 0, 10, 20, ... second 0), white in between since it spawned.
+# How a player reaches it: building a Marble Sculpture (Furniture menu).
+# What changes: the sculpture's tint.
+#
+# A Marble Sculpture built by setup west of the printing pod is selected (its title dumped): it
+# has the mod's component, white until the next tenth minute.
+from: early-base
+mods: [3041121019]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"MarbleSculpture\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Granite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {MarbleSculpture: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: MarbleSculpture}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}
+  - expect_state:
+      "selected:GetComponent<闪烁的雕塑_Sparkling_Sculpture.CC1MM20230924GG1>": exists
+      "selected:GetComponent<KBatchedAnimController>.TintColour.a": 255

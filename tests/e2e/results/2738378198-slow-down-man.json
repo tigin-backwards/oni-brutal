@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2738378198-slow-down-man.yaml",
+ "mods": [
+  "2738378198"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "played 150 s, the clock moves a tenth of a 1500 s cycle",
+ "updated": "2026-10-29",
+ "commit": "8103f113",
+ "mod_dlls": {
+  "2738378198": {
+   "SlowDownMod.dll": "155af903a4caf56a096c4ab9963c175f16c793f1958dd36820948a83176ebfb9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-073906-4ac6cb82",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T07:54:00",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-091006-954c347e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T09:10:06",
+    "lane": 7,
+    "reference_run": "20261029-073906-4ac6cb82",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-091006-954c347e",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T09:14:40",
+    "lane": 7,
+    "reference_run": "20261029-073906-4ac6cb82",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

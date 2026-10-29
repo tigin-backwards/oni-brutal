@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3195409590-isoresin-refiner.yaml",
+ "mods": [
+  "3195409590"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "one built is selected: the mod's resin converter; title dump matches",
+ "updated": "2026-10-29",
+ "commit": "8103f113",
+ "mod_dlls": {
+  "3195409590": {
+   "IsoresinRefiner.dll": "4df34f37ca5d9ce5a56fca2568cd7fc96193e284ed3a1e9208a7cebeb41e6457"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-065930-d09166fc",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T07:03:10",
+    "lane": 8,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-084312-44930f81",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T08:43:12",
+    "lane": 7,
+    "reference_run": "20261029-065930-d09166fc",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261029-084312-44930f81",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T08:44:08",
+    "lane": 7,
+    "reference_run": "20261029-065930-d09166fc",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

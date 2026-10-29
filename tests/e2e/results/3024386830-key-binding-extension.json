@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3024386830-key-binding-extension.yaml",
+ "mods": [
+  "3024386830"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Controls screen's valid keys hold the mouse side buttons",
+ "updated": "2026-10-29",
+ "commit": "8103f113",
+ "mod_dlls": {
+  "3024386830": {
+   "KeyBindingExtension.dll": "18f94318df9780960dcee13dfdff44fe73f188e4dafbb1ea90a201639f3c8455"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-070726-6bd2020b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T07:20:19",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-090136-214d09a7",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T09:01:36",
+    "lane": 7,
+    "reference_run": "20261029-070726-6bd2020b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-090136-214d09a7",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T09:02:20",
+    "lane": 7,
+    "reference_run": "20261029-070726-6bd2020b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

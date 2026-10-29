@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2972282656-better-rad-pill.yaml",
+ "mods": [
+  "2972282656"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "options set: a Rad Pill takes 1 s, and no unirradiated Duplicant takes it",
+ "updated": "2026-10-29",
+ "commit": "8103f113",
+ "mod_dlls": {
+  "2972282656": {
+   "RadPillThreshold.dll": "9a336a6908110170bf98e86c95b8b9ef9977db5ac98dcbebaf2f56fb13f23b3b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-073906-4ac6cb82",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T08:21:25",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-092750-aea7b752",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T09:27:50",
+    "lane": 7,
+    "reference_run": "20261029-073906-4ac6cb82",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-092750-aea7b752",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T09:30:08",
+    "lane": 7,
+    "reference_run": "20261029-073906-4ac6cb82",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

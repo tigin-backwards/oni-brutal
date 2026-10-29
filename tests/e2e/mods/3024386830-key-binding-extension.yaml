@@ -1,0 +1,14 @@
+# 按键绑定扩展 (Key Binding Extension) (3024386830), class P.
+#
+# What it does: at load, it adds the mouse's side buttons (Mouse3 to Mouse6) to the keys the
+# Controls screen (InputBindingsScreen) accepts for a binding, through reflection on its
+# static validKeys array.
+# How a player reaches it: Options, Controls, a binding, then a side button.
+# What changes: side buttons can be bound to actions.
+#
+# The screen's valid keys hold the four buttons once the colony has loaded.
+from: early-base
+mods: [3024386830]
+steps:
+  - expect_state:
+      "type:InputBindingsScreen::validKeys": [{contains: Mouse3}, {contains: Mouse4}, {contains: Mouse5}, {contains: Mouse6}]

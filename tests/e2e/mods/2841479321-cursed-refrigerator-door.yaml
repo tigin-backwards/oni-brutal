@@ -1,0 +1,26 @@
+# S 被诅咒的冰箱门 Cursed Refrigerator Door (2841479321), class P.
+#
+# What it does: the Refrigerator becomes a room cooler: postfixes on RefrigeratorConfig give it
+# -10 kDTU/s of self heat (it cools its surroundings) at 180 W, 80 W in power-saver mode, and
+# a minimum operating temperature of -200 °C (73.15 K).
+# How a player reaches it: building a Refrigerator (Food menu).
+# What changes: a fridge that chills the room.
+#
+# The definition carries the new values; a Refrigerator built by setup west of the printing
+# pod is selected (its title dumped): it has the mod's operating limit and power saver.
+from: early-base
+mods: [2841479321]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Refrigerator\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"Refrigerator\").SelfHeatKilowattsWhenActive": -10
+      "Assets.GetBuildingDef(\"Refrigerator\").EnergyConsumptionWhenActive": 180
+  - run: {seconds: 2}
+  - expect: {buildings: {Refrigerator: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: Refrigerator}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}
+  - expect_state:
+      "selected:GetComponent<MinimumOperatingTemperature>.minimumTemperature": 73.15

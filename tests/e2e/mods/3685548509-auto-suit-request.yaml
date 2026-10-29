@@ -1,0 +1,28 @@
+# Auto-suit-request (3685548509), classes P, O.
+#
+# What it does: a new Atmo Suit dock (SuitLocker) that is not configured yet requests a suit
+# by itself when it spawns (a postfix on SuitLocker.OnSpawn calls ConfigRequestSuit); an
+# empty configured dock re-requests a suit every 600 s (a schedule callback added to the
+# dock's empty.configured state), unless the building is disabled; and a dock waiting for a
+# suit accepts one dropped off (a postfix on CanDropOffSuit).
+# How a player reaches it: building an Atmo Suit Dock.
+# What changes: docks ask for suits without the player pressing "Request Suit".
+#
+# A dock built by setup in the corridor west of the printing pod is selected (its title
+# dumped): it is configured and waiting for a suit, where the game alone leaves a new dock
+# unconfigured.
+from: early-base
+mods: [3685548509]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"SuitLocker\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {SuitLocker: 1}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: SuitLocker}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}
+  - expect_state:
+      "selected:GetComponent<SuitLocker>.GetStoredOutfit()": missing
+      "selected:GetComponent<SuitLocker>.smi.GetCurrentState().name": ["!= 'root.empty.notconfigured'", "== original"]
+      "selected:GetComponent<SuitLocker>.CanDropOffSuit()": true

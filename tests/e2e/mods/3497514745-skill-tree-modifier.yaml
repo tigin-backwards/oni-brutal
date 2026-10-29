@@ -1,0 +1,19 @@
+# Skill Tree modifier (StrongerSkills) (3497514745), class P.
+#
+# What it does: a postfix on Db.Initialize multiplies every attribute perk of every skill by
+# ten (Junior Miner's +2 Digging becomes +20) and rewrites the perk's name to match.
+# How a player reaches it: the Skills screen; a Duplicant learning a skill.
+# What changes: skills give ten times their attribute bonuses.
+#
+# Junior Miner's dig perk reads +20, and the Skills screen opens with the mod's perks.
+from: early-base
+mods: [3497514745]
+steps:
+  - expect_state:
+      "Db.Get().SkillPerks.IncreaseDigSpeedSmall.modifier.Value": [">= 20", "== original"]
+      "Db.Get().SkillPerks.IncreaseDigSpeedSmall.Name": {contains: "20"}
+      "Db.Get().SkillPerks.IncreaseConstructionSmall.modifier.Value": [">= 20", "== original"]
+  - open: {management: skills}
+  - ui_wait: {path: "**/SkillsScreen", cond: stable}
+  - expect_ui:
+      "**/SkillsScreen": {active: true}

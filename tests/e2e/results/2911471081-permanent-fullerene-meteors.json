@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2911471081-permanent-fullerene-meteors.yaml",
+ "mods": [
+  "2911471081"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "loaded only: without an open Temporal Tear its season patches leave the seasons alone",
+ "updated": "2026-10-29",
+ "commit": "8103f113",
+ "mod_dlls": {
+  "2911471081": {
+   "PermanentFullereneMeteors.dll": "a30cbf19a55253cd13f21709a68714b0d65f2e92570cabf03e624ce8d40e453b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-073906-4ac6cb82",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T08:13:25",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-092257-b0bd2aec",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T09:22:57",
+    "lane": 7,
+    "reference_run": "20261029-073906-4ac6cb82",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-092257-b0bd2aec",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T09:24:33",
+    "lane": 7,
+    "reference_run": "20261029-073906-4ac6cb82",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

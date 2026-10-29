@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2571093570-gantry-doesnt-need-power.yaml",
+ "mods": [
+  "2571093570"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Gantry needs no power; one built is selected; title dump matches",
+ "updated": "2026-10-29",
+ "commit": "8103f113",
+ "mod_dlls": {
+  "2571093570": {
+   "Lightbulbulon.dll": "f2e9c51dc2a7809845739b55120aa54781d09546d4beecf3cd8521b7a22e1bf6"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-073906-4ac6cb82",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T07:50:27",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-090813-f0ff94fb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T09:08:13",
+    "lane": 7,
+    "reference_run": "20261029-073906-4ac6cb82",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261029-090813-f0ff94fb",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T09:09:05",
+    "lane": 7,
+    "reference_run": "20261029-073906-4ac6cb82",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

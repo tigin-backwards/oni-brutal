@@ -1,0 +1,56 @@
+{
+ "spec": "mods/3744473442-easy-print.yaml",
+ "mods": [
+  "3744473442"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Easy Print tool's Liquid Naphtha filter and a click print about 30 kg of naphtha in the corridor",
+ "updated": "2026-10-29",
+ "commit": "1fdd8d67",
+ "mod_dlls": {
+  "3744473442": {
+   "Easy_Print.dll": "d2e14140af9466395b76e95d053fb41348f35337ac78352489448dad36414f7c",
+   "PLib.dll": "c4bb22f1bc06ebcb0dbba75a7f1bc46f63eaa3dae12c22a08729f1a6d3362dda"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-150642-6081766e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T15:21:54",
+    "lane": 4,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-152554-d2a50413",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T15:30:07",
+    "lane": 4,
+    "reference_run": "20261029-150642-6081766e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-152554-d2a50413",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T15:30:55",
+    "lane": 4,
+    "reference_run": "20261029-150642-6081766e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

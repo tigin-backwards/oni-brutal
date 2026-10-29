@@ -1,0 +1,25 @@
+# 快速打印 Easy Print (3744473442), classes T, K.
+#
+# What it does: adds a tool, Easy Print (the tool menu, a PLib key binding), a one-cell brush
+# that adds a fixed mass of an element to each open, non-foundation cell it paints: water,
+# brine, crude oil or petroleum (30 g or 300 g), naphtha (30 kg), oxygen or carbon dioxide
+# (1 kg) or hydrogen; the element is chosen in the tool's parameter menu.
+# How a player reaches it: the tool menu's Easy Print.
+# What changes: a cheat brush for liquids and gases.
+#
+# The tool is picked from the tool menu: its filter lists the eight elements. Naphtha is
+# picked and a click prints 30 kg of it in the corridor west of the printing pod.
+from: early-base
+mods: [3744473442]
+steps:
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - tool: {toolbar: Easy Print}
+  - expect_state:
+      "PlayerController.Instance.ActiveTool.name": EasyPrintTool
+  - click: {ui: "**/ToolMenu/ToolParameters/Content/List/toggleEntry/Toggle", index: 4}
+  - expect_state:
+      "cells:108,206..118,209::Grid.Mass.get_Item({cell})": {save_as: before}
+  - click_world: {cell: [113, 207]}
+  - run: {seconds: 2}
+  - expect_state:
+      "cells:108,206..118,209::Grid.Mass.get_Item({cell})": ">= before + 25"

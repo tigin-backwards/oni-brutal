@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3139285721-saltbox.yaml",
+ "mods": [
+  "3139285721"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Fine Dining unlocks the SaltBox; one built through the Food menu gets salt from Duplicants and offers food filters",
+ "updated": "2026-10-27",
+ "commit": "3d288f97",
+ "mod_dlls": {
+  "3139285721": {
+   "SaltBox.dll": "ff3e43b6460139782b724bf45c88d70790b562b99d6c82330d90ebccef760e2a"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-114113-564df08f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T13:40:39",
+    "lane": 15,
+    "signatures": 1
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-155648-cd6a24c5",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T15:56:48",
+    "lane": 14,
+    "reference_run": "20261027-114113-564df08f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "food-menu": 0.0
+    }
+   },
+   {
+    "run": "20261027-155648-cd6a24c5",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T16:05:09",
+    "lane": 14,
+    "reference_run": "20261027-114113-564df08f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "food-menu": 0.0
+    }
+   }
+  ]
+ }
+}

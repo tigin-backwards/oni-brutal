@@ -1,0 +1,60 @@
+{
+ "spec": "mods/2878495368-signal-bridge.yaml",
+ "mods": [
+  "2878495368"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the four longer automation bridges are in the Automation menu (shot matches); a 5-cell one built links the cells two to its left and right",
+ "updated": "2026-10-27",
+ "commit": "0f154e5f",
+ "mod_dlls": {
+  "2878495368": {
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
+   "Signal bridge╨┼║┼╟┼.dll": "776817863bf582cf3a3a02686d6f86a01ca70cef17c57efd513e4441754ad68b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-114104-90e83e51",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T12:18:37",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-141817-23a73552",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T14:18:17",
+    "lane": 14,
+    "reference_run": "20261027-114104-90e83e51",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "automation-menu": 0.0
+    }
+   },
+   {
+    "run": "20261027-141817-23a73552",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T14:19:11",
+    "lane": 14,
+    "reference_run": "20261027-114104-90e83e51",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "automation-menu": 0.0
+    }
+   }
+  ]
+ }
+}

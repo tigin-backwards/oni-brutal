@@ -147,6 +147,10 @@ namespace OniMoono.Engine.Rendering
         /// Diagnostics: device work per frame (draws, binds) averaged over `frames`, since the
         /// last call; null when not counted.
         public virtual string TakeFrameCounters(int frames) => null;
+
+        /// Diagnostics: the video memory the driver reports free (and, where it counts them,
+        /// evictions to system memory); null when the driver reports none.
+        public virtual string MemoryCounters() => null;
     }
 
     /// The colour and depth surfaces drawing goes to; null colours are the back buffer.

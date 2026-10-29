@@ -484,6 +484,15 @@ the category buttons.
 << {"ok":true,"result":{"settled":true,"menu":true,"open":true,"visible":12,"stale":0,"reasons":[],"ms":0.41,"frames":37,"maxMs":0.62}}
 ```
 
+### keys.log `{on?}`
+
+Starts the key log, or clears it when it runs (`on: false` stops it). While it runs, the
+driver records the key codes `Input.GetKeyDown` is true for in each frame (all key codes below
+`Mouse0`), the key code of each IMGUI `KeyDown` event that names one, and the characters
+`KeyDown` events type. Read them as state: `type:E2eDriver.KeyLog::Down` (one entry a frame,
+codes of one frame joined by `+`, entries by spaces), `::Events` (space-separated) and
+`::Chars`. Answers `{"recording": true}`.
+
 ## Errors
 
 | error | when |

@@ -1,4 +1,4 @@
-# scripts/mod-sweep.py s2000: 1088 mods, batches of 22, the save 2minnow, 90 s of play; commit 8b374a54, 2026-10-26
+# scripts/mod-sweep.py s2000: 1343 mods, batches of 22, the save 2minnow, 90 s of play; commit 6d4545b9, 2026-10-27
 id	rank	original	ours	note
 1882162095	751	ok	ok	
 2836461351	752	ok	ok	
@@ -68,7 +68,7 @@ id	rank	original	ours	note
 2863558330	828	ok	ok	
 3678142367	829	ok	ok	
 2820163949	830	ok	ok	
-3609476592	831	ok	menu	the player exits (1) while loading; DarknessNotExcluded: Failed to patch Workable.GetEfficiencyMultiplier()
+3609476592	831	ok	ok	loads alone in both players on the player of commit 6d4545b9 (its batch failed in ours on an older build)
 2924528762	832	ok	ok	
 2881769456	833	ok	ok	
 2954005789	834	ok	ok	
@@ -209,7 +209,7 @@ id	rank	original	ours	note
 3357219777	984	ok	ok	
 2845382372	985	ok	ok	
 1727987491	986	ok	ok	
-3165114076	987	ok	menu	step start: <urlopen error [Errno 111] Connection refused>; ours disables it ("Failed to load mod ...disabling"); ---> System.InvalidProgramException: Common Language Runtime detected an invalid program @ HarmonyLib.PatchFunctions.UpdateWrapper_PatchN; HarmonyLib.HarmonyException: Patching exception in method TMPro.EditState TMPro.TMP_InputField::KeyPressed(UnityEngine.Event evt) @ HarmonyLib.PatchFunctions.UpdateWrapper_PatchN; null Exception while loading mod Aze.DeleteFullWord at RUN/home/config/unityNd/Klei/Oxygen Not Included/mods/Local/N @ HarmonyLib.PatchFunctions.UpdateWrapper_PatchN
+3165114076	987	ok	ok	loads alone in both players on the player of commit 6d4545b9 (its batch failed in ours on an older build)
 2549477669	988	ok	ok	
 3447554654	989	ok	ok	
 2558070245	990	menu	-	the original disables it ("Failed to load mod ...disabling"): step start: the player exited (1) while loading; HarmonyLib.HarmonyException: Patching exception in method null ---> System.ArgumentException: Undefined target method for patch method static System.Void SuperMiner.AutoMiner_DigBlockingCB::Postfix(System.IntN cell, System.Boolean& __result) @ HarmonyLib.PatchClassProcessor.PatchWithAttributes; [ReversibleHeaterClones] Failed patch HeaterSideScreen_PrepareTarget_CloneCleanupPatch: HarmonyLib.HarmonyException: Patching exception in method null --->
@@ -221,7 +221,7 @@ id	rank	original	ours	note
 2377629562	996	ok	ok	
 3362048907	997	ok	ok	
 2915322068	998	ok	ok	
-3710035894	999	ok	colony	---> System.ArgumentException: Undefined target method for patch method static System.Boolean ReversibleHeaterClones.SpaceHeater_BoolModeSetter_CloneBlockPatch::Prefix(SpaceHeater __instance, System.Reflection.MethodBase __originalMethod) @ HarmonyLib.PatchClassProcessor.PatchWithAttributes; ---> System.ArgumentException: Undefined target method for patch method static System.Void ReversibleHeaterClones.HeaterSideScreen_PrepareTarget_CloneCleanupPatch::Prefix(System.Object[] __args) @ HarmonyLib.PatchClassProcessor.PatchWithAttributes; [ReversibleHeaterClones] Failed patch HeaterSideScreen_Pre
+3710035894	999	ok	ok	loads alone in both players on the player of commit 6d4545b9 (its batch failed in ours on an older build)
 3286478591	1000	ok	ok	
 3003736085	1001	ok	ok	
 2167499088	1002	ok	ok	
@@ -286,7 +286,7 @@ id	rank	original	ours	note
 3386552780	1068	ok	ok	
 3736878109	1069	ok	ok	
 1963992940	1070	ok	ok	
-3398520692	1071	ok	colony	the player exits (1) while loading; System.MissingMethodException: Cannot dynamically create an instance of type "SonJeremy.TrashCans.AutoConsumption.AutoFluidTrashCans". Reason: No parameterless constructor defined @ UnityEngine.Object.ConstructBound[T](Type type, NativeObject native) in /home/nigit/projects/oni-brutal/.claude/worktrees/agent-aNdNfNeNfN/src/OniBrutal.UnityEngine/Core/Object.cs.line N; null Exception in RegisterBuilding for type SonJeremy.TrashCans.BuildingConfig.GasTrashCanConfig from TrashCans @ UnityEngine.Object.ConstructBound[T](Type type, NativeObject native
+3398520692	1071	ok	ok	loads alone in both players on the player of commit 6d4545b9 (its batch failed in ours on an older build)
 3719204845	1072	ok	ok	
 3006715942	1073	ok	ok	
 1999001228	1074	ok	ok	
@@ -294,7 +294,7 @@ id	rank	original	ours	note
 3235904679	1077	ok	ok	
 3556910379	1078	ok	ok	
 3456696039	1079	ok	ok	
-3637505541	1080	ok	colony	[GravitasMod] Patch failed for KModalScreen.OnCmpDisable: System.ArgumentException: You can only patch implemented methods/constructors. Patch the declared method virtual System.Void KModalScreen::OnCmpDisable() instead @ HarmonyLib.PatchProcessor.Patch_PatchN; [GravitasMod] Patch failed for KModalScreen.OnDeactivate: System.ArgumentException: You can only patch implemented methods/constructors. Patch the declared method virtual System.Void KModalScreen::OnDeactivate() instead @ HarmonyLib.PatchProcessor.Patch_PatchN; [GravitasMod] Patch failed for KScreen.OnCleanUp: System.ArgumentException:
+3637505541	1080	ok	ok	loads alone in both players on the player of commit 6d4545b9 (its batch failed in ours on an older build)
 3380780873	1081	ok	ok	
 1332127867	1083	-	-	a translation: installed disabled, as a subscription leaves it; not swept
 3625551075	1084	ok	ok	
@@ -328,14 +328,14 @@ id	rank	original	ours	note
 1962983262	1115	ok	ok	
 2777145427	1117	ok	ok	
 3753181401	1119	ok	ok	
-3773818206	1120	ok	colony	the crash screen opens while the save loads; ---> System.InvalidCastException: Unable to cast object of type "Context[Rottable,Rottable+Instance,IStateMachineTarget,Rottable+Def]" to type "Context[CritterCondoInteractMontior,CritterCondoInteractMontior+Instance,IStateMac
+3773818206	1120	ok	ok	loads alone in both players on the player of commit 6d4545b9 (its batch failed in ours on an older build)
 3415553359	1121	ok	ok	
 2880319200	1122	colony	-	the crash screen opens while the save loads; System.ArgumentException: An item with the same key has already been added. Key: WoodenDoor @ PlanScreen.BuildB
 1927259233	1123	ok	ok	
 3329512249	1124	ok	ok	
 3022610348	1125	ok	ok	
 3316755325	1126	ok	ok	
-3805601277	1127	ok	menu	step start: Remote end closed connection without response; [更好的存档] OnLoad 失败: System.MissingMethodException: Method not found: "Void UnityEngine.Application.add_quitting(System.Action)" @ SaveOpt.ModLoader.InstallQuitHook
+3805601277	1127	ok	ok	loads alone in both players on the player of commit 6d4545b9 (its batch failed in ours on an older build)
 3759482835	1128	ok	ok	
 2094022117	1129	ok	ok	
 2633732356	1130	ok	ok	
@@ -346,7 +346,7 @@ id	rank	original	ours	note
 2570834434	1138	ok	ok	
 2746246303	1139	-	-	a translation: installed disabled, as a subscription leaves it; not swept
 2868395237	1140	ok	ok	
-3638972299	1141	ok	colony	the crash screen opens while the save loads; TypeLoadException: Could not load type "LimitVelocityOverLifetimeModule" from assembly "UnityEngine.ParticleSystemModule, Version=N.N, Culture=neutral, PublicKeyToken=null" @ CursorLaserMining.Visual_Classic.ConfigureMasterFX
+3638972299	1141	ok	ok	loads alone in both players on the player of commit 6d4545b9 (its batch failed in ours on an older build)
 2814417161	1143	menu	-	the original disables it ("Failed to load mod ...disabling"): step start: the player exited (1) while loading; HarmonyLib.HarmonyException: Patching exception in method Klei.AI.AttributeConverter Database.AttributeConverters::Create(System.String id, System.String name, System.String description, Klei.AI.Attribute attribute, System.Single multiplier, System.Single base_value, IAttributeFormatter formatter, System.String[] requiredDlcIds, System.String[] forbiddenDlcIds) ---> System.Exception: Parameter "available_dlcs" not found in method Klei.AI.Attribute
 2843896901	1144	ok	ok	
 3308456170	1145	ok	ok	
@@ -356,7 +356,7 @@ id	rank	original	ours	note
 3260591912	1149	ok	ok	
 3630055851	1150	ok	ok	
 3523317587	1151	ok	ok	
-2963257205	1152	ok	menu	step start: [Errno 104] Connection reset by peer; ---> System.NullReferenceException: Object reference not set to an instance of an object @ DeliveryTemperatureLimit.StatusItemsUpdaterPatch.RenderNms; DeliveryTemperatureLimit: Failed to find FetchAreaChore.StatesInstance.Begin() delegate for patching; System.Reflection.TargetInvocationException: Exception has been thrown by the target of an invocation @ DeliveryTemperatureLimit.StatusItemsUpdaterPatch.RenderNms (and 1 more)
+2963257205	1152	ok	ok	loads alone in both players on the player of commit 6d4545b9 (its batch failed in ours on an older build)
 3566906492	1153	ok	ok	
 3002268593	1154	menu	-	fails alone in the original too: its DLL references PLib but ships without it (a FileNotFoundException for PLib in its OnLoad), so it loads only beside a mod of its batch that ships PLib
 2719163704	1155	ok	ok	
@@ -406,7 +406,7 @@ id	rank	original	ours	note
 1872113768	1206	ok	ok	
 2879691917	1207	ok	ok	
 3586981589	1208	ok	ok	
-2967596358	1209	ok	menu	step start: [Errno 104] Connection reset by peer; ours disables it ("Failed to load mod ...disabling"); ---> System.InvalidProgramException: Common Language Runtime detected an invalid program @ HarmonyLib.PatchFunctions.UpdateWrapper_PatchN; HarmonyLib.HarmonyException: Patching exception in method System.Void Timelapser::SetPostionAndOrtho(System.IntN world_id) @ HarmonyLib.PatchFunctions.UpdateWrapper_PatchN; null Exception while loading mod llunak.FixesAndTweaks at RUN/home/config/unityNd/Klei/Oxygen Not Included/mods/Local/N @ HarmonyLib.PatchFunctions.UpdateWrapper_PatchN
+2967596358	1209	ok	ok	loads alone in both players on the player of commit 6d4545b9 (its batch failed in ours on an older build)
 2682170372	1210	ok	ok	
 3100867929	1211	ok	ok	
 3571290810	1212	ok	ok	
@@ -423,9 +423,9 @@ id	rank	original	ours	note
 2839171298	1225	ok	ok	
 3474301255	1226	ok	ok	
 2832650525	1227	ok	ok	
-2857940400	1228	ok	menu	step start: the player exited (1) before OniMcp started; ours disables it ("Failed to load mod ...disabling"); System.IO.FileNotFoundException: Could not load file or assembly "PLib, Version=N.N, Culture=neutral, PublicKeyToken=null". The system cannot find the file specified @ Stacking_bed_叠叠床.ModLoad.OnLoad; null Exception while loading mod N.Local at RUN/home/config/unityNd/Klei/Oxygen Not Included/mods/Local/N @ Stacking_bed_叠叠床.ModLoad.OnLoad
+2857940400	1228	menu	-	alone, on the player of commit 6d4545b9: the original disables it ("Failed to load mod ...disabling"): step start: the player exited (1) while loading; Fatal parse error in /home/nigit/projects/oni-brutal/.claude/worktrees/agent-aNdNfNeNfN/out/sweep/.original-N/OxygenNotIncluded_Data/StreamingAssets/dlc/dlcN/worldgen/subworlds/carrotquarry/CarrotQuarryBasicScarce.yaml; System.IO.FileNotFoundException: Could not load file or assembly "PLib, Version=N.N, Culture=neutral, PublicKeyToken=null" or one of its dependencies @ KMod.DLLLoader.LoadDLLs
 3100888062	1229	ok	ok	
-3799038247	1230	ok	colony	the crash screen opens while the save loads; System.Collections.Generic.KeyNotFoundException: The given key "N" was not present in the dictionary @ ColonyDiagnosticUtility.GetDiagnostic; Assert failed: Clustercraft Exterior Door has no targetDoor
+3799038247	1230	ok	colony	alone, on the player of commit 6d4545b9: the crash screen opens while the save loads; System.Collections.Generic.KeyNotFoundException: The given key "N" was not present in the dictionary @ ColonyDiagnosticUtility.GetDiagnostic; Assert failed: Clustercraft Exterior Door has no targetDoor
 3297925875	1232	ok	ok	
 2994335358	1233	ok	ok	
 3340413393	1234	ok	ok	
@@ -446,7 +446,7 @@ id	rank	original	ours	note
 1994592210	1251	ok	ok	
 3339017519	1253	ok	ok	
 3006462315	1254	ok	ok	
-2983351482	1255	ok	menu	step start: the player exited (1) before OniMcp started; ours disables it ("Failed to load mod ...disabling"); System.NullReferenceException: Object reference not set to an instance of an object @ ONITwitch.DefaultCommands.SetupCommands; System.MissingMethodException: Method not found: "Void UnityEngine.PhysicsND.IgnoreLayerCollision(IntN, IntN, Boolean)" @ ONITwitch.Patches.PhysicsPatches.MainMenu_OnSpawn_Patch.Postfix; System.TypeLoadException: Could not load type "UnityEngine.Bindings.NativeHeaderAttribute" from assembly "UnityEngine.SharedIntern
+2983351482	1255	ok	menu	alone, on the player of commit 6d4545b9: step start: the player exited (1) before OniMcp started; ours disables it ("Failed to load mod ...disabling"); System.NullReferenceException: Object reference not set to an instance of an object @ ONITwitch.DefaultCommands.SetupCommands; System.MissingMethodException: Method not found: "Void UnityEngine.PhysicsND.IgnoreLayerCollision(IntN, IntN, Boolean)" @ ONITwitch.Patches.PhysicsPatches.MainMenu_OnSpawn_Patch.Postfix; System.TypeLoadException: Could not load type "UnityEngine.Bindings.NativeHeaderAttribute" from assembly "UnityEngine.SharedIntern
 3521556826	1256	ok	ok	
 2876954518	1257	ok	ok	
 3247018513	1258	ok	ok	
@@ -601,7 +601,7 @@ id	rank	original	ours	note
 2985335138	1425	colony	-	the crash screen opens while the save loads; ArgumentException: Accessing mismatched handle version. Expected version=N but got version=N @ HandleVector`N.UnpackHandle; Nu
 2141411697	1426	ok	ok	
 2897919789	1428	ok	ok	
-2363171361	1429	ok	colony	the crash screen opens while the save loads; N Exception in: (Minion).SleepChoreMonitor.root.checkforbed @ Public_Luxury_Beds.Patches.Patches.Postfix_UpdateBed(Instance __instance) in C.\Repos\MrPurpleN\ONI\Public Luxury Beds\Patches\Patches.cs.line N; System.MethodAcces
+2363171361	1429	ok	colony	alone, on the player of commit 6d4545b9: the crash screen opens while the save loads; N Exception in: (Minion).SleepChoreMonitor.root.checkforbed @ Public_Luxury_Beds.Patches.Patches.Postfix_UpdateBed(Instance __instance) in C.\Repos\MrPurpleN\ONI\Public Luxury Beds\Patches\Patches.cs.line N; System.MethodAcces
 3002566087	1430	ok	ok	
 3523056620	1431	-	-	a translation: installed disabled, as a subscription leaves it; not swept
 3022436400	1432	ok	ok	
@@ -609,7 +609,7 @@ id	rank	original	ours	note
 2872005064	1435	ok	ok	
 3580813956	1436	ok	ok	
 2369401506	1437	ok	ok	
-3609531831	1439	ok	colony	NullReferenceException: Object reference not set to an instance of an object @ UnityEngine.Object.ThrowNullReference; SeaTurtle Exception in: (SeaTurtle).EatStates.root.eating.loop @ Rephysicalized.FueledDietController.TryApplyFuelConversion; System.NullReferenceException: Object reference not set to an instance of an object @ Rephysicalized.FueledDietController.TryApplyFuelConversion
+3609531831	1439	ok	colony	alone, on the player of commit 6d4545b9: NullReferenceException: Object reference not set to an instance of an object @ UnityEngine.Object.ThrowNullReference; SeaTurtle Exception in: (SeaTurtle).EatStates.root.eating.loop @ Rephysicalized.FueledDietController.TryApplyFuelConversion; System.NullReferenceException: Object reference not set to an instance of an object @ Rephysicalized.FueledDietController.TryApplyFuelConversion
 3760466471	1440	ok	ok	
 2781529336	1441	ok	ok	
 1725334376	1442	ok	ok	
@@ -1084,7 +1084,262 @@ id	rank	original	ours	note
 3195409590	1967	ok	ok	
 3241546548	1968	ok	ok	
 2894589931	1969	colony	-	the player exits (1) while loading; System.NullReferenceException: Object reference not set to an instance of an object @ DiscoveredResources.Discover; System.MissingMethodException: Method not found: UnityEngine.GameObject .EntityTemplates.ExtendEntityToBasicPlant(UnityEngine.GameObject,single,single,single,single,SimHashes[],bool,single,single,string,bool,bool,bool,bool,single,single,single,string,string) @ EntityConfigManager.Regist
+2964859765	1970	ok	ok	
+3633274042	1972	menu	-	the original disables it ("Failed to load mod ...disabling"): step start: the player exited (1) while loading; System.NullReferenceException: Object reference not set to an instance of an object @ Database.Personalities..ctor; System.Reflection.ReflectionTypeLoadException: Exception of type "System.Reflection.ReflectionTypeLoadException" was thrown
+3615946354	1974	ok	ok	
+2942728835	1975	ok	ok	
+3683855614	1976	ok	ok	
+3685548509	1977	ok	ok	
+3497514745	1978	ok	ok	
+3024386830	1981	ok	ok	
+3794390677	1983	ok	ok	
+2996735249	1984	ok	ok	
+2967920743	1985	colony	-	the player exits (1) while loading; ArgumentOutOfRangeException: Index was out of range. Must be non-negative and less than the size of the collection @ BackwallManager+BackwallIndexer.get_Element; Assert failed: Cannot send a frame to the sim with zero active regions @ SubworldZoneRenderData.GenerateTexture
+1714574778	1987	colony	-	the player exits (1) while loading; System.NullReferenceException: Object reference not set to an instance of an object @ EquipmentConfigManager.RegisterEquipment; System.InvalidCastException: Specified cast is not valid
+3142166714	1988	ok	ok	
+3737287126	1989	ok	ok	
+3748520836	1990	ok	ok	
+3752732754	1991	ok	ok	
+3748116345	1992	ok	ok	
+3743988171	1993	ok	ok	
+3212502461	1994	ok	ok	
+3797325396	1997	ok	ok	
+3795634377	1999	ok	ok	
+2957924585	2000	colony	-	the player exits (1) while loading; ArgumentException: The Object you want to instantiate is null @ UnityEngine.Object.Instantiate; ArgumentOutOfRangeException: Index was out of range. Must be non-negative and less than the size of the collection @ BackwallManager+BackwallIndexer.get_Element
+3757306688	2001	ok	ok	
+3538456497	2002	ok	ok	
+2963065993	2003	ok	ok	
+2981889053	2004	ok	ok	
+3771256441	2006	ok	ok	
+2850593098	2007	ok	ok	
+3770134628	2008	ok	ok	
+3818420137	2009	ok	ok	
+3778429429	2010	ok	ok	
+3592585682	2012	ok	ok	
+3658128284	2013	ok	ok	
+3647713426	2019	ok	ok	
+3751545416	2020	ok	ok	
+2911471081	2021	ok	ok	
+2543359683	2022	colony	-	the player exits (1) while loading; Assert failed: Clustercraft Exterior Door has no targetDoor @ ClusterUtil.GetMyWorld; System.NullReferenceException: Object reference not set to an instance of an object @ DiscoveredResources.Discover
+3804026640	2023	ok	ok	
+3257389066	2024	ok	ok	
+3098578803	2025	ok	ok	
+2184126787	2026	menu	-	the original disables it ("Failed to load mod ...disabling"): step start: the player exited (1) before OniMcp started; System.MissingMethodException: Method not found: UnityEngine.GameObject .EntityTemplates.ExtendEntityToBasicPlant(UnityEngine.GameObject,single,single,single,single,SimHashes[],bool,single,single,string,bool,bool,bool,bool,single,single,single,string,string) @ ForestTreeConfig.CreatePrefab; HarmonyLib.HarmonyException: Patching exception in method null ---> System.ArgumentException: Undefined target method for patch m
+3316378973	2027	ok	ok	
+2801784483	2030	ok	ok	
+2936219269	2031	ok	ok	
+2571093570	2032	ok	ok	
+3600547549	2033	ok	menu	step start: the player exited (1) before OniMcp started; ours disables it ("Failed to load mod ...disabling"); System.BadImageFormatException: Enclosing type(s) not found for type "‌‌‍⁯‬⁭​⁫‪⁮⁮⁮‎‌‬‏⁫⁮‍⁭‌‎‎⁬‌‍⁪⁯⁫⁮​‭‎⁬⁮‬⁬⁯‭‬‮" in assembly "Refrigerator, Version=N.N, Culture=neutral, PublicKeyToken=null" @ KMod.DLLLoader.LoadDLLs; null Exception while loading mod Refrigerator at RUN/home/config/unityNd/Klei/Oxygen Not Included/mods/Local/N @ KMod.DLLLoader.LoadDLLs
+2993579796	2034	colony	-	the player exits (1) while loading; ArgumentOutOfRangeException: Index was out of range. Must be non-negative and less than the size of the collection @ BackwallManager+BackwallIndexer.get_Element; Assert failed: Cannot send a frame to the sim with zero active regions @ SubworldZoneRenderData.GenerateTexture
+2761762708	2035	ok	ok	
+3778736902	2036	ok	ok	
+3464297291	2037	ok	ok	
+3672588272	2038	ok	ok	
+2738378198	2039	ok	ok	
+3688438313	2041	ok	ok	
+3495836420	2042	ok	ok	
+2972282656	2043	ok	ok	
+3752782665	2044	ok	ok	
+3009259571	2045	ok	ok	
+3670726296	2046	ok	ok	
+2841479321	2047	ok	ok	
+3041121019	2048	ok	ok	
+3337042773	2049	ok	ok	
+3589783089	2051	ok	ok	
 3512323881	2052	-	-	a translation: installed disabled, as a subscription leaves it; not swept
+3336798970	2053	ok	ok	
+3137433157	2055	ok	ok	
+3623756298	2056	ok	ok	
+3303381412	2057	ok	ok	
+3177244670	2058	ok	ok	
+3015712689	2059	colony	-	the player exits (1) while loading; ArgumentOutOfRangeException: Index was out of range. Must be non-negative and less than the size of the collection @ BackwallManager+BackwallIndexer.get_Element; Assert failed: Cannot send a frame to the sim with zero active regions @ SubworldZoneRenderData.GenerateTexture
+3473427266	2060	ok	ok	
+3627499096	2061	ok	ok	
+3744782865	2062	ok	ok	
+3381463958	2063	ok	ok	
+3816086407	2066	ok	ok	
+3701644444	2067	ok	ok	
+3740739859	2068	ok	ok	
+3492107267	2069	ok	ok	
+3814225219	2071	ok	ok	
+3153187460	2072	ok	ok	
+3779664497	2073	ok	ok	
+3783068134	2074	ok	ok	
+3774227325	2075	ok	ok	
+3522028220	2076	ok	ok	
+2661261076	2078	ok	ok	
+3809733067	2079	ok	ok	
+3061865159	2080	ok	ok	
+2882097509	2081	ok	ok	
+3308463557	2082	ok	ok	
+3314075768	2083	ok	ok	
+3820631720	2084	ok	ok	
+3754969315	2085	ok	ok	
+3295157777	2086	ok	ok	
+3768108283	2087	ok	ok	
+3743125036	2088	ok	ok	
+3767433917	2089	ok	ok	
+3388797865	2090	ok	ok	
+3761489442	2091	ok	ok	
+3451963146	2092	ok	ok	
+2856862271	2094	ok	ok	
+3796163933	2095	ok	ok	
+3740359087	2096	ok	ok	
+3764371140	2097	ok	ok	
+3712929275	2098	ok	ok	
+3536307961	2099	ok	ok	
+3669014459	2100	menu	-	the original disables it ("Failed to load mod ...disabling"):
+1924502103	2101	ok	ok	
+3815900814	2102	ok	colony	the crash screen opens while the save loads; System.Collections.Generic.KeyNotFoundException: The given key "N" was not present in the dictionary @ ColonyDiagnosticUtility.GetDiagnostic; Assert failed: Clustercraft Exterior Door has no targetDoor
+3664027081	2103	ok	ok	
+3384420807	2104	ok	ok	
+3691374894	2105	ok	ok	
+3781314647	2106	ok	ok	
+3781549526	2107	ok	ok	
+2753303517	2108	ok	ok	
+3733621804	2109	ok	ok	
+3547012082	2112	ok	ok	
+2868033778	2113	ok	ok	
+3600081670	2114	ok	ok	
+3779252781	2116	ok	ok	
+2569243282	2118	ok	ok	
+2830334724	2119	ok	ok	
+3785595680	2121	ok	ok	
+2790411820	2122	ok	ok	
+2633971775	2123	ok	ok	
+1864485284	2124	ok	ok	
+3756857086	2125	ok	ok	
+3261914818	2126	ok	ok	
+2849498691	2127	colony	-	the player exits (1) while loading; System.IndexOutOfRangeException: Index was outside the bounds of the array @ BuildingDef.PostProcess; null Exception in RegisterBuilding for type Super_Trap超级捕兽夹.CreatureTrapNConfig from Super Trap超级捕兽夹 @ BuildingDef.PostProcess
+3775494629	2128	ok	ok	
+3313961907	2129	menu	-	the original disables it ("Failed to load mod ...disabling"): step start: the player exited (1) while loading; System.IndexOutOfRangeException: Index was outside the bounds of the array @ BuildingDef.PostProcess; System.TypeLoadException: Could not load type InsulatedManualPressureDoorConfig, InsulatedDoor, Version=N.N, Culture=neutral, PublicKeyToken=null while decoding custom attribute: (null)
+3777061147	2130	ok	ok	
+3754957812	2131	ok	ok	
+1967660729	2132	ok	ok	
+3747915195	2133	ok	ok	
+2859116081	2134	ok	ok	
+3093919356	2135	ok	ok	
+2881537956	2136	ok	ok	
+3747431307	2137	ok	ok	
+2847688104	2138	ok	ok	
+3776423893	2139	ok	ok	
+3771257593	2140	ok	ok	
+3572106966	2141	ok	ok	
+3362422974	2142	ok	ok	
+2643535656	2143	ok	ok	
+3744512018	2144	ok	ok	
+3631518402	2145	ok	ok	
+3813100436	2147	ok	ok	
+2194551369	2148	ok	ok	
+3799668020	2149	ok	ok	
 3740803157	2151	-	-	a translation: installed disabled, as a subscription leaves it; not swept
+3280526635	2152	ok	menu	step start: the player exited (1) before OniMcp started; ours disables it ("Failed to load mod ...disabling"); System.IO.FileLoadException: Could not load file or assembly "TestMod, Version=N.N, Culture=neutral, PublicKeyToken=null". The assembly architecture is not compatible with the current process architecture @ KMod.DLLLoader.LoadDLLs; null Exception while loading mod N.Local at RUN/home/config/unityNd/Klei/Oxygen Not Included/mods/Local/N @ KMod.DLLLoader.LoadDLLs
+3794685601	2153	ok	ok	
+3733343625	2154	ok	ok	
+2544278649	2155	ok	ok	
+3774780988	2157	ok	ok	
+3741933887	2158	ok	ok	
+2890628700	2159	ok	ok	
+2861868848	2160	ok	ok	
+2468928092	2161	ok	ok	
+1862397379	2162	ok	ok	
+3752072338	2163	ok	ok	
+3734897370	2164	ok	ok	
+2925184608	2165	menu	-	the player exits (1) while loading; MissingMethodException: Method not found: UnityEngine.UI.InputField/SubmitEvent UnityEngine.UI.InputField.get_onEndEdit() @ AsTool.Unity.Component.AsMonoBehaviour.Awake; MissingMethodException: Method not found: UnityEngine.UI.InputField/SubmitEvent UnityEngine.UI.InputField.get_onEndEdit() @ AsTool.Unity.Component.AsMonoBehaviour.ConfirmInit
+2553002229	2166	ok	ok	
+3733337902	2167	ok	ok	
+3020060237	2168	ok	ok	
+3104895444	2169	ok	ok	
+3733333133	2170	ok	ok	
+2932351756	2171	ok	ok	
+3770104072	2172	ok	ok	
+3744330704	2173	ok	ok	
+3270878303	2174	ok	ok	
+2891580501	2175	ok	ok	
+3809293304	2176	ok	ok	
+3572721874	2177	ok	ok	
+2984784113	2178	ok	ok	
+2798967122	2179	ok	colony	the player exits (-6) while loading; System.AccessViolationException: Attempted to read or write protected memory. This is often an indication that other memory is corrupt @ Default_Deconstruct.Patches+DefaultDeconstruct.Postfix
+3777521625	2180	ok	ok	
+2817871454	2181	ok	ok	
+2984782534	2182	ok	ok	
+2977857632	2183	ok	ok	
+2885128758	2184	ok	ok	
+2840818971	2185	ok	ok	
+2813227044	2186	ok	ok	
+3340422284	2188	ok	ok	
+3279603342	2189	ok	ok	
+3598063686	2190	ok	ok	
+2871028837	2191	ok	ok	
+3808298586	2193	ok	ok	
+3817909889	2195	ok	ok	
+3760302968	2197	ok	ok	
+3141579911	2198	ok	ok	
+3299836191	2199	ok	ok	
 3617182868	2200	-	-	a translation: installed disabled, as a subscription leaves it; not swept
+3680468628	2201	ok	ok	
+3160051408	2202	ok	ok	
+3786622419	2203	ok	ok	
+3750113063	2204	ok	ok	
+3754481883	2205	ok	ok	
+3031766445	2206	menu	-	the original disables it ("Failed to load mod ...disabling"): step start: the player exited (1) while loading; First anim file needs to be non-null. MMNGGNComplete (UnityEngine.GameObject) @ KAnimControllerBase.set_AnimFiles; HarmonyLib.HarmonyException: Patching exception in method virtual System.Void Artable::OnSpawn() ---> System.MissingFieldException: Field not found: .Artable.defaultArtworkId Due to: Using static instructions with literal field @ HarmonyLib.PatchFunctions.UpdateWrapper
+2924263228	2207	ok	ok	
+2877852779	2208	ok	ok	
+3764621728	2209	ok	ok	
+3781215906	2210	ok	ok	
+3772228364	2211	ok	ok	
+3576949496	2212	ok	ok	
+3219676318	2213	ok	ok	
+3804083827	2214	ok	ok	
+3671923806	2215	ok	ok	
+3014611371	2216	ok	ok	
+3530882685	2217	ok	ok	
+2933744769	2218	ok	ok	
+3777518780	2219	ok	ok	
+3762134857	2220	ok	ok	
+3745964188	2221	ok	ok	
+3531417534	2222	ok	ok	
+3754772127	2224	ok	ok	
+3793407198	2226	ok	ok	
+2889411141	2227	ok	ok	
+3813044956	2228	ok	ok	
+3803709010	2229	ok	ok	
+3471468928	2230	ok	ok	
+3372332347	2231	ok	ok	
+2871231353	2232	colony	-	the crash screen opens while the save loads; ForestTreeBranch (ForestTreeBranch_Original) ~~~!System.NullReferenceException: Object reference not set to an instance of an
+3075795676	2233	ok	colony	KelpPlant (KelpPlant_Original) Exception in: (KelpPlant).StandardCropPlant+States.root.alive.harvest.Enter @ SeedProducer.<>c.<.cctor>b__N_N; System.TypeLoadException: Could not resolve type with token N from typeref (expected class "Worker" in assembly "Assembly-CSharp, Version=N.N, Culture=neutral, PublicKeyToken=null") @ SeedProducer.<>c.<.cctor>b__N_N
+3258344801	2234	ok	ok	
+3756093578	2236	ok	ok	
+3565141562	2237	ok	ok	
+2851941027	2238	ok	ok	
+3010615067	2239	ok	ok	
+3809993771	2241	menu	-	the original disables it ("Failed to load mod ...disabling"): step start: the player exited (1) while loading; Fatal parse error in /home/nigit/projects/oni-brutal/.claude/worktrees/agent-aNdNfNeNfN/out/sweep/.original-N/OxygenNotIncluded_Data/StreamingAssets/dlc/expansionN/worldgen/subworlds/barren/LargeChasmStart.yaml; First anim file needs to be non-null. LargeSmartBatteryComplete (UnityEngine.GameObject) @ KAnimControllerBase.set_AnimFiles
+3764483034	2242	ok	ok	
+3773478487	2243	ok	ok	
+3056395846	2244	ok	ok	
+3756931433	2245	ok	ok	
+3744629230	2246	ok	ok	
+3776712228	2247	ok	ok	
+3091953604	2248	ok	ok	
+3767538624	2250	ok	ok	
+3589119260	2252	ok	ok	
+3711271278	2253	ok	ok	
+3046055353	2254	ok	ok	
+2931678158	2255	ok	ok	
+3713116459	2256	ok	ok	
+2959451670	2257	ok	ok	
+3681053575	2258	ok	ok	
+2855463973	2259	colony	-	the player exits (1) while loading; System.IndexOutOfRangeException: Index was outside the bounds of the array @ BuildingDef.PostProcess; null Exception in RegisterBuilding for type Radiation_Palm_辐射掌.RadiationLightNConfig from Radiation Palm 辐射掌 @ BuildingDef.PostProcess
+1737895533	2260	ok	ok	
+3775625682	2261	ok	ok	
+3800809242	2262	ok	ok	
+3771254504	2263	ok	ok	
+3576800211	2264	ok	ok	
+3733334259	2266	ok	ok	
+3742843221	2267	ok	ok	
+3011808756	2268	ok	ok	
+3531107726	2269	ok	ok	
+3674780225	2270	ok	ok	
 2733975631	2271	-	-	a translation: installed disabled, as a subscription leaves it; not swept
+3752870013	2273	ok	ok	
+2627722791	2274	ok	ok	

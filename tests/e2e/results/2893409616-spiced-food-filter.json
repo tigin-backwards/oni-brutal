@@ -1,0 +1,67 @@
+{
+ "spec": "mods/2893409616-spiced-food-filter.yaml",
+ "mods": [
+  "2893409616"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a storage bin's filter side screen shows the Only allow spiced items row; clicks on its check box set and clear the bin's spice filter (unspiced food forbidden); the rows dump and the side screen shot match",
+ "updated": "2026-10-27",
+ "commit": "ecf2040f",
+ "mod_dlls": {
+  "2893409616": {
+   "SpicedFoodFilter.dll": "66284cbcee31ee726fa219b5849abe8f21869535efd05691c57c854bf289c2e1"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-102545-317b751b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T10:33:06",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-110904-52ca1d78",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T11:09:04",
+    "lane": 15,
+    "reference_run": "20261027-102545-317b751b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "config-rows": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "side-screen": 0.001389
+    }
+   },
+   {
+    "run": "20261027-110904-52ca1d78",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T11:09:55",
+    "lane": 15,
+    "reference_run": "20261027-102545-317b751b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "config-rows": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "side-screen": 0.001389
+    }
+   }
+  ]
+ }
+}

@@ -213,18 +213,44 @@ namespace OniMoono.Engine
         {
             if (now == go.ActiveInHierarchy) return;
             var changed = new List<GameObjectNative>();
-            SetFlags(go, now, changed);
-            ReapplyDrivenOnActivation(go.Transform, changed);
-            if (now) AwakeAndEnableAll(changed);
+            if (now)
+            {
+                SetFlags(go, true, changed);
+                ReapplyDrivenOnActivation(go.Transform, changed);
+                AwakeAndEnableAll(changed);
+            }
             else
             {
-                foreach (var g in changed)
-                {
-                    foreach (var c in g.Components)
-                        if (c.Native != null) Disable(c);
-                    StopCoroutinesOn(g);
-                }
+                CollectActive(go, changed);
+                ReapplyDrivenOnActivation(go.Transform, changed);
+                DeactivateTree(go);
             }
+        }
+
+        static void CollectActive(GameObjectNative go, List<GameObjectNative> active)
+        {
+            if (!go.ActiveInHierarchy) return;
+            active.Add(go);
+            foreach (var child in go.Transform.Children) CollectActive(child.GameObject, active);
+        }
+
+        /// Leaves the active state, as Unity's player does on SetActive(false) and on destruction
+        /// (measured, UnityProbe PROBE_SCENARIO=deactorder): an object's activeInHierarchy turns
+        /// false when the walk reaches it, its children are walked, and only then do its own
+        /// OnDisables run (children first). So while one object's OnDisable runs, its later
+        /// siblings and their subtrees still read activeInHierarchy true, and an OnDisable that
+        /// deactivates one of them disables it there and then (the walk then skips it).
+        /// DetailCollapsableLabel.OnDisable hides its content rows, later siblings, only while
+        /// they still read active (issue #23).
+        static void DeactivateTree(GameObjectNative go)
+        {
+            if (!go.ActiveInHierarchy) return;
+            go.ActiveInHierarchy = false;
+            foreach (var child in go.Transform.Children)
+                if (child.GameObject.ActiveSelf && child.Parent == go.Transform) DeactivateTree(child.GameObject);
+            foreach (var c in go.Components)
+                if (c.Native != null) Disable(c);
+            StopCoroutinesOn(go);
         }
 
         /// RectTransform.reapplyDrivenProperties for every RectTransform whose activeInHierarchy
@@ -509,21 +535,7 @@ namespace OniMoono.Engine
             DestroySubtree(go);
         }
 
-        static void DeactivateForDestroy(GameObjectNative go)
-        {
-            var changed = new List<GameObjectNative>();
-            SetFlags(go, false, changed);
-            var deactivated = new HashSet<GameObjectNative>(changed);
-            void PostOrder(GameObjectNative g)
-            {
-                foreach (var child in g.Transform.Children)
-                    if (deactivated.Contains(child.GameObject)) PostOrder(child.GameObject);
-                foreach (var c in g.Components)
-                    if (c.Native != null) Disable(c);
-                StopCoroutinesOn(g);
-            }
-            PostOrder(go);
-        }
+        static void DeactivateForDestroy(GameObjectNative go) => DeactivateTree(go);
 
         /// OnDestroy for every component of the subtree first, then the objects are released:
         /// while the callbacks run, every object of the subtree is still alive (OnDestroy code

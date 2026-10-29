@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2990535748-renewable-abyssalite.yaml",
+ "mods": [
+  "2990535748"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the starmap patch logs that it took; the Glimmering Asteroid Field yields abyssalite with the mod's weights and the Stone Hatch turns tungsten into abyssalite",
+ "updated": "2026-10-27",
+ "commit": "0f154e5f",
+ "mod_dlls": {
+  "2990535748": {
+   "Renewable Abyssalite.dll": "826ddbb5625c7cadc1d9341965e2cf00308bb2cf0dda20ee586c9f09ae6ff795"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-112540-575b1ae3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T11:54:50",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-121711-054ea9aa",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T13:28:37",
+    "lane": 14,
+    "reference_run": "20261027-112540-575b1ae3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-121711-054ea9aa",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T14:14:11",
+    "lane": 14,
+    "reference_run": "20261027-112540-575b1ae3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

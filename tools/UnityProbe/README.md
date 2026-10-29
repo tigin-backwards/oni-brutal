@@ -204,6 +204,19 @@ toggle row. Compare the players with `tools/UnityProbe/lc-check.py diff ORIG OUR
 [--positions]`. `ugui.md` ("Moved children of layout groups", "RectMask2D culling") records what
 it measured.
 
+With `PROBE_SCENARIO=deactorder` only the deactivation-order probe runs (`DeactivateOrder.cs`,
+lines `DA …`, at mod load): a small hierarchy deactivated, activated and destroyed, with each
+`OnEnable` and `OnDisable` logging every object's `activeSelf`, `activeInHierarchy` and
+`isActiveAndEnabled`, and cases where an `OnDisable` deactivates a sibling or disables a
+component. Diff the players' `DA` lines; `LifecycleTests` (`DeactivationTurnsEachObjectInactive…`)
+encodes it.
+
+With `PROBE_SCENARIO=focusdelivery` only the focus probe runs (`FocusDelivery.cs`, lines `AF …`,
+from mod load): which MonoBehaviours `OnApplicationFocus` reaches. Move the X input focus away
+from the player's window and back (XSetInputFocus on the lane's display) while the main menu is
+up. Measured in U59: both players call it on enabled and disabled behaviours of active objects,
+and on an object with a timed Destroy pending, never on inactive objects.
+
 To run one of them in a player without the e2e runner's lanes, give it a scratch profile
 (`XDG_CONFIG_HOME`) whose `mods/Local/SemanticsProbe/` holds the DLL and the two yaml files, with
 the `mods.json` entry described above. Run the original player through `scripts/e2e.py`'s

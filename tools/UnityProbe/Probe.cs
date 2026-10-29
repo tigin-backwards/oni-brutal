@@ -109,6 +109,18 @@ namespace SemanticsProbe
                 go.AddComponent<ChildDimensions>();
                 return;
             }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "focusdelivery")
+            {
+                Rec.Log("=== values: focus delivery");
+                FocusDelivery.Run();
+                return;
+            }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "deactorder")
+            {
+                Rec.Log("=== values: deactivation order");
+                DeactivateOrder.Run();
+                return;
+            }
             if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "floatprec")
             {
                 Rec.Log("=== values: float precision");

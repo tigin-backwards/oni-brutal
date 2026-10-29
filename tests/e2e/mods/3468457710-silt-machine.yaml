@@ -1,0 +1,31 @@
+# 淤泥机fixed！Silt Machine！ (3468457710), class B.
+#
+# What it does: adds the Natural Plant Box (junnishengchan, 3x4, refined metal and plastic, 240
+# W, no research) to the Food menu: an oxylite refinery's body that takes polluted oxygen from a
+# gas pipe (0.5 kg/s) and gold delivered by hand (1 g/s) and drops slime in 10 kg lumps.
+# How a player reaches it: the build menu (Food).
+# What changes: slime without puffts.
+#
+# The Food menu lists it; its converter takes polluted oxygen and gold and makes slime.
+from: early-base
+mods: [3468457710]
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"junnishengchan\").WidthInCells": 3
+      "Assets.GetBuildingDef(\"junnishengchan\").HeightInCells": 4
+      "Assets.GetBuildingDef(\"junnishengchan\").EnergyConsumptionWhenActive": 240
+      "Assets.GetBuildingDef(\"junnishengchan\").InputConduitType": Gas
+      "Assets.GetPrefab(\"junnishengchan\").GetComponent<ElementConverter>.consumedElements[0].Tag": "== 'ContaminatedOxygen'"
+      "Assets.GetPrefab(\"junnishengchan\").GetComponent<ElementConverter>.consumedElements[1].Tag": "== 'Gold'"
+      "Assets.GetPrefab(\"junnishengchan\").GetComponent<ElementConverter>.outputElements[0].elementHash": SlimeMold
+      "Assets.GetPrefab(\"junnishengchan\").GetComponent<ManualDeliveryKG>.RequestedItemTag": "== 'Gold'"
+  - run: {seconds: 5}
+  - click: {ui: "**/PlanScreen/Toggle:Food"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/junnishengchan Group*", cond: stable}
+  - shot: {name: food-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - click: {ui: "**/BuildingGroups/**/Grid/junnishengchan Group*"}
+  - ui_wait: {path: "**/PlanBuildingSelectionPanel/ProductInfoScreen", cond: stable}
+  - expect_ui:
+      "**/ProductInfoScreen/**/TitleBar/**/Label": {text: "~Natural Plant Box"}
+  - key: {code: Escape}
+  - key: {code: Escape}

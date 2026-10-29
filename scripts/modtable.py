@@ -276,6 +276,11 @@ broken.update({
 broken.update({
     '2368685352': 'broken upstream: its compressors\' and ports\' operational-changed handler casts the event\'s data to a type the game no longer sends, so every finished Quantum Compressor or port throws an InvalidCastException in EnergyConsumer.OnPrefabInit and the crash screen opens (spec tests/e2e/mods/2368685352-quantum-compressors.yaml)',
 })
+# Found by the e2e specs of ranks 1641-1725: the spec fails the same way in the original.
+broken.update({
+    '3466461752': 'broken upstream: its builder\'s state machine calls `StateMachine.Instance.Subscribe(int, Action<object>)`, which the game no longer has, so the finished building throws a MissingMethodException in `LiquidLockBuilder.OnSpawn` and cannot be selected (spec tests/e2e/mods/3466461752-uf-liquid-lock-builder.yaml)',
+    '3332098282': 'broken upstream: its postfix on `SimpleInfoScreen.RefreshStoragePanel` calls `CollapsibleDetailContentPanel.SetLabelWithButton`, which the game no longer has, so selecting a building with storage throws a MissingMethodException and the crash screen opens (spec tests/e2e/mods/3332098282-advanced-storage-v4.yaml)',
+})
 # Flagged by onimaxxing as not loading, played by spec tests/e2e/mods/flagged-no-mod-info.yaml on
 # the base-game colony (game build U59-744825): KMod skips them in both players.
 NO_MOD_INFO = ('broken upstream: ships no mod_info.yaml, which KMod requires since 2021: it logs "Is '

@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2964396728-build-hot-buildings.yaml",
+ "mods": [
+  "2964396728"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a ladder built from 450 K obsidian is far hotter than the game's 45 °C cap",
+ "updated": "2026-10-27",
+ "commit": "2c41026e",
+ "mod_dlls": {
+  "2964396728": {
+   "BuildHotBuildings.dll": "1060082986599f0f985731c82d5b97900ce30389730a69587c0e85c9b3246409"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-114113-564df08f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T12:19:54",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-145108-889418eb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T14:52:18",
+    "lane": 15,
+    "reference_run": "20261027-114113-564df08f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-145108-889418eb",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T14:56:53",
+    "lane": 15,
+    "reference_run": "20261027-114113-564df08f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

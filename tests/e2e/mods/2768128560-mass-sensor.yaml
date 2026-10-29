@@ -1,0 +1,28 @@
+# Mass Sensor (2768128560), classes B, S, O.
+#
+# What it does: adds the Mass Sensor (KIN.MassSensor, 1x1, refined metal, in the Utilities
+# menu): every 4 s it adds up the mass of the element in its cell and every cell of that element
+# connected to it, and reports it under its name ("SENSOR #1", renamable) in a MASS SENSORS
+# category the mod adds to the All Resources screen (rows that can be pinned to the resources
+# panel); its PLib options pick what the rows show (name and element, name only, element only).
+# How a player reaches it: the build menu (Utilities); the resources panel's See All screen.
+# What changes: the mass of a gas or liquid pocket, at a glance.
+#
+# Setup builds a sensor in the oxygen of the corridor west of the printing pod. After a few
+# seconds it measures the corridor's oxygen; the resources panel's See All opens the All
+# Resources screen, which lists a MASS SENSORS category with the row "SENSOR #1 (Oxygen)".
+from: early-base
+mods: [2768128560]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"KIN.MassSensor\")", method: Build, args: [{"$": "Grid.XYToCell(111, 208)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 5}
+  - expect_state:
+      "all:MassSensor.Sensor::[0].Name": "== 'SENSOR #1'"
+      "all:MassSensor.Sensor::[0].Element.id": Oxygen
+      "all:MassSensor.Sensor::[0].Mass": "> 10"
+  - click: {ui: "**/PinnedResourcesPanel/Resources/EntryContainer/SeeAllButton"}
+  - ui_wait: {path: "**/TopRight/AllResourcesScreen/Scroll/RootList", cond: stable}
+  - expect_ui:
+      "**/AllResourcesScreen/Scroll/RootList/CategoryRow/Header/*Label": {any_text: "MASS SENSORS"}
+      "**/AllResourcesScreen/Scroll/RootList/CategoryRow/Container/ResourceRow/NameLabel": {any_text: "~SENSOR #1 ("}

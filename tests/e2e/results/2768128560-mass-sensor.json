@@ -1,0 +1,56 @@
+{
+ "spec": "mods/2768128560-mass-sensor.yaml",
+ "mods": [
+  "2768128560"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Mass Sensor in the corridor's oxygen measures it, and the All Resources screen lists its MASS SENSORS row",
+ "updated": "2026-10-27",
+ "commit": "ce13fcbb",
+ "mod_dlls": {
+  "2768128560": {
+   "MassSensor.dll": "72baaf48c845ef83f667e42720c37a7d99055190b83f7c904a61c95145cd3ddf",
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-114113-564df08f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T13:06:41",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-152708-8332c253",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T15:27:08",
+    "lane": 15,
+    "reference_run": "20261027-114113-564df08f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-152708-8332c253",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T15:28:01",
+    "lane": 15,
+    "reference_run": "20261027-114113-564df08f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

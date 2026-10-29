@@ -1,0 +1,22 @@
+# Enhanced Radiation Engine增强辐射粒子发动机 (2846006297), classes P, O.
+#
+# What it does: postfixes on HEPEngineConfig.DoPostConfigureComplete give the Spaced Out
+# Radiation Engine a radbolt fuel tank of 666,666 and a radbolt storage of 333,333 (its PLib
+# options in TempretureControler.json; the game's are 4000 each), lets it carry very tall
+# rockets (maximum height ROCKET_HEIGHT.VERY_TALL) and sets its efficiency to
+# ENGINE_EFFICIENCY.STRONG, as the game already has it.
+# How a player reaches it: a rocket built on a Radiation Engine.
+# What changes: the engine's range and the rocket's height limit.
+#
+# The Radiation Engine prefab carries the larger tank and storage, a maximum height of 35
+# (the game: 20) and the strong efficiency.
+from: early-base
+mods: [2846006297]
+options:
+  "2846006297": {$file: TempretureControler.json, a1: 666666, a2: 333333}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"HEPEngine\").GetComponent<HEPFuelTank>.physicalFuelCapacity": 666666
+      "Assets.GetPrefab(\"HEPEngine\").GetComponent<HighEnergyParticleStorage>.capacity": 333333
+      "Assets.GetPrefab(\"HEPEngine\").GetComponent<RocketEngineCluster>.maxHeight": 35
+      "Assets.GetPrefab(\"HEPEngine\").GetComponent<RocketEngineCluster>.efficiency": 60

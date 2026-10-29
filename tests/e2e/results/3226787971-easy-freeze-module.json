@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3226787971-easy-freeze-module.yaml",
+ "mods": [
+  "3226787971"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a finished freeze module turns into its insulated tiles, chute, freezing tile, rails and wire; the world shot matches",
+ "updated": "2026-10-27",
+ "commit": "53a7608c",
+ "mod_dlls": {
+  "3226787971": {
+   "EasyFreezeModule.dll": "b3167f936d621ec69249eccd74e22923926bfb33dea5d967c0d2d3c2858d3b93"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-114113-564df08f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T13:37:22",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-155500-58668cd5",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T15:55:00",
+    "lane": 14,
+    "reference_run": "20261027-114113-564df08f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "freezer": 0.008925
+    }
+   },
+   {
+    "run": "20261027-155500-58668cd5",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T15:55:54",
+    "lane": 14,
+    "reference_run": "20261027-114113-564df08f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "freezer": 0.008571
+    }
+   }
+  ]
+ }
+}

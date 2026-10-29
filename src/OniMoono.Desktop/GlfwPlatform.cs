@@ -536,9 +536,23 @@ namespace OniMoono.Desktop
             return m;
         }
 
+        /// What each held key's press reported, by scancode: its release reports the same, even
+        /// when the layout changed in between.
+        readonly Dictionary<int, KeyCode> pressed = new();
+
         void OnKey(GlfwWindow w, GlfwKey key, int scancode, GlfwKeyAction action, GlfwModifier mods)
         {
-            var code = KeyMap.ToUnity(key);
+            KeyCode code;
+            if (action == GlfwKeyAction.Release && pressed.Remove(scancode, out var down)) code = down;
+            else
+            {
+                code = KeyMap.ToUnity(key);
+                // Printable keys follow the layout unless the build asks for positions (KeyboardLayout).
+                if (KeyboardLayout.IsPrintable(key) && !OniMoono.Engine.Assets.ProjectSettings.UsePhysicalKeys
+                    && KeyboardLayout.Current(key, scancode) is { } layoutCode)
+                    code = layoutCode;
+                if (action == GlfwKeyAction.Press) pressed[scancode] = code;
+            }
             if (code == KeyCode.None) return;
             var modifiers = Modifiers();
             if ((mods & GlfwModifier.CapsLock) != 0) modifiers |= EventModifiers.CapsLock;

@@ -1,0 +1,23 @@
+# High Precision Temperature (3022469420), class P.
+#
+# What it does: transpilers on GameUtil.GetFormattedTemperature and AppendFormattedTemperature
+# raise the threshold below which the game shows a temperature with four decimals (0.1 degrees)
+# to float.MaxValue, so every temperature shown reads with up to four decimals: 26.9734 °C
+# where the game shows 27 °C.
+# How a player reaches it: anywhere a temperature is shown (hover card, details screen).
+# What changes: the temperature texts.
+#
+# The patch logs that it took; a formatted temperature keeps four decimals, and the hover card
+# over a corridor cell shows its gas temperature with decimals.
+from: early-base
+mods: [3022469420]
+require_log: ['High Precision Temperature: Successfully patched']
+steps:
+  - expect_state:
+      "GameUtil.GetFormattedTemperature(300.1234)": "== '26.9734 ºC'"
+      "GameUtil.GetFormattedTemperature(310.0)": "== '36.85 ºC'"
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [114, 208]}
+  - expect_ui:
+      "**/HoverTextScreen/LocText/Text": {any_text: "/^-?\\d+\\.\\d{2,4} ºC$/"}

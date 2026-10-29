@@ -1,0 +1,27 @@
+# Room Style Randomizer (3766516655), class T.
+#
+# What it does: adds a "Style" tool to the tool menu (a DragTool copying the Clear tool's
+# cursor and area visuals). Dragging it over an area (or clicking a room) gives the buildings
+# there random unlocked blueprints (facades), the same facade for each building type within a
+# room, spread evenly over the candidates; hovering highlights the room.
+# How a player reaches it: the tool menu's Style button.
+# What changes: buildings' skins.
+#
+# The Style tool is picked from the tool menu (the tool menu is shot) and dragged over the east
+# corridor with the cot; the mod logs what it applied. Which skins it picks is random, so only
+# that it ran is checked.
+from: early-base
+mods: [3766516655]
+require_log: ['\[RoomStyleRandomizer\] Applied randomized room style']
+steps:
+  - driver: {camera.set: {cell: [126, 208], ortho: 12}}
+  - expect_state:
+      "count:PlayerController.Instance.tools[*] if .name == RoomStyleRandomizerTool": 1
+  - tool: {toolbar: Style}
+  - expect_state:
+      "PlayerController.Instance.ActiveTool.name": RoomStyleRandomizerTool
+  - shot: {name: toolmenu, crop: "**/ToolMenu", threshold: 0.04}
+  - drag: {from: [130, 207], to: [135, 209]}
+  - expect_state:
+      "PlayerController.Instance.ActiveTool.name": RoomStyleRandomizerTool
+  - key: {code: Escape}

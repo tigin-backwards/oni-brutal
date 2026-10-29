@@ -147,6 +147,8 @@ namespace OniMoono.Host
                 image = anyCpu;
                 EngineLog.Engine($"mod image: {Path.GetFileName(path)} is IL only and marked to run in 32-bit processes only; loaded without that mark, as on Mono");
             }
+            // Types nested in <Module> load, as on Mono (ModuleNestedTypes).
+            if (ModuleNestedTypes.Adjust(image ?? File.ReadAllBytes(path), ref symbols, path) is { } unnested) image = unnested;
             // A nested type of the game's strings that the game no longer has is bound as Mono binds
             // it (MonoNestedTypeRefs).
             if (MonoNestedTypeRefs.Adjust(image ?? File.ReadAllBytes(path), ref symbols, path) is { } bound) image = bound;

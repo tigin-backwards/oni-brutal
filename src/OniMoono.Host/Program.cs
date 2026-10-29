@@ -1108,6 +1108,58 @@ namespace OniMoono.Host
                     try { Directory.Delete(dir, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
                 }
             });
+            Check("A mod with types nested in <Module> (ModuleNestedTypes)", () =>
+            {
+                ModAccess.Install();
+                var dir = Directory.CreateTempSubdirectory("oni-moono-check-").FullName;
+                try
+                {
+                    // As Abyssalite's obfuscated Katairite.dll: Hidden, nested in <Module>, with a type
+                    // nested in it, calls a private method of <Module>.
+                    var name = "OniMoonoCheckGlobalNested";
+                    using (var assembly = Cecil.AssemblyDefinition.CreateAssembly(new Cecil.AssemblyNameDefinition(name, new Version(1, 0)), name, Cecil.ModuleKind.Dll))
+                    {
+                        var module = assembly.MainModule;
+                        var global = module.Types.Single(t => t.Name == "<Module>");
+                        var secret = new Cecil.MethodDefinition("Secret", Cecil.MethodAttributes.Private | Cecil.MethodAttributes.Static, module.TypeSystem.Int32);
+                        secret.Body.GetILProcessor().Emit(Cecil.Cil.OpCodes.Ldc_I4_7);
+                        secret.Body.GetILProcessor().Emit(Cecil.Cil.OpCodes.Ret);
+                        global.Methods.Add(secret);
+                        var hidden = new Cecil.TypeDefinition("", "Hidden", Cecil.TypeAttributes.NestedAssembly | Cecil.TypeAttributes.Abstract | Cecil.TypeAttributes.Sealed, module.TypeSystem.Object);
+                        global.NestedTypes.Add(hidden);
+                        var inner = new Cecil.TypeDefinition("", "Inner", Cecil.TypeAttributes.NestedAssembly | Cecil.TypeAttributes.Abstract | Cecil.TypeAttributes.Sealed, module.TypeSystem.Object);
+                        hidden.NestedTypes.Add(inner);
+                        var get = new Cecil.MethodDefinition("Get", Cecil.MethodAttributes.Assembly | Cecil.MethodAttributes.Static, module.TypeSystem.Int32);
+                        get.Body.GetILProcessor().Emit(Cecil.Cil.OpCodes.Call, secret);
+                        get.Body.GetILProcessor().Emit(Cecil.Cil.OpCodes.Ret);
+                        inner.Methods.Add(get);
+                        var probe = new Cecil.TypeDefinition("", "Probe", Cecil.TypeAttributes.Public | Cecil.TypeAttributes.Abstract | Cecil.TypeAttributes.Sealed, module.TypeSystem.Object);
+                        module.Types.Add(probe);
+                        var run = new Cecil.MethodDefinition("Run", Cecil.MethodAttributes.Public | Cecil.MethodAttributes.Static, module.TypeSystem.Int32);
+                        run.Body.GetILProcessor().Emit(Cecil.Cil.OpCodes.Call, get);
+                        run.Body.GetILProcessor().Emit(Cecil.Cil.OpCodes.Ret);
+                        probe.Methods.Add(run);
+                        assembly.Write(Path.Combine(dir, name + ".dll"));
+                    }
+                    var path = Path.Combine(dir, name + ".dll");
+                    try
+                    {
+                        new System.Runtime.Loader.AssemblyLoadContext("OniMoono check global nested", isCollectible: true).LoadFromAssemblyPath(path).GetTypes();
+                        throw new InvalidOperationException("CoreCLR loaded the types nested in <Module> as they are");
+                    }
+                    catch (BadImageFormatException)
+                    {
+                    }
+                    var loaded = ModAccess.LoadFrom(path);
+                    var types = loaded.GetTypes();
+                    var result = (int)loaded.GetType("Probe")!.GetMethod("Run")!.Invoke(null, null)!;
+                    return result == 7 && types.Length == 3 ? "its types load and run, as on Mono" : throw new InvalidOperationException($"returned {result}, {types.Length} types");
+                }
+                finally
+                {
+                    try { Directory.Delete(dir, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+                }
+            });
             Check("A mod calling a protected game method of a class it does not derive from (ModAccess)", () =>
             {
                 ModAccess.Install();

@@ -147,7 +147,8 @@ are rewritten as its assemblies load (D29), in the same pass as its directory li
 the double close in 0Harmony's MonoMod (D31) and its thread aborts (D47). The game's Harmony is
 adjusted where patches would run differently on CoreCLR (D12–D14, D17–D21, D33, D34, D43), and
 mods' assemblies are rewritten as they load where their IL relies on Mono (D11, D22, D23,
-D27–D32, D40, D42, D47, D50). No other game IL is touched.
+D27–D32, D40, D42, D47, D50, D51). No other game IL
+is touched.
 
 | Mono provided | Host provides | Needed by |
 |---|---|---|
@@ -1176,6 +1177,20 @@ game or mod code can notice. Each says how it is resolved, or why it is kept.
   with the flag cleared, before its other passes, and its `Location` stays its file's; IL runs the
   same either way. An image with native code is left as it is (it cannot run here).
   `--check-types` loads an x86 IL-only image marked so (CoreCLR alone refuses it) and runs it.
+- **D51 Types nested in `<Module>`.** Obfuscators nest types in the module's global type (the
+  NestedClass table names TypeDef 1 as their enclosing class). Mono loads them as any nested
+  type: `<Module>` is a class like the others. CoreCLR's table of the classes an assembly
+  declares leaves `<Module>` out, so such a type, and every type nested in it, fails to load
+  ("Enclosing type(s) not found for type … in assembly …", BadImageFormatException), and KMod
+  disables the mod (Abyssalite's `Katairite.dll` nests 8 of its 15 types in `<Module>` and 3 in
+  those, Refrigerator's `Refrigerator.dll` 8 of 16 and 4). **Resolved in** `ModuleNestedTypes`, before `MonoNestedTypeRefs`
+  as `ModAccess` loads a mod: the types nested in `<Module>` become top-level types (public ones
+  public, the others internal) with their own nested types, and `<Module>`'s private and
+  protected members become internal, so the code that could reach them as nested types still
+  can. Kept: those types' names lose their `<Module>+` prefix and their `DeclaringType` is null,
+  where Mono's is `<Module>`. `--check-types` loads a mod whose type nested in `<Module>` holds a
+  type calling a private method of `<Module>` (CoreCLR alone refuses it as it is), lists its
+  types and runs it.
 
 ## 3. The engine API (`OniMoono.UnityEngine`)
 

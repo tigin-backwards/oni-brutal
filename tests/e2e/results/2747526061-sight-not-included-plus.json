@@ -1,0 +1,56 @@
+{
+ "spec": "mods/2747526061-sight-not-included-plus.yaml",
+ "mods": [
+  "2747526061"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with the Small option every Duplicant's sight radius is 8 (inner 6)",
+ "updated": "2026-10-27",
+ "commit": "ecf2040f",
+ "mod_dlls": {
+  "2747526061": {
+   "PLib.dll": "3b174379c1bc41e51c6771c1d5b1d66494d96c4fe9e7cb0d54ef38887d87dedb",
+   "SightNotIncluded.dll": "759e3b2f17b858212ab8f75a71e3e68148ca2b9aa337217ef3b6618a472b7755"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-103032-617b0bb3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T10:54:47",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-112104-2c852eb8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T11:21:04",
+    "lane": 15,
+    "reference_run": "20261027-103032-617b0bb3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-112104-2c852eb8",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T11:21:53",
+    "lane": 15,
+    "reference_run": "20261027-103032-617b0bb3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

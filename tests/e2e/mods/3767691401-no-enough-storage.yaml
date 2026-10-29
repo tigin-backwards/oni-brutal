@@ -1,0 +1,44 @@
+# No Enough Storage (3767691401), class B.
+#
+# What it does: adds four huge storages: Ultra Large Liquid Storage and Ultra Large Gas Storage
+# (2x3 reservoirs for 100,000,000,000 kg with a full-signal port, after Improved Liquid Piping
+# and HVAC), Ultra Large Solid Storage (a 2x3 storage bin of raw minerals for 100,000,000,000
+# kg, after Smart Storage) and Ultra Large Food Storage (a powered 1x2 refrigerator, after Food
+# Repurposing), with codex entries; it also raises the game's mass cap per item
+# (PrimaryElement.MAX_MASS) to 10^12 kg.
+# How a player reaches it: the build menu (Base, Food), after the research; the storage's filter
+# side screen.
+# What changes: storage that never fills.
+#
+# Setup researches Smart Storage. An Ultra Large Solid Storage is ordered in the corridor west
+# of the printing pod out of sandstone and built; its filter side screen takes sandstone, and
+# Duplicants store sandstone in it.
+from: early-base
+mods: [3767691401]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"SmartStorage\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"SmartStorage\").unlockedItemIDs": {contains: SolidBlackHoler}
+      "Db.Get().Techs.Get(\"ImprovedLiquidPiping\").unlockedItemIDs": {contains: LiquidBlackHoler}
+      "Assets.GetPrefab(\"SolidBlackHoler\").GetComponent<Storage>.capacityKg": 100000000000
+      "Assets.GetPrefab(\"GasBlackHoler\").GetComponent<Storage>.capacityKg": 100000000000
+      "PrimaryElement.MAX_MASS": 1000000000000
+  - run: {seconds: 5}
+  - build: {prefab: SolidBlackHoler, at: [113, 206], material: SandStone}
+  - expect: {blueprints: {SolidBlackHoler: 1}}
+  - run: {seconds: 900, until: {buildings: {SolidBlackHoler: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: SolidBlackHoler}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/TreeFilterableSideScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Ultra Large Solid Storage"}
+  - type: {ui: "**/TreeFilterableSideScreen/SearchRow/FilterInputField", text: "sandstone"}
+  - ui_wait: {path: "**/TreeFilterableRow/Elements/Element/CheckBox", cond: stable}
+  - click: {ui: "**/TreeFilterableRow/Elements/Element/CheckBox"}
+  - expect_state: {"selected:GetComponent<TreeFilterable>.AcceptedTags": {contains: SandStone}}
+  - key: {code: Escape}
+  - run: {seconds: 300}
+  - expect_state:
+      "all:StorageLocker::[0].GetComponent<Storage>.MassStored()": "> 0"

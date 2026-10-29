@@ -1,0 +1,26 @@
+# Better Isoresin Tree (SapTreeSettings, 2467498655), class P; PLib options.
+#
+# What it does: a postfix on SapTreeConfig.CreatePrefab sets the Experiment 52B (sap tree)
+# from options: how much food it eats per swing (EatRate), resin per 120,000 kcal (Ratio),
+# its stomach size and its ooze rate.
+# How a player reaches it: the mod's PLib options; a sap tree.
+# What changes: a tunable isoresin tree.
+#
+# The options double every value (0.1 kg a swing, 1200 kg of resin per 120,000 kcal, 10 kg
+# of stomach, 4 kg/s of ooze); the tree's def carries them, and a tree spawned by setup in
+# the room east of the printing pod is a sap tree.
+from: early-base
+mods: [2467498655]
+options:
+  SapTreeSettings: {EatRate: 0.1, Ratio: 1200, StomachSize: 10, OozeRate: 4}
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131786, 0, 0, \"SapTree\", \"BuildingFront\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"SapTree\").GetComponent<StateMachineController>.cmpdef.defs[0].stomachSize": 10
+      "Assets.GetPrefab(\"SapTree\").GetComponent<StateMachineController>.cmpdef.defs[0].oozeRate": 4
+      "Assets.GetPrefab(\"SapTree\").GetComponent<StateMachineController>.cmpdef.defs[0].massEatRate": [">= 0.0999", "<= 0.1001"]
+      "Assets.GetPrefab(\"SapTree\").GetComponent<StateMachineController>.cmpdef.defs[0].kcalorieToKGConversionRatio": [">= 0.00999", "<= 0.01001"]
+  - run: {seconds: 3}
+  - expect_state:
+      "count:all:KPrefabID::[*] if .PrefabTag.Name == SapTree": 1

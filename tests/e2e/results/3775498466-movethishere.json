@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3775498466-movethishere.yaml",
+ "mods": [
+  "3775498466"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the hauling point's card hides its materials (shot); placed, it stands at once",
+ "updated": "2026-10-29",
+ "commit": "0c60ca12",
+ "mod_dlls": {
+  "3775498466": {
+   "MoveThisHere.dll": "f122a98995a9e4bc32e45e4bc7b07c81a9d5e20daa601ec9decef29d42e08092"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-145102-18288f91",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T16:00:43",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-010732-6b6febd8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T01:22:43",
+    "lane": 16,
+    "reference_run": "20261027-145102-18288f91",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.0
+    }
+   },
+   {
+    "run": "20261029-010732-6b6febd8",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T01:23:44",
+    "lane": 16,
+    "reference_run": "20261027-145102-18288f91",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.0
+    }
+   }
+  ]
+ }
+}

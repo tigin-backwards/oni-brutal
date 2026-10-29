@@ -1,0 +1,28 @@
+# Choose an Ingredient (3744010266), classes P, U; PLib options.
+#
+# What it does: the Ethanol Distiller, Wood Burner, Campfire (Wood Heater), Deodorizer, Water
+# Sieve and Ice-E Fan get a flat tag filter side screen listing every element their delivery
+# asks for (sand or regolith for filters, wood, ice): unchecked ones are forbidden to the
+# delivery errand and dropped if stored. All are allowed on new buildings by default
+# (option), and only discovered ones are listed (option).
+# How a player reaches it: select one of those buildings; its ingredient side screen.
+# What changes: pick which ingredient a building takes.
+#
+# setup builds a Deodorizer in the corridor west of the printing pod; selected, it shows the
+# filter side screen (dumped); unchecking an element forbids it to the delivery.
+from: early-base
+mods: [3744010266]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"AirFilter\")", method: Build, args: [131765, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"AirFilter\").GetComponent<FlatTagFilterable>": exists
+      "Assets.GetPrefab(\"WaterPurifier\").GetComponent<ChooseIngredient.MDKGChooser>": exists
+  - run: {seconds: 2}
+  - expect: {buildings: {AirFilter: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: AirFilter}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/FlatTagFilterSideScreen*", cond: stable}
+  - ui_dump: {name: filter, root: "**/DetailsScreen/SideScreen/**/FlatTagFilterSideScreen*"}
+  - expect_state:
+      "selected:GetComponent<ManualDeliveryKG>.ForbiddenTags.Length": 0

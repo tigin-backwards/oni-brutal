@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3067514896-longevity-moo.yaml",
+ "mods": [
+  "3067514896"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Gassy Moo's base trait gives a maximum age of 1000 cycles, and a moo set down has that maximum age",
+ "updated": "2026-10-27",
+ "commit": "ecf2040f",
+ "mod_dlls": {
+  "3067514896": {
+   "K-11-╗ε╡├╛├╡─║ú┼ú.dll": "d502c9ef3f06c958e7f20a8b4c7a159fbd5fb09ed1b01cd0a58048ddc184821c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-103032-617b0bb3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T10:42:29",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-111750-afc50dba",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T11:17:50",
+    "lane": 15,
+    "reference_run": "20261027-103032-617b0bb3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-111750-afc50dba",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T11:18:41",
+    "lane": 15,
+    "reference_run": "20261027-103032-617b0bb3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

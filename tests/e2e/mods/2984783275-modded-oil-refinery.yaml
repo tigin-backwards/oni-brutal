@@ -1,0 +1,35 @@
+# 魔改原油精炼器 (2984783275), class B.
+#
+# What it does: adds OilRefinery1, a 4x4 oil refinery of any metal in the Refining menu after
+# Improved Combustion that runs without power or a Duplicant: from a liquid pipe it takes water
+# (1 kg/s, up to 1000 kg stored) and turns it into 10 kg/s of petroleum, which it sends out of
+# its liquid output, and 1 kg/s of natural gas, which it vents.
+# How a player reaches it: the build menu (Refining), after the research.
+# What changes: petroleum from water.
+#
+# Setup researches Improved Combustion, clears the rock above the corridor west of the printing
+# pod (the corridor is 3 cells high) and tiles over the pit in its floor, builds one there and
+# puts 100 kg of water in its storage (what its pipe would bring); it holds the water. Whether it
+# runs is not shown: it does not become operational there, in the original either.
+from: early-base
+mods: [2984783275]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"ImprovedCombustion\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [133673, Oxygen, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1, 293]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [133674, Oxygen, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1, 293]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [133675, Oxygen, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1, 293]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [133676, Oxygen, {"$": "CellEventLogger.Instance.SandBoxTool"}, 1, 293]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Tile\")", method: Build, args: [{"$": "Grid.XYToCell(113, 206)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Tile\")", method: Build, args: [{"$": "Grid.XYToCell(114, 206)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"OilRefinery1\")", method: Build, args: [{"$": "Grid.XYToCell(114, 207)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "last:GetComponent<Storage>", method: AddLiquid, args: [Water, 100, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"ImprovedCombustion\").unlockedItemIDs": {contains: OilRefinery1}
+      "Assets.GetBuildingDef(\"OilRefinery1\").RequiresPowerInput": false
+      "Assets.GetPrefab(\"OilRefinery1\").GetComponent<ElementConverter>.outputElements[0].elementHash": Petroleum
+      "all:魔改原油精炼器.魔改原油精炼器+AutomaticOilRefinery::[0].GetComponent<Storage>.GetMassAvailable(\"Water\")": 100
+  - run: {seconds: 10}
+  - expect_state:
+      "all:魔改原油精炼器.魔改原油精炼器+AutomaticOilRefinery::[0].GetComponent<Storage>.GetMassAvailable(\"Water\")": 100

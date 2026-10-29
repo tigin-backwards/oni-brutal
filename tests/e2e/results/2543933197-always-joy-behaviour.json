@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2543933197-always-joy-behaviour.yaml",
+ "mods": [
+  "2543933197"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "after a minute of play all three Duplicants are overjoyed",
+ "updated": "2026-10-27",
+ "commit": "6d4545b9",
+ "mod_dlls": {
+  "2543933197": {
+   "AlwaysJoy.dll": "07ddc3d9162cb6d339a247b6b9396d4f35b1040933d0e8d757106e006185cb5b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-122300-34502628",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T12:44:10",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-130634-0528365b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T13:16:42",
+    "lane": 16,
+    "reference_run": "20261027-122300-34502628",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-130634-0528365b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T13:18:48",
+    "lane": 16,
+    "reference_run": "20261027-122300-34502628",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

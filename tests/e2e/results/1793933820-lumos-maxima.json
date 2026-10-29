@@ -1,0 +1,55 @@
+{
+ "spec": "mods/1793933820-lumos-maxima.yaml",
+ "mods": [
+  "1793933820"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Shine Bug prefabs have 900 lux plus 300 a tier, and a Shine Bug set down gives 1200 lux",
+ "updated": "2026-10-29",
+ "commit": "c0943b9a",
+ "mod_dlls": {
+  "1793933820": {
+   "LumosMaxima.dll": "2350181012aaf4c44b14405800e0438cc334031ede46cfbf806553efaab28969"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-010724-da620746",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T02:10:35",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-030954-d353d13e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T03:09:54",
+    "lane": 15,
+    "reference_run": "20261029-010724-da620746",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-030954-d353d13e",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T03:10:40",
+    "lane": 15,
+    "reference_run": "20261029-010724-da620746",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

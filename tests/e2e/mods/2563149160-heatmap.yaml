@@ -1,0 +1,29 @@
+# HeatMap (2563149160), classes P, U; PLib UI.
+#
+# What it does: opening the Temperature overlay shows a PLib panel ("温度控制", temperature
+# control) on the tool menu with two sliders, the overlay's lower and upper temperature
+# bounds, a checkbox keeping their distance and a reset button. Moving a slider spreads the
+# overlay's colour thresholds (SimDebugView.temperatureThresholds) between the bounds;
+# closing the overlay hides the panel.
+# How a player reaches it: the Temperature overlay (F3).
+# What changes: a temperature overlay with an adjustable colour range.
+#
+# F3 opens the overlay and the panel (dumped, shot); a click on the lower slider's track
+# moves the lower bound and the thresholds follow; F3 again closes it.
+from: early-base
+mods: [2563149160]
+steps:
+  - run: {seconds: 2}
+  - key: {code: F3}
+  - ui_wait: {path: "**/ToolMenu/Border", cond: stable}
+  - ui_dump: {name: panel, root: "**/ToolMenu/Border"}
+  - shot: {name: panel, crop: "**/ToolMenu/Border", threshold: 0.04}
+  - expect_state:
+      "SimDebugView.Instance.temperatureThresholds[3].value": {save_as: before}
+  - click: {ui: "**/ToolMenu/Border/**/lowerSlider"}
+  - run: {seconds: 1}
+  - expect_state:
+      "type:reinwd.HeatMap.HeatMapControl::modified": true
+      "SimDebugView.Instance.temperatureThresholds[3].value": ["!= before", "== original"]
+  - key: {code: F3}
+  - ui_wait: {path: "**/ToolMenu/Border", cond: gone}

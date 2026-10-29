@@ -1,0 +1,23 @@
+# Pip Licks Butt (3802090892), classes P (art).
+#
+# What it does: gives Pips (squirrels on the squirrel nav grid) a monitor that, about three
+# times a cycle with a cooldown between, makes the Pip want to lick its butt, and a chore-table
+# behaviour that plays the mod's lick_butt animation (plb_pip_licks_butt_kanim, with a sound)
+# when it does.
+# How a player reaches it: watching a Pip.
+# What changes: an idle animation for Pips.
+#
+# The mod's animation is loaded. A Pip set down in setup in the corridor west of the printing
+# pod rolls its waits: within a cycle the monitor has sent it to lick and rolled its next wait
+# (rolled again after each lick).
+from: early-base
+mods: [3802090892]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131762, 0, 0, \"Squirrel\", \"Creatures\")", method: SetActive, args: [true]}}
+  - driver: {count: {methods: ["PipLicksButt.Content.Scripts.PipKicksButtMonitor+Instance:NextWaitDuration"]}}
+steps:
+  - expect_state:
+      "Assets.GetAnim(\"plb_pip_licks_butt_kanim\")": exists
+  - run: {seconds: 600}
+  - expect_state:
+      "E2eDriver.Counting.Of(\"PipLicksButt.Content.Scripts.PipKicksButtMonitor+Instance:NextWaitDuration\")": ">= 1"

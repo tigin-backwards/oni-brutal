@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2951142821-polluted-water-electrolyzer.yaml",
+ "mods": [
+  "2951142821"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "an Electrolyzer built and selected has a second converter making polluted oxygen",
+ "updated": "2026-10-27",
+ "commit": "8edec30d",
+ "mod_dlls": {
+  "2951142821": {
+   "PollutedElectrolyzer.dll": "52e0cf3293620bbbc171219696f18f1f435224c1b19b8a6ef6f9ced12491ac56"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-131522-a47d65cb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T13:59:41",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-142041-80e4c84c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T14:39:05",
+    "lane": 16,
+    "reference_run": "20261027-131522-a47d65cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-142041-80e4c84c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T14:39:53",
+    "lane": 16,
+    "reference_run": "20261027-131522-a47d65cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

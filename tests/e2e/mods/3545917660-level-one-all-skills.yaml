@@ -1,0 +1,31 @@
+# 小人一级全技能 (Duplicants' first-level skills grant everything, 3545917660), class P.
+#
+# What it does: a postfix on Db.Initialize appends many perks to each first-level skill:
+# Hard Digging (Mining1) grants every digging perk up to radioactive materials, Improved
+# Carrying, Electrical Engineering and the like are folded into the first tier of each tree,
+# with large athletics bonuses on all of them.
+# How a player reaches it: learn a first-level skill in the Skills screen.
+# What changes: one skill point makes a Duplicant a master of its tree.
+#
+# setup gives Nikola a skill point; in the Skills screen he is picked and learns Hard
+# Digging, and has the perks for digging the hardest and radioactive materials.
+from: early-base
+mods: [3545917660]
+setup:
+  - driver: {setup.call: {target: "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>", method: ForceAddSkillPoint}}
+steps:
+  - expect_state:
+      "Db.Get().Skills.Mining1.perks.Count": "> 15"
+      "Components.LiveMinionIdentities.Items[1].name": Nikola
+      "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>.HasPerk(\"CanDigDiamondAndObsidan\")": false
+  - open: {management: skills}
+  - ui_wait: {path: "**/SkillsScreen/Minions/SelectedDuplicant/Top/BoxButtons/CurrentLevel", cond: stable}
+  - click: {text: "~Nikola", under: "**/SkillsScreen"}
+  - ui_wait: {path: "**/SkillsScreen/Minions/SelectedDuplicant/Top/BoxButtons/CurrentLevel", cond: stable}
+  - expect_state:
+      "ui:**/SkillsScreen::GetComponent<SkillsScreen>.CurrentlySelectedMinion.GetProperName()": Nikola
+  - click: {text: "~Hard Digging</link>", under: "**/SkillsScreen"}
+  - expect_state:
+      "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>.HasMasteredSkill(\"Mining1\")": true
+      "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>.HasPerk(\"CanDigDiamondAndObsidan\")": true
+      "Components.LiveMinionIdentities.Items[1].GetComponent<MinionResume>.HasPerk(\"CanDigCorium\")": true

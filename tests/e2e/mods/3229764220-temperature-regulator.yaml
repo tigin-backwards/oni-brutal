@@ -1,0 +1,36 @@
+# 温度调节器 (3229764220), classes S, P.
+#
+# What it does: gives the Thermo Regulator and the Thermo Aquatuner a slider side screen and a
+# check box: the slider sets how much they change the temperature (-100 to 100 degrees, the
+# game's -14), and power draw scales with it; with the box ("绝对温度", absolute temperature) ticked
+# the slider sets the output temperature instead (0 to 4000 degrees) and the change follows the
+# input's temperature.
+# How a player reaches it: a Thermo Regulator's or Aquatuner's side screens.
+# What changes: how far, or to what, they heat or cool.
+#
+# Setup builds a Thermo Regulator in the corridor west of the printing pod. Selected, its slider
+# reads -14; -20 typed into its number field sets a change of -20 degrees on the conditioner and
+# 240 W x 20/14 on its power use; the absolute check box turns the slider's range to 0 to 4000.
+from: early-base
+mods: [3229764220]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"AirConditioner\")", method: Build, args: [{"$": "Grid.XYToCell(113, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: AirConditioner}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/SingleSliderSideScreen/Contents/NumberInputField", cond: stable}
+  - expect_ui:
+      "**/SingleSliderSideScreen/Contents/MinLabel": {text: "~-100"}
+      "**/SingleSliderSideScreen/Contents/MaxLabel": {text: "~100"}
+      "**/SingleCheckboxSideScreen/Contents/CheckboxGroup/Label": {text: "绝对温度"}
+  - ui_dump: {name: slider, root: "**/DetailsScreen/SideScreen/**/SingleSliderSideScreen", mask_text: ['​']}
+  - type: {ui: "**/SingleSliderSideScreen/Contents/NumberInputField", text: "-20", clear: true, enter: true}
+  - expect_state:
+      "selected:GetComponent<LStudioONI.Conditioner>.RelativeTemp": -20
+      "selected:AirConditioner.temperatureDelta": -20
+  - expect_state: {"selected:EnergyConsumer.BaseWattageRating": "== original"}
+  - click: {ui: "**/SingleCheckboxSideScreen/Contents/CheckboxGroup/CheckBox"}
+  - expect_state: {"selected:GetComponent<LStudioONI.Conditioner>.Enable": true}
+  - expect_ui:
+      "**/SingleSliderSideScreen/Contents/MaxLabel": {text: "~4000"}

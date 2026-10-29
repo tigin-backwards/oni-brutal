@@ -1,0 +1,56 @@
+{
+ "spec": "mods/3803708767-crafted-quality.yaml",
+ "mods": [
+  "3803708767"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with quality on, a Cot built by the Duplicants gets a quality grade",
+ "updated": "2026-10-29",
+ "commit": "0c60ca12",
+ "mod_dlls": {
+  "3803708767": {
+   "CraftedQuality.dll": "f02ceac3511bec088219f5711e145d188d20bee8b2756674602679521eb77b31",
+   "PLib.dll": "d17686d90670c40bd9ae84ce9cb9964985657ad6d79f84eb1243f901cb39b04d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-145102-18288f91",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T16:20:02",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-010732-6b6febd8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T01:29:03",
+    "lane": 16,
+    "reference_run": "20261027-145102-18288f91",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-010732-6b6febd8",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T01:30:59",
+    "lane": 16,
+    "reference_run": "20261027-145102-18288f91",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

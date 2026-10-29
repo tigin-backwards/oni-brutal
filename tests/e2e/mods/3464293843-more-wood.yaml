@@ -1,0 +1,27 @@
+# 狐鹿-木材强化 More Wood (3464293843), classes P, O.
+#
+# What it does: a postfix on WoodDeerConfig.CreatePrefab sets the wood the Wood Deer drops when
+# sheared (its WellFedShearable def's dropMass, 360 kg in the game) to its PLib option
+# "每次剪毛掉落量(kg)", 900 kg by default (100 to 5000, restart required), and logs the value.
+# How a player reaches it: shearing a Wood Deer at a shearing station.
+# What changes: the wood each shearing gives.
+#
+# The option is set to its default explicitly; the Wood Deer prefab's shearable def drops 900 kg
+# of wood logs, and a Wood Deer set down in setup carries the same def.
+from: early-base
+mods: [3464293843]
+options:
+  "3464293843": {WoodPerShear: 900}
+require_log: ['\[狐鹿剪毛MOD\] 已设置掉落量：900kg']
+setup:
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [131762, 0, 0, "WoodDeer", "Creatures"]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "SelectTool.Instance", method: Select, args: [{"$": "last:GetComponent<KSelectable>"}]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"WoodDeer\").GetComponent<StateMachineController>.cmpdef.defs[18].itemDroppedOnShear": "== 'WoodLog'"
+      "Assets.GetPrefab(\"WoodDeer\").GetComponent<StateMachineController>.cmpdef.defs[18].dropMass": 900
+  - run: {seconds: 2}
+  - expect_state:
+      "selected:KPrefabID.PrefabTag.Name": WoodDeer
+      "selected:StateMachineController.cmpdef.defs[18].dropMass": 900

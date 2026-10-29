@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3747871003-orehull-harvests-plants.yaml",
+ "mods": [
+  "3747871003"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the adult Orehull prefab has the Stomp monitor (60 s, radius 10) and the stomping animation; one set down carries it",
+ "updated": "2026-10-27",
+ "commit": "0f154e5f",
+ "mod_dlls": {
+  "3747871003": {
+   "OrehullHarvester.dll": "1330c22dc526e5985d012a2495d44bde8977b47a6a1659b6be07a114b5b670bf"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-112540-575b1ae3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T11:57:50",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-141455-4c009761",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T14:14:55",
+    "lane": 14,
+    "reference_run": "20261027-112540-575b1ae3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-141455-4c009761",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T14:15:47",
+    "lane": 14,
+    "reference_run": "20261027-112540-575b1ae3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

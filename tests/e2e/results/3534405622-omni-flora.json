@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3534405622-omni-flora.yaml",
+ "mods": [
+  "3534405622"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a flower pot's planter side screen plants a Myrth Rose seed, and Duplicants plant it; the seeds are care packages",
+ "updated": "2026-10-29",
+ "commit": "568f07b9",
+ "mod_dlls": {
+  "3534405622": {
+   "SharlesPlants.dll": "362e89b7040c3acb9dc85164392e02ce986aaa4071eccee173ff983b91d6daae"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-010724-da620746",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T01:27:16",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-025059-b427ac7a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T02:50:59",
+    "lane": 14,
+    "reference_run": "20261029-010724-da620746",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-025059-b427ac7a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T03:08:58",
+    "lane": 14,
+    "reference_run": "20261029-010724-da620746",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

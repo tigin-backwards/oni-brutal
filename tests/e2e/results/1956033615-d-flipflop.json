@@ -1,0 +1,59 @@
+{
+ "spec": "mods/1956033615-d-flipflop.yaml",
+ "mods": [
+  "1956033615"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Duplicant Traffic Control unlocks the D-FlipFlop; one built starts with Q red and Q-bar green, and the Automation menu shot matches",
+ "updated": "2026-10-29",
+ "commit": "76ffcc88",
+ "mod_dlls": {
+  "1956033615": {
+   "LogicGateDFF.dll": "a1a7da46aff3fbca14db94ebe82c41b56ec87a39dcaad7cfb8d2806c5fcc375e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-114104-90e83e51",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T12:04:21",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-012845-d380cf9f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T01:28:45",
+    "lane": 14,
+    "reference_run": "20261027-114104-90e83e51",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "automation-menu": 0.0
+    }
+   },
+   {
+    "run": "20261029-012845-d380cf9f",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T01:29:39",
+    "lane": 14,
+    "reference_run": "20261027-114104-90e83e51",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "automation-menu": 0.0
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,25 @@
+# Interstellar Remote Workers (3438586580), classes P, S.
+#
+# What it does: a prefix replaces RemoteWorkTerminalSidescreen.RefreshOptions, so a Remote
+# Controller's side screen lists the remote worker docks of every world in the cluster, not only
+# its own world's, after "nothing selected".
+# How a player reaches it: a Remote Controller's side screen.
+# What changes: a terminal can drive a remote worker on another asteroid.
+#
+# Setup builds a Remote Controller and a Remote Worker Dock in the corridor west of the printing
+# pod. Selected, the controller's side screen lists "nothing selected" and the dock (its random
+# number masked).
+from: early-base
+mods: [3438586580]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"RemoteWorkTerminal\")", method: Build, args: [{"$": "Grid.XYToCell(111, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"RemoteWorkerDock\")", method: Build, args: [{"$": "Grid.XYToCell(115, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {RemoteWorkTerminal: 1, RemoteWorkerDock: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [111, 207], select: RemoteWorkTerminal}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/*RemoteWork*", cond: stable}
+  - expect_state:
+      "ui:**/DetailsScreen/SideScreen/**/*RemoteWork*::GetComponent<RemoteWorkTerminalSidescreen>.rowContainer.childCount": ">= 2"
+  - ui_dump: {name: rows, root: "**/DetailsScreen/SideScreen/**/*RemoteWork*", mask_text: ['Dock \d+']}

@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2901544995-dupe-picker.yaml",
+ "mods": [
+  "2901544995"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Reject All confirmation shows the aptitude drop-down; a pick from its list sets the aptitude",
+ "updated": "2026-10-29",
+ "commit": "f36e2a85",
+ "mod_dlls": {
+  "2901544995": {
+   "ONIPickDupes.dll": "87e0262516454fa6826cc0a5c14d874accd2da9e70ce0c4b3a4ad305f33edbe7"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-114113-564df08f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T13:20:02",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-021012-390a1b56",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T02:10:12",
+    "lane": 14,
+    "reference_run": "20261027-114113-564df08f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "confirmation": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261029-021012-390a1b56",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T02:10:56",
+    "lane": 14,
+    "reference_run": "20261027-114113-564df08f",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "confirmation": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

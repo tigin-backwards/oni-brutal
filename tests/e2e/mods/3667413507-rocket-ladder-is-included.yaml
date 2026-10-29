@@ -1,0 +1,26 @@
+# Rocket Ladder Is Included (3667413507), class P.
+#
+# What it does: every Rocket Platform (LaunchPad) gets a ScaffoldLadderManager. Once a second
+# it measures the rocket standing on it and keeps an invulnerable ladder, three cells right
+# of the pad's centre, as tall as the rocket's scaffolding; a user-menu button cycles the
+# ladders' look (standard, plastic, ruins).
+# How a player reaches it: build a rocket on a platform.
+# What changes: rockets get a ladder up their side.
+#
+# The rockets-so fixture has two rockets on platforms. After a few seconds of play their
+# platforms have ladders beside the rockets; a platform selected shows the ladder button.
+from: rockets-so
+mods: [3667413507]
+steps:
+  - expect_ui: {"**/SpriteListDialog": {count: 2}}
+  - click: {ui: "**/SpriteListDialog/**/ConfigurableButton", index: 1}
+  - expect_ui: {"**/SpriteListDialog": {count: 1}}
+  - click: {ui: "**/SpriteListDialog/**/ConfigurableButton"}
+  - ui_wait: {path: "**/SpriteListDialog", cond: gone, frames: 120}
+  - expect_state:
+      "Assets.GetPrefab(\"LaunchPad\").GetComponent<RocketScaffoldLadder.ScaffoldLadderManager>": exists
+      "count:Components.LaunchPads.Items[*] if .GetComponent<RocketScaffoldLadder.ScaffoldLadderManager>.enabled == true": ">= 2"
+      "count:all:Ladder::[*] if .enabled == true": {save_as: before}
+  - run: {seconds: 5}
+  - expect_state:
+      "count:all:Ladder::[*] if .enabled == true": ["> before + 10", "== original"]

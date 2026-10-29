@@ -34,6 +34,8 @@ namespace OniMoono.Desktop
         bool cursorVisible = true;
         CursorLockMode cursorLock;
         GlfwCursor customCursor;
+        /// Windows: custom cursors that follow the pointer size (made on first use).
+        Win32Cursor win32Cursor;
         bool closeRequested;
 
         public GlfwWindow Window => window;
@@ -454,6 +456,7 @@ namespace OniMoono.Desktop
                 _ => cursorVisible ? GlfwCursorMode.Normal : GlfwCursorMode.Hidden,
             };
             window.SetInputMode(GlfwInputMode.Cursor, (int)glfwMode);
+            if (win32Cursor != null) win32Cursor.Shown = glfwMode is GlfwCursorMode.Normal or GlfwCursorMode.Captured;
         }
 
         /// Texture pixels run bottom-up; cursor images top-down.
@@ -470,6 +473,21 @@ namespace OniMoono.Desktop
                     rgba[o + 2] = c.b;
                     rgba[o + 3] = c.a;
                 }
+            if (OperatingSystem.IsWindows())
+            {
+                win32Cursor ??= new Win32Cursor((IntPtr)window.GetWin32Window())
+                {
+                    Shown = cursorVisible && cursorLock != CursorLockMode.Locked,
+                };
+                if (!customCursor.IsNull())
+                {
+                    window.SetCursor(default);
+                    customCursor.Dispose();
+                    customCursor = default;
+                }
+                if (win32Cursor.Set(rgba, width, height, (int)hotspot.x, (int)hotspot.y)) return;
+                win32Cursor.Clear(); // not loaded: GLFW's, unscaled
+            }
             fixed (byte* p = rgba)
             {
                 var cursor = Glfw.CreateCursor(new GlfwCursor.CreateInfo
@@ -485,6 +503,7 @@ namespace OniMoono.Desktop
 
         public void SetDefaultCursor()
         {
+            win32Cursor?.Clear();
             window.SetCursor(default);
             if (!customCursor.IsNull()) customCursor.Dispose();
             customCursor = default;
@@ -502,6 +521,7 @@ namespace OniMoono.Desktop
         public void Dispose()
         {
             Closing?.Invoke();
+            win32Cursor?.Dispose();
             if (!customCursor.IsNull()) customCursor.Dispose();
             renderWindow.Dispose();
             window.Dispose();
@@ -536,9 +556,23 @@ namespace OniMoono.Desktop
             return m;
         }
 
+        /// What each held key's press reported, by scancode: its release reports the same, even
+        /// when the layout changed in between.
+        readonly Dictionary<int, KeyCode> pressed = new();
+
         void OnKey(GlfwWindow w, GlfwKey key, int scancode, GlfwKeyAction action, GlfwModifier mods)
         {
-            var code = KeyMap.ToUnity(key);
+            KeyCode code;
+            if (action == GlfwKeyAction.Release && pressed.Remove(scancode, out var down)) code = down;
+            else
+            {
+                code = KeyMap.ToUnity(key);
+                // Printable keys follow the layout unless the build asks for positions (KeyboardLayout).
+                if (KeyboardLayout.IsPrintable(key) && !OniMoono.Engine.Assets.ProjectSettings.UsePhysicalKeys
+                    && KeyboardLayout.Current(key, scancode) is { } layoutCode)
+                    code = layoutCode;
+                if (action == GlfwKeyAction.Press) pressed[scancode] = code;
+            }
             if (code == KeyCode.None) return;
             var modifiers = Modifiers();
             if ((mods & GlfwModifier.CapsLock) != 0) modifiers |= EventModifiers.CapsLock;

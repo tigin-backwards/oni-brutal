@@ -1,0 +1,26 @@
+# Minecraft chest skin (3481545178), class P (art).
+#
+# What it does: adds a Blocky Chest facade (LDBCS_BlockyChest, its mc_chest_kanim) for the
+# Storage Bin to the game's building facades, with the storage bin's sounds, and lists it in the
+# supply closet's storage subcategory.
+# How a player reaches it: the storage bin's facade picker (build menu or the bin's blueprint
+# side screen); the supply closet.
+# What changes: how a storage bin may look.
+#
+# The facade is in the database for the storage bin with its animation. A storage bin built in
+# setup in the corridor west of the printing pod with that facade wears it and is drawn as the
+# blocky chest (a world shot).
+from: early-base
+mods: [3481545178]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"StorageLocker\")", method: Build, args: [{"$": "Grid.XYToCell(113, 207)"}, Neutral, null, [SandStone], 293.15, LDBCS_BlockyChest]}}
+steps:
+  - expect_state:
+      "Db.Get().Permits.BuildingFacades.Get(\"LDBCS_BlockyChest\").PrefabID": "== 'StorageLocker'"
+      "Db.Get().Permits.BuildingFacades.Get(\"LDBCS_BlockyChest\").AnimFile": "== 'mc_chest_kanim'"
+      "Assets.GetAnim(\"mc_chest_kanim\")": exists
+  - run: {seconds: 2}
+  - expect_state:
+      "all:StorageLocker::[0].GetComponent<BuildingFacade>.CurrentFacade": "== 'LDBCS_BlockyChest'"
+  - driver: {camera.set: {cell: [113, 208], ortho: 4}}
+  - world_shot: {name: chest, ortho: 4, at: [113, 208], threshold: 0.08}

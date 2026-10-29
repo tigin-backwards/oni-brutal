@@ -1,0 +1,29 @@
+# Customisable Plug Slugs (SmugSlugs, 2482057864), class P; PLib options.
+#
+# What it does: options tune the Plug Slug and its morphs: the watts a tame, happy, fed slug
+# generates (its generator's rating), and new diets: metal ore (default), refined metal,
+# rocks, sulfur, clay, polluted dirt, abyssalite and ices, each with a mass per cycle and a
+# hydrogen conversion ratio.
+# How a player reaches it: the mod's PLib options; Plug Slugs.
+# What changes: slugs that eat more things and make more power.
+#
+# The options raise the wattage to 2000 W and add a refined metal diet; the slug's generator
+# def and its diet carry them, and a slug spawned by setup in the corridor west of the
+# printing pod lives through a while of play.
+from: early-base
+mods: [2482057864]
+options:
+  SmugSlugs: {WattsGenerated: 2000, MetalConsumed: 10}
+setup:
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [131765, 0, 0, "Staterpillar", "Creatures"]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"StaterpillarGenerator\").GeneratorWattageRating": 2000
+      "Assets.GetBuildingDef(\"StaterpillarGenerator\").GeneratorBaseCapacity": 6250
+      "type:SmugSlugs.SmugSlugsPatches+StaterpillarConfig_CreateStaterpillar_Patch::opts.MetalConsumed": 10
+      # SolidConsumerMonitor's def: the ore diet and the refined metal one
+      "Assets.GetPrefab(\"Staterpillar\").GetComponent<StateMachineController>.cmpdef.defs[17].diet.infos.Length": 2
+  - run: {seconds: 5}
+  - expect_state:
+      "count:all:KPrefabID::[*] if .PrefabTag.Name == Staterpillar": 1

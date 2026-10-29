@@ -1,0 +1,33 @@
+# Bot Tweaks (3701580252), classes P, U; PLib options.
+#
+# What it does: tracks the colony's robots (Sweepy, Rover, Biobot, Flydo, Remote Worker) and
+# lists them in a "Robots" category of the All Resources screen, each row with its count and
+# a pin toggle that shows it in the pinned resources panel; options decide what happens to
+# expired rovers and biobots (nothing, marked for deconstruction, or allowed to use power
+# banks), and atomic power banks charge robots.
+# How a player reaches it: the pinned resources panel's See All; the Robots rows.
+# What changes: robots counted like resources.
+#
+# setup spawns a Sweepy in the corridor west of the printing pod. The All Resources screen
+# has the Robots category first, with a Sweepy row (dumped, shot).
+from: early-base
+mods: [3701580252]
+setup:
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [131765, 0, 0, "SweepBot", "Creatures"]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"SweepBot\").GetComponent<BotTweaks.Sweepy>": exists
+  - run: {seconds: 3}
+  # The pinned panel's lines settle after a run; clicked before, the button can move under the
+  # pointer and the click land on a resource line.
+  - ui_wait: {path: "**/PinnedResourcesPanel/Resources/EntryContainer/SeeAllButton", cond: stable}
+  - click: {ui: "**/PinnedResourcesPanel/Resources/EntryContainer/SeeAllButton"}
+  - ui_wait: {path: "**/TopRight/AllResourcesScreen", cond: stable}
+  - expect_ui:
+      "**/AllResourcesScreen/Scroll/RootList/CategoryRow[0]/Header/NameLabel": {text: "Robots"}
+      "**/AllResourcesScreen/Scroll/RootList/CategoryRow[0]/Container/ResourceRow/NameLabel": {text: "Sweepy"}
+  # The screen fills its numbers over the next frames (and a run closes it), so the numbers
+  # are masked; the Robots category is compared by structure.
+  - ui_dump: {name: robots, root: "**/AllResourcesScreen/Scroll/RootList/CategoryRow[0]", mask_text: ['\d[\d.,]*( ?(kg|t|units|kcal))?', '\.\.\.']}
+  - shot: {name: robots, crop: "**/AllResourcesScreen/Scroll/RootList/CategoryRow[0]/Header/NameLabel", threshold: 0.04}

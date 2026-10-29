@@ -1,0 +1,33 @@
+{
+ "spec": "mods/3466461752-uf-liquid-lock-builder.yaml",
+ "mods": [
+  "3466461752"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-27",
+ "commit": "ecf2040f",
+ "mod_dlls": {
+  "3466461752": {
+   "LiquidLockBuilder.dll": "e3e3d709d0f8a28e80d8b8f8783c0e9aa8c5e93a12cccc6a66e63ab2cfda67b6"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-101758-91b26142",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-27T10:17:58",
+    "lane": 14,
+    "reasons": [
+     "step 14: no LiquidLockBuilder selected at [112, 207] after 5 clicks (last: None)"
+    ],
+    "signatures": 2
+   }
+  ],
+  "ours": []
+ }
+}

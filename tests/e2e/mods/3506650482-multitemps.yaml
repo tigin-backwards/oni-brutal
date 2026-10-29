@@ -1,0 +1,22 @@
+# MultiTemps (3506650482), class P.
+#
+# What it does: a postfix on GameUtil.GetFormattedTemperature appends the temperature in the
+# other units selected (all three by default, in its MultiTempsConfig.json) after the game's
+# unit: "27 °C, 80.6 °F, 300.1 K". Patches on the game options' unit buttons let a player toggle
+# several units on.
+# How a player reaches it: anywhere a temperature is shown.
+# What changes: temperatures read in several units at once.
+#
+# A formatted temperature lists Celsius, then Fahrenheit and Kelvin; the hover card over a
+# corridor cell shows its gas temperature in the three units.
+from: early-base
+mods: [3506650482]
+steps:
+  - expect_state:
+      "GameUtil.GetFormattedTemperature(300.1234)": ["== original", {contains: "ºF"}, {contains: "K"}]
+      "GameUtil.GetFormattedTemperature(310.0)": "== original"
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [114, 208]}
+  - expect_ui:
+      "**/HoverTextScreen/LocText/Text": {any_text: "/ºC, .*ºF, .*K/"}

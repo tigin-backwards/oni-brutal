@@ -1,0 +1,37 @@
+# D-FlipFlop (1956033615), class B.
+#
+# What it does: adds the D-FlipFlop (LogicGateDFF, 2x2, refined metal, in the Automation menu
+# after Duplicant Traffic Control): a data input D and a clock input C on its left, outputs Q
+# and Q-bar on its right. When C goes from red to green it stores D, and sends it on Q and its
+# inverse on Q-bar; a status item shows the stored value.
+# How a player reaches it: the build menu (Automation), after the research.
+# What changes: an edge-triggered memory gate.
+#
+# Setup researches Duplicant Traffic Control and builds one in the corridor west of the printing
+# pod: it starts with its memory red, so Q sends red and Q-bar green; its four ports are where
+# the mod puts them, and the Automation menu lists it.
+from: early-base
+mods: [1956033615]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"DupeTrafficControl\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LogicGateDFF\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"DupeTrafficControl\").unlockedItemIDs": {contains: LogicGateDFF}
+      "Assets.GetBuildingDef(\"LogicGateDFF\").LogicInputPorts.Count": 2
+      "Assets.GetBuildingDef(\"LogicGateDFF\").LogicOutputPorts.Count": 2
+  - run: {seconds: 2}
+  - expect: {buildings: {LogicGateDFF: 1}}
+  - expect_state:
+      "all:MoreLogicGates.LogicGateDFF.LogicGateDFF::[0].GetComponent<LogicPorts>.GetOutputValue(\"LogicGateDFF_Q\")": 0
+      "all:MoreLogicGates.LogicGateDFF.LogicGateDFF::[0].GetComponent<LogicPorts>.GetOutputValue(\"LogicGateDFF_QN\")": 1
+  - click: {ui: "**/PlanScreen/Toggle:Automation"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/LogicGateDFF Group*", cond: stable}
+  - shot: {name: automation-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - key: {code: Escape}
+  - driver: {camera.set: {cell: [113, 208], ortho: 6}}
+  - click_world: {cell: [112, 207], select: LogicGateDFF}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~D-FlipFlop"}

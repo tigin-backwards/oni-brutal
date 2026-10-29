@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3809267164-natural-planting-flx.yaml",
+ "mods": [
+  "3809267164"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Natural Planting Tile built by the Duplicants turns into dirt with a wild Mealwood",
+ "updated": "2026-10-27",
+ "commit": "8edec30d",
+ "mod_dlls": {
+  "3809267164": {
+   "Natural-Planting-Flx.dll": "3e2109b0912901732a274575ebe9ace3c25a4b266c33e632f5923a1e6a18823b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-132745-bfd98f4e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T14:05:45",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-142041-80e4c84c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T14:47:20",
+    "lane": 16,
+    "reference_run": "20261027-132745-bfd98f4e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.007747
+    }
+   },
+   {
+    "run": "20261027-142041-80e4c84c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T14:48:50",
+    "lane": 16,
+    "reference_run": "20261027-132745-bfd98f4e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.007747
+    }
+   }
+  ]
+ }
+}

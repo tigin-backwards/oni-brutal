@@ -1,0 +1,24 @@
+# Cold Wheat Bread -> Spice Bread (2838619875), class P.
+#
+# What it does: postfixes on GourmetCookingStationConfig replace two Gas Range recipes: Pepper
+# Bread from 3 Frost Bread and a Pepper Nut (instead of flour), and Barbeque from 2 Plant
+# Meat.
+# How a player reaches it: a Gas Range's recipe list.
+# What changes: bread and plant meat can be cooked further.
+#
+# setup builds a Gas Range in the corridor west of the printing pod; selected, it lists the
+# recipes.
+from: early-base
+mods: [2838619875]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"GourmetCookingStation\")", method: Build, args: [131765, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "ComplexRecipeManager.Get().GetRecipe(\"GourmetCookingStation_I_ColdWheatBread_SpiceNut_O_SpiceBread\").ingredients[0].amount": 3
+      "ComplexRecipeManager.Get().GetRecipe(\"GourmetCookingStation_I_PlantMeat_O_CookedMeat\").ingredients[0].amount": 2
+  - run: {seconds: 2}
+  - expect: {buildings: {GourmetCookingStation: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: GourmetCookingStation}
+  - ui_wait: {path: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView", cond: stable}
+  - ui_dump: {name: recipes, root: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView"}

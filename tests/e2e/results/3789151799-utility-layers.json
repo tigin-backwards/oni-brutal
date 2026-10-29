@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3789151799-utility-layers.yaml",
+ "mods": [
+  "3789151799"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "F2 shows the layer HUD (dump, shot); its buttons select layer 2 and all layers",
+ "updated": "2026-10-29",
+ "commit": "960fa78d",
+ "mod_dlls": {
+  "3789151799": {
+   "TripleUtilityLayers.dll": "57409f7623a67f3f92b8f52f033c3ced61f1ecfabafebb0c9b990a7693eb2007"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-010732-2e8b7c55",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T01:56:42",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-024514-537d9d0f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T02:54:26",
+    "lane": 16,
+    "reference_run": "20261029-010732-2e8b7c55",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "hud": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "hud": 0.029075
+    }
+   },
+   {
+    "run": "20261029-024514-537d9d0f",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T02:55:14",
+    "lane": 16,
+    "reference_run": "20261029-010732-2e8b7c55",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "hud": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "hud": 0.029075
+    }
+   }
+  ]
+ }
+}

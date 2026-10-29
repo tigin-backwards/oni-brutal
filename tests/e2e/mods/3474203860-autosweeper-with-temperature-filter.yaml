@@ -1,0 +1,41 @@
+# AutoSweeper with Temperature Filter (3474203860), classes B, U; PLib UI.
+#
+# What it does: adds the Auto-Sweeper/Temp Filter (AutoSweeperTempFilter, 3x1, 120 W), a
+# Conveyance building unlocked by Smart Storage: an auto-sweeper (SolidTransferArm, range 4)
+# that only picks up items whose temperature lies between a minimum and a maximum, set in
+# a PLib side screen of two text fields (in the player's temperature unit).
+# How a player reaches it: research Smart Storage; the Shipping menu; select the sweeper.
+# What changes: sweepers that sort by temperature.
+#
+# Smart Storage is researched in setup and a sweeper built in the corridor west of the
+# printing pod. The Shipping menu offers it (its card); selected, the built one shows the
+# temperature side screen, and a minimum typed into it is stored in kelvin.
+from: early-base
+mods: [3474203860]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"SmartStorage\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"AutoSweeperTempFilter\")", method: Build, args: [131764, Neutral, null, [Copper, Polypropylene, Glass], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"SmartStorage\").unlockedItemIDs": {contains: AutoSweeperTempFilter}
+      "Assets.GetPrefab(\"AutoSweeperTempFilter\").GetComponent<SolidTransferArm>.pickupRange": 4
+  - run: {seconds: 3}
+  - driver: {camera.set: {cell: [113, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Shipping"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/AutoSweeperTempFilter Group*", cond: stable}
+  - scroll: {at: "**/PlanBuildingSelectionPanel/BuildingGroups", notches: -10}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/AutoSweeperTempFilter Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/AutoSweeperTempFilter Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - key: {code: Escape}
+  - click_world: {cell: [113, 207], select: AutoSweeperTempFilter}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/AutoSweeperTempFilterPanel", cond: stable}
+  - ui_dump: {name: side, root: "**/DetailsScreen/SideScreen/**/AutoSweeperTempFilterPanel"}
+  - shot: {name: side, crop: "**/DetailsScreen/SideScreen/**/AutoSweeperTempFilterPanel", threshold: 0.04}
+  - type: {ui: "**/AutoSweeperTempFilterPanel/MinTempField", text: "50", enter: true, clear: true}
+  - expect_state:
+      "selected:GetComponent<AutoSweeperTempFilter.AutoSweeperSettings>.minTempK": [">= 323.1", "<= 323.2"]

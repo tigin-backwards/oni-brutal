@@ -1,0 +1,30 @@
+# 食物保鲜逃课模块 (3226787971), class B.
+#
+# What it does: adds 保鲜逃课模块 (FreezePre, 3x3, raw mineral and refined metal, in the Food menu
+# after Solid Transport, built by a Duplicant with conveyor skills). When finished it replaces
+# itself with a ready-made freezer: six insulated tiles around a 1x2 pocket, a conveyor chute
+# above a powered "冷冻砖" (NoTile) floor that holds its cell at -50 °C while powered, a conveyor
+# rail through it, a conductive wire under it, and vacuum in the pocket.
+# How a player reaches it: the build menu (Food), after the research.
+# What changes: a food freezer in one building.
+#
+# Setup researches Solid Transport and finishes one module in the corridor west of the printing
+# pod (no Duplicant here has the conveyor skill). It is gone at once, and in its place stand six
+# insulated tiles, the chute, the freezing tile, two rail pieces and the wire.
+from: early-base
+mods: [3226787971]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"SolidTransport\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"FreezePre\")", method: Build, args: [{"$": "Grid.XYToCell(113, 207)"}, Neutral, null, [SandStone, Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"SolidTransport\").unlockedItemIDs": {contains: FreezePre}
+      "Assets.GetBuildingDef(\"NoTile\").RequiresPowerInput": true
+  - run: {seconds: 5}
+  - expect:
+      buildings: {FreezePre: 0, InsulationTile: 6, SolidVent: 1, NoTile: 1, SolidConduit: 2, WireRefined: 1}
+  - expect_state:
+      "count:all:BuildingComplete::[*] if .name == NoTileComplete": 1
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - world_shot: {name: freezer, ortho: 6, at: [113, 208], threshold: 0.08}

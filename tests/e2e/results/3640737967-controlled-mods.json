@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3640737967-controlled-mods.yaml",
+ "mods": [
+  "3640737967"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the pause menu's Restart opens the confirm dialog with its Restart into this save box (ticked by a click); CANCEL closes it; the shots and dump match",
+ "updated": "2026-10-29",
+ "commit": "a6cc8d6c",
+ "mod_dlls": {
+  "3640737967": {
+   "ControlledMods.dll": "c5fcffad6d521caddaee79850f36fb930c0e5bd63777c9dc73879ca8f425b8fc"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-132508-335cbefc",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T14:42:26",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-022536-e772fcca",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T02:25:36",
+    "lane": 14,
+    "reference_run": "20261027-132508-335cbefc",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "pause": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "dialog": 8.7e-05
+    }
+   },
+   {
+    "run": "20261029-022536-e772fcca",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T02:26:21",
+    "lane": 14,
+    "reference_run": "20261027-132508-335cbefc",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "pause": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "dialog": 1.2e-05
+    }
+   }
+  ]
+ }
+}

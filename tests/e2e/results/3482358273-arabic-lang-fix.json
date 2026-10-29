@@ -1,0 +1,64 @@
+{
+ "spec": "mods/3482358273-arabic-lang-fix.yaml",
+ "mods": [
+  "3482358273"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "in English the build watermark gains the translator credit (dump)",
+ "updated": "2026-10-29",
+ "commit": "960fa78d",
+ "mod_dlls": {
+  "3482358273": {
+   "ArabicTextFixMod.dll": "87ad38e13ee49a09437fbd945c87413d6af1eeff98e3f6854442f2f5667dfd73",
+   "RTLTMPro.dll": "6a3460381e65fe93018cec06fca6bbbe3f5f182cfa3c79ab3102f4fa7076d65c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-010732-2e8b7c55",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T02:13:52",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-024514-537d9d0f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T03:02:41",
+    "lane": 16,
+    "reference_run": "20261029-010732-2e8b7c55",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "watermark": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261029-024514-537d9d0f",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T03:03:31",
+    "lane": 16,
+    "reference_run": "20261029-010732-2e8b7c55",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "watermark": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

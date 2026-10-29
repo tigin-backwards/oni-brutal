@@ -1,0 +1,56 @@
+# Furioza (3016468268), class W.
+#
+# What it does: adds two Spaced Out clusters, Furioza (coordinate prefix Furioza) and Furioza
+# Classic, with an extremely hot 300x150 start world (difficulty 5) on the mod's own biomes and
+# subworlds (barren Furioza rock, an iron depth with liquid iron, flipped bottoms), a starting
+# base template with every early building (bases/Allin1), its own POI templates (a nullifier, a
+# drecko base) and planet art, a flipped warp world, and the game's moonlets and starmap POIs.
+# How a player reaches it: New Game, the cluster carousel (or its coordinate).
+# What changes: a new cluster to start in.
+#
+# From the early base: Main Menu, New Game, Survival, the special clusters (its category), then
+# the coordinate Furioza-12345-0-0-0 selects the cluster; it is launched and embarked. The new
+# game's start world is the mod's Furioza world with its subworlds, the cluster has its eleven
+# worlds, and the starmap its Temporal Tear.
+from: early-base
+mods: [3016468268]
+memory_gb: 11
+steps:
+  - key: {code: Escape}
+  - ui_wait: {path: "**/PauseScreen/**/Main MenuButton", cond: stable}
+  - click: {ui: "**/PauseScreen/**/Main MenuButton"}
+  - ui_wait: {path: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton", cond: stable}
+  - click: {ui: "**/ConfirmDialog/GameObject/Panel/ConfigurableButton"}   # Quit Without Saving
+  - ui_wait: {path: "**/MainMenu_SpacedOut/MainMenuMenubar/MainMenuButtons", cond: stable, frames: 3000}
+  - click: {text: "NEW GAME", under: "**/MainMenuButtons"}
+  - ui_wait: {path: "**/ModeSelectScreen/Panel/Content/RootToggles/StandardGame", cond: stable}
+  - click: {ui: "**/ModeSelectScreen/Panel/Content/RootToggles/StandardGame"}
+  - ui_wait: {path: "**/ClusterCategorySelectionScreen/Panel/Content/RootToggles/EventGame", cond: stable}
+  - click: {ui: "**/ClusterCategorySelectionScreen/Panel/Content/RootToggles/EventGame"}
+  - ui_wait: {path: "**/ColonyDestinationScreen2/Layout/Buttons/LaunchButton", cond: stable, frames: 3000}
+  - expect_state:
+      "count:ProcGen.SettingsCache.clusterLayouts.clusterCache.Keys[*] if .EndsWith(\"clusters/Furioza\") == true": 1
+      "count:ProcGen.SettingsCache.clusterLayouts.clusterCache.Keys[*] if .EndsWith(\"clusters/FuriozaClassic\") == true": 1
+  - click: {ui: "**/CoordinateContainer/SeedInput"}
+  - ui_wait: {path: "**/CoordinateContainer/SeedInput", cond: stable}
+  - type: {ui: "**/CoordinateContainer/SeedInput", text: "Furioza-12345-0-0-0", clear: true, enter: true}
+  - ui_wait: {path: "**/Section - Destination/DestinationDetailsHeader/ClusterName", cond: stable}
+  - expect_state:
+      "CustomGameSettings.Instance.GetCurrentQualitySetting(\"ClusterLayout\").id": [{contains: Furioza}, "== original"]
+      "ui:**/Section - Destination/DestinationDetailsHeader/ClusterName::GetComponent<LocText>.text": "== original"
+  - ui_dump: {name: asteroids, root: "**/Section - Destination/World Scoll (Rect Size Set By Screen Code!)/Content/Details"}
+  - click: {ui: "**/ColonyDestinationScreen2/Layout/Buttons/LaunchButton"}
+  - ui_wait: {path: "**/MinionSelectScreen/Content/BottomContent/Buttons/ProceedButton", cond: stable, frames: 60000}
+  - click: {ui: "**/MinionSelectScreen/Content/BottomContent/Buttons/ProceedButton"}
+  - ui_wait: {path: "**/MinionSelectScreen", cond: gone, frames: 6000}
+  - expect_state:
+      "ClusterManager.Instance.WorldContainers.Count": 11
+      "ClusterManager.Instance.GetStartWorld().worldName": "== original"
+      "ClusterManager.Instance.GetStartWorld().worldSize.x": 300
+      "ClusterManager.Instance.GetStartWorld().worldSize.y": 150
+      "Components.LiveMinionIdentities.Count": ">= 3"
+      "all:TemporalTear::Length": 1
+      "all:HarvestablePOIClusterGridEntity::Length": ">= 10"
+  - expect_state:
+      "ClusterManager.Instance.GetStartWorld().worldName": {contains: Furioza}
+      "count:ClusterManager.Instance.GetStartWorld().m_generatedSubworlds[*] if .Contains(\"BarrenFurioza\") == true": ">= 1"

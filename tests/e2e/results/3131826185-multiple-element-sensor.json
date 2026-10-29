@@ -1,0 +1,61 @@
+{
+ "spec": "mods/3131826185-multiple-element-sensor.yaml",
+ "mods": [
+  "3131826185"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Automation menu card (shot); a built gas element sensor's filter side screen (shot)",
+ "updated": "2026-10-29",
+ "commit": "0c60ca12",
+ "mod_dlls": {
+  "3131826185": {
+   "MultipleElementSensor.dll": "671f044c5858314d080b98ac198c8c2229b510219d2b3f5a019e79c560741924"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-145102-18288f91",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T15:43:19",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-010732-6b6febd8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T01:16:04",
+    "lane": 16,
+    "reference_run": "20261027-145102-18288f91",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.0,
+     "filter": 0.0
+    }
+   },
+   {
+    "run": "20261029-010732-6b6febd8",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T01:17:11",
+    "lane": 16,
+    "reference_run": "20261027-145102-18288f91",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.0,
+     "filter": 0.0
+    }
+   }
+  ]
+ }
+}

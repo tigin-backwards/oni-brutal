@@ -1,0 +1,29 @@
+# Super bigger Storage / 超大容量储物 (3772304726), class P.
+#
+# What it does: postfixes on the storage buildings' DoPostConfigureComplete raise their
+# capacity: the Storage Bin, Smart Storage Bin and wood storage to 10,000,000 kg, the Ration Box
+# and the Refrigerator to 1,000,000 kg.
+# How a player reaches it: any of those buildings, their capacity side screen.
+# What changes: how much each holds.
+#
+# The prefabs carry the new capacities. A storage bin built in setup offers 10,000,000 kg on its
+# capacity side screen, and the early base's ration box holds up to 1,000,000 kg.
+from: early-base
+mods: [3772304726]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"StorageLocker\")", method: Build, args: [{"$": "Grid.XYToCell(113, 207)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"StorageLocker\").GetComponent<Storage>.capacityKg": 10000000
+      "Assets.GetPrefab(\"StorageLockerSmart\").GetComponent<Storage>.capacityKg": 10000000
+      "Assets.GetPrefab(\"RationBox\").GetComponent<Storage>.capacityKg": 1000000
+      "Assets.GetPrefab(\"Refrigerator\").GetComponent<Storage>.capacityKg": 1000000
+      "all:RationBox::[0].GetComponent<Storage>.capacityKg": 1000000
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: StorageLocker}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/CapacityControlSideScreen", cond: stable}
+  - expect_state:
+      "selected:StorageLocker.MaxCapacity": 10000000
+      "selected:StorageLocker.UserMaxCapacity": 10000000
+  - ui_dump: {name: capacity, root: "**/DetailsScreen/SideScreen/**/CapacityControlSideScreen"}

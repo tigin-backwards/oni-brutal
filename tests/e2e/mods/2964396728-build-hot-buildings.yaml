@@ -1,0 +1,23 @@
+# Build Hot Buildings (2964396728), class P.
+#
+# What it does: a transpiler on Constructable.OnCompleteWork removes the cap the game puts on a
+# finished building's temperature (at most 318.15 K, 45 °C, from its materials), so a building
+# made of hot materials is as hot as they were.
+# How a player reaches it: building anything out of hot material.
+# What changes: new buildings keep the heat of their materials.
+#
+# Setup sets 200 kg of obsidian at 450 K down in the corridor west of the printing pod. A ladder
+# ordered there out of obsidian is built from it, and the finished ladder is far hotter than 45
+# °C.
+from: early-base
+mods: [2964396728]
+setup:
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"Obsidian\").substance", method: SpawnResource, args: [[111.5, 207.5, -12], 200, 450, 255, 0]}}
+steps:
+  - run: {seconds: 2}
+  - build: {prefab: Ladder, at: [113, 207], material: Obsidian}
+  - expect: {blueprints: {Ladder: 1}}
+  - run: {seconds: 900, until: {buildings: {Ladder: ">=1"}, pending_construction: 0}}
+  - expect_state:
+      "count:all:Ladder::[*] if .GetComponent<PrimaryElement>.ElementID == Obsidian": 1
+      "sum:all:Ladder::[*].GetComponent<PrimaryElement>.Temperature if .GetComponent<PrimaryElement>.ElementID == Obsidian": "> 340"

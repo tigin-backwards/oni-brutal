@@ -1,0 +1,79 @@
+{
+ "spec": "mods/3772549326-resource-calculator.yaml",
+ "mods": [
+  "3772549326"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "the calculator button opens the panel under the HUD as in the original (dump, shot); Escape closes it",
+ "updated": "2026-10-29",
+ "commit": "93034b42",
+ "mod_dlls": {
+  "3772549326": {
+   "ONI_ResourceCalculator.dll": "3e99a8aee6623e6cb10fd1121ba399e9a9587764d1717656ba4a11f57283ef32"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-145102-18288f91",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T16:24:16",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-023906-6d0d6067",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-29T02:39:06",
+    "lane": 16,
+    "reference_run": "20261027-145102-18288f91",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "panel": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 2
+      }
+     }
+    },
+    "shots": {
+     "panel": 0.000995
+    }
+   },
+   {
+    "run": "20261029-023906-6d0d6067",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-29T02:39:55",
+    "lane": 16,
+    "reference_run": "20261027-145102-18288f91",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "panel": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 2
+      }
+     }
+    },
+    "shots": {
+     "panel": 0.002331
+    }
+   }
+  ]
+ }
+}

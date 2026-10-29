@@ -1,0 +1,27 @@
+# Lazy ranching (Infinigroom, 3514022158), class P.
+#
+# What it does: a postfix on ModifierSet.CreateCritteEffects makes the Groomed effect
+# ("Ranched") last 200 cycles with +15 happiness, and the incubator's lullaby ("EggSong")
+# last 10 cycles with +800 % incubation.
+# How a player reaches it: groom a critter at a Grooming Station; sing to an egg.
+# What changes: groomed critters stay groomed for 200 cycles.
+#
+# setup spawns a Hatch in the corridor west of the printing pod and grooms it (the Groomed
+# effect, as a Grooming Station gives it). After a while of play it has nearly 200 cycles of
+# grooming left.
+from: early-base
+mods: [3514022158]
+setup:
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [131765, 0, 0, "Hatch", "Creatures"]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "last:GetComponent<Effects>", method: Add, args: ["Ranched", true]}}
+steps:
+  - expect_state:
+      "Db.Get().effects.Get(\"Ranched\").duration": 120000
+      "Db.Get().effects.Get(\"Ranched\").SelfModifiers[0].Value": 15
+      "Db.Get().effects.Get(\"EggSong\").duration": 6000
+  - run: {seconds: 5}
+  - expect_state:
+      "count:all:Effects::[*] if .HasEffect(\"Ranched\") == true": 1
+      # the Groomed effect instance setup's Add returned
+      "last:timeRemaining": ["> 119000", "< 120000"]

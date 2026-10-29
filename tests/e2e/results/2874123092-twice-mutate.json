@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2874123092-twice-mutate.yaml",
+ "mods": [
+  "2874123092"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "eight Mealwood seeds' mutation rolls (MutantPlant.Mutate) leave some with two mutations and none unmutated",
+ "updated": "2026-10-29",
+ "commit": "3a5dc2ba",
+ "mod_dlls": {
+  "2874123092": {
+   "DoubleMutateMod.dll": "5883474067eeb694d218b6d2554cf2a54e2409ae79d0f276d7808f0ea1337d59"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-010724-da620746",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T01:14:56",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-023339-5e2bd3ed",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T02:47:40",
+    "lane": 14,
+    "reference_run": "20261029-010724-da620746",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-023339-5e2bd3ed",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T02:48:26",
+    "lane": 14,
+    "reference_run": "20261029-010724-da620746",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

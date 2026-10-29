@@ -1,0 +1,24 @@
+# Rebalanced Skills (2687208049), class P.
+#
+# What it does: a postfix on Db.Initialize moves skills in the skill tree: Engineering1 needs
+# Technicals2 and Building3 and moves to tier 3; RocketPiloting1 needs only ThermalSuits and
+# moves to tier 1; ThermalSuits needs nothing and moves to tier 0; Suits1 moves to tier 1.
+# How a player reaches it: the Skills screen (L).
+# What changes: which skills a Duplicant can learn first.
+#
+# The skills database holds the new tiers and prerequisites; the Skills screen opens with the
+# tree laid out by them.
+from: early-base
+mods: [2687208049]
+steps:
+  - expect_state:
+      "Db.Get().Skills.Engineering1.tier": 3
+      "Db.Get().Skills.Engineering1.priorSkills": {equals: [Technicals2, Building3]}
+      "Db.Get().Skills.RocketPiloting1.tier": 1
+      "Db.Get().Skills.RocketPiloting1.priorSkills": {equals: [ThermalSuits]}
+      "Db.Get().Skills.ThermalSuits.tier": 0
+      "Db.Get().Skills.ThermalSuits.priorSkills.Count": 0
+      "Db.Get().Skills.Suits1.tier": 1
+  - open: {management: skills}
+  - ui_wait: {path: "**/SkillsScreen/Content/Skills/ScrollRect/ScrollContent/Table", cond: stable}
+  - shot: {name: tree, crop: "**/SkillsScreen/Content/Skills", threshold: 0.04}

@@ -1,0 +1,33 @@
+{
+ "spec": "mods/3332098282-advanced-storage-v4.yaml",
+ "mods": [
+  "3332098282"
+ ],
+ "verdict": "pending",
+ "why": "the spec fails in the original: a broken spec, or a mod broken upstream",
+ "findings": [],
+ "note": "",
+ "updated": "2026-10-27",
+ "commit": "8022a243",
+ "mod_dlls": {
+  "3332098282": {
+   "TeleStorage.dll": "0abf7569c623a4431fbfbda12d0915496e877c35dfdb2ad68ae3a31e47f46945"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-112540-575b1ae3",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-27T12:01:09",
+    "lane": 15,
+    "reasons": [
+     "step 6: E2eDriver ui.wait {\"path\": \"**/DetailsScreen/SideScreen/**/FilterSideScreen\", \"cond\": \"stable\", \"frames\": 300}: timeout: stable not met within 300 frames"
+    ],
+    "signatures": 1
+   }
+  ],
+  "ours": []
+ }
+}

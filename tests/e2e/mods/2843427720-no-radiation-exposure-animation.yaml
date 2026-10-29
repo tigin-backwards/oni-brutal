@@ -1,0 +1,26 @@
+# No Radiation Exposure Animation (2843427720), class P.
+#
+# What it does: a prefix replaces RadiationMonitor.CheckRadiationLevel with a copy that still
+# recovers, absorbs the cell's radiation into the Duplicant's radiation balance and plays the
+# sickness itch, but never queues the exposure reaction (the animation a Duplicant stops to
+# play when it walks into radiation).
+# How a player reaches it: Duplicants in radiation.
+# What changes: Duplicants keep working through radiation exposure.
+#
+# setup turns three cells of rock above the printing pod into uranium ore. After a while of
+# play the Duplicants have absorbed as much radiation as in the original, and the cell below
+# the ore is as radioactive.
+from: early-base
+mods: [2843427720]
+setup:
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [133682, UraniumOre, null, 2000, 300, 255, 0, -1]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [133683, UraniumOre, null, 2000, 300, 255, 0, -1]}}
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [133684, UraniumOre, null, 2000, 300, 255, 0, -1]}}
+steps:
+  - expect: {duplicants: 3}
+  - run: {seconds: 60}
+  - expect_state:
+      "Grid.Element[133683].id": "== 'UraniumOre'"
+      "Components.LiveMinionIdentities.Count": 3
+      "sum:Components.LiveMinionIdentities.Items[*].GetComponent<Modifiers>.amounts.Get(\"RadiationBalance\").value if .enabled == true": "== original"
+      "Grid.Radiation.get_Item(133047)": "== original"

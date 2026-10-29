@@ -1,0 +1,48 @@
+# Twice Mutate 双重变异 (2874123092), class P.
+#
+# What it does: a postfix on MutantPlant.Mutate, the roll that gives a seed (or plant) a random
+# mutation, gives it, four times in five, two mutations instead: a pair from its list of 19
+# compatible pairs (moderatelyLoose_moderatelyTight, sunnySpeed_heavyFruit, ...). A seed that
+# already has more than two keeps them.
+# How a player reaches it: seeds from plants grown under radiation, which mutate.
+# What changes: mutated seeds with two mutations.
+#
+# Setup sets eight Mealwood seeds down in the corridor west of the printing pod and rolls each
+# one's mutation (MutantPlant.Mutate, the call radiation would make): none is left unmutated, and
+# the mod gives some of them a second, paired subspecies (counted calls of SetSubSpecies). Which
+# ones is random.
+from: early-base
+mods: [2874123092]
+setup:
+  - driver: {count: {methods: ["MutantPlant:SetSubSpecies"]}}
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [{"$": "Grid.XYToCell(108, 207)"}, 0, 0, "BasicSingleHarvestPlantSeed", "Ore"]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "last:GetComponent<MutantPlant>", method: Mutate}}
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [{"$": "Grid.XYToCell(109, 207)"}, 0, 0, "BasicSingleHarvestPlantSeed", "Ore"]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "last:GetComponent<MutantPlant>", method: Mutate}}
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [{"$": "Grid.XYToCell(110, 207)"}, 0, 0, "BasicSingleHarvestPlantSeed", "Ore"]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "last:GetComponent<MutantPlant>", method: Mutate}}
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [{"$": "Grid.XYToCell(111, 207)"}, 0, 0, "BasicSingleHarvestPlantSeed", "Ore"]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "last:GetComponent<MutantPlant>", method: Mutate}}
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [{"$": "Grid.XYToCell(112, 207)"}, 0, 0, "BasicSingleHarvestPlantSeed", "Ore"]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "last:GetComponent<MutantPlant>", method: Mutate}}
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [{"$": "Grid.XYToCell(113, 207)"}, 0, 0, "BasicSingleHarvestPlantSeed", "Ore"]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "last:GetComponent<MutantPlant>", method: Mutate}}
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [{"$": "Grid.XYToCell(114, 207)"}, 0, 0, "BasicSingleHarvestPlantSeed", "Ore"]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "last:GetComponent<MutantPlant>", method: Mutate}}
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [{"$": "Grid.XYToCell(115, 207)"}, 0, 0, "BasicSingleHarvestPlantSeed", "Ore"]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "last:GetComponent<MutantPlant>", method: Mutate}}
+steps:
+  - run: {seconds: 1}
+  # Each roll sets a seed's subspecies once; the mod sets it again, with a pair, four times in
+  # five: eight rolls with at most one second setting would be one chance in ten thousand.
+  - expect_state:
+      "E2eDriver.Counting.Of(\"MutantPlant:SetSubSpecies\")": ">= 10"
+      "count:all:MutantPlant::[*] if .GetComponent<KPrefabID>.PrefabTag.Name == BasicSingleHarvestPlantSeed and .IsOriginal == true": 0

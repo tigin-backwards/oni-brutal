@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3439346200-variety-included.yaml",
+ "mods": [
+  "3439346200"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "each Duplicant gets one of the mod's sizes (60 to 120 %) and keeps it while playing",
+ "updated": "2026-10-29",
+ "commit": "63c8a9fe",
+ "mod_dlls": {
+  "3439346200": {
+   "DuplicantVariety.dll": "8bb5a745c05009375b2f4e617314263bc1adffc3d0a58af6ab8e83ee0cca5271"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-025140-7d1672a8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T02:55:03",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-031016-b1419adc",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T03:12:07",
+    "lane": 16,
+    "reference_run": "20261029-025140-7d1672a8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-031016-b1419adc",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T03:13:05",
+    "lane": 16,
+    "reference_run": "20261029-025140-7d1672a8",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,60 @@
+{
+ "spec": "mods/2850723145-super-dimensional-miner.yaml",
+ "mods": [
+  "2850723145"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Robo-Miner's def and a built one use the mod's animation; the world shot of it matches",
+ "updated": "2026-10-29",
+ "commit": "1e3123ec",
+ "mod_dlls": {
+  "2850723145": {
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
+   "Super Dimensional Miner│¼┤╬╘¬┐≤╗·.dll": "8e00633dd3dba88e7139c4b7c181ac5bae3d2572c0da234e88b278724ea5ffaa"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-112540-575b1ae3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T12:09:55",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-012103-221fee1f",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T01:21:03",
+    "lane": 14,
+    "reference_run": "20261027-112540-575b1ae3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "miner": 0.00775
+    }
+   },
+   {
+    "run": "20261029-012103-221fee1f",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T01:22:05",
+    "lane": 14,
+    "reference_run": "20261027-112540-575b1ae3",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "miner": 0.007285
+    }
+   }
+  ]
+ }
+}

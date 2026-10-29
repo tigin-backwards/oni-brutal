@@ -1,0 +1,21 @@
+# Outdated - Renewable Abyssalite (Spaced Out!) (2990535748), class P.
+#
+# What it does: makes abyssalite renewable two ways. A Harmony patch it applies on the fly (when
+# the Robo-Miner's def is made) on HarvestablePOIConfig.GenerateConfigs replaces the Glimmering
+# Asteroid Field's harvestable elements with molten tungsten, wolframite, coal, carbon dioxide
+# and abyssalite; and a postfix on BaseHatchConfig.HardRockDiet lets the Stone Hatch eat
+# tungsten and excrete abyssalite.
+# How a player reaches it: a rocket's drillcone at a Glimmering Asteroid Field; a Stone Hatch
+# fed tungsten.
+# What changes: abyssalite from space mining and from Stone Hatches.
+#
+# The starmap patch logs that it took; the Glimmering Asteroid Field yields abyssalite with the
+# mod's weights, and the Stone Hatch's diet turns tungsten into abyssalite.
+from: early-base
+mods: [2990535748]
+require_log: ['\[Renewable_Abyssalite\]: Starmap patch succesful']
+steps:
+  - expect_state:
+      "HarvestablePOIConfigurator.FindType(\"GlimmeringAsteroidField\").harvestableElements": {equals: {MoltenTungsten: 2.0, Wolframite: 6.0, Carbon: 0.9, CarbonDioxide: 0.9, Katairite: 0.2}}
+      "Assets.GetPrefab(\"HatchHard\").GetComponent<StateMachineController>.cmpdef.defs[17].diet.GetDietInfo(\"Tungsten\").producedElement": "== 'Katairite'"
+      "Assets.GetPrefab(\"HatchHard\").GetComponent<StateMachineController>.cmpdef.defs[17].diet.infos.Length": "== original"

@@ -1,0 +1,45 @@
+# U&F-Liquid Lock Builder 锁液器 (3466461752), class B.
+#
+# What it does: a fixed fork of Liquid Lock Builder (2627892585). Adds the Liquid Lock Builder to
+# the Plumbing menu, with no research: a 1x3 raw-mineral building whose side screen picks
+# liquids. Duplicants bring 30 g of a picked liquid, which it pours beside its top, then
+# unpicks it, so a liquid lock is built a few grams at a time.
+# How a player reaches it: the build menu (Plumbing); its filter side screen.
+# What changes: liquid locks without bottling by hand.
+#
+# A bottle of 10 kg of crude oil is set down in setup. The builder is built in the dug-out
+# corridor west of the printing pod, crude oil is picked through its side screen's search field
+# and checkbox; a Duplicant brings 30 g of it, the builder pours it out and unpicks it.
+from: early-base
+mods: [3466461752]
+setup:
+  - driver: {setup.call: {target: "ElementLoader.FindElementByName(\"CrudeOil\").substance", method: SpawnResource, args: [[109.5, 207.5, -12], 10, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"LiquidLockBuilder\").GetComponent<Storage>.capacityKg": 0.03
+  - run: {seconds: 10}
+  - click: {ui: "**/PlanScreen/Toggle:Plumbing"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/LiquidLockBuilder Group*", cond: stable}
+  - shot: {name: plumbing-menu, crop: "**/PlanBuildingSelectionPanel/BuildingGroups", threshold: 0.04}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click: {ui: "**/BuildingGroups/**/Grid/LiquidLockBuilder Group*"}
+  - ui_wait: {path: "**/PlanBuildingSelectionPanel/ProductInfoScreen", cond: stable}
+  - click_world: {cell: [112, 206]}
+  - key: {code: Escape}
+  - expect: {blueprints: {LiquidLockBuilder: 1}}
+  - run: {seconds: 900, until: {buildings: {LiquidLockBuilder: 1}, pending_construction: 0}}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: LiquidLockBuilder}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/TreeFilterableSideScreen", cond: stable}
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Liquid Lock Builder"}
+  - type: {ui: "**/TreeFilterableSideScreen/SearchRow/FilterInputField", text: "crude oil"}
+  - ui_wait: {path: "**/TreeFilterableRow/Elements/Element/CheckBox", cond: stable}
+  - click: {ui: "**/TreeFilterableRow/Elements/Element/CheckBox"}
+  - expect_state: {"selected:GetComponent<TreeFilterable>.AcceptedTags": {contains: CrudeOil}}
+  - key: {code: Escape}
+  - run: {seconds: 300}
+  - expect_state:
+      "all:LiquidLockBuilder.Entities.Buildings.LiquidLockBuilder::[0].GetComponent<TreeFilterable>.AcceptedTags.Count": 0
+      "all:LiquidLockBuilder.Entities.Buildings.LiquidLockBuilder::[0].GetComponent<Storage>.MassStored()": 0
+      "sum:all:Pickupable::[*].GetComponent<PrimaryElement>.Mass if .GetComponent<PrimaryElement>.ElementID == CrudeOil": ["< 9.99", "> 9.9"]

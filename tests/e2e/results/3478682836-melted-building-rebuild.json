@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3478682836-melted-building-rebuild.yaml",
+ "mods": [
+  "3478682836"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "an ice ladder melts and an ice ladder blueprint takes its place",
+ "updated": "2026-10-27",
+ "commit": "6d4545b9",
+ "mod_dlls": {
+  "3478682836": {
+   "Melted_Rebuild.dll": "b0861514e9c3c5969108b09aefc780a25a82fd4a53dc31dd53d14938eca9b9d7"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-122300-34502628",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T13:00:09",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-130634-0528365b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T13:24:10",
+    "lane": 16,
+    "reference_run": "20261027-122300-34502628",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261027-130634-0528365b",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T13:25:25",
+    "lane": 16,
+    "reference_run": "20261027-122300-34502628",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

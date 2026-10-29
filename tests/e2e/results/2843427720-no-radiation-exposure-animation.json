@@ -1,0 +1,55 @@
+{
+ "spec": "mods/2843427720-no-radiation-exposure-animation.yaml",
+ "mods": [
+  "2843427720"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "uranium ore near the pod: the Duplicants absorb radiation as in the original; the reaction itself is not observed",
+ "updated": "2026-10-29",
+ "commit": "b7860c06",
+ "mod_dlls": {
+  "2843427720": {
+   "NoRadiationExposure.dll": "8f10ec9f8c94ed5a93b50eb1f67c623aa77a9ccdeca67d9a89690a032c340e04"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-031520-d4e99f8e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T03:19:08",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-032822-3a52c902",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T03:30:50",
+    "lane": 16,
+    "reference_run": "20261029-031520-d4e99f8e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-032822-3a52c902",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T03:32:57",
+    "lane": 16,
+    "reference_run": "20261029-031520-d4e99f8e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

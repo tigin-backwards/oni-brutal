@@ -1,0 +1,79 @@
+{
+ "spec": "mods/2787109631-ethanol-fermenter.yaml",
+ "mods": [
+  "2787109631"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "the Refinement menu card (shot); a built fermenter lists its 13 recipes (dump)",
+ "updated": "2026-10-27",
+ "commit": "d52da26d",
+ "mod_dlls": {
+  "2787109631": {
+   "fermenter.dll": "2aefde1174473252f3e4885b2c69f1906daee4eaf5a97debe523abe51b7524c3"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-145102-18288f91",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T14:55:38",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-153635-35d5ca9b",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-27T16:08:52",
+    "lane": 17,
+    "reference_run": "20261027-145102-18288f91",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "product": 0.007747
+    }
+   },
+   {
+    "run": "20261027-153635-35d5ca9b",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-27T16:10:01",
+    "lane": 17,
+    "reference_run": "20261027-145102-18288f91",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "product": 0.007747
+    }
+   }
+  ]
+ }
+}

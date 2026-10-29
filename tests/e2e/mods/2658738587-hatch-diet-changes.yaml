@@ -1,0 +1,27 @@
+# Hatch diet changes (2658738587), class P.
+#
+# What it does: postfixes on BaseHatchConfig's diets: the Hatch also eats regolith and salt for
+# coal, and refined metals, which it excretes as their ores (copper as copper ore, iron as iron
+# ore, gold as gold amalgam, ...), at 1.4 times the calories and 95 % conversion; the Sage Hatch
+# eats more plant matter; the Stone Hatch no longer eats obsidian but eats glass and other rock;
+# the Smooth Hatch also eats refined carbon and wolframite; and SetupDiet takes some overlaps
+# out of the coal and metal diets.
+# How a player reaches it: any hatch near those materials.
+# What changes: what the hatches eat and what they excrete.
+#
+# The Hatch's diet (its CreatureCalorieMonitor def, the 18th state machine def) turns copper
+# into copper ore and salt into coal, and still eats sandstone; the diets' sizes match the
+# original's.
+from: early-base
+mods: [2658738587]
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"Hatch\").GetComponent<StateMachineController>.cmpdef.defs[17].diet.GetDietInfo(\"Copper\").producedElement": "== 'Cuprite'"
+      "Assets.GetPrefab(\"Hatch\").GetComponent<StateMachineController>.cmpdef.defs[17].diet.GetDietInfo(\"Salt\").producedElement": "== 'Carbon'"
+      "Assets.GetPrefab(\"Hatch\").GetComponent<StateMachineController>.cmpdef.defs[17].diet.GetDietInfo(\"SandStone\")": exists
+      "Assets.GetPrefab(\"Hatch\").GetComponent<StateMachineController>.cmpdef.defs[17].diet.GetDietInfo(\"Copper\").producedConversionRate": 0.95
+  - expect_state:
+      "Assets.GetPrefab(\"Hatch\").GetComponent<StateMachineController>.cmpdef.defs[17].diet.infos.Length": "== original"
+      "Assets.GetPrefab(\"HatchHard\").GetComponent<StateMachineController>.cmpdef.defs[17].diet.infos.Length": "== original"
+      "Assets.GetPrefab(\"HatchMetal\").GetComponent<StateMachineController>.cmpdef.defs[17].diet.infos.Length": "== original"
+      "Assets.GetPrefab(\"HatchVeggie\").GetComponent<StateMachineController>.cmpdef.defs[17].diet.infos.Length": "== original"

@@ -1,0 +1,30 @@
+{
+ "spec": "mods/3807965885-oni-multiplayer.yaml",
+ "mods": [
+  "3807965885"
+ ],
+ "verdict": "pending",
+ "why": "0 run(s) of ours against original run 20261029-010724-da620746; 2 needed",
+ "findings": [],
+ "note": "not playable: the MULTIPLAYER hub and JOIN A GAME dialog open, and connecting to an address nobody listens on is refused and retried; a session needs a second game process",
+ "updated": "2026-10-29",
+ "commit": "95fb8e6c",
+ "mod_dlls": {
+  "3807965885": {
+   "OniMp.dll": "67a9c7bea75d833f10f8381a345ddc55dd8a4a650e01179d27bc27cc81cd1533"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-010724-da620746",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T02:26:47",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": []
+ }
+}

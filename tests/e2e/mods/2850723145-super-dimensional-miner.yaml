@@ -1,0 +1,22 @@
+# Super Dimensional Miner超次元矿机 (2850723145), class P (art).
+#
+# What it does: a postfix on AutoMinerConfig.CreateBuildingDef gives the Robo-Miner the mod's
+# own animation, AutoMiner1_kanim (shipped in its anim folder), in place of the game's.
+# How a player reaches it: building a Robo-Miner.
+# What changes: how the Robo-Miner looks.
+#
+# The Robo-Miner's def uses the mod's animation; setup builds one in the corridor west of the
+# printing pod, and it is drawn with that animation (a world shot of it).
+from: early-base
+mods: [2850723145]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"AutoMiner\")", method: Build, args: [{"$": "Grid.XYToCell(113, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"AutoMiner\").AnimFiles[0].name": "== 'AutoMiner1_kanim'"
+      "Assets.GetBuildingDef(\"AutoMiner\").AnimFiles.Length": 1
+  - run: {seconds: 2}
+  - expect: {buildings: {AutoMiner: 1}}
+  - expect_state:
+      "all:AutoMiner::[0].GetComponent<KBatchedAnimController>.AnimFiles[0].name": "== 'AutoMiner1_kanim'"
+  - world_shot: {name: miner, ortho: 5, at: [113, 208], threshold: 0.08}

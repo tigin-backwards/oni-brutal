@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3438586580-interstellar-remote-workers.yaml",
+ "mods": [
+  "3438586580"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a Remote Controller's side screen lists nothing selected and the corridor's dock (dump matches)",
+ "updated": "2026-10-29",
+ "commit": "a844a2ce",
+ "mod_dlls": {
+  "3438586580": {
+   "Interstellar_Remote_Workers.dll": "7c1c741a6659a55d1b4df15147ad6d8849a77fa72975129d8995c585dd64188f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-134518-3daf9420",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T15:43:36",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-023037-f7b61320",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T02:45:57",
+    "lane": 14,
+    "reference_run": "20261027-134518-3daf9420",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "rows": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261029-023037-f7b61320",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T02:46:47",
+    "lane": 14,
+    "reference_run": "20261027-134518-3daf9420",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "rows": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

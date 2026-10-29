@@ -1,0 +1,59 @@
+{
+ "spec": "mods/1718257423-old-steam-turbine.yaml",
+ "mods": [
+  "1718257423"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the old Steam Turbine is in the Power menu, its card opens (shot)",
+ "updated": "2026-10-27",
+ "commit": "8edec30d",
+ "mod_dlls": {
+  "1718257423": {
+   "OldSteamTurbine.dll": "57cd7bb6d75d036e26a08b1a8a7571e4fa76495a8740dd1ecf62ce933441cd7f"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-131522-a47d65cb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T13:33:06",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-142041-80e4c84c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T14:32:21",
+    "lane": 16,
+    "reference_run": "20261027-131522-a47d65cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "info": 0.0
+    }
+   },
+   {
+    "run": "20261027-142041-80e4c84c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T14:33:12",
+    "lane": 16,
+    "reference_run": "20261027-131522-a47d65cb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "info": 0.0
+    }
+   }
+  ]
+ }
+}

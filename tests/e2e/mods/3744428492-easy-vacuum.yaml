@@ -1,0 +1,26 @@
+# 快速抽真空（Easy Vacuum） (3744428492), classes T, K.
+#
+# What it does: adds an Easy Vacuum tool to the toolbar (a flood tool, its own bindable PLib
+# action): pointed at a gas or liquid cell it previews the connected area of that same element
+# in its world, and a click replaces every cell of it with vacuum at once.
+# How a player reaches it: the toolbar's Easy Vacuum button (or its key).
+# What changes: a pocket of gas or liquid removed in one click.
+#
+# The tool is picked from the toolbar; a click on the oxygen in the corridor west of the
+# printing pod empties that pocket of oxygen: the corridor holds less than half its gas
+# afterwards (carbon dioxide stays and flows in).
+from: early-base
+mods: [3744428492]
+steps:
+  - run: {seconds: 1}
+  - expect_state:
+      "cells:110,207..118,209::Grid.Mass.get_Item({cell})": {save_as: before}
+  - expect_state: {"cells:110,207..118,209::Grid.Mass.get_Item({cell})": "> 1"}
+  - driver: {camera.set: {cell: [114, 208], ortho: 10}}
+  - tool: {toolbar: Easy Vacuum}
+  - expect_state: {"PlayerController.Instance.ActiveTool.name": "== 'EasyVacuumTool'"}
+  - click_world: {cell: [114, 208]}
+  - key: {code: Escape}
+  - run: {seconds: 0.5, speed: 1}
+  - expect_state:
+      "cells:110,207..118,209::Grid.Mass.get_Item({cell})": "< 0.5 * before"

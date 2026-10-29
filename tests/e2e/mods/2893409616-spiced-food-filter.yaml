@@ -1,0 +1,33 @@
+# Spiced Food Filter (2893409616), classes P, S.
+#
+# What it does: gives every filtered storage other than the refrigerator and the spice grinder
+# (storage bins, the ration box, ...) a SpiceFilter, and shows the item filter's "Only allow
+# spiced items" row for them, which the game shows for refrigerators only. Checked, the storage
+# forbids unspiced food and drops what unspiced food it holds.
+# How a player reaches it: a storage bin's filter side screen, its "Only allow spiced items"
+# check box.
+# What changes: which food a storage bin or ration box takes.
+#
+# A storage bin is built in setup in the corridor west of the printing pod. Its side screen
+# shows the row; a click on its check box sets the bin's spice filter and forbids unspiced food;
+# a second click clears it again.
+from: early-base
+mods: [2893409616]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"StorageLocker\")", method: Build, args: [{"$": "Grid.XYToCell(113, 207)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: StorageLocker}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/TreeFilterableSideScreen", cond: stable}
+  - expect_ui:
+      "**/TreeFilterableSideScreen/**/ConfigurationRows/OnlyAllowSpicedItems": {active: true}
+  - expect_state: {"selected:GetComponent<SpicedFoodFilter.SpiceFilter>.OnlyStoreSpicedFood": false}
+  - ui_dump: {name: config-rows, root: "**/TreeFilterableSideScreen/ContentMask/Content/ConfigurationRows"}
+  - click: {ui: "**/TreeFilterableSideScreen/**/ConfigurationRows/OnlyAllowSpicedItems/CheckBox"}
+  - expect_state:
+      "selected:GetComponent<SpicedFoodFilter.SpiceFilter>.OnlyStoreSpicedFood": true
+      "selected:GetComponent<SpicedFoodFilter.SpiceFilter>.FilteredStorage.forbiddenTags": {contains: UnspicedFood}
+  - shot: {name: side-screen, crop: "**/DetailsScreen/SideScreen", threshold: 0.04}
+  - click: {ui: "**/TreeFilterableSideScreen/**/ConfigurationRows/OnlyAllowSpicedItems/CheckBox"}
+  - expect_state: {"selected:GetComponent<SpicedFoodFilter.SpiceFilter>.OnlyStoreSpicedFood": false}

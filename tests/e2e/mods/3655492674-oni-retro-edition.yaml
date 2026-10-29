@@ -1,0 +1,37 @@
+# ONI: Retro Edition [beta] (3655492674), classes B, P, T, U; PLib options.
+#
+# What it does: brings back early-access content and looks: buildings (the Smelter, Metal
+# Reclaimer, retro Gas Pump, Wall Lamp, Large Battery, Gamma Ray Oven, a Job Board), old
+# foods, oxygen masks, the old Steam Turbine, rotting Duplicant bones, old textures, pipe
+# icons and suits, effects, sounds and Wattson messages, building overrides from JSON, and a
+# Pumping Tool (the "Slurp" tool) in the tool menu whose placers have a plumber pump liquid
+# from the marked cells.
+# How a player reaches it: the tool menu's Pumping Tool; the build menus.
+# What changes: the game looks and plays like its early versions.
+#
+# Its shipped config.json holds non-default values, so the options are set here as shipped.
+# setup floods the pit in the corridor floor west of the printing pod. The Pumping Tool is
+# picked from the tool menu and dragged over the water; pump placers appear on the liquid
+# cells.
+from: early-base
+mods: [3655492674]
+options:
+  "3655492674": {IronOreTexture: 1, TileTopsMerge: true, manualSlimemachine: true, gassensorpower: true, GammaRayOvenRadbolts: true, liquidsensorpower: true, endlessRotting: true, oldPipeIcons: true, oldDupeSuits: true}
+setup:
+  - driver: {setup.call: {type: SimMessages, method: AddRemoveSubstance, args: [131126, Water, null, 1000, 300, 255, 0]}}
+  - driver: {setup.call: {type: SimMessages, method: AddRemoveSubstance, args: [131127, Water, null, 1000, 300, 255, 0]}}
+  - driver: {setup.call: {type: SimMessages, method: AddRemoveSubstance, args: [131128, Water, null, 1000, 300, 255, 0]}}
+  - driver: {setup.call: {type: SimMessages, method: AddRemoveSubstance, args: [131129, Water, null, 1000, 300, 255, 0]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"SlurpPlacer\")": exists
+      "Assets.GetBuildingDef(\"RetroOni_Smelter\")": exists
+      "Db.Get().Techs.Get(\"GlassFurnishings\").unlockedItemIDs": {contains: RetroOni_WallLamp}
+  - run: {seconds: 3}
+  - driver: {camera.set: {cell: [113, 208], ortho: 10}}
+  - tool: {toolbar: "Pumping Tool"}
+  - expect_state: {"Grid.IsLiquid(131128)": true}
+  - drag: {from: [110, 206], to: [113, 206]}
+  - key: {code: Escape}
+  - expect_state:
+      "count:all:KPrefabID::[*] if .PrefabTag.Name == SlurpPlacer": [">= 1", "== original"]

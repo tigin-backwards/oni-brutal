@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3626072188-copy-materials-tool.yaml",
+ "mods": [
+  "3626072188"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "Copy Materials on a copper ore ladder marks a sandstone ladder for rebuilding in copper ore",
+ "updated": "2026-10-27",
+ "commit": "8edec30d",
+ "mod_dlls": {
+  "3626072188": {
+   "CopyMaterialsTool.dll": "99eaa6493f31871630f5c267a06f6a54b4ea910a84558cd5d5402e45f581547c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-132745-bfd98f4e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T14:02:10",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261027-142041-80e4c84c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T14:45:43",
+    "lane": 16,
+    "reference_run": "20261027-132745-bfd98f4e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261027-142041-80e4c84c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-27T14:46:31",
+    "lane": 16,
+    "reference_run": "20261027-132745-bfd98f4e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "user-menu": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

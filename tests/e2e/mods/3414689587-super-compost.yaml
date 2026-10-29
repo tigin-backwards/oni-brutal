@@ -1,0 +1,33 @@
+# Building-Super Compost 超级堆肥堆 (3414689587), class P; PLib options (Controler.json).
+#
+# What it does: postfixes on CompostConfig rework the Compost by options: what it makes
+# (Production: dirt, fertilizer or clay) and how much (Mass x 0.1 kg/s of dirt, x 0.05 of the
+# others), its heat (Heat x 1 kDTU/s), the turning errand's work time (Worktime) and the
+# output's temperature (OutTem); it drops its product in 100 kg piles and needs no operator.
+# How a player reaches it: build a Compost; the options in the mod's PLib dialog.
+# What changes: a compost that makes fertilizer fast.
+#
+# Its shipped Controler.json holds non-default values, so the options are set here:
+# fertilizer at 10x (0.5 kg/s), no heat, 1 s of work, output at 0 °C. setup builds a Compost
+# in the corridor west of the printing pod and loads it with polluted dirt; selected, its
+# converter makes fertilizer.
+from: early-base
+mods: [3414689587]
+options:
+  "3414689587": {$file: Controler.json, Mass: 10, Heat: 0, Worktime: 1, OutTem: 0, Production: 1}
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Compost\")", method: Build, args: [131764, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "all:Compost::[0].GetComponent<Storage>", method: AddOre, args: [ToxicSand, 200, 300, 255, 0, false, true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"Compost\").GetComponent<ElementConverter>.outputElements[0].elementHash": "== 'Fertilizer'"
+      "Assets.GetPrefab(\"Compost\").GetComponent<ElementConverter>.outputElements[0].massGenerationRate": 0.5
+      "Assets.GetPrefab(\"Compost\").GetComponent<CompostWorkable>.workTime": 1
+      "Assets.GetBuildingDef(\"Compost\").SelfHeatKilowattsWhenActive": 0
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: Compost}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<ElementConverter>.outputElements[0].elementHash": "== 'Fertilizer'"
+      "selected:GetComponent<Storage>.MassStored()": ">= 199"

@@ -142,17 +142,20 @@ def ws_mods():
 # ---------------------------------------------------------------- specs
 
 TOP_KEYS = {'name', 'from', 'mods', 'options', 'setup', 'steps', 'require_log', 'mask_text', 'tolerance',
-            'thresholds', 'ignore_fields', 'memory_gb', 'spaced_out', 'translation', 'language'}
+            'thresholds', 'ignore_fields', 'memory_gb', 'spaced_out', 'translation', 'language',
+            'keyboard'}
 # The game's own translations (`language`), as Localization.PreinstalledLanguages names them.
 PREINSTALLED_LANGUAGES = ('zh_klei', 'ko_klei', 'ru_klei')
 # `from: main-menu` loads no fixture: the steps start at the main menu (a new game's spec).
 MAIN_MENU = 'main-menu'
+# An XKB layout as setxkbmap takes it, a variant in parentheses: fr, de, us(dvorak).
+KEYBOARD_LAYOUT = r'[a-z]{2,8}(\([\w-]+\))?'
 # Steps that talk to E2eDriver (a spec with any of them needs it installed).
 DRIVER_STEPS = {'click', 'toggle', 'dropdown', 'type', 'drag', 'tool', 'expect_ui', 'expect_state', 'ui_dump',
                 'ui_wait', 'world_shot', 'driver', 'click_world', 'scroll', 'expect_hit'}
-STEP_KINDS = {'dig', 'build', 'run', 'expect', 'call', 'save', 'shot', 'open', 'key'} | DRIVER_STEPS
+STEP_KINDS = {'dig', 'build', 'run', 'expect', 'call', 'save', 'shot', 'open', 'key', 'keyboard'} | DRIVER_STEPS
 DRIVER_COMMANDS = {'ping', 'ui.find', 'ui.at', 'ui.dump', 'ui.wait', 'world.to_screen', 'screen.to_cell', 'state.get', 'state.each', 'camera.get',
-                   'camera.set', 'canvas.hide', 'canvas.show', 'setup.call', 'seed', 'count'}
+                   'camera.set', 'canvas.hide', 'canvas.show', 'setup.call', 'seed', 'count', 'keys.log'}
 
 
 def _cell(value):
@@ -216,6 +219,15 @@ def check_step(where, kind, value, in_setup):
              'open takes {management: NAME}, {key: CODE} or {user_menu: ACTION_KEY, at: [x, y] | id: ID}')
         if isinstance(value, dict) and 'key' in value:
             problems += [f'{where}: {p}' for p in key_problems(value['key'])]
+    elif kind == 'keyboard':
+        need(isinstance(value, str) and re.fullmatch(KEYBOARD_LAYOUT, value),
+             'keyboard takes an XKB layout, as setxkbmap does: fr, de, us(dvorak)')
+    elif kind == 'key' and isinstance(value, dict) and 'keycode' in value:
+        # A physical key by its X keycode, whatever the display's layout puts on it.
+        need(isinstance(value['keycode'], int) and 8 <= value['keycode'] <= 255, 'key `keycode` is an X keycode, 8 to 255')
+        need(set(value) <= {'keycode', 'mods'}, 'key `keycode` takes only `mods`')
+        for m in value.get('mods', []):
+            problems += [f'{where}: {p}' for p in key_problems(m)]
     elif kind == 'key':
         need(isinstance(value, dict) and value.get('code'), 'key takes {code: "Shift+B"}')
         need(not isinstance(value, dict) or 'at' not in value or _cell(value['at']),
@@ -303,6 +315,10 @@ def check_spec(spec):
         problems.append(f"`language` is one of the game's own: {', '.join(PREINSTALLED_LANGUAGES)}")
     elif 'language' in spec and 'translation' in spec:
         problems.append('`language` and `translation` both pick the language')
+    if 'keyboard' in spec and not (isinstance(spec['keyboard'], str) and re.fullmatch(KEYBOARD_LAYOUT, spec['keyboard'])):
+        problems.append('`keyboard` is an XKB layout, as setxkbmap takes it: fr, de, us(dvorak)')
+    if 'keyboard' not in spec and any(isinstance(s, dict) and 'keyboard' in s for s in spec.get('steps') or []):
+        problems.append('a `keyboard` step needs the spec\'s `keyboard`, which keeps the display\'s layout (-noreset)')
     options = spec.get('options', {})
     if not isinstance(options, dict) or not all(isinstance(v, dict) for v in options.values()):
         problems.append('`options` maps a static ID to {Field: value}')
@@ -1433,6 +1449,18 @@ class Input:
             self.key_event(key, False)
             self.frames(2)
 
+    def physical_key(self, keycode, mods=()):
+        """Presses and releases the key at X keycode KEYCODE, with MODS held: the key at a
+        position, whatever the layout puts on it."""
+        self.focus()
+        with self.modifiers(mods):
+            self.xtst.XTestFakeKeyEvent(self.dpy, keycode, 1, 0)
+            self._flush()
+            self.frames(2)
+            self.xtst.XTestFakeKeyEvent(self.dpy, keycode, 0, 0)
+            self._flush()
+            self.frames(2)
+
     def type_text(self, text):
         self.focus()
         for ch in text:
@@ -1619,13 +1647,37 @@ class Watchdog(threading.Thread):
         return (result.stdout.splitlines() or ['hang-dump.sh printed nothing'])[0]
 
 
+def keyboard_server_options(keyboard):
+    """The X server's options for a spec with a `keyboard`. A server resets its keymap when its
+    last client leaves, as setxkbmap does: -noreset keeps the layout until the player connects.
+    Keys pressed by keycode are held for frames, which at a colony's frame rate outlast the
+    default autorepeat delay (660 ms): -ardelay puts it out of reach, so each press types one
+    character in both players."""
+    return ['-noreset', '-ardelay', '30000'] if keyboard else []
+
+
+def set_keyboard(display, xauthority, keyboard):
+    """KEYBOARD, an XKB layout, on DISPLAY (a lane's, never the desktop's)."""
+    if not keyboard:
+        return
+    env = dict(os.environ, DISPLAY=display)
+    if xauthority:
+        env['XAUTHORITY'] = xauthority
+    layout, _, variant = keyboard.partition('(')
+    command = ['setxkbmap', '-display', display, layout, *(['-variant', variant.rstrip(')')] if variant else [])]
+    done = subprocess.run(command, env=env, capture_output=True, text=True)
+    if done.returncode:
+        raise SpecFailure(f'setxkbmap {keyboard} on {display} failed: {done.stderr.strip()}')
+
+
 class Player:
     """One player process on its own display, with a scratch profile holding OniMcp, E2eDriver,
     the spec's mods and options, and a fixture."""
 
     def __init__(self, kind, out, env, fixture, lane, mods=(), options=None, driver=False, expansion1=True,
-                 translation=None, language=None):
+                 translation=None, language=None, keyboard=None):
         self.kind, self.out, self.env, self.lane = kind, out, env, lane
+        self.keyboard = keyboard
         self.home = os.path.join(out, 'home')
         self.profile = os.path.join(self.home, *PROFILE)
         self.log = os.path.join(out, 'player.log' if kind == 'original' else 'stdout.txt')
@@ -1739,7 +1791,8 @@ class Player:
             self.process = subprocess.Popen(command, env=env, stdout=open(stdout, 'w'), stderr=subprocess.STDOUT,
                                             start_new_session=True)
         else:
-            command = ['xvfb-run', '-a', '-s', f'-screen 0 {WIDTH}x{HEIGHT}x24', *command]
+            command = ['xvfb-run', '-a', '-s', ' '.join([f'-screen 0 {WIDTH}x{HEIGHT}x24', *keyboard_server_options(self.keyboard)]),
+                       *command]
             os.makedirs(shared_dir(), exist_ok=True)
             with _xvfb_start, open(os.path.join(shared_dir(), 'xvfb.lock'), 'a+') as lock:
                 fcntl.flock(lock, fcntl.LOCK_EX)
@@ -1765,7 +1818,8 @@ class Player:
         number = display.lstrip(':')
         if display_in_use(number):
             raise SpecFailure(f'display {display} is in use')
-        self.xvfb = subprocess.Popen(['Xvfb', display, '-screen', '0', f'{WIDTH}x{HEIGHT}x24', '-nolisten', 'tcp'],
+        self.xvfb = subprocess.Popen(['Xvfb', display, '-screen', '0', f'{WIDTH}x{HEIGHT}x24', '-nolisten', 'tcp',
+                                      *keyboard_server_options(self.keyboard)],
                                      stdout=subprocess.DEVNULL, stderr=open(os.path.join(self.out, 'xvfb.txt'), 'w'),
                                      start_new_session=True)
         deadline = time.time() + 20
@@ -1773,6 +1827,8 @@ class Player:
             if self.xvfb.poll() is not None or time.time() > deadline:
                 raise SpecFailure(f'Xvfb {display} did not start')
             time.sleep(0.2)
+        # The spec's layout, before the player connects (-noreset keeps it).
+        set_keyboard(display, None, self.keyboard)
 
     def find_display(self):
         """The display and X authority file xvfb-run gave the player (from its environment)."""
@@ -1785,6 +1841,7 @@ class Player:
                     number = self.display.lstrip(':').split('.')[0]
                     while not display_ready(number) and time.time() < deadline:
                         time.sleep(0.2)
+                    set_keyboard(self.display, self.xauthority, self.keyboard)
                     return
             if self.process.poll() is not None:
                 raise SpecFailure(f'xvfb-run exited ({self.process.returncode})')
@@ -2558,6 +2615,12 @@ class Run:
             self.world_shot(value)
         elif kind == 'open':
             self.open(value)
+        elif kind == 'keyboard':
+            # The layout switched while the player runs, as a player's alt+shift does.
+            set_keyboard(self.player.display, self.player.xauthority, value)
+            self.frames(5)
+        elif kind == 'key' and 'keycode' in value:
+            self.need_input().physical_key(value['keycode'], value.get('mods', ()))
         elif kind == 'key':
             if 'at' in value:
                 # A tool hears keys only while the pointer is over the world, not the UI.
@@ -2878,7 +2941,7 @@ class Run:
                 raise SpecFailure(f'no fixture {fixture}')
             self.player = Player(self.kind, self.out, self.env, fixture, self.lane, spec['mods'], spec.get('options'),
                                  driver=uses_driver, expansion1=spaced_out(spec), translation=spec.get('translation'),
-                                 language=spec.get('language'))
+                                 language=spec.get('language'), keyboard=spec.get('keyboard'))
             self.mcp.on_reply = self.player.watchdog.progress
             records = open(os.path.join(self.out, 'results.jsonl'), 'w')
             started = time.time()

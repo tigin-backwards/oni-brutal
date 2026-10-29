@@ -1,0 +1,28 @@
+# Multiplayer Mod (OniMultiplayer, 3728274068), classes S, M, P, U; base game only.
+#
+# What it does: several players share one colony: a host captures the loaded colony's save
+# and sends it to clients over LAN/TCP or Steam (lobbies, P2P), then relays every tool order
+# (dig, build, mop, sweep, priorities, deconstruct, capture, ...), speed changes, immigrant
+# picks and chores, with desync dumps. The main menu gets a MULTIPLAYER panel: Host LAN, Host
+# Steam/LAN, Find Steam Lobby, Join Clipboard (a join token), Reset, and a status line; in a
+# colony an overlay and hotkeys (Ctrl+Alt+R resets).
+# How a player reaches it: the main menu's MULTIPLAYER panel; in game, its overlay.
+# What changes: nothing until a session runs.
+#
+# A session needs two game processes (or real Steam accounts), which a spec of one player
+# cannot have, so this spec drives what one player reaches: the main menu panel (dumped)
+# and Host LAN, which refuses to host from the main menu (a colony must be loaded first). It
+# records the original only, as mods/3635632392-antigravity-multiplayer.yaml does.
+from: main-menu
+spaced_out: false
+mods: [3728274068]
+require_log: ['Main menu multiplayer buttons injected']
+steps:
+  - ui_wait: {path: "**/MainMenu/**/MainMenuButtons", cond: stable, frames: 3000}
+  - ui_wait: {path: "**/OniMultiplayerPanel", cond: stable}
+  - expect_state:
+      "type:OniMultiplayer.Mod.Runtime.OniMultiplayerRuntime::LastStatusMessage": "Multiplayer: Idle."
+  - ui_dump: {name: panel, root: "**/OniMultiplayerPanel"}
+  - click: {ui: "**/OniMultiplayerPanel/OniMultiplayerHostLANButton"}
+  - expect_state:
+      "type:OniMultiplayer.Mod.Runtime.OniMultiplayerRuntime::LastStatusMessage": {contains: "Host requires a loaded colony save"}

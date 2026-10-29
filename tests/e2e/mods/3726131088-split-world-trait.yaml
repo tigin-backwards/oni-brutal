@@ -1,0 +1,23 @@
+# Split World Trait (3726131088), classes W, P.
+#
+# What it does: adds the Split World world trait (worldgen/traits/SplitWorld.yaml): a band of
+# space with magma right below it cuts the asteroid in two at depth, exclusive with core and
+# crust traits. Patches resize such a world and repack the cluster around it, patch the
+# teleporters, and register the trait's icon (an embedded sprite) and strings.
+# How a player reaches it: a new game whose asteroid rolls the trait.
+# What changes: worlds split by a space layer.
+#
+# The trait is loaded into the game's worldgen settings beside the game's own, with its tags,
+# exclusivity and extra subworlds; its name and its icon sprite are registered. A world rolling
+# it depends on the seed; this spec checks the settings worldgen reads.
+from: early-base
+mods: [3726131088]
+steps:
+  - expect_state:
+      "ProcGen.SettingsCache.worldTraits[\"traits/SplitWorld\"].name": "== 'STRINGS.WORLD_TRAITS.SPLIT_WORLD.NAME'"
+      "ProcGen.SettingsCache.worldTraits[\"traits/SplitWorld\"].traitTags": {contains: SplitWorldTrait}
+      "ProcGen.SettingsCache.worldTraits[\"traits/SplitWorld\"].exclusiveWithTags": {contains: CoreTrait}
+      "ProcGen.SettingsCache.worldTraits[\"traits/SplitWorld\"].additionalSubworldFiles.Count": 2
+      "ProcGen.SettingsCache.worldTraits[\"traits/SplitWorld\"].additionalUnknownCellFilters.Count": 2
+      "Assets.GetSprite(\"SplitWorld\")": exists
+      "Strings.Get(\"STRINGS.WORLD_TRAITS.SPLIT_WORLD.NAME\").String": "== original"

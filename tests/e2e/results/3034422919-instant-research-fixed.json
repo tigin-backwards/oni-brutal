@@ -1,0 +1,61 @@
+{
+ "spec": "mods/3034422919-instant-research-fixed.yaml",
+ "mods": [
+  "3034422919"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "the research screen opens panned elsewhere in ours: Power Regulation, on screen in the original (its click researches it at once), lies below the screen in ours (y 758), so the click cannot be made",
+ "updated": "2026-10-29",
+ "commit": "32883c21",
+ "mod_dlls": {
+  "3034422919": {
+   "InstantResearchFixed.dll": "adc8182127ca9e00ba364fc26f22a3fdde1067b4e24fb2aae5b573d4578710ae"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-012035-7f57cd57",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T02:40:46",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-025514-2b5a955b",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-29T02:55:14",
+    "lane": 15,
+    "reasons": [
+     "step 4: GameScreenManager/FullScreenUICanvases/ResearchScreen/Content/ScrollRectRoot/ScrollContent/<link=\"POWERREGULATION\">Power Regulation</link> Panel is off screen (rect (578.09, 758.68, 156.86, 75.34))"
+    ],
+    "reference_run": "20261029-012035-7f57cd57",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-025514-2b5a955b",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-29T02:56:16",
+    "lane": 15,
+    "reasons": [
+     "step 4: GameScreenManager/FullScreenUICanvases/ResearchScreen/Content/ScrollRectRoot/ScrollContent/<link=\"POWERREGULATION\">Power Regulation</link> Panel is off screen (rect (585.85, -1598.35, 156.86, 75.34))"
+    ],
+    "reference_run": "20261029-012035-7f57cd57",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

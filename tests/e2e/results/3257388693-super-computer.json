@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3257388693-super-computer.yaml",
+ "mods": [
+  "3257388693"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Super Computer needs no power, takes water from a pipe and makes resources; one built is selected without an energy consumer",
+ "updated": "2026-10-29",
+ "commit": "0d7478f2",
+ "mod_dlls": {
+  "3257388693": {
+   "│¼╝╢╝╞╦π╗·.dll": "98bad7bf1d131c1fecca975973b3039216cbc69b9a06afa7f0043c5036328043"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-114104-90e83e51",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T13:09:02",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-020420-c5041eb2",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T02:04:20",
+    "lane": 14,
+    "reference_run": "20261027-114104-90e83e51",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-020420-c5041eb2",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T02:05:08",
+    "lane": 14,
+    "reference_run": "20261027-114104-90e83e51",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

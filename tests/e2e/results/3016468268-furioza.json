@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3016468268-furioza.yaml",
+ "mods": [
+  "3016468268"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a new game at Furioza-12345-0-0-0 generates the mod's cluster: eleven worlds, the 300x150 Furioza start world with its subworlds, the Temporal Tear",
+ "updated": "2026-10-29",
+ "commit": "b9f4842a",
+ "mod_dlls": {
+  "3016468268": {
+   "Furioza.dll": "3e3b8f1faeadf75819899eb13c767ef03d069496c3931019a4f8fec8e27e7209"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-023335-3815950b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T02:36:45",
+    "lane": 15,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-024743-e26bb344",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T03:28:08",
+    "lane": 14,
+    "reference_run": "20261029-023335-3815950b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261029-024743-e26bb344",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T03:29:16",
+    "lane": 14,
+    "reference_run": "20261029-023335-3815950b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

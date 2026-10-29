@@ -1,0 +1,16 @@
+# Auto-Teleport (AutoTeleportMod, 3674429822), class P.
+#
+# What it does: a postfix on WarpPortal.WarpPortalSM.InitializeStates makes the occupied
+# portal's waiting state go on to warping after 0.5 s, so a Duplicant that enters a Teleporter
+# (Warp Portal) is sent at once instead of waiting for the player's button.
+# How a player reaches it: a Teleporter between asteroids; send a Duplicant into it.
+# What changes: no more confirming each teleport.
+#
+# The patched state machine is checked on the colony's teleporter.
+from: early-base
+mods: [3674429822]
+require_log: ['AutoTeleportMod: Patched occupied.waiting to auto-warp after 0.5s']
+steps:
+  - run: {seconds: 2}
+  - expect_state:
+      "count:all:WarpPortal::[*] if .enabled == true": "== original"

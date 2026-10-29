@@ -1,0 +1,81 @@
+{
+ "spec": "mods/3474203860-autosweeper-with-temperature-filter.yaml",
+ "mods": [
+  "3474203860"
+ ],
+ "verdict": "warning",
+ "why": "known findings: fixed-format-midpoint",
+ "findings": [
+  "fixed-format-midpoint"
+ ],
+ "note": "the Shipping menu card (shot); a built sweeper's temperature fields (dump, shot) store a typed minimum",
+ "updated": "2026-10-29",
+ "commit": "93034b42",
+ "mod_dlls": {
+  "3474203860": {
+   "AutoSweeperTempFilter.dll": "722cad28f822a4df268c04317d884b49da04cedb19c69c6a0a0f01eeff4e4a63"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-145102-18288f91",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T15:31:11",
+    "lane": 16,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-023906-6d0d6067",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-29T02:40:45",
+    "lane": 16,
+    "reference_run": "20261027-145102-18288f91",
+    "new_signatures": 0,
+    "findings": [
+     "fixed-format-midpoint"
+    ],
+    "ui_dump": {
+     "side": {
+      "differences": 0,
+      "known": {
+       "fixed-format-midpoint": 4
+      }
+     }
+    },
+    "shots": {
+     "product": 0.0,
+     "side": 0.005526
+    }
+   },
+   {
+    "run": "20261029-023906-6d0d6067",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-29T02:41:40",
+    "lane": 16,
+    "reference_run": "20261027-145102-18288f91",
+    "new_signatures": 0,
+    "findings": [
+     "fixed-format-midpoint"
+    ],
+    "ui_dump": {
+     "side": {
+      "differences": 0,
+      "known": {
+       "fixed-format-midpoint": 4
+      }
+     }
+    },
+    "shots": {
+     "product": 0.0,
+     "side": 0.005526
+    }
+   }
+  ]
+ }
+}

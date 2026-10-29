@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3519929015-overheat-control.yaml",
+ "mods": [
+  "3519929015"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the research station's temperature monitor cuts it off once it is heated past its shutdown temperature and marks it cooling; selected, it shows the monitoring status",
+ "updated": "2026-10-29",
+ "commit": "59c3c3c9",
+ "mod_dlls": {
+  "3519929015": {
+   "OverheatControl.dll": "b386e2ddf2c5a2de51927d30e10fe9de76d4280c68ae4135a07ce752ef58eb3d"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261027-114104-90e83e51",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-27T11:52:13",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-012454-3e8a3ce3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T01:24:54",
+    "lane": 14,
+    "reference_run": "20261027-114104-90e83e51",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-012454-3e8a3ce3",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T01:25:59",
+    "lane": 14,
+    "reference_run": "20261027-114104-90e83e51",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

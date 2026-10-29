@@ -1016,5 +1016,82 @@ namespace OniMoono.Tests
             Assert.True(clone != null);
             Assert.Equal("Transform Recorder- BoxCollider", Parts(clone));
         }
+
+        /// Logs, in its OnDisable, the activeInHierarchy of every object of the probe's hierarchy,
+        /// and runs `onDisable` then.
+        public class HierarchySpy : MonoBehaviour
+        {
+            public static readonly Dictionary<string, GameObject> Objects = new();
+            public System.Action onDisable;
+            void OnDisable()
+            {
+                if (!Objects.ContainsKey("C")) return;
+                var flags = new List<string>();
+                foreach (var kv in Objects) flags.Add(kv.Key + (kv.Value.activeInHierarchy ? "+" : "-"));
+                Recorder.Log.Add(name + ":OnDisable " + string.Join(" ", flags));
+                onDisable?.Invoke();
+            }
+        }
+
+        // UnityProbe's deactorder scenario in the original player: P > A, B (> B1, B2), C. An
+        // object turns inactive when the walk reaches it, then its children are walked, then its
+        // own OnDisables run.
+        static GameObject DeactivationTree()
+        {
+            HierarchySpy.Objects.Clear();
+            Recorder.Log.Clear();
+            GameObject Make(string n, GameObject parent)
+            {
+                var go = new GameObject(n);
+                if (parent != null) go.transform.SetParent(parent.transform, false);
+                HierarchySpy.Objects[n] = go;
+                go.AddComponent<HierarchySpy>();
+                return go;
+            }
+            var p = Make("P", null);
+            Make("A", p);
+            var b = Make("B", p);
+            Make("B1", b);
+            Make("B2", b);
+            Make("C", p);
+            return p;
+        }
+
+        static readonly string[] DeactivationLog = [
+            "A:OnDisable P- A- B+ B1+ B2+ C+",
+            "B1:OnDisable P- A- B- B1- B2+ C+",
+            "B2:OnDisable P- A- B- B1- B2- C+",
+            "B:OnDisable P- A- B- B1- B2- C+",
+            "C:OnDisable P- A- B- B1- B2- C-",
+            "P:OnDisable P- A- B- B1- B2- C-"];
+
+        [Fact]
+        public void DeactivationTurnsEachObjectInactiveWhenItsTurnComesChildrenFirst()
+        {
+            DeactivationTree().SetActive(false);
+            Assert.Equal(DeactivationLog, Recorder.Log);
+        }
+
+        [Fact]
+        public void AnOnDisableThatDeactivatesALaterSiblingDisablesItThere()
+        {
+            // DetailCollapsableLabel.OnDisable hides its content rows, later siblings, only while
+            // they still read active: when the details screen closes too (issue #23).
+            var p = DeactivationTree();
+            var c = HierarchySpy.Objects["C"];
+            HierarchySpy.Objects["A"].GetComponent<HierarchySpy>().onDisable = () => c.SetActive(false);
+            p.SetActive(false);
+            Assert.Equal(["A", "C", "B1", "B2", "B", "P"], Recorder.Log.ConvertAll(e => e.Split(':')[0]));
+            p.SetActive(true);
+            Assert.False(c.activeSelf);
+            Assert.False(c.activeInHierarchy);
+        }
+
+        [Fact]
+        public void DestructionDisablesInTheSameOrderWithTheSameFlags()
+        {
+            Object.DestroyImmediate(DeactivationTree());
+            Assert.Equal(DeactivationLog, Recorder.Log);
+        }
 }
 }

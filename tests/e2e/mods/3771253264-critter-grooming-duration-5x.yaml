@@ -1,0 +1,18 @@
+# 小动物照料5倍时长 Critter Grooming Duration 5x (3771253264), class P.
+#
+# What it does: postfixes on the Grooming Station's and the underwater Fish Grooming
+# Station's DoPostConfigureComplete wrap their RanchStation.Def.OnRanchCompleteCb: after the
+# game's callback gives the critter its Ranched (groomed) effect, the time it added is
+# multiplied by 5, and the new duration logged.
+# How a player reaches it: a rancher grooms a critter at a station.
+# What changes: groomed critters stay groomed five times longer.
+#
+# A grooming needs a rancher, a ranch room and a critter's own visit; the spec checks the
+# mod's wrapper sits in both stations' callbacks, as in the original.
+from: early-base
+mods: [3771253264]
+require_log: ['\[CritterGroomingDuration5x\] Loaded\.']
+steps:
+  - expect_state:
+      "count:Assets.GetPrefab(\"RanchStation\").GetComponent<StateMachineController>.cmpdef.defs[*] if .OnRanchCompleteCb.Method.DeclaringType.Namespace == CritterGroomingDuration5x": 1
+      "count:Assets.GetPrefab(\"UnderwaterRanchStation\").GetComponent<StateMachineController>.cmpdef.defs[*] if .OnRanchCompleteCb.Method.DeclaringType.Namespace == CritterGroomingDuration5x": 1

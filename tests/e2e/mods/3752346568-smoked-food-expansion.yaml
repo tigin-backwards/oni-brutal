@@ -1,0 +1,21 @@
+# 更多烟熏食物 Smoked Food Expansion (3752346568), class P.
+#
+# What it does: adds three foods (Prehistoric Planet Pack): Smoked Surf and Turf (smoked
+# fish and smoked dinosaur meat), Caramelized Smoked Vegetables (smoked vegetables and sugar)
+# and the Royal Grilled Rib Steak, with Smoker recipes for each (a postfix on
+# SmokerConfig.ConfigureBuildingTemplate).
+# How a player reaches it: the Smoker's recipe side screen, in a Prehistoric colony.
+# What changes: three more smoked dishes.
+#
+# The Prehistoric fixture has the foods and their recipes, three more of the Smoker's than
+# the game's own.
+from: prehistoric1
+mods: [3752346568]
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"SmokedSurfAndTurf\").GetComponent<Edible>.FoodInfo.CaloriesPerUnit": "== original"
+      "Assets.GetPrefab(\"CaramelizedSmokedVegetables\").GetComponent<Edible>.FoodInfo.CaloriesPerUnit": 8000000
+      "Assets.GetPrefab(\"RoyalGrilledRibSteak\")": exists
+      "count:ComplexRecipeManager.Get().recipes[*] if .id.StartsWith(\"Smoker\") == true": "== original"
+      "count:ComplexRecipeManager.Get().recipes[*] if .results[0].material.Name == SmokedSurfAndTurf": 1
+      "count:ComplexRecipeManager.Get().recipes[*] if .results[0].material.Name == RoyalGrilledRibSteak": [">= 1", "== original"]

@@ -1,0 +1,24 @@
+# 钻石压机合成流明石英 Diamond Press Produces Lumen Quartz (3778429429), class B (a recipe).
+#
+# What it does: a postfix on DiamondPressConfig.ConfigureBuildingTemplate adds a Diamond Press
+# recipe that turns 200 kg of glass into a Lumen Quartz (PinkRockCarved) in 80 s, for Spaced
+# Out with The Frosty Planet Pack (the recipe's required DLCs, as the mod's).
+# How a player reaches it: the Diamond Press's recipe list.
+# What changes: a source of lumen quartz.
+#
+# The recipe is registered as in the original; a Diamond Press built by setup west of the
+# printing pod is selected: its recipe list is dumped and shot.
+from: early-base
+mods: [3778429429]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"DiamondPress\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "count:ComplexRecipeManager.Get().recipes[*] if .results[0].material.Name == PinkRockCarved and .fabricators[0].Name == DiamondPress": [">= 1", "== original"]
+  - run: {seconds: 2}
+  - expect: {buildings: {DiamondPress: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [112, 207], select: DiamondPress}
+  - ui_wait: {path: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView", cond: stable}
+  - ui_dump: {name: recipes, root: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView"}
+  - shot: {name: recipes, crop: "**/DetailsScreen", threshold: 0.04}

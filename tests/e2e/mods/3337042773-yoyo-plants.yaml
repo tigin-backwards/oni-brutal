@@ -1,0 +1,24 @@
+# yoyo植物模组 (yoyo Plants) (3337042773), class P (PLib options).
+#
+# What it does: a prefix on Db.Initialize rewrites the crop table (CROPS.CROP_TYPES): every
+# crop's growth time is multiplied by the "time" option (0.1 to 1) and its yield by the
+# "production" option (1 to 10), keeping the game's per-crop yields as multiples.
+# How a player reaches it: the mod's options; growing crops.
+# What changes: faster, larger harvests.
+#
+# The options are set explicitly (time 0.5, production 2): Mealwood's crop takes 900 s and
+# gives 2, Bristle Blossom's 1800 s, and Mealwood planted by the game reads the same, as in the
+# original.
+from: early-base
+mods: [3337042773]
+options:
+  "3337042773": {$file: Controler.json, time: 0.5, production: 2.0}
+steps:
+  - expect_state:
+      "TUNING.CROPS.CROP_TYPES[0].cropId": BasicPlantFood
+      "TUNING.CROPS.CROP_TYPES[0].cropDuration": 900
+      "TUNING.CROPS.CROP_TYPES[0].numProduced": 2
+      "TUNING.CROPS.CROP_TYPES[1].cropId": PrickleFruit
+      "TUNING.CROPS.CROP_TYPES[1].cropDuration": 1800
+      "TUNING.CROPS.CROP_TYPES.Count": "== original"
+      "Assets.GetPrefab(\"BasicSingleHarvestPlant\").GetComponent<Crop>.cropVal.cropDuration": 900

@@ -1,0 +1,87 @@
+{
+ "spec": "mods/3778736902-gravnet-ai.yaml",
+ "mods": [
+  "3778736902"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "the Silicon Purifier and GPU Assembler built are selected: their recipe list dumps match",
+ "updated": "2026-10-29",
+ "commit": "2e861a10",
+ "mod_dlls": {
+  "3778736902": {
+   "MeepNetAI.dll": "de3f48249aebafed9236d9aedca289797137e02755d647313514ca9a75d80a6b"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-171506-7be95722",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T17:22:08",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-182304-ea2b1569",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-29T18:23:04",
+    "lane": 7,
+    "reference_run": "20261029-171506-7be95722",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "purifier": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     },
+     "assembler": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261029-182304-ea2b1569",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-29T18:24:04",
+    "lane": 7,
+    "reference_run": "20261029-171506-7be95722",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "purifier": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     },
+     "assembler": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

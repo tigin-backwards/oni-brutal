@@ -1,0 +1,69 @@
+{
+ "spec": "mods/3795634377-wall-air-conditioner.yaml",
+ "mods": [
+  "3795634377"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "one built on the ceiling is selected: the mod's controller and its threshold side screen dump match",
+ "updated": "2026-10-29",
+ "commit": "2e861a10",
+ "mod_dlls": {
+  "3795634377": {
+   "AirConditioningIndoorUnit.dll": "096660599bb3a91376a0192dd3323dfd15b90a745df08cc0f81111574cd25370"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-171506-7be95722",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T17:25:49",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-182458-d396d5f3",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T18:24:58",
+    "lane": 7,
+    "reference_run": "20261029-171506-7be95722",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     },
+     "threshold": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261029-182458-d396d5f3",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T18:25:46",
+    "lane": 7,
+    "reference_run": "20261029-171506-7be95722",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "title": {
+      "differences": 0
+     },
+     "threshold": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

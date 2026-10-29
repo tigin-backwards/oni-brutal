@@ -1,0 +1,35 @@
+# Controlled Buildings (3670726296), classes P, V.
+#
+# What it does: building footprints and draw layers. A postfix on JuicerConfig makes the
+# Juicer 3 tall (so ceiling trim fits in 4-high rooms); a prefix on Assets.AddBuildingDef puts
+# drywall-like backwalls (drywall, tempshift plates, Gravitas walls, pixel packs) on the
+# backwall object and scene layers and Transit Tubes on their own layers, buildable anywhere;
+# a postfix on BuildingComplete.OnSpawn pushes drywall behind wires (z -16); tube connections
+# are always allowed; Arbor Tree branches draw in front of the trunk.
+# How a player reaches it: building those buildings.
+# What changes: how they fit and overlap.
+#
+# The definitions carry the new sizes and rules, as in the original; a drywall built by setup
+# in the corridor west of the printing pod stands at z -16, and a Juicer there is 3 tall.
+from: early-base
+mods: [3670726296]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"ExteriorWall\")", method: Build, args: [{"$": "Grid.XYToCell(112, 208)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"Juicer\")", method: Build, args: [{"$": "Grid.XYToCell(115, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"Juicer\").HeightInCells": 3
+      "Assets.GetBuildingDef(\"TravelTube\").BuildLocationRule": Anywhere
+      "Assets.GetBuildingDef(\"TravelTube\").ObjectLayer": "== original"
+      "Assets.GetBuildingDef(\"ExteriorWall\").SceneLayer": "== original"
+      "Assets.GetBuildingDef(\"ThermalBlock\").ObjectLayer": "== original"
+  - run: {seconds: 2}
+  - expect: {buildings: {ExteriorWall: 1, Juicer: 1}}
+  - expect_state:
+      "sum:all:BuildingComplete::[*].transform.position.z if .name == ExteriorWallComplete": -16
+  - driver: {camera.set: {cell: [114, 208], ortho: 8}}
+  - click_world: {cell: [115, 208], select: Juicer}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<Building>.Def.HeightInCells": 3
+  - world_shot: {name: corridor, ortho: 4, at: [114, 208], hide_ui: true, mask: [[0, 400, 1280, 320]]}

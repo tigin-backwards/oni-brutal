@@ -1,0 +1,56 @@
+{
+ "spec": "mods/3337042773-yoyo-plants.yaml",
+ "mods": [
+  "3337042773"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "options set: the crop table carries the options' times and yields",
+ "updated": "2026-10-29",
+ "commit": "2e861a10",
+ "mod_dlls": {
+  "3337042773": {
+   "PLib.dll": "b862c5db2b3cd6df09a62d4a30782e91e2b24e8e1bfac08d991c9cc89a984ba9",
+   "yoyoPlants.dll": "85a1ef7fcc0b459333900c1fcdafa9bbba6ac92a9fd040d1b12c1f4c395694b4"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-171506-7be95722",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T17:58:44",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-182634-4eabc90e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T18:26:34",
+    "lane": 7,
+    "reference_run": "20261029-171506-7be95722",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-182634-4eabc90e",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T18:27:17",
+    "lane": 7,
+    "reference_run": "20261029-171506-7be95722",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

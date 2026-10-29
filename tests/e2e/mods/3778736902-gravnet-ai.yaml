@@ -1,0 +1,35 @@
+# GRAVNet AI and Infrastructure (3778736902), classes B, S.
+#
+# What it does: a large content mod: a Silicon Purifier and a GPU Assembler (fabricators for
+# silicon and GPU modules, then server racks), data centers in several tiers that train "GRAV"
+# AI model families and lend AI assistance to colony work, Flydo drones, an AI usage sensor,
+# combined-cycle and magma generators, a fusion core, high-capacity grid cables and a
+# superconducting backbone, cooling towers and a coolant blender, and orbital power satellites
+# and receivers; with side screens of its own (AI model dropdown and specialty).
+# How a player reaches it: the build menus (Refining, Power, Utilities, Automation, Rocketry),
+# after research.
+# What changes: an AI and power-infrastructure tech line.
+#
+# The two entry fabricators, built by setup west of the printing pod, are selected: their
+# recipe lists are dumped, as many recipes as in the original.
+from: early-base
+mods: [3778736902]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"MeepNetSiliconPurifier\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [SandStone, Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"MeepNetGpuAssembler\")", method: Build, args: [{"$": "Grid.XYToCell(112, 210)"}, Neutral, null, [Copper, SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0].Name == MeepNetSiliconPurifier": [">= 1", "== original"]
+      "count:ComplexRecipeManager.Get().recipes[*] if .fabricators[0].Name == MeepNetGpuAssembler": [">= 1", "== original"]
+      "Assets.GetBuildingDef(\"MeepNetAIUsageSensor\")": exists
+      "Assets.GetBuildingDef(\"MeepNetCoolingTower\")": exists
+  - run: {seconds: 2}
+  - expect: {buildings: {MeepNetSiliconPurifier: 1, MeepNetGpuAssembler: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [112, 208], select: MeepNetSiliconPurifier}
+  - ui_wait: {path: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView", cond: stable}
+  - ui_dump: {name: purifier, root: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView"}
+  - driver: {camera.set: {cell: [112, 210], ortho: 10}}
+  - click_world: {cell: [112, 211], select: MeepNetGpuAssembler}
+  - ui_wait: {path: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView", cond: stable}
+  - ui_dump: {name: assembler, root: "**/ComplexFabricatorSideScreen/Contents/ButtonScrollView"}

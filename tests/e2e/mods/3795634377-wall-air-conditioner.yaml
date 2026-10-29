@@ -1,0 +1,32 @@
+# Wall Air Conditioner (3795634377), classes B, S.
+#
+# What it does: a 2x1 ceiling-mounted Wall Air Conditioner (AirConditioningIndoorUnit) in the
+# Utilities menu next to the Thermo Regulator, researched with HVAC: powered, with a liquid
+# input and output for coolant and an automation port. While the gas in the 4x4 area below it
+# is warmer than its target temperature (default 22 °C, set in a threshold side screen the mod
+# relabels), it moves that heat into the coolant flowing through it; its range shows in an
+# overlay. Its power, cooling rate, decor and cost come from its options.
+# How a player reaches it: the build menu (Utilities), after the research; its side screen.
+# What changes: a compact gas cooler working off a liquid loop.
+#
+# The research lists it; one built by setup on the corridor's ceiling west of the printing pod
+# is selected: it has the mod's controller with its default target, and its threshold side
+# screen is shown (dumped, numbers masked).
+from: early-base
+mods: [3795634377]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"AirConditioningIndoorUnit\")", method: Build, args: [{"$": "Grid.XYToCell(112, 209)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"HVAC\").unlockedItemIDs": {contains: AirConditioningIndoorUnit}
+      "Assets.GetBuildingDef(\"AirConditioningIndoorUnit\").BuildLocationRule": OnCeiling
+  - run: {seconds: 2}
+  - expect: {buildings: {AirConditioningIndoorUnit: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [112, 209], select: AirConditioningIndoorUnit}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar/Border/LabelGroup"}
+  - expect_state:
+      "selected:GetComponent<AirConditioningIndoorUnit.AirConditioningController>.Threshold": 295.15
+  - ui_wait: {path: "**/ThresholdSwitchSideScreen", cond: stable}
+  - ui_dump: {name: threshold, root: "**/ThresholdSwitchSideScreen", mask_text: ['-?\d+(\.\d+)?']}

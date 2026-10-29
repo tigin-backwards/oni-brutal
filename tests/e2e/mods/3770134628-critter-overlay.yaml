@@ -1,0 +1,31 @@
+# Critter Overlay (3770134628), classes S, O (Unity UI): by the author of Geyser Overlay
+# (3765355897), on the same overlay kit.
+#
+# What it does: a "Critters" overlay with its own toolbar button and a hotkey (a PLib action):
+# every critter on the active asteroid is highlighted, coloured by species, and the legend
+# lists them by type (a click on a row cycles the camera through them), with Wild,
+# Domesticated and Eggs filters.
+# How a player reaches it: the overlay toolbar's Critters button.
+# What changes: a way to find critters.
+#
+# setup drops two Hatches in the corridor west of the printing pod. The Critters button opens
+# the overlay: its legend (dumped and shot) lists the Hatches, and the world shot shows them
+# highlighted.
+from: early-base
+mods: [3770134628]
+require_log: ['\[CritterOverlay\] Loaded']
+setup:
+  - driver: {seed: 12345}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(0, 112, 207, \"Hatch\", \"Creatures\")", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(0, 114, 207, \"Hatch\", \"Creatures\")", method: SetActive, args: [true]}}
+steps:
+  - driver: {camera.set: {cell: [118, 208], ortho: 12}}
+  - click: {ui: "**/OverlaysBarHolder/OverlaysBar/Toggle:Critters"}
+  - ui_wait: {path: "**/TopRight/OverlayLegend", cond: stable}
+  - expect_ui:
+      "**/OverlayLegend/TitleBar/Label": {text: "CRITTERS"}
+  - expect_state:
+      "OverlayScreen.Instance.GetMode().ToString()": "!= 'None'"
+  - ui_dump: {name: legend, root: "**/TopRight/OverlayLegend"}
+  - shot: {name: legend, crop: "**/TopRight/OverlayLegend", threshold: 0.04}
+  - world_shot: {name: overlay, ortho: 12, at: [118, 208]}

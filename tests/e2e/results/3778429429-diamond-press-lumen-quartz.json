@@ -1,0 +1,79 @@
+{
+ "spec": "mods/3778429429-diamond-press-lumen-quartz.yaml",
+ "mods": [
+  "3778429429"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "the glass to lumen quartz recipe is registered as in the original; the Diamond Press's recipe list dump and shot match",
+ "updated": "2026-10-29",
+ "commit": "2e861a10",
+ "mod_dlls": {
+  "3778429429": {
+   "DiamondPressLumenQuartz.dll": "efb970b3bc12c2606345ca257b19f5ced81682ed0ceb0db57a387bacb993ca74"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-171506-7be95722",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T17:18:34",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-182127-b358f3ec",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-29T18:21:27",
+    "lane": 7,
+    "reference_run": "20261029-171506-7be95722",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "recipes": 0.0
+    }
+   },
+   {
+    "run": "20261029-182127-b358f3ec",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-29T18:22:13",
+    "lane": 7,
+    "reference_run": "20261029-171506-7be95722",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "recipes": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "recipes": 0.0
+    }
+   }
+  ]
+ }
+}

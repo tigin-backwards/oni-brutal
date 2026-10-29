@@ -1,0 +1,81 @@
+{
+ "spec": "mods/3770134628-critter-overlay.yaml",
+ "mods": [
+  "3770134628"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "the Critters overlay opens from its button over two Hatches: legend dump and shot and the overlay's world shot match",
+ "updated": "2026-10-29",
+ "commit": "2e861a10",
+ "mod_dlls": {
+  "3770134628": {
+   "CritterOverlay.dll": "083173faad187ce9f562dc4906a3a6d3055ad44375245622acdf58ade7c40212"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-171506-7be95722",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T17:15:06",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-181957-baeb6f48",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-29T18:19:57",
+    "lane": 7,
+    "reference_run": "20261029-171506-7be95722",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "legend": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "legend": 4.9e-05,
+     "overlay": 5.2e-05
+    }
+   },
+   {
+    "run": "20261029-181957-baeb6f48",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-29T18:20:42",
+    "lane": 7,
+    "reference_run": "20261029-171506-7be95722",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "legend": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "legend": 4.9e-05,
+     "overlay": 5.4e-05
+    }
+   }
+  ]
+ }
+}

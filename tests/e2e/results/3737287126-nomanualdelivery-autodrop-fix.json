@@ -1,0 +1,63 @@
+{
+ "spec": "mods/3737287126-nomanualdelivery-autodrop-fix.yaml",
+ "mods": [
+  "2047308624",
+  "3477214095",
+  "3737287126"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with both mods: Disable and Enable AutoDrop toggle the auto drop, the automation-only flag as in the original",
+ "updated": "2026-10-29",
+ "commit": "2e861a10",
+ "mod_dlls": {
+  "2047308624": {
+   "NoManualDelivery.dll": "5564a877753a2036c7912def278f6ef59c0db5841bb3ed71da48bc1a4114a301"
+  },
+  "3477214095": {
+   "Auto Drop Gas Bottler and Liquid.dll": "5070c0657125eda0ab52faa866bfe0ff8e07ba48249461ad8ab04f84f2e2f100"
+  },
+  "3737287126": {
+   "NoManualDelivery_With_AutoDropGasBottlerAndLiquid_Fix.dll": "fa0c428c74192e9b7b6b23cef5cde808a53e511fabb3c9f3811abeee4884d97c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-171506-7be95722",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T18:11:31",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-182942-dfe5eeb4",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T18:29:42",
+    "lane": 7,
+    "reference_run": "20261029-171506-7be95722",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-182942-dfe5eeb4",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T18:34:37",
+    "lane": 7,
+    "reference_run": "20261029-171506-7be95722",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

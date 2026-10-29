@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3670726296-controlled-buildings.yaml",
+ "mods": [
+  "3670726296"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Juicer is 3 tall, drywall sits behind wires (z -16) and tube rules match; world shot matches",
+ "updated": "2026-10-29",
+ "commit": "2e861a10",
+ "mod_dlls": {
+  "3670726296": {
+   "ControlledBuildings.dll": "627d23a32cea4958eee5f6d420fb35deba08aac6d670a9001e89b8851d684e08"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-171506-7be95722",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T18:08:14",
+    "lane": 7,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-182801-61465be8",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T18:28:01",
+    "lane": 7,
+    "reference_run": "20261029-171506-7be95722",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "corridor": 0.011717
+    }
+   },
+   {
+    "run": "20261029-182801-61465be8",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T18:28:52",
+    "lane": 7,
+    "reference_run": "20261029-171506-7be95722",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "corridor": 0.009525
+    }
+   }
+  ]
+ }
+}

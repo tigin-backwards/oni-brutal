@@ -1,0 +1,39 @@
+# Omni Flora: Decorative Plants [Reloaded] [Test] (3534405622), classes P, O, W.
+#
+# What it does: adds eight decorative plants (Prickly Lotus, Frost Blossom, Icy Shroom, Myrth
+# Rose, Rust Fern, Spore Lamp, Tropicalgae, Shlurp Coral) with their seeds. New worlds spawn
+# them in the biomes they suit; the printing pod offers their seeds as care packages; the
+# Molecular Forge makes each seed from a base-game seed and an element. Each plant's decor grows
+# as it matures and flourishes, and some react to temperature (cold- or warm-loving). Settings
+# in its options file (debug reveal, seed spawns, extended codex entries).
+# How a player reaches it: seeds from care packages or the world, planted in a flower pot or
+# planter.
+# What changes: decorative plants and their seeds.
+#
+# Setup builds a flower pot in the corridor west of the printing pod and sets a Myrth Rose seed
+# down beside it. The pot's planter side screen offers the seed; Duplicants plant it, and the
+# plant grows in the pot. The care packages include the eight seeds.
+from: early-base
+mods: [3534405622]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"FlowerVase\")", method: Build, args: [{"$": "Grid.XYToCell(113, 206)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131762, 0, 0, \"MyrthRoseSeed\", \"Ore\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"MyrthRose\").GetComponent<SharlesPlants.SharlesPlant>": exists
+      "Assets.GetPrefab(\"MyrthRoseSeed\").GetComponent<KPrefabID>.Tags": {contains: DecorSeed}
+      "count:Immigration.Instance.carePackages[*] if .id == MyrthRoseSeed": 1
+      "count:Immigration.Instance.carePackages[*] if .id == ShlurpCoralSeed": 1
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [112, 208], ortho: 8}}
+  - click_world: {cell: [113, 206], select: FlowerVase}
+  - ui_wait: {path: "**/Config Tab - body instance/PlanterSideScreen", cond: stable}
+  - click: {text: "Myrth Rose", under: "**/PlanterSideScreen"}
+  - click: {ui: "**/PlanterSideScreen/Contents/ButtonArea/PlaceButton"}
+  - expect_state: {"all:FlowerVase::[0].GetComponent<PlantablePlot>.requestedEntityTag": "== 'MyrthRoseSeed'"}
+  - key: {code: Escape}
+  - run: {seconds: 600}
+  - run: {seconds: 300}
+  - expect_state:
+      "all:FlowerVase::[0].GetComponent<PlantablePlot>.Occupant.GetComponent<KPrefabID>.PrefabTag.Name": MyrthRose
+      "all:FlowerVase::[0].GetComponent<PlantablePlot>.Occupant.GetComponent<SharlesPlants.SharlesPlant>": exists

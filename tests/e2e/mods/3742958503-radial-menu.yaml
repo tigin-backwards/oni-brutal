@@ -1,0 +1,26 @@
+# Radial Menu (3742958503), classes T, S, K.
+#
+# What it does: a right click in the world (a new action, Open Radial Menu, bound to the
+# right mouse button; patches on InterfaceTool's clicks and keys) opens a radial menu around
+# the pointer (its own canvas, RadialMenuCanvas): three rings of options (tools, overlays,
+# build categories) picked by pointing and clicking, a build category opening its buildings
+# on the wheel; the scroll wheel switches rings, Escape or a right click closes it.
+# Ctrl+H hides the game's HUD (an option in its settings file). The action table is widened
+# to a thousand entries for the new action.
+# How a player reaches it: right-click in the world.
+# What changes: a pie menu for tools and buildings.
+#
+# A right click in the middle of the screen opens the wheel; Escape closes it. (The wheel
+# closes when the pointer leaves it, so no screenshot is taken: a shot moves the pointer away.)
+from: early-base
+mods: [3742958503]
+steps:
+  - driver: {camera.set: {cell: [113, 208], ortho: 10}}
+  - expect_state:
+      "type:RadialMenuController::Instance.IsMenuOpen": false
+  - click: {at: [640, 360], button: right}
+  - expect_state:
+      "type:RadialMenuController::Instance.IsMenuOpen": true
+  - key: {code: Escape}
+  - expect_state:
+      "type:RadialMenuController::Instance.IsMenuOpen": false

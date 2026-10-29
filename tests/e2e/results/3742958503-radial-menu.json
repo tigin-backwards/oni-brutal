@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3742958503-radial-menu.yaml",
+ "mods": [
+  "3742958503"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a right click opens the radial menu and Escape closes it; the wheel closes when the pointer leaves, so it is not shot",
+ "updated": "2026-10-29",
+ "commit": "1fdd8d67",
+ "mod_dlls": {
+  "3742958503": {
+   "RadialMenuMod.dll": "884746b0eb1acdf6ead9a53942fed480eb35259efe88c5303ce170d378883f40"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-150642-6081766e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T15:18:39",
+    "lane": 4,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-152554-d2a50413",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T15:28:41",
+    "lane": 4,
+    "reference_run": "20261029-150642-6081766e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-152554-d2a50413",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T15:29:23",
+    "lane": 4,
+    "reference_run": "20261029-150642-6081766e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

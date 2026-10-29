@@ -1,0 +1,40 @@
+# Geotuner Less Limited (GeotunerLessLimited, 2907583139), class P.
+#
+# What it does: transpilers raise the cap of Geotuners per geyser from 5 to 50 where the game
+# checks it: the Geotuner side screen's geyser rows (their tooltip and their click) and
+# GeoTuner.Instance.OnCopySettings, which points a Geotuner at the copied one's geyser only
+# while fewer than the cap point at it.
+# How a player reaches it: assign Geotuners to a geyser, by the side screen or by copying
+# settings.
+# What changes: more than five Geotuners can tune one geyser.
+#
+# setup spawns a steam geyser and builds six Geotuners around the printing pod, and points
+# the first at the geyser. Its settings are copied onto the other five with the Copy
+# Settings tool: all six then point at the geyser (the base game stops at five).
+from: early-base
+mods: [2907583139]
+setup:
+  - driver: {setup.call: {type: Scenario, method: SpawnPrefab, args: [134956, 0, 0, "GeyserGeneric_steam", "BuildingBack"]}}
+  - driver: {setup.call: {target: "last:", method: SetActive, args: [true]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"GeoTuner\")", method: Build, args: [131763, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"GeoTuner\")", method: Build, args: [131767, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"GeoTuner\")", method: Build, args: [131784, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"GeoTuner\")", method: Build, args: [134943, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"GeoTuner\")", method: Build, args: [134947, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"GeoTuner\")", method: Build, args: [134964, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+  - driver: {setup.call: {target: "Components.GeoTuners.GetItems(0)[0]", method: AssignFutureGeyser, args: [{"$": "all:Geyser::[0]"}]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {GeoTuner: 6}}
+  - expect_state:
+      "Components.GeoTuners.GetItems(0).Count": 6
+      "Components.GeoTuners.GetItems(0)[0].GetFutureGeyser().GetAmountOfGeotunersPointingOrWillPointAtThisGeyser()": 1
+  - driver: {camera.set: {cell: [122, 210], ortho: 14}}
+  - click_world: {cell: [112, 208], select: GeoTuner}
+  - ui_wait: {path: "**/DetailsScreen/UserMenuButtons/UserMenuScreen/Buttons", cond: stable}
+  - click: {text: "Copy Settings", under: "**/UserMenuScreen"}
+  - drag: {from: [110, 214], to: [136, 207]}
+  - key: {code: Escape}
+  - run: {seconds: 1}
+  - expect_state:
+      "all:Geyser::[0].GetAmountOfGeotunersPointingOrWillPointAtThisGeyser()": 6

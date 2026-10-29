@@ -1,0 +1,79 @@
+{
+ "spec": "mods/3713083599-plantmanualmutate.yaml",
+ "mods": [
+  "3713083599"
+ ],
+ "verdict": "warning",
+ "why": "known findings: scroll-normalized-position",
+ "findings": [
+  "scroll-normalized-position"
+ ],
+ "note": "a Mealwood seed's PLib mutation side screen opens and matches the original's but for a scroll position",
+ "updated": "2026-10-29",
+ "commit": "1785bc2f",
+ "mod_dlls": {
+  "3713083599": {
+   "RadiationPromotion_merge.dll": "1a1f938f66abf829f8aa058e45eb7ae2bc7a95fcb2bc45b0b4863ea32c3e0ef4"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-090559-e1e62f9e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T11:23:44",
+    "lane": 4,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-121806-2d41950c",
+    "index": 1,
+    "verdict": "warn",
+    "date": "2026-10-29T12:46:11",
+    "lane": 4,
+    "reference_run": "20261029-090559-e1e62f9e",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "side": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "side": 0.004157
+    }
+   },
+   {
+    "run": "20261029-121806-2d41950c",
+    "index": 2,
+    "verdict": "warn",
+    "date": "2026-10-29T12:47:04",
+    "lane": 4,
+    "reference_run": "20261029-090559-e1e62f9e",
+    "new_signatures": 0,
+    "findings": [
+     "scroll-normalized-position"
+    ],
+    "ui_dump": {
+     "side": {
+      "differences": 0,
+      "known": {
+       "scroll-normalized-position": 1
+      }
+     }
+    },
+    "shots": {
+     "side": 0.004157
+    }
+   }
+  ]
+ }
+}

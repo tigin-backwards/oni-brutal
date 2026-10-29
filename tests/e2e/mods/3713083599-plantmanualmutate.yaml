@@ -1,0 +1,25 @@
+# PlantManualMutate (3713083599), class S.
+#
+# What it does: adds a PLib side screen (SubspeciesSelectorSideScreen) to anything with a
+# MutantPlant, plants and seeds: a row of combo boxes, each choosing one of the game's plant
+# mutations, a scrolling list of the mutations' names and descriptions, and an Apply button
+# that sets the chosen mutations on the plant (and its branches), applies them and discovers
+# the new subspecies.
+# How a player reaches it: select a plant or a seed; its side screen.
+# What changes: a player picks a plant's mutations by hand.
+#
+# A Mealwood seed is spawned by setup on the corridor floor west of the printing pod and
+# selected: the side screen opens with its selectors.
+from: early-base
+mods: [3713083599]
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131762, 0, 0, \"BasicSingleHarvestPlantSeed\", \"Ore\")", method: SetActive, args: [true]}}
+steps:
+  - run: {seconds: 2}
+  - driver: {camera.set: {cell: [110, 208], ortho: 6}}
+  - click_world: {pos: [110.5, 206.2], select: BasicSingleHarvestPlantSeed}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/SubspeciesSelectorSideScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<MutantPlant>.IsOriginal": true
+  - ui_dump: {name: side, root: "**/DetailsScreen/SideScreen/**/SubspeciesSelectorSideScreen"}
+  - shot: {name: side, crop: "**/DetailsScreen/SideScreen/**/SubspeciesSelectorSideScreen", threshold: 0.04}

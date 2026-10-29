@@ -1,0 +1,28 @@
+# 大型蒸汽涡轮机 Large steam turbine (3547626800), class B.
+#
+# What it does: adds the 大型蒸汽涡轮机 (Zhengqiji, 5x3, the Steam Turbine's art), a bigger steam
+# turbine rated 4250 W for the Power menu, unlocked by Renewable Energy.
+# How a player reaches it: research Renewable Energy; the Power menu.
+# What changes: a stronger steam turbine.
+#
+# Renewable Energy is researched in setup; the def carries the rating and the Power menu offers
+# its card.
+from: early-base
+mods: [3547626800]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"RenewableEnergy\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"RenewableEnergy\").unlockedItemIDs": {contains: Zhengqiji}
+      "Assets.GetBuildingDef(\"Zhengqiji\").GeneratorWattageRating": 4250
+      "Assets.GetBuildingDef(\"Zhengqiji\").WidthInCells": 5
+  - driver: {camera.set: {cell: [113, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Power"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/Zhengqiji Group*", cond: stable}
+  # Its card sits in the menu's last row, below the 720-pixel screen in both players even
+  # scrolled down, so it is checked for, not clicked.
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/Zhengqiji Group*": {active: true}

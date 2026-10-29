@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3547626800-large-steam-turbine.yaml",
+ "mods": [
+  "3547626800"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the large turbine is unlocked and offered in the Power menu",
+ "updated": "2026-10-29",
+ "commit": "2d4aca2a",
+ "mod_dlls": {
+  "3547626800": {
+   "zhengqiji.dll": "6a0e3aa460be23b4068265504dce70ac1d49646085692bf123df56343ee95f7c"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-134140-71c6d6eb",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T13:49:50",
+    "lane": 1,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-143747-9481627a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T15:31:39",
+    "lane": 1,
+    "reference_run": "20261029-134140-71c6d6eb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-143747-9481627a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T15:32:20",
+    "lane": 1,
+    "reference_run": "20261029-134140-71c6d6eb",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

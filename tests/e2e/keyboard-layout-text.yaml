@@ -1,0 +1,42 @@
+# Keyboard layouts (issue #24) in a text field: with a French (AZERTY) layout, the characters
+# typed into the build menu's search field, and which key selects all with Ctrl.
+#
+# Keys are pressed by their X keycode (evdev numbering), as keyboard-layout.yaml does. The keys at
+# the US positions of P, U, Semicolon (fr M) and P give "pump". Ctrl with the key at the US Q
+# position (labelled A on AZERTY) and with the one at the US A position (labelled Q) then show
+# which of them TMP_InputField's select-all hears.
+#
+# The original (Linux, U57): "pump" is typed; Ctrl with the key labelled Q leaves the caret at 4;
+# Ctrl with the key labelled A selects all (anchor 4, focus 0), and the key then types "a" over it.
+# Select-all follows the layout's A, as the key codes do (KeyboardLayout in OniMoono.Desktop).
+from: early-base
+keyboard: fr
+steps:
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - expect_ui:
+      "**/BuildingGroups/Searchbar/FilterInputField": {active: true}
+  - ui_wait: {path: "**/BuildingGroups/Searchbar/FilterInputField", cond: stable}
+  - click: {ui: "**/BuildingGroups/Searchbar/FilterInputField"}
+  - key: {keycode: 33}   # US p, fr p
+  - key: {keycode: 30}   # US u, fr u
+  - key: {keycode: 47}   # US semicolon, fr m
+  - key: {keycode: 33}
+  - expect_state:
+      "ui:**/BuildingGroups/Searchbar/FilterInputField::KInputTextField.text": ["== 'pump'", "== original"]
+  # Ctrl and the key at the US A position: fr Q.
+  - key: {keycode: 38, mods: [Ctrl]}
+  - expect_state:
+      "ui:**/BuildingGroups/Searchbar/FilterInputField::KInputTextField.text": ["== 'pump'", "== original"]
+      "ui:**/BuildingGroups/Searchbar/FilterInputField::KInputTextField.selectionAnchorPosition": [4, "== original"]
+      "ui:**/BuildingGroups/Searchbar/FilterInputField::KInputTextField.selectionFocusPosition": [4, "== original"]
+  # Ctrl and the key at the US Q position: fr A.
+  - key: {keycode: 24, mods: [Ctrl]}
+  - expect_state:
+      "ui:**/BuildingGroups/Searchbar/FilterInputField::KInputTextField.text": ["== 'pump'", "== original"]
+      "ui:**/BuildingGroups/Searchbar/FilterInputField::KInputTextField.selectionAnchorPosition": [4, "== original"]
+      "ui:**/BuildingGroups/Searchbar/FilterInputField::KInputTextField.selectionFocusPosition": [0, "== original"]
+  # Typed over a selection, the key at the US Q position types fr a.
+  - key: {keycode: 24}
+  - expect_state:
+      "ui:**/BuildingGroups/Searchbar/FilterInputField::KInputTextField.text": ["== 'a'", "== original"]
+  - key: {code: Escape}

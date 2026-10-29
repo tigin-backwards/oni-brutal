@@ -1340,7 +1340,8 @@ merging is an optimisation we may add only where it cannot change the result).
 
 `OniMoono.Platform` wraps `Brutal.Glfw`: one window with a GL 4.5 core context, vsync,
 resize, fullscreen/windowed modes (`Screen.*`), monitors/resolutions, DPI, keyboard
-(GLFW key → Unity `KeyCode`), text input (UTF-32 via our own char-callback handling where
+(GLFW key → Unity `KeyCode`; character keys through the active layout, as the game's Input
+Manager has "Use Physical Keys" off: `KeyboardLayout`, measured on AZERTY), text input (UTF-32 via our own char-callback handling where
 BRUTAL's 16-bit truncation would corrupt input), mouse buttons/position (bottom-left origin)
 and scroll, hardware cursors from `Texture2D`, clipboard, focus events. Legacy Input Manager
 axes/buttons come from `globalgamemanagers` `InputManager` settings, with Unity's gravity /

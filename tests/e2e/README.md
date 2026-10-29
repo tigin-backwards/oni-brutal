@@ -226,7 +226,21 @@ Key names follow the game's `KKeyCode`: `A`–`Z`, `Alpha0`–`Alpha9` (or `0`�
 `Escape`, `Return`, `Space`, `Tab`, `Backspace`, `Delete`, `UpArrow`/`DownArrow`/`LeftArrow`/
 `RightArrow`, `LeftShift`, `LeftControl`, `LeftAlt`, `Keypad0`–`Keypad9`, `KeypadPlus`,
 `Comma`, `Period`, `Slash`, `Minus`, `Equals`, `LeftBracket` and others (`KKEYCODES` in
-e2e.py). `type` types any printable ASCII, on a US keymap.
+e2e.py). `type` types any printable ASCII, on a US keymap (or the spec's `keyboard`).
+
+```yaml
+keyboard: fr                     # top level: the lane display's XKB layout (setxkbmap), for both players
+steps:
+  - key: {keycode: 24}                 # a physical key by X keycode (evdev): AZERTY's A, QWERTY's Q
+  - key: {keycode: 24, mods: [Ctrl]}
+  - keyboard: us                       # the layout switched while the player runs
+```
+
+A spec with `keyboard` runs its Xvfb with `-noreset` (an X server resets its keymap when its
+last client leaves, as setxkbmap does) and `-ardelay 30000` (a key held for frames at a
+colony's frame rate would autorepeat). E2eDriver's key log (`driver: {keys.log: {}}`, then
+`type:E2eDriver.KeyLog::Down`, `::Events` and `::Chars`) records what each key reported:
+[keyboard-layout.yaml](keyboard-layout.yaml).
 
 ### Expectations on the UI and on state (E2eDriver)
 

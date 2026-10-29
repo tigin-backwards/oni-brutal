@@ -1,0 +1,23 @@
+# 火箭套娃 Rocket nesting dolls (3454818548), class P.
+#
+# What it does: lets a Rocket Platform, and the rocket port loaders, unloaders and bridge,
+# be built inside a rocket's interior (their NotRocketInteriorBuilding tag removed), the
+# platform attaching to a rocket (AttachmentSlotTag Rocket, no rotation); patches on
+# ClusterUtil (parent worlds, pickupables and amounts of related worlds) and MaterialNeeds
+# let a rocket inside a rocket share materials and errands with its parents.
+# How a player reaches it: a rocket's interior build menu (Spaced Out).
+# What changes: rockets inside rockets.
+#
+# The platform's and ports' prefabs carry the mod's changes, as in the original.
+from: early-base
+mods: [3454818548]
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"LaunchPad\").GetComponent<KPrefabID>.HasTag(\"NotRocketInteriorBuilding\")": false
+      "Assets.GetPrefab(\"ModularLaunchpadPortSolid\").GetComponent<KPrefabID>.HasTag(\"NotRocketInteriorBuilding\")": false
+      "Assets.GetPrefab(\"ModularLaunchpadPortBridge\").GetComponent<KPrefabID>.HasTag(\"NotRocketInteriorBuilding\")": false
+      "Assets.GetPrefab(\"ModularLaunchpadPortGasUnloader\").GetComponent<KPrefabID>.HasTag(\"NotRocketInteriorBuilding\")": false
+      "Assets.GetBuildingDef(\"LaunchPad\").AttachmentSlotTag.Name": Rocket
+      "Assets.GetBuildingDef(\"LaunchPad\").PermittedRotations": "== 'Unrotatable'"
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

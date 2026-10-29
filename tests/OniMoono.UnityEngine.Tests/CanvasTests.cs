@@ -49,6 +49,28 @@ namespace OniMoono.Tests
             }
         }
 
+        /// Unity keeps the low 16 bits of a canvas's sorting order: the Resource Calculator mod's
+        /// 100000 reads back as -31072 in the original player, which draws that canvas under
+        /// the game's HUD.
+        [Fact]
+        public void SortingOrderKeepsTheLow16Bits()
+        {
+            var canvas = new GameObject("Root", typeof(RectTransform)).AddComponent<Canvas>();
+            try
+            {
+                canvas.sortingOrder = 100000;
+                Assert.Equal(-31072, canvas.sortingOrder);
+                canvas.sortingOrder = 32767;
+                Assert.Equal(32767, canvas.sortingOrder);
+                canvas.sortingOrder = -32769;
+                Assert.Equal(32767, canvas.sortingOrder);
+            }
+            finally
+            {
+                Object.DestroyImmediate(canvas.gameObject);
+            }
+        }
+
         [Fact]
         public void NestedCanvasSortsWithTheNearestOverridingAncestor()
         {

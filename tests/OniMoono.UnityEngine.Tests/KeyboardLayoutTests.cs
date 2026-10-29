@@ -73,20 +73,24 @@ namespace OniMoono.Tests
         public void KeysymsAsCharacters(ulong keysym, int expected)
             => Assert.Equal(expected, KeyboardLayout.KeysymCharacter(keysym));
 
-        // Windows (not measured): AZERTY's virtual keys and unshifted characters
-        // (MapVirtualKeyExW) through the same rule.
+        // Windows: the original's measured table, by virtual key (the French layout's for each
+        // AZERTY key here).
         [Theory]
-        [InlineData((uint)'A', (uint)'A', KeyCode.A)]                    // the key at the US Q position
-        [InlineData((uint)'Q', (uint)'Q', KeyCode.Q)]
-        [InlineData((uint)'1', (uint)'&', KeyCode.Alpha1)]               // VK_1 types &
-        [InlineData(0xBAu, (uint)'$', KeyCode.Dollar)]              // VK_OEM_1
-        [InlineData(0xDDu, 0x8000005Eu, KeyCode.None)]         // VK_OEM_6: dead ^
-        [InlineData(0xC0u, 0xF9u, KeyCode.None)]               // VK_OEM_3: ù
-        [InlineData(0xBCu, (uint)',', KeyCode.Comma)]
-        [InlineData(0xDFu, (uint)'!', KeyCode.Exclaim)]             // VK_OEM_8
-        [InlineData(0u, 0u, KeyCode.None)]
-        public void WindowsVirtualKeys(uint vk, uint toChar, KeyCode expected)
-            => Assert.Equal(expected, KeyboardLayout.FromVirtualKey(vk, toChar));
+        [InlineData((uint)'A', KeyCode.A)]               // the key at the US Q position
+        [InlineData((uint)'Q', KeyCode.Q)]               // the key at the US A position
+        [InlineData((uint)'1', KeyCode.Alpha1)]          // types &
+        [InlineData(0xDBu, KeyCode.LeftBracket)]         // VK_OEM_4: the ) key
+        [InlineData(0xBAu, KeyCode.Semicolon)]           // VK_OEM_1: the $ key
+        [InlineData(0xBEu, KeyCode.Period)]              // VK_OEM_PERIOD: the ; key
+        [InlineData(0xDFu, KeyCode.BackQuote)]           // VK_OEM_8: the ! key
+        [InlineData(0xC0u, KeyCode.BackQuote)]           // VK_OEM_3: the ù key
+        [InlineData(0xDEu, KeyCode.Quote)]               // VK_OEM_7: the ² key
+        [InlineData(0xDDu, KeyCode.RightBracket)]        // VK_OEM_6: the dead ^ key
+        [InlineData(0xE2u, KeyCode.Backslash)]           // VK_OEM_102: the < key
+        [InlineData(0xBDu, KeyCode.Minus)]
+        [InlineData(0u, KeyCode.None)]
+        public void WindowsVirtualKeys(uint vk, KeyCode expected)
+            => Assert.Equal(expected, KeyboardLayout.FromVirtualKey(vk));
 
         [Fact]
         public void OnlyTheMainBlocksCharacterKeysFollowTheLayout()

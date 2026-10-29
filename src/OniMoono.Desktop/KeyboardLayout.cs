@@ -44,15 +44,22 @@ namespace OniMoono.Desktop
     ///
     /// So: a digit on the key's first two levels gives AlphaN; else a letter gives that letter;
     /// else the first level's ASCII character gives the KeyCode of that character; anything else
-    /// (non-ASCII, dead keys) gives no key code. The Windows mapping is not measured: it applies
-    /// the same rule to the layout's virtual key (MapVirtualKeyExW, letters and digits from VK_A..Z
-    /// and VK_0..9) and to the character an OEM key types unshifted (MAPVK_VK_TO_CHAR, dead keys
-    /// none). macOS keeps positions (not measured).
+    /// (non-ASCII, dead keys) gives no key code. macOS keeps positions (not measured).
     ///
-    /// Not matched, in the characters typed (which follow the layout in both players): the
-    /// original types none for keys it gives no key code (ù and ² on AZERTY) and does not compose
-    /// dead keys (after ^ it types the next key as is); ours types what the layout's input method
-    /// gives, through GLFW's character callback. Also unrelated to layouts: with NumLock off the
+    /// Windows is different: the original maps the layout's virtual key through a fixed table,
+    /// whatever character the key types. Measured in the original Windows player (same build) with
+    /// key messages posted to its window (the scancode, and the virtual key the layout gives it)
+    /// under the US and the French layout, read by E2eDriver's key log: VK_A..Z are the letters,
+    /// VK_0..9 Alpha0..9, and the OEM keys are, on both layouts, OEM_1 Semicolon, OEM_PLUS Equals,
+    /// OEM_COMMA Comma, OEM_MINUS Minus, OEM_PERIOD Period, OEM_2 Slash, OEM_3 BackQuote, OEM_4
+    /// LeftBracket, OEM_5 Backslash, OEM_6 RightBracket, OEM_7 Quote, OEM_8 BackQuote, OEM_102
+    /// Backslash. So on AZERTY the ) key is LeftBracket, the ; key Period, the ! key BackQuote and
+    /// the ù key BackQuote, where the Linux player gives RightParen, Semicolon, Exclaim and none.
+    ///
+    /// Characters typed follow the layout in both players. The Linux original types none for keys
+    /// it gives no key code (ù and ² on AZERTY) and does not compose dead keys (after ^ it types
+    /// the next key as is); the Windows original types them and composes (^ then e is ê), as ours
+    /// does on both, through GLFW's character callback. Also unrelated to layouts: with NumLock off the
     /// original reports the keypad's navigation keys (KP_1 is End), ours the keypad's positions.
     /// Key labels (the controls screen, tooltips) are the game's names for the bound KeyCode
     /// (GameUtil.GetKeycodeLocalized), the same in both players.
@@ -85,15 +92,25 @@ namespace OniMoono.Desktop
             return -1;
         }
 
-        /// Windows: a layout's virtual key and the character it types unshifted (the low word of
-        /// MAPVK_VK_TO_CHAR; its top bit marks a dead key) as the characters FromCharacters takes.
-        public static KeyCode FromVirtualKey(uint vk, uint toChar)
+        /// Windows: the KeyCode of a layout's virtual key (the table above); none for a key the
+        /// table does not name.
+        public static KeyCode FromVirtualKey(uint vk) => vk switch
         {
-            if (vk is >= 'A' and <= 'Z') return KeyCode.A + (int)(vk - 'A');
-            if (vk is >= '0' and <= '9') return KeyCode.Alpha0 + (int)(vk - '0');
-            if (vk == 0 || (toChar & 0x80000000) != 0) return KeyCode.None;
-            return FromCharacters((int)(toChar & 0xffff), -1);
-        }
+            >= 'A' and <= 'Z' => KeyCode.A + (int)(vk - 'A'),
+            >= '0' and <= '9' => KeyCode.Alpha0 + (int)(vk - '0'),
+            0xBA => KeyCode.Semicolon,
+            0xBB => KeyCode.Equals,
+            0xBC => KeyCode.Comma,
+            0xBD => KeyCode.Minus,
+            0xBE => KeyCode.Period,
+            0xBF => KeyCode.Slash,
+            0xC0 or 0xDF => KeyCode.BackQuote,
+            0xDB => KeyCode.LeftBracket,
+            0xDC or 0xE2 => KeyCode.Backslash,
+            0xDD => KeyCode.RightBracket,
+            0xDE => KeyCode.Quote,
+            _ => KeyCode.None,
+        };
 
         /// The KeyCode of a printable key under the layout active now, or null where the layout
         /// cannot be read (the caller keeps the position).
@@ -154,15 +171,14 @@ namespace OniMoono.Desktop
 
         // ---- Windows: the active layout's virtual key for the scancode.
 
-        const uint MAPVK_VK_TO_CHAR = 2, MAPVK_VSC_TO_VK_EX = 3;
+        const uint MAPVK_VSC_TO_VK_EX = 3;
 
         static KeyCode? Windows(int scancode)
         {
             // GLFW's scancode is the make code with KF_EXTENDED (0x100); printable keys have none.
             if ((scancode & 0x100) != 0) return null;
             var layout = GetKeyboardLayout(0);
-            uint vk = MapVirtualKeyExW((uint)scancode & 0xff, MAPVK_VSC_TO_VK_EX, layout);
-            return FromVirtualKey(vk, vk == 0 ? 0 : MapVirtualKeyExW(vk, MAPVK_VK_TO_CHAR, layout));
+            return FromVirtualKey(MapVirtualKeyExW((uint)scancode & 0xff, MAPVK_VSC_TO_VK_EX, layout));
         }
 
         [DllImport("user32.dll")]

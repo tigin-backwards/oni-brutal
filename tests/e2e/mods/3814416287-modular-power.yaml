@@ -1,0 +1,31 @@
+# Modular Power (Power Plant Systems) (3814416287), classes B, V.
+#
+# What it does: adds a build menu category, Modular Power, of 27 machines that make up an
+# industrial power plant: gas and liquid fuel tanks and pumps, combustion chambers, boilers,
+# steam turbines, alternators, condensers and controls, linked through ports into a plant;
+# they unlock with Improved Combustion, Advanced Power Regulation and other power research. A
+# codex video tutorial explains the plant.
+# How a player reaches it: power research; the Modular Power menu.
+# What changes: power plants built from parts.
+#
+# Improved Combustion is researched in setup and a compact gas tank (MPGasTankCompact, 2x3)
+# built in the west corridor; the techs list the machines (27 of them, as in the original).
+from: early-base
+mods: [3814416287]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"ImprovedCombustion\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"MPGasTankCompact\")", method: Build, args: [131763, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"ImprovedCombustion\").unlockedItemIDs": [{contains: MPGasTankCompact}, {contains: MPGasBurner}]
+      "Db.Get().Techs.Get(\"AdvancedPowerRegulation\").unlockedItemIDs": {contains: MPGasTankBulk}
+      "Assets.GetBuildingDef(\"MPGasTankCompact\").WidthInCells": 2
+      "Assets.GetBuildingDef(\"MPGasTankCompact\").HeightInCells": 3
+      "count:Assets.BuildingDefs[*] if .PrefabID.StartsWith(\"MP\") == true": [">= 27", "== original"]
+  - run: {seconds: 3}
+  - expect: {buildings: {MPGasTankCompact: 1}}
+  - expect_state:
+      "all:ModularPower.ModularMachine::Length": 1

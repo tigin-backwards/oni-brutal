@@ -1,0 +1,67 @@
+{
+ "spec": "mods/3457655108-fragment-thermostat.yaml",
+ "mods": [
+  "3457655108"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "with a -10 to 50 °C range in its options, a built thermostat's slider side screen shows that range, matching the original's",
+ "updated": "2026-10-29",
+ "commit": "1785bc2f",
+ "mod_dlls": {
+  "3457655108": {
+   "FragmentThermostat.dll": "2a0539f5e3d975e562a9ee9a9647b49249d2e2f554fe4b87e9bed8e3684820eb"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-090559-e1e62f9e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T10:35:32",
+    "lane": 4,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-121806-2d41950c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T12:31:59",
+    "lane": 4,
+    "reference_run": "20261029-090559-e1e62f9e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "side": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "side": 0.0
+    }
+   },
+   {
+    "run": "20261029-121806-2d41950c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T12:32:51",
+    "lane": 4,
+    "reference_run": "20261029-090559-e1e62f9e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "side": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "side": 0.0
+    }
+   }
+  ]
+ }
+}

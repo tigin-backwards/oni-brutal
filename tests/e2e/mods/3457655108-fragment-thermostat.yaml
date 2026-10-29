@@ -1,0 +1,33 @@
+# 碎片恒温器+ Fragment Thermostat (3457655108), classes B, O; PLib options.
+#
+# What it does: adds the Fragment Thermostat (FTMod, 3x1, refined metal, Shipping menu with
+# the conveyor coolers, researched with Solid Management): a powered (1200 W) conveyor
+# bridge that heats or cools the items passing through to a target temperature set on its
+# slider side screen, between -20 and 30 °C (options), or, in the options' second mode,
+# conditions them by a fixed amount.
+# How a player reaches it: research Solid Management; the Shipping menu; its side screen.
+# What changes: conveyor items at a set temperature.
+#
+# Options here: the slider runs from -10 to 50 °C. A thermostat built by setup in the corridor
+# west of the printing pod is selected: its slider side screen shows that range.
+from: early-base
+mods: [3457655108]
+options:
+  "3457655108": {MinTemperature: -10.0, MaxTemperature: 50.0}
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"FTMod\")", method: Build, args: [{"$": "Grid.XYToCell(113, 207)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"SolidManagement\").unlockedItemIDs": {contains: FTMod}
+      "Assets.GetBuildingDef(\"FTMod\").EnergyConsumptionWhenActive": 1200
+  - run: {seconds: 3}
+  - expect: {buildings: {FTMod: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: FTMod}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<FragmentThermostat.FragmentThermostatComponent>.GetSliderMin(0)": -10
+      "selected:GetComponent<FragmentThermostat.FragmentThermostatComponent>.GetSliderMax(0)": 50
+      "selected:GetComponent<FragmentThermostat.FragmentThermostatComponent>.GetSliderValue(0)": "== original"
+  - ui_dump: {name: side, root: "**/DetailsScreen/SideScreen/**/SingleSliderSideScreen"}
+  - shot: {name: side, crop: "**/DetailsScreen/SideScreen", threshold: 0.04}

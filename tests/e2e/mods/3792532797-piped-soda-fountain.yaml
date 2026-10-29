@@ -1,0 +1,36 @@
+# Piped Soda Fountain (3792532797), class B.
+#
+# What it does: adds the Piped Soda Fountain (PipedSodaFountain, a copy of the Soda Fountain
+# next to it in the Furniture menu, researched with Catalytics): the fountain's carbon
+# dioxide delivery is removed and a gas input port (PipedSodaFountainGasPort, a secondary
+# input on its lower-left cell) feeds it from a pipe instead; without gas it does not run.
+# How a player reaches it: research Catalytics; the Furniture menu.
+# What changes: a soda fountain that takes CO2 by pipe.
+#
+# Catalytics is researched in setup and a fountain built in the corridor west of the printing
+# pod: it has no CO2 delivery, a piped gas consumer that wants CO2 and a gas input that
+# blocks it while empty. The Furniture menu offers it; its card is shot.
+from: early-base
+mods: [3792532797]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"Catalytics\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"PipedSodaFountain\")", method: Build, args: [{"$": "Grid.XYToCell(113, 206)"}, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"Catalytics\").unlockedItemIDs": {contains: PipedSodaFountain}
+      "Assets.GetPrefab(\"PipedSodaFountain\").GetComponent<ManualDeliveryKG>": missing
+      "Assets.GetPrefab(\"SodaFountain\").GetComponent<ManualDeliveryKG>.RequestedItemTag.Name": CarbonDioxide
+  - run: {seconds: 3}
+  - expect: {buildings: {PipedSodaFountain: 1}}
+  - expect_state:
+      "count:all:ConduitConsumer::[*] if .useSecondaryInput == true and .capacityTag.Name == CarbonDioxide": 1
+      "all:PipedSodaFountain.PipedSodaFountainGasPort::[0].GetComponent<Operational>.IsOperational": false
+  - driver: {camera.set: {cell: [113, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Furniture"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/PipedSodaFountain Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/PipedSodaFountain Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}

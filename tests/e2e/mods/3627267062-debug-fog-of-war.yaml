@@ -1,0 +1,28 @@
+# Debug Fog of War (3627267062), class P (a key handler).
+#
+# What it does: with debug mode on, a prefix on DebugHandler.OnKeyDown consumes the debug
+# toggle (Action 174) and only frees the camera and shows or hides the debug paint screen
+# (closing its element menu and toggling the base template button), where the game's handler
+# also spawns every world-gen object and reveals the fog of war.
+# How a player reaches it: debug mode (debug_enable.txt), then the debug toggle (Backspace).
+# What changes: the debug toggle no longer reveals the map.
+#
+# setup turns debug mode on (DebugHandler.SetDebugEnabled), as debug_enable.txt would.
+# Backspace opens the paint screen and frees the camera; the fog stays.
+from: early-base
+mods: [3627267062]
+setup:
+  - driver: {setup.call: {type: DebugHandler, method: SetDebugEnabled, args: [true]}}
+steps:
+  - expect_state:
+      "DebugHandler.enabled": true
+      "DebugHandler.RevealFogOfWar": false
+      "DebugPaintElementScreen.Instance.gameObject.activeSelf": false
+      "CameraController.Instance.FreeCameraEnabled": false
+  - driver: {camera.set: {cell: [112, 208], ortho: 10}}
+  - key: {code: Backspace}
+  - run: {seconds: 1}
+  - expect_state:
+      "DebugPaintElementScreen.Instance.gameObject.activeSelf": true
+      "CameraController.Instance.FreeCameraEnabled": true
+      "DebugHandler.RevealFogOfWar": false

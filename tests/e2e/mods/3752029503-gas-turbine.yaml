@@ -1,0 +1,26 @@
+# 气体涡轮机 GasTurbine (3752029503), classes B, O.
+#
+# What it does: adds the 气体涡轮机 (MOREGASTURBINE, 5x3, the Steam Turbine's art) for the Power
+# menu, available without research: it draws hot gas (any gas, each with its own wattage
+# multiplier) from the cells below it and makes power. PLib options (MoreGasTurbineConfig.json)
+# set its base wattage (3000 W), pump rate and self-heat range.
+# How a player reaches it: the Mods screen's options; the Power menu.
+# What changes: a turbine that runs on any hot gas.
+#
+# Options here: base wattage 4000 W. The def's rating follows; the Power menu card is shot.
+from: early-base
+mods: [3752029503]
+options:
+  "3752029503": {"$file": "MoreGasTurbineConfig.json", "BaseWattage": 4000}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"MOREGASTURBINE\").GeneratorWattageRating": 4000
+      "Assets.GetBuildingDef(\"MOREGASTURBINE\").WidthInCells": 5
+  - driver: {camera.set: {cell: [113, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Power"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/MOREGASTURBINE Group*", cond: stable}
+  - scroll: {at: "**/PlanBuildingSelectionPanel/BuildingGroups", notches: -10}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/MOREGASTURBINE Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/MOREGASTURBINE Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}

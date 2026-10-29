@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3252090977-lighting-and-art.yaml",
+ "mods": [
+  "3252090977"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Furniture menu offers the four buildings; a Utility light lights the corridor as in the original; card shot matches",
+ "updated": "2026-10-29",
+ "commit": "2d4aca2a",
+ "mod_dlls": {
+  "3252090977": {
+   "LightingAndArt.dll": "8db6be6a4a568906bfa522e1d9f421bcaba74c52da9bc2d78694be27cf896a18"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-071158-8a6b9b85",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T07:34:40",
+    "lane": 4,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-083519-82e8344c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T08:47:53",
+    "lane": 4,
+    "reference_run": "20261029-071158-8a6b9b85",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.007747
+    }
+   },
+   {
+    "run": "20261029-083519-82e8344c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T08:48:48",
+    "lane": 4,
+    "reference_run": "20261029-071158-8a6b9b85",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.007747
+    }
+   }
+  ]
+ }
+}

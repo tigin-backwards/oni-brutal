@@ -1,0 +1,31 @@
+# 太空背景 / True Space Background (3810757236), classes B, V.
+#
+# What it does: adds two 1x1 construction projects to the Base menu's tiles (after the
+# Drywall), unlocked by Refined Renovations (RefinedObjects): "Space
+# Background" turns its cell's world background (zone) into space, where gas and liquid are
+# lost, and "Default Background" turns it back to sandstone. A finished project converts its
+# cell and removes itself.
+# How a player reaches it: research Refined Objects; the Base menu.
+# What changes: the background of chosen cells becomes space.
+#
+# Refined Objects is researched in setup and a Space Background project completed on a cell
+# of the east corridor: that cell's zone is space and the project is gone. The cell is shot
+# from the world, UI hidden.
+from: early-base
+mods: [3810757236]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"RefinedObjects\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"RefinedObjects\").unlockedItemIDs": [{contains: QYSpaceBackgroundProject}, {contains: QYDefaultBackgroundProject}]
+      "type:SpaceBackground.BackgroundRuntime::GetZoneType(131787)": "!= 'Space'"
+  - build: {prefab: QYSpaceBackgroundProject, at: [135, 207], material: SandStone}
+  - run: {seconds: 600, until: {pending_construction: 0}}
+  - run: {seconds: 2}
+  - expect_state:
+      "type:SpaceBackground.BackgroundRuntime::GetZoneType(131787)": "== 'Space'"
+      "count:all:SpaceBackground.BackgroundConversionWorksite::[*] if .enabled == true": 0
+  - world_shot: {name: space, ortho: 5, at: [134, 208]}

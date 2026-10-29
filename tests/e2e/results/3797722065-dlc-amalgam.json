@@ -1,0 +1,73 @@
+{
+ "spec": "mods/3797722065-dlc-amalgam.yaml",
+ "mods": [
+  "3797722065"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Amalgum category card (dump, shot); a new game of Europa by coordinate and its worlds",
+ "updated": "2026-10-29",
+ "commit": "e5cbc118",
+ "mod_dlls": {
+  "3797722065": {
+   "DLCAmalgam.dll": "ec4d86c5d2f2e22d88011a187ed4821e8503021746b1de89f38cf386907359ff"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-112259-0d44a806",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T13:13:43",
+    "lane": 1,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-164749-3dfc6f64",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T16:49:27",
+    "lane": 1,
+    "reference_run": "20261029-112259-0d44a806",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "categories": {
+      "differences": 0
+     },
+     "asteroids": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "categories": 0.034044
+    }
+   },
+   {
+    "run": "20261029-164749-3dfc6f64",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T16:51:02",
+    "lane": 1,
+    "reference_run": "20261029-112259-0d44a806",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "categories": {
+      "differences": 0
+     },
+     "asteroids": {
+      "differences": 0
+     }
+    },
+    "shots": {
+     "categories": 0.024756
+    }
+   }
+  ]
+ }
+}

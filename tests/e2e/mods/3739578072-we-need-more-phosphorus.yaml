@@ -1,0 +1,20 @@
+# We Need More Phosphorus! (3739578072), classes P, O; PLib options.
+#
+# What it does: postfixes on the four Drecko configs' CreatePrefab (patched by name at load)
+# find each diet's Info entries that produce phosphorite, by reflection on Diet.Info's
+# members, and multiply their conversion rate (100 times by default, an option); a postfix on
+# ElementLoader.Load sets the thermal conductivity of phosphorite and liquid phosphorus to 50
+# (an option).
+# How a player reaches it: Dreckos eating; the elements' properties.
+# What changes: Dreckos give far more phosphorite; phosphorus conducts heat.
+#
+# Both elements conduct at 50; the log names the diets changed, as the original's does.
+from: early-base
+mods: [3739578072]
+require_log: ['\[WeNeedMorePhosphorus\] Applied Thermal Conductivity: 50', '\[WeNeedMorePhosphorus\] SUCCESS! Modified .Phosphorite.']
+steps:
+  - expect_state:
+      "ElementLoader.FindElementByName(\"Phosphorite\").thermalConductivity": 50
+      "ElementLoader.FindElementByName(\"LiquidPhosphorus\").thermalConductivity": 50
+  - run: {seconds: 5}
+  - expect: {duplicants: 3}

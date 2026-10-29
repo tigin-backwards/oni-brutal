@@ -1,0 +1,20 @@
+# Free Marine Drill (3745300476), class P.
+#
+# What it does: the Marine Drill (UnderwaterVentDrill, DLC5) needs no diamond: its diamond
+# storage, delivery errand and consumption rate are removed, HasAnyDiamond always holds, and
+# its drill progress no longer waits for diamond.
+# How a player reaches it: build a Marine Drill over an underwater vent.
+# What changes: it drills without diamond deliveries.
+#
+# The drill's prefab has no diamond delivery, a storage of no capacity and no consumption.
+# The mod's log line is there.
+from: early-base
+mods: [3745300476]
+require_log: ['FreeDrill: removed diamond storage']
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"UnderwaterVentDrill\").GetComponents<ManualDeliveryKG>.Length": 0
+      "Assets.GetPrefab(\"UnderwaterVentDrill\").GetComponent<Storage>.capacityKg": 0
+      "Assets.GetPrefab(\"UnderwaterVentDrill\").GetComponent<Storage>.storageFilters.Count": 0
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

@@ -1,0 +1,22 @@
+# POB-Bionic Besties 仿生小伙伴 (3404416193), class X (no code; needs Dupery Fixed, 3172734005).
+#
+# What it does: a Dupery personality pack: PERSONALITIES.json adds bionic versions of the
+# game's Duplicants (BPEI "Pei", BMAE "Mae" and others, Model BionicMinion, with their looks,
+# stress and joy traits), OVERRIDE_PERSONALITIES.json makes them printable starting picks, and
+# strings/zh.po translates them. Dupery Fixed loads them into the personality database.
+# How a player reaches it: the printing pod and the new colony's Duplicant picks.
+# What changes: more bionic Duplicants on offer.
+#
+# Both mods are installed. The pack's personalities are in the database (as many as in the
+# original), bionic and printable.
+from: early-base
+mods: [3172734005, 3404416193]
+steps:
+  - expect_state:
+      "count:Db.Get().Personalities.resources[*] if .Id == BPEI": 1
+      "count:Db.Get().Personalities.resources[*] if .Id == BMAE": 1
+      "Db.Get().Personalities.Get(\"BPEI\").model.Name": BionicMinion
+      "Db.Get().Personalities.Get(\"BPEI\").Name": Pei
+      "Db.Get().Personalities.Count": "== original"
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

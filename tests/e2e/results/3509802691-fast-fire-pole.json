@@ -1,0 +1,55 @@
+{
+ "spec": "mods/3509802691-fast-fire-pole.yaml",
+ "mods": [
+  "3509802691"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Fire Pole climbs at the mod's speeds; a built pole",
+ "updated": "2026-10-29",
+ "commit": "2d4aca2a",
+ "mod_dlls": {
+  "3509802691": {
+   "fastfirepole.dll": "0fbe9d7634b2fafad6d432add5ad29ae49f490bb4890f62eb2afa5263b21681e"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-070935-7f670b10",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T07:30:23",
+    "lane": 2,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-143747-9481627a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T15:28:44",
+    "lane": 1,
+    "reference_run": "20261029-070935-7f670b10",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   },
+   {
+    "run": "20261029-143747-9481627a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T15:29:30",
+    "lane": 1,
+    "reference_run": "20261029-070935-7f670b10",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {}
+   }
+  ]
+ }
+}

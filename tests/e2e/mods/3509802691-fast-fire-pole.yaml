@@ -1,0 +1,20 @@
+# Fast climb fire pole (3509802691), class P.
+#
+# What it does: a postfix on FirePoleConfig.ConfigureBuildingTemplate sets the Fire Pole's
+# ladder speeds to 1.2 up (the game's 0.25, a plastic ladder's speed) and 4 down.
+# How a player reaches it: build a Fire Pole (Base menu); Duplicants climb it.
+# What changes: Duplicants climb a Fire Pole as fast as a plastic ladder.
+#
+# The Fire Pole's prefab and one built in the east corridor have the mod's multipliers.
+from: early-base
+mods: [3509802691]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"FirePole\")", method: Build, args: [131786, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"FirePole\").BuildingComplete.GetComponent<Ladder>.upwardsMovementSpeedMultiplier": 1.2
+      "Assets.GetBuildingDef(\"FirePole\").BuildingComplete.GetComponent<Ladder>.downwardsMovementSpeedMultiplier": 4
+  - run: {seconds: 2}
+  - expect: {buildings: {FirePole: 1}}
+  - expect_state:
+      "count:all:Ladder::[*] if .upwardsMovementSpeedMultiplier == 1.2": 1

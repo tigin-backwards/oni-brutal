@@ -1,0 +1,59 @@
+{
+ "spec": "mods/2858439107-true-luxury-bed.yaml",
+ "mods": [
+  "2858439107"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Comfy Bed costs raw minerals and reed fiber, one is built of them, and its card matches the original's",
+ "updated": "2026-10-29",
+ "commit": "1785bc2f",
+ "mod_dlls": {
+  "2858439107": {
+   "NewLuxuryBed.dll": "b08a295a7ebd244be7a444135346c454d322abe83713063d30baeb92444c5000"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-090559-e1e62f9e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T09:47:46",
+    "lane": 4,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-121806-2d41950c",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T12:21:03",
+    "lane": 4,
+    "reference_run": "20261029-090559-e1e62f9e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.0
+    }
+   },
+   {
+    "run": "20261029-121806-2d41950c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T12:21:56",
+    "lane": 4,
+    "reference_run": "20261029-090559-e1e62f9e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.0
+    }
+   }
+  ]
+ }
+}

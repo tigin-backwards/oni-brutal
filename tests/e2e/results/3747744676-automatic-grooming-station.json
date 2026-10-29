@@ -1,0 +1,65 @@
+{
+ "spec": "mods/3747744676-automatic-grooming-station.yaml",
+ "mods": [
+  "3747744676"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "spec fails in ours: the Auto Grooming Station's card from the Stations menu shows only its title and material row, as the Christmas Tree's does; the three stations are unlocked",
+ "updated": "2026-10-29",
+ "commit": "1785bc2f",
+ "mod_dlls": {
+  "3747744676": {
+   "AutoGroomingStationMod.dll": "ea00c0461a8e6fdee1eabcb63a7a0d79873e9071c58ecc4ff05889f2abb02830"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-090559-e1e62f9e",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T11:46:23",
+    "lane": 4,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-121806-2d41950c",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-29T12:52:45",
+    "lane": 4,
+    "reasons": [
+     "shot product: 100.00% of pixels differ (> 4%)"
+    ],
+    "reference_run": "20261029-090559-e1e62f9e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 1.0
+    }
+   },
+   {
+    "run": "20261029-121806-2d41950c",
+    "index": 2,
+    "verdict": "fail",
+    "date": "2026-10-29T12:53:37",
+    "lane": 4,
+    "reasons": [
+     "shot product: 100.00% of pixels differ (> 4%)"
+    ],
+    "reference_run": "20261029-090559-e1e62f9e",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 1.0
+    }
+   }
+  ]
+ }
+}

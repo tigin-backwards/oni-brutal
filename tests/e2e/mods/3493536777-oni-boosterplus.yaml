@@ -1,0 +1,22 @@
+# ONI_BoosterPlus (3493536777), classes P, S.
+#
+# What it does: strengthens Bionic Duplicants' boosters (The Bionic Booster Pack): every
+# booster also gives +2 strength (a prefix on CreateBoosterModifiers), strength carries twice
+# as much (the CarryAmountFromStrength converter's multiplier doubled), the Tidy booster gets
+# a third perk and the carrying perk, the boosters' skill perks give more booster slots, and
+# the bionic upgrade monitor creates extra slots up to the mod's maximum; the bionic
+# details panels follow.
+# How a player reaches it: a Bionic Duplicant's boosters.
+# What changes: stronger bionic boosters.
+#
+# The converter and the booster slot perks carry the mod's numbers, as in the original.
+from: early-base
+mods: [3493536777]
+require_log: ['Patch_SkillPerks_Constructor_ResourceSet code patch called']
+steps:
+  - expect_state:
+      "Db.Get().AttributeConverters.Get(\"CarryAmountFromStrength\").multiplier": "== original"
+      "Db.Get().SkillPerks.ExtraBionicBooster1.Id": "== original"
+      "Db.Get().Skills.BionicsD1.perks.Count": "== original"
+  - run: {seconds: 10}
+  - expect: {duplicants: 3}

@@ -1,0 +1,25 @@
+# 帕库鱼幸福度加成 Pacu happiness bonus (3744782341), classes P, O; PLib options.
+#
+# What it does: registers an effect, PacuHappinessBonus (帕库鱼天性, permanent, +3 critter
+# happiness, an option from 0 to 20), and postfixes on the Pacu, Tropical Pacu and Gulp Fish
+# configs' OnSpawn give it to every pacu, since pacus cannot be groomed.
+# How a player reaches it: any pacu; its happiness in the details screen.
+# What changes: happier pacus.
+#
+# Options here: +5. The effect gives +5, and a Pacu spawned in setup in the corridor west of
+# the printing pod has it.
+from: early-base
+mods: [3744782341]
+options:
+  "3744782341": {HappinessBonus: 5}
+setup:
+  - driver: {setup.call: {target: "Scenario.SpawnPrefab(131762, 0, 0, \"Pacu\", \"Creatures\")", method: SetActive, args: [true]}}
+steps:
+  - expect_state:
+      "Db.Get().effects.Get(\"PacuHappinessBonus\").SelfModifiers[0].Value": 5
+      "Db.Get().effects.Get(\"PacuHappinessBonus\").SelfModifiers[0].AttributeId": Happiness
+  - run: {seconds: 2}
+  - expect_state:
+      "count:all:Effects::[*] if .HasEffect(\"PacuHappinessBonus\") == true": 1
+  - expect_state:
+      "count:all:Effects::[*] if .HasEffect(\"PacuHappinessBonus\") == true": "== original"

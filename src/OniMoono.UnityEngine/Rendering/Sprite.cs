@@ -11,6 +11,23 @@ using UnityEngine.U2D;
 
 namespace UnityEngine
 {
+    /// Sprite.packingMode; the game's assemblies do not use it, so SurfaceGen does not emit it.
+    public enum SpritePackingMode
+    {
+        Tight = 0,
+        Rectangle = 1,
+    }
+
+    /// Sprite.packingRotation; emitted by hand for the same reason.
+    public enum SpritePackingRotation
+    {
+        None = 0,
+        FlipHorizontal = 1,
+        FlipVertical = 2,
+        Rotate180 = 3,
+        Any = 15,
+    }
+
     public partial class Sprite
     {
         SpriteNative Data => (SpriteNative)NativeOrThrow;
@@ -39,6 +56,12 @@ namespace UnityEngine
         }
 
         public bool packed => (Data.Render.Settings & 1) != 0;
+
+        /// How the sprite was packed: tight or rectangle (mods read it; the game does not).
+        public SpritePackingMode packingMode => (SpritePackingMode)((Data.Render.Settings >> 1) & 1);
+
+        /// How the sprite's pixels were flipped or rotated in its texture when packed.
+        public SpritePackingRotation packingRotation => (SpritePackingRotation)((Data.Render.Settings >> 2) & 0xF);
 
         /// Bounds of the sprite's geometry in units around the pivot.
         public Bounds bounds => Data.Bounds;

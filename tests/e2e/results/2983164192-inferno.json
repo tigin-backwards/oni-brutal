@@ -1,0 +1,63 @@
+{
+ "spec": "mods/2983164192-inferno.yaml",
+ "mods": [
+  "2983164192"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "a new game of the Inferno cluster by coordinate (asteroid list dump); its worlds, start world and POIs",
+ "updated": "2026-10-29",
+ "commit": "2d4aca2a",
+ "mod_dlls": {
+  "2983164192": {
+   "Inferno.dll": "5c853b9e427575c6ec164af8e389f504f8dba51b8b000822b95dc932758ebf42"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-074432-9668621b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T08:15:49",
+    "lane": 3,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-143747-9481627a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T15:06:32",
+    "lane": 1,
+    "reference_run": "20261029-074432-9668621b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261029-143747-9481627a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T15:07:48",
+    "lane": 1,
+    "reference_run": "20261029-074432-9668621b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "asteroids": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

@@ -1,0 +1,62 @@
+{
+ "spec": "mods/2841373684-critters-can-pass.yaml",
+ "mods": [
+  "2841373684"
+ ],
+ "verdict": "failed",
+ "why": "a run of ours failed",
+ "findings": [],
+ "note": "spec fails in ours: the Farm Block's card from the Base menu showed only its title and material row in one of two runs (128 px tall against 214), as the Christmas Tree's does; the block's cell flags match",
+ "updated": "2026-10-29",
+ "commit": "2d4aca2a",
+ "mod_dlls": {
+  "2841373684": {
+   "CrittersCanPass.dll": "16fa9e6d45b160f8da63e76bb0372feec7b70acab6ae7267821a75befa0cb1fe"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-071158-8a6b9b85",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T07:22:46",
+    "lane": 4,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-083519-82e8344c",
+    "index": 1,
+    "verdict": "fail",
+    "date": "2026-10-29T08:44:16",
+    "lane": 4,
+    "reasons": [
+     "shot product: 100.00% of pixels differ (> 4%)"
+    ],
+    "reference_run": "20261029-071158-8a6b9b85",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 1.0
+    }
+   },
+   {
+    "run": "20261029-083519-82e8344c",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T08:45:09",
+    "lane": 4,
+    "reference_run": "20261029-071158-8a6b9b85",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.0
+    }
+   }
+  ]
+ }
+}

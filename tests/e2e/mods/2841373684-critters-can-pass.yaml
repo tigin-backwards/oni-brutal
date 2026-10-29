@@ -1,0 +1,39 @@
+# Critters Can Pass (2841373684), class B.
+#
+# What it does: adds the Farm Block (CrittersPassableBlock, a metal tile that is a floor for
+# Duplicants and impassable to them, but critters walk through it: CritterPassable clears
+# Grid.CritterImpassable and sets DupeImpassable, FakeFloor and Foundation on its cell) and
+# the Farm Door (CrittersPassableDoor, 1x2, a door that critters pass even when locked), both
+# in the Base menu and researched with Basic Farming.
+# How a player reaches it: research Basic Farming; the Base menu.
+# What changes: ranch walls that keep Duplicants out and let critters through.
+#
+# Basic Farming is researched in setup and a Farm Block built in the corridor west of the
+# printing pod: its cell is a foundation, impassable to Duplicants and passable to critters.
+# The Base menu offers both buildings; the block's card is shot.
+from: early-base
+mods: [2841373684]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"FarmingTech\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"CrittersPassableBlock\")", method: Build, args: [{"$": "Grid.XYToCell(112, 207)"}, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"FarmingTech\").unlockedItemIDs": [{contains: CrittersPassableBlock}, {contains: CrittersPassableDoor}]
+  - run: {seconds: 2}
+  - expect: {buildings: {CrittersPassableBlock: 1}}
+  - expect_state:
+      "Grid.CritterImpassable.get_Item(131764)": false
+      "Grid.DupeImpassable.get_Item(131764)": true
+      "Grid.Foundation.get_Item(131764)": true
+      "Grid.FakeFloor.get_Item(131764)": true
+  - driver: {camera.set: {cell: [113, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/CrittersPassableBlock Group*", cond: stable}
+  - expect_ui:
+      "**/BuildingGroups/**/Grid/CrittersPassableDoor Group*": {active: true}
+  - click: {ui: "**/BuildingGroups/**/Grid/CrittersPassableBlock Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}

@@ -1,0 +1,31 @@
+{
+ "spec": "mods/3728274068-multiplayer-mod.yaml",
+ "mods": [
+  "3728274068"
+ ],
+ "verdict": "pending",
+ "why": "0 run(s) of ours against original run 20261029-010732-2e8b7c55; 2 needed",
+ "findings": [],
+ "note": "menus only, recorded in the original: the main menu's MULTIPLAYER panel (dump); Host LAN asks for a loaded colony",
+ "updated": "2026-10-29",
+ "commit": "aa9bdf54",
+ "mod_dlls": {
+  "3728274068": {
+   "OniMultiplayer.Core.dll": "9c95644e2d797c470b00b328934e5a5f69d54cf2a6b25d66927de37edae6e5a4",
+   "OniMultiplayer.Mod.dll": "7cf05b5e3ec48d5edcc212eaefd36941974a932994e80c2fbcd5947d373448b2"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-010732-2e8b7c55",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T02:41:40",
+    "lane": 17,
+    "signatures": 0
+   }
+  ],
+  "ours": []
+ }
+}

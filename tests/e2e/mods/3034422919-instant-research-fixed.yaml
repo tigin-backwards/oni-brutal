@@ -9,10 +9,20 @@
 #
 # The option is turned off. On the research screen a click on Power Regulation queues it (with
 # anything it needs first) and researches it at once; the queue is empty after it.
+#
+# Where the screen opens depends on frame times: its Update zooms from 1 to 0.6 about the pointer
+# by min(5 x unscaledDeltaTime, 0.9) a frame and pulls the content inside its bounds by
+# unscaledDeltaTime, so a first frame of 0.45 s (the original in the runner) lands at about
+# (31, 39) and one of 0.01 s (ours) at about (144, -142), Power Regulation below the screen
+# (UnityProbe researchpan; ours with PROBE_RP_SLEEP=450 lands at (33, 35)). Setup asks the
+# screen to pan to Power Regulation (ResearchScreen.ZoomToTech) before it first opens; it gets
+# there whatever the frame times.
 from: early-base
 mods: [3034422919]
 options:
   "3034422919": {OnlyInSandbox: false}
+setup:
+  - driver: {setup.call: {target: "ManagementMenu.Instance.researchScreen", method: ZoomToTech, args: [PowerRegulation, false]}}
 steps:
   - expect_state:
       "Research.Instance.GetTechInstance(\"PowerRegulation\").IsComplete()": false

@@ -11,6 +11,9 @@
 # Basic Farming is researched in setup and a Farm Block built in the corridor west of the
 # printing pod: its cell is a foundation, impassable to Duplicants and passable to critters.
 # The Base menu offers both buildings; the block's card is shot.
+#
+# The card is shot with the pointer still on its button: the card collapses when the pointer
+# leaves the build menu (ProductInfoScreen.CheckMouseOver), as in 2906165124-christmas-tree.
 from: early-base
 mods: [2841373684]
 setup:
@@ -36,4 +39,4 @@ steps:
       "**/BuildingGroups/**/Grid/CrittersPassableDoor Group*": {active: true}
   - click: {ui: "**/BuildingGroups/**/Grid/CrittersPassableBlock Group*"}
   - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
-  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04, pointer: stay}

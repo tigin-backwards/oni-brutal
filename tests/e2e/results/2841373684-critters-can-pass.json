@@ -3,12 +3,12 @@
  "mods": [
   "2841373684"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "spec fails in ours: the Farm Block's card from the Base menu showed only its title and material row in one of two runs (128 px tall against 214), as the Christmas Tree's does; the block's cell flags match",
+ "note": "the Farm Block's cell is a foundation, impassable to Duplicants and passable to critters; the Base menu offers both buildings, and the block's card is shot with the pointer on its button",
  "updated": "2026-10-29",
- "commit": "2d4aca2a",
+ "commit": "ab14d9ea",
  "mod_dlls": {
   "2841373684": {
    "CrittersCanPass.dll": "16fa9e6d45b160f8da63e76bb0372feec7b70acab6ae7267821a75befa0cb1fe"
@@ -17,39 +17,36 @@
  "runs": {
   "original": [
    {
-    "run": "20261029-071158-8a6b9b85",
+    "run": "20261029-161422-cdcff676",
     "index": 1,
     "verdict": "pass",
-    "date": "2026-10-29T07:22:46",
-    "lane": 4,
+    "date": "2026-10-29T16:14:22",
+    "lane": 15,
     "signatures": 0
    }
   ],
   "ours": [
    {
-    "run": "20261029-083519-82e8344c",
+    "run": "20261029-161827-dbb3f442",
     "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-29T08:44:16",
-    "lane": 4,
-    "reasons": [
-     "shot product: 100.00% of pixels differ (> 4%)"
-    ],
-    "reference_run": "20261029-071158-8a6b9b85",
+    "verdict": "pass",
+    "date": "2026-10-29T16:18:27",
+    "lane": 15,
+    "reference_run": "20261029-161422-cdcff676",
     "new_signatures": 0,
     "findings": [],
     "ui_dump": {},
     "shots": {
-     "product": 1.0
+     "product": 0.0
     }
    },
    {
-    "run": "20261029-083519-82e8344c",
+    "run": "20261029-161827-dbb3f442",
     "index": 2,
     "verdict": "pass",
-    "date": "2026-10-29T08:45:09",
-    "lane": 4,
-    "reference_run": "20261029-071158-8a6b9b85",
+    "date": "2026-10-29T16:22:48",
+    "lane": 15,
+    "reference_run": "20261029-161422-cdcff676",
     "new_signatures": 0,
     "findings": [],
     "ui_dump": {},

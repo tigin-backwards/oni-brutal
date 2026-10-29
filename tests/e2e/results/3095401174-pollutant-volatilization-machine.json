@@ -3,12 +3,12 @@
  "mods": [
   "3095401174"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "spec fails in ours: the Polluted Dirt Volatilizer's card from the Oxygen menu shows only its title and material row (128 px tall against 389 in the original), as the Christmas Tree's does; the defs and research match",
+ "note": "Directed Air Streams unlocks both volatilizers with the mod's converters; the dirt volatilizer's card is shot with the pointer on its button",
  "updated": "2026-10-29",
- "commit": "2d4aca2a",
+ "commit": "ab14d9ea",
  "mod_dlls": {
   "3095401174": {
    "huifaqi.dll": "7fe319cd04a8c02f85f02bdce0db56d456e75bd438277962f9f313302ffa68b1"
@@ -17,47 +17,41 @@
  "runs": {
   "original": [
    {
-    "run": "20261029-071158-8a6b9b85",
+    "run": "20261029-162348-692062c6",
     "index": 1,
     "verdict": "pass",
-    "date": "2026-10-29T08:05:01",
-    "lane": 5,
+    "date": "2026-10-29T16:23:48",
+    "lane": 15,
     "signatures": 0
    }
   ],
   "ours": [
    {
-    "run": "20261029-083519-82e8344c",
+    "run": "20261029-163037-124d64d5",
     "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-29T08:46:04",
-    "lane": 4,
-    "reasons": [
-     "shot product: 100.00% of pixels differ (> 4%)"
-    ],
-    "reference_run": "20261029-071158-8a6b9b85",
+    "verdict": "pass",
+    "date": "2026-10-29T16:30:37",
+    "lane": 15,
+    "reference_run": "20261029-162348-692062c6",
     "new_signatures": 0,
     "findings": [],
     "ui_dump": {},
     "shots": {
-     "product": 1.0
+     "product": 0.0
     }
    },
    {
-    "run": "20261029-083519-82e8344c",
+    "run": "20261029-163037-124d64d5",
     "index": 2,
-    "verdict": "fail",
-    "date": "2026-10-29T08:46:58",
-    "lane": 4,
-    "reasons": [
-     "shot product: 100.00% of pixels differ (> 4%)"
-    ],
-    "reference_run": "20261029-071158-8a6b9b85",
+    "verdict": "pass",
+    "date": "2026-10-29T16:31:36",
+    "lane": 15,
+    "reference_run": "20261029-162348-692062c6",
     "new_signatures": 0,
     "findings": [],
     "ui_dump": {},
     "shots": {
-     "product": 1.0
+     "product": 0.0
     }
    }
   ]

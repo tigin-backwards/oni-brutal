@@ -8,6 +8,9 @@
 #
 # Advanced Power Regulation is researched in setup. Both defs build anywhere, and the Power
 # menu's Heavy-Watt Wire card is shot.
+#
+# The card is shot with the pointer still on its button: the card collapses when the pointer
+# leaves the build menu (ProductInfoScreen.CheckMouseOver), as in 2906165124-christmas-tree.
 from: early-base
 mods: [3691848497]
 setup:
@@ -25,4 +28,4 @@ steps:
   - ui_wait: {path: "**/BuildingGroups/**/Grid/HighWattageWire Group*", cond: stable}
   - click: {ui: "**/BuildingGroups/**/Grid/HighWattageWire Group*"}
   - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
-  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04, pointer: stay}

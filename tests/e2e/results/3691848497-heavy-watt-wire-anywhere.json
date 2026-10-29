@@ -3,12 +3,12 @@
  "mods": [
   "3691848497"
  ],
- "verdict": "failed",
- "why": "a run of ours failed",
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
  "findings": [],
- "note": "spec fails in ours: the Heavy-Watt Wire's card from the Power menu shows only its title and material row, as the Christmas Tree's does; both defs build anywhere",
+ "note": "both Heavy-Watt Wire defs build anywhere; the Power menu's card is shot with the pointer on its button",
  "updated": "2026-10-29",
- "commit": "1785bc2f",
+ "commit": "ab14d9ea",
  "mod_dlls": {
   "3691848497": {
    "HeavyWattWireAnywhere.dll": "3e69f0d62fdb731d06af88adf4adb0b850669cd9e68a09457bea3add571696aa"
@@ -17,47 +17,41 @@
  "runs": {
   "original": [
    {
-    "run": "20261029-090559-e1e62f9e",
+    "run": "20261029-163238-3c734a1b",
     "index": 1,
     "verdict": "pass",
-    "date": "2026-10-29T11:19:53",
-    "lane": 4,
+    "date": "2026-10-29T16:32:38",
+    "lane": 15,
     "signatures": 0
    }
   ],
   "ours": [
    {
-    "run": "20261029-121806-2d41950c",
+    "run": "20261029-163657-47dc1e41",
     "index": 1,
-    "verdict": "fail",
-    "date": "2026-10-29T12:44:19",
-    "lane": 4,
-    "reasons": [
-     "shot product: 100.00% of pixels differ (> 4%)"
-    ],
-    "reference_run": "20261029-090559-e1e62f9e",
+    "verdict": "pass",
+    "date": "2026-10-29T16:36:57",
+    "lane": 15,
+    "reference_run": "20261029-163238-3c734a1b",
     "new_signatures": 0,
     "findings": [],
     "ui_dump": {},
     "shots": {
-     "product": 1.0
+     "product": 0.0
     }
    },
    {
-    "run": "20261029-121806-2d41950c",
+    "run": "20261029-163657-47dc1e41",
     "index": 2,
-    "verdict": "fail",
-    "date": "2026-10-29T12:45:12",
-    "lane": 4,
-    "reasons": [
-     "shot product: 100.00% of pixels differ (> 4%)"
-    ],
-    "reference_run": "20261029-090559-e1e62f9e",
+    "verdict": "pass",
+    "date": "2026-10-29T16:38:02",
+    "lane": 15,
+    "reference_run": "20261029-163238-3c734a1b",
     "new_signatures": 0,
     "findings": [],
     "ui_dump": {},
     "shots": {
-     "product": 1.0
+     "product": 0.0
     }
    }
   ]

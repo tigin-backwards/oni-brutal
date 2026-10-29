@@ -8,6 +8,9 @@
 #
 # The heater's tech is researched in setup. Its def has the port; one built by setup in the corridor west of the printing pod
 # has its operational controller. Its card is shot.
+#
+# The card is shot with the pointer still on its button: the card collapses when the pointer
+# leaves the build menu (ProductInfoScreen.CheckMouseOver), as in 2906165124-christmas-tree.
 from: early-base
 mods: [3594192836]
 setup:
@@ -28,4 +31,4 @@ steps:
   - ui_wait: {path: "**/BuildingGroups/**/Grid/Campfire Group*", cond: stable}
   - click: {ui: "**/BuildingGroups/**/Grid/Campfire Group*"}
   - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
-  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04, pointer: stay}

@@ -11,6 +11,9 @@
 # Critter Ranching II is researched in setup. The three stations are unlocked; one built in
 # the corridor west of the printing pod needs a ranch room. The Stations menu offers it (its
 # card is shot).
+#
+# The card is shot with the pointer still on its button: the card collapses when the pointer
+# leaves the build menu (ProductInfoScreen.CheckMouseOver), as in 2906165124-christmas-tree.
 from: early-base
 mods: [3747744676]
 setup:
@@ -33,4 +36,4 @@ steps:
   - ui_wait: {path: "**/BuildingGroups/**/Grid/AutoGroomingStation Group*", cond: stable}
   - click: {ui: "**/BuildingGroups/**/Grid/AutoGroomingStation Group*"}
   - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
-  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04, pointer: stay}

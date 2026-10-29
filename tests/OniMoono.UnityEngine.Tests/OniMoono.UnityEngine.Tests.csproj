@@ -12,6 +12,8 @@
     <PackageReference Include="xunit.runner.visualstudio" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="System.Runtime.Serialization.Formatters" />
+    <!-- The game's Newtonsoft.Json 7 needs its CAS types (as in the host). -->
+    <PackageReference Include="System.Security.Permissions" />
   </ItemGroup>
   <ItemGroup>
     <!-- The engine is process-global, like Unity's: tests run one at a time. -->
@@ -44,6 +46,11 @@
     <!-- The game's Harmony, as mods patch the engine with it (TmpInputSetupTests). -->
     <Reference Include="0Harmony">
       <HintPath>$(OniGameDir)/OxygenNotIncluded_Data/Managed/0Harmony.dll</HintPath>
+    </Reference>
+    <!-- Delegates through the game's Newtonsoft.Json as Mono serializes them (MonoDelegateSerializationTests). -->
+    <Compile Include="../../src/OniMoono.Host/MonoDelegateSerialization.cs" Link="Host/MonoDelegateSerialization.cs" />
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>$(OniGameDir)/OxygenNotIncluded_Data/Managed/Newtonsoft.Json.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

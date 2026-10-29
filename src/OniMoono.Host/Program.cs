@@ -113,6 +113,10 @@ namespace OniMoono.Host
                     PInvokePatches.Install();
                     PatchDependents.Install();
                     GenericMemberScopes.Install();
+                    // Delegates' GetObjectData writes what Mono's does, which Newtonsoft.Json
+                    // writes (D48). A runtime method, but one the engine never calls: patched here,
+                    // off the main thread (two patches, about 20 ms).
+                    MonoDelegateSerialization.Install(MonoNames.FullName, StateMachineSaveNames.AssemblyOf);
                 }
                 catch (Exception e)
                 {

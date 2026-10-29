@@ -28,15 +28,30 @@ namespace OniMoono.Desktop.Gl
         static delegate* unmanaged[Cdecl]<ulong, void> makeResident, makeNonResident;
         static delegate* unmanaged[Cdecl]<uint, int, ulong, void> programUniformHandle;
 
+        /// AMD's Windows driver (GL_VENDOR "ATI Technologies Inc."; Mesa's AMD driver reports
+        /// "AMD") advertises the extension, but there every draw and every texture upload costs a
+        /// flat ~0.25 ms of GPU time with handles resident, against 0.001-0.009 ms bound to units:
+        /// a loaded colony's frame took 270-570 ms of GPU time on an RX 9070 XT, 26-30 ms with
+        /// --no-bindless (issue #27, measured with --gpu-profile; likely also issue #21's collapse,
+        /// the same card, worsening as a colony's resident textures grow). Binding to units has
+        /// no such cost there, so that driver binds.
+        public static bool SlowOnDriver(string vendor) => vendor.Contains("ATI Technologies", StringComparison.Ordinal);
+
+        /// Why bindless textures are off, or null when they are on.
+        public static string Reason { get; private set; }
+
         /// Loads the entry points (the rendering context is current).
-        public static void Initialize()
+        public static void Initialize(string vendor)
         {
-            if (Disabled || !GlPrograms.Extensions.Contains("GL_ARB_bindless_texture")) return;
+            if (Disabled) { Reason = "--no-bindless"; return; }
+            if (!GlPrograms.Extensions.Contains("GL_ARB_bindless_texture")) { Reason = "no ARB_bindless_texture"; return; }
+            if (SlowOnDriver(vendor)) { Reason = "AMD's Windows driver, where bindless draws are slow"; return; }
             getTextureSamplerHandle = (delegate* unmanaged[Cdecl]<uint, uint, ulong>)Glfw.GetProcAddress("glGetTextureSamplerHandleARB"u8);
             makeResident = (delegate* unmanaged[Cdecl]<ulong, void>)Glfw.GetProcAddress("glMakeTextureHandleResidentARB"u8);
             makeNonResident = (delegate* unmanaged[Cdecl]<ulong, void>)Glfw.GetProcAddress("glMakeTextureHandleNonResidentARB"u8);
             programUniformHandle = (delegate* unmanaged[Cdecl]<uint, int, ulong, void>)Glfw.GetProcAddress("glProgramUniformHandleui64ARB"u8);
             Enabled = getTextureSamplerHandle != null && makeResident != null && makeNonResident != null && programUniformHandle != null;
+            if (!Enabled) Reason = "entry points missing";
         }
 
         static readonly Regex FirstUniform = new(@"^[ \t]*(UNITY_LOCATION\(\d+\)[ \t]*)?uniform\b", RegexOptions.Multiline);

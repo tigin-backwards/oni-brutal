@@ -1251,7 +1251,11 @@ textures; in a large colony that was ~33 of 46 GPU ms per frame, 2.5 with handle
 compiled with `#extension GL_ARB_bindless_texture` and the default `layout(bindless_sampler)`
 qualifier ahead of their uniforms; sampling state then lives in sampler objects, and a texture
 whose image is specified again is recreated under a new name (a handle fixes its layout).
-Elsewhere (Mesa's d3d12 driver under WSL) textures are bound to units. A texture without an
+Elsewhere (Mesa's d3d12 driver under WSL) textures are bound to units, and so they are on AMD's
+Windows driver (`GL_VENDOR` "ATI Technologies Inc."), which lists the extension but charges a flat
+~0.25 ms of GPU time per draw and per texture upload with handles resident, against
+0.001-0.009 ms bound to units (an RX 9070 XT: 270-570 GPU ms per frame on a loaded colony,
+26-30 with units; issue #27). `--no-bindless` binds on any driver. A texture without an
 image (zero width or height) is sampled as no texture, (0, 0, 0, 1).
 
 **Render thread, presentation and frame pacing.** Unity's player records rendering on the main

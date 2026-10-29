@@ -1,0 +1,26 @@
+# Liquid Vent Not Overflow (2846822603), class P.
+#
+# What it does: a prefix on Vent.IsValidOutputCell: in a liquid cell, a vent may output only
+# while the cell's mass plus 10 kg stays within its overpressure mass scaled by the liquid's
+# maximum mass (1000 kg of water for a Liquid Vent). The game allows any mass below 1000 kg,
+# so a vent overfills its cell.
+# How a player reaches it: a Liquid Vent under liquid.
+# What changes: a Liquid Vent stops before its cell overflows.
+#
+# 995 kg of water is put into a sandstone cell under the east corridor, sealed in rock, and a
+# Liquid Vent built on it. After a short run, the vent's output check refuses the cell (the
+# game alone would accept it, 995 < 1000).
+from: early-base
+mods: [2846822603]
+setup:
+  - driver: {setup.call: {type: SimMessages, method: ReplaceElement, args: [130514, Water, {"$": "CellEventLogger.Instance.DebugTool"}, 995, 300, 255, 0, -1]}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"LiquidVent\")", method: Build, args: [130514, Neutral, null, [Copper], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - expect_state:
+      "Grid.Element[130514].id": "== 'Water'"
+      "Grid.Mass.get_Item(130514)": [">= 990", "<= 1000"]
+      "all:Vent::[0].overpressureMass": 1000
+  - expect_state:
+      "all:Vent::[0].IsValidOutputCell(130514)": false
+      "all:Vent::[0].IsValidOutputCell(131786)": true

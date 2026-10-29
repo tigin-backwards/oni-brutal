@@ -1,0 +1,32 @@
+# NamedStorage (2991018571), classes P, S.
+#
+# What it does: storage buildings with a filter side screen (TreeFilterable shown in the user
+# menu, a storage shown in the UI) get a NamedStorageImplement: whenever their filter changes
+# (TreeFilterable.UpdateFilters) their name is prefixed with what they accept, the frame after;
+# renaming by hand edits the base name only (patches on EditableTitleBar.SetEditingState and
+# UserNameable.SetName strip the prefix).
+# How a player reaches it: a storage bin's filter side screen; its title.
+# What changes: storage bins named after their contents.
+#
+# setup builds a Storage Bin in the corridor west of the printing pod. Selected, sandstone is
+# ticked in its filter; the bin's name is then prefixed [Sandstone].
+from: early-base
+mods: [2991018571]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"StorageLocker\")", method: Build, args: [{"$": "Grid.XYToCell(113, 206)"}, Neutral, null, [SandStone], 293.15, DEFAULT_FACADE]}}
+steps:
+  - run: {seconds: 2}
+  - expect: {buildings: {StorageLocker: 1}}
+  - expect_state:
+      "all:NamedStorage.NamedStorageImplement::[0]": exists
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: StorageLocker}
+  - ui_wait: {path: "**/DetailsScreen/SideScreen/**/TreeFilterableSideScreen", cond: stable}
+  - type: {ui: "**/TreeFilterableSideScreen/SearchRow/FilterInputField", text: "sandstone"}
+  - ui_wait: {path: "**/TreeFilterableRow/Elements/Element/CheckBox", cond: stable}
+  - click: {ui: "**/TreeFilterableRow/Elements/Element/CheckBox"}
+  - expect_state: {"selected:GetComponent<TreeFilterable>.AcceptedTags": {contains: SandStone}}
+  - ui_wait: {path: "**/DetailsScreen/TitleBar", cond: stable}
+  - expect_state:
+      "selected:GetComponent<KSelectable>.GetName()": {contains: "[Sandstone]"}
+  - ui_dump: {name: title, root: "**/DetailsScreen/TitleBar"}

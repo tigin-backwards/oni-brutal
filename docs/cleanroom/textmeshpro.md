@@ -340,6 +340,17 @@ channel meanings must match exactly.
     `DeactivateInputField(true)` changes no selection and makes no nested call.
   - Clicking the field selects and activates it.
   - Deselecting it (`OnDeselect`) deactivates it.
+  - **The IME mode** (measured 2026-10-29 in the original Windows player, issue #30: the
+    duplicant rename field, `EditableTitleBar`, read with E2eDriver a frame at a time):
+    activation sets `Input.imeCompositionMode` to `On`, from `Auto` or `Off`, by the first
+    frame the field is focused; deactivating a focused field sets it to `Auto`, from `On` or
+    `Off`. In between the field leaves it alone: set to `Auto` or `Off` while the field is
+    focused, it stays so. Selecting a field that does not become focused (on a screen that
+    is not shown) leaves it as it was.
+  - While an IME composes (`Input.compositionString` not empty), the label shows the text
+    with the composition inserted at the caret in `<u>…</u>` (measured: `<u>ni</u>​` for
+    "ni" with the text selected), and `Input.compositionCursorPos` is set to a screen point at
+    the caret. Our input reports no composition string, so this part is not implemented.
 - **Editing:**
   - While focused, the field drains the keyboard events with `Event.PopEvent` in
     `OnUpdateSelected` (measured: not in `LateUpdate`), which the event system's input

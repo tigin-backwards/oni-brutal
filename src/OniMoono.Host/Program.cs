@@ -1068,6 +1068,46 @@ namespace OniMoono.Host
                     try { Directory.Delete(dir, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
                 }
             });
+            Check("A mod built to run in 32-bit processes only (ModAccess)", () =>
+            {
+                ModAccess.Install();
+                var dir = Directory.CreateTempSubdirectory("oni-moono-check-").FullName;
+                try
+                {
+                    // As 3280526635's TestMod.dll: x86, IL only, 32BITREQUIRED.
+                    var name = "OniMoonoCheck32Bit";
+                    using (var assembly = Cecil.AssemblyDefinition.CreateAssembly(new Cecil.AssemblyNameDefinition(name, new Version(1, 0)), name, Cecil.ModuleKind.Dll))
+                    {
+                        var module = assembly.MainModule;
+                        module.Architecture = Cecil.TargetArchitecture.I386;
+                        module.Attributes = Cecil.ModuleAttributes.ILOnly | Cecil.ModuleAttributes.Required32Bit;
+                        var probe = new Cecil.TypeDefinition("", "Probe", Cecil.TypeAttributes.Public | Cecil.TypeAttributes.Abstract | Cecil.TypeAttributes.Sealed, module.TypeSystem.Object);
+                        module.Types.Add(probe);
+                        var get = new Cecil.MethodDefinition("Get", Cecil.MethodAttributes.Public | Cecil.MethodAttributes.Static, module.TypeSystem.Int32);
+                        probe.Methods.Add(get);
+                        get.Body.GetILProcessor().Emit(Cecil.Cil.OpCodes.Ldc_I4_7);
+                        get.Body.GetILProcessor().Emit(Cecil.Cil.OpCodes.Ret);
+                        assembly.Write(Path.Combine(dir, name + ".dll"));
+                    }
+                    var path = Path.Combine(dir, name + ".dll");
+                    try
+                    {
+                        new System.Runtime.Loader.AssemblyLoadContext("OniMoono check 32-bit", isCollectible: true).LoadFromAssemblyPath(path);
+                        throw new InvalidOperationException("CoreCLR loaded the 32-bit image as it is");
+                    }
+                    catch (Exception e) when (e is FileLoadException or BadImageFormatException)
+                    {
+                    }
+                    var loaded = ModAccess.LoadFrom(path);
+                    if (loaded.Location != path) throw new InvalidOperationException($"its location is {loaded.Location}");
+                    var result = (int)loaded.GetType("Probe")!.GetMethod("Get")!.Invoke(null, null)!;
+                    return result == 7 ? "it loads and runs, as on Mono" : throw new InvalidOperationException($"returned {result}");
+                }
+                finally
+                {
+                    try { Directory.Delete(dir, true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+                }
+            });
             Check("A mod calling a protected game method of a class it does not derive from (ModAccess)", () =>
             {
                 ModAccess.Install();

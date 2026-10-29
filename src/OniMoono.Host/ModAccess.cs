@@ -141,6 +141,12 @@ namespace OniMoono.Host
                 var pdb = Path.ChangeExtension(path, ".pdb");
                 if (File.Exists(pdb)) symbols = File.ReadAllBytes(pdb);
             }
+            // An IL-only image marked 32-bit only loads, as on Mono (D50); the passes below read it so.
+            if (Without32BitRequired(image ?? File.ReadAllBytes(path)) is { } anyCpu)
+            {
+                image = anyCpu;
+                EngineLog.Engine($"mod image: {Path.GetFileName(path)} is IL only and marked to run in 32-bit processes only; loaded without that mark, as on Mono");
+            }
             // A nested type of the game's strings that the game no longer has is bound as Mono binds
             // it (MonoNestedTypeRefs).
             if (MonoNestedTypeRefs.Adjust(image ?? File.ReadAllBytes(path), ref symbols, path) is { } bound) image = bound;
@@ -190,6 +196,35 @@ namespace OniMoono.Host
             lock (directories)
                 if (!directories.Contains(Path.GetDirectoryName(path)!)) directories.Add(Path.GetDirectoryName(path)!);
             return Recorded(assembly);
+        }
+
+        const CorFlags Required32Bit = CorFlags.Requires32Bit;
+
+        /// D50. The image with its CLI header's 32BITREQUIRED flag cleared when it is IL only and
+        /// has it, else null. Mono reads the flag only into the assembly name's processor
+        /// architecture (mono_assembly_fill_assembly_name_full, metadata/assembly.c) and runs the
+        /// image in a 64-bit process; CoreCLR refuses to load it there ("The assembly architecture
+        /// is not compatible with the current process architecture"). An IL-only image runs the
+        /// same either way; one with native code cannot be run here and is left as it is.
+        internal static byte[]? Without32BitRequired(byte[] image)
+        {
+            int flagsOffset;
+            try
+            {
+                using var pe = new PEReader(new MemoryStream(image, writable: false));
+                var cor = pe.PEHeaders.CorHeader;
+                if (cor == null || (cor.Flags & CorFlags.ILOnly) == 0 || (cor.Flags & Required32Bit) == 0) return null;
+                // The COR20 header: cb, major and minor version, the metadata directory, then Flags.
+                flagsOffset = pe.PEHeaders.CorHeaderStartOffset + 16;
+            }
+            catch (BadImageFormatException)
+            {
+                return null;
+            }
+            var copy = (byte[])image.Clone();
+            var flags = (CorFlags)BitConverter.ToInt32(copy, flagsOffset) & ~Required32Bit;
+            BitConverter.TryWriteBytes(copy.AsSpan(flagsOffset, 4), (int)flags);
+            return copy;
         }
 
         /// A mod's assembly, once loaded: its types are the same in both players (MonoMissingTypes).

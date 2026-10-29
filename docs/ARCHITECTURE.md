@@ -147,7 +147,7 @@ are rewritten as its assemblies load (D29), in the same pass as its directory li
 the double close in 0Harmony's MonoMod (D31) and its thread aborts (D47). The game's Harmony is
 adjusted where patches would run differently on CoreCLR (D12–D14, D17–D21, D33, D34, D43), and
 mods' assemblies are rewritten as they load where their IL relies on Mono (D11, D22, D23,
-D27–D32, D40, D42, D47). No other game IL is touched.
+D27–D32, D40, D42, D47, D50). No other game IL is touched.
 
 | Mono provided | Host provides | Needed by |
 |---|---|---|
@@ -1166,6 +1166,16 @@ game or mod code can notice. Each says how it is resolved, or why it is kept.
   `--check-types` patches a game method that calls `Type.GetType` for a type of its own assembly,
   and calls it from that assembly: CoreCLR alone threw "Could not resolve type 'CheckPort' in
   assembly '0Harmony'".
+- **D50 Mods built to run in 32-bit processes only.** An IL-only image whose CLI header has
+  `32BITREQUIRED` (an x86 build) loads in Mono's 64-bit player: Mono reads the flag only into the
+  assembly name's processor architecture (`mono_assembly_fill_assembly_name_full`,
+  `metadata/assembly.c`), and its image loader skips the machine check (`metadata/image.c`).
+  CoreCLR refuses it in a 64-bit process ("The assembly architecture is not compatible with the
+  current process architecture"), and KMod disabled 气体液体管道装载器 (3280526635, whose
+  `TestMod.dll` is so built). **Resolved in** `ModAccess`: such a mod image loads from memory
+  with the flag cleared, before its other passes, and its `Location` stays its file's; IL runs the
+  same either way. An image with native code is left as it is (it cannot run here).
+  `--check-types` loads an x86 IL-only image marked so (CoreCLR alone refuses it) and runs it.
 
 ## 3. The engine API (`OniMoono.UnityEngine`)
 

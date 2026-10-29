@@ -1,0 +1,34 @@
+# Advance Storage repaired (TeleStorage) (3248848464), classes B, S.
+#
+# What it does: adds the TeleStorage Liquid (2x3) and Gas (5x3) reservoirs for the Base menu,
+# unlocked by Catalytics: every TeleStorage shares one pool of the elements chosen in its filter
+# side screen, so liquid or gas put in one comes out of another anywhere; the info screen shows
+# the shared contents.
+# How a player reaches it: research Catalytics; the Base menu; a built one's filter.
+# What changes: liquids and gases teleport between storages.
+#
+# Catalytics is researched in setup and a TeleStorage Liquid built in the east corridor. The
+# Base menu's card is shot.
+from: early-base
+mods: [3248848464]
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"Catalytics\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Game.Instance", method: Trigger, args: [-107300940]}}
+  - driver: {setup.call: {target: "PlanScreen.Instance._researchedDefs", method: Clear}}
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"TeleStorageLiquid\")", method: Build, args: [131786, Neutral, null, [Steel, Polypropylene, Diamond], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Db.Get().Techs.Get(\"Catalytics\").unlockedItemIDs": [{contains: TeleStorageLiquid}, {contains: TeleStorageGas}]
+      "Assets.GetBuildingDef(\"TeleStorageLiquid\").WidthInCells": 2
+      "Assets.GetBuildingDef(\"TeleStorageGas\").WidthInCells": 5
+  - run: {seconds: 3}
+  - expect: {buildings: {TeleStorageLiquid: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 10}}
+  - click: {ui: "**/PlanScreen/Toggle:Base"}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/TeleStorageLiquid Group*", cond: stable}
+  - scroll: {at: "**/PlanBuildingSelectionPanel/BuildingGroups", notches: -10}
+  - ui_wait: {path: "**/BuildingGroups/**/Grid/TeleStorageLiquid Group*", cond: stable}
+  - click: {ui: "**/BuildingGroups/**/Grid/TeleStorageLiquid Group*"}
+  - ui_wait: {path: "**/ProductInfoScreen", cond: stable}
+  - shot: {name: product, crop: "**/ProductInfoScreen", threshold: 0.04}

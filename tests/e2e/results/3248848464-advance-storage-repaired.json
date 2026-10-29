@@ -1,0 +1,59 @@
+{
+ "spec": "mods/3248848464-advance-storage-repaired.yaml",
+ "mods": [
+  "3248848464"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Base menu card (shot); a built TeleStorage Liquid",
+ "updated": "2026-10-29",
+ "commit": "2d4aca2a",
+ "mod_dlls": {
+  "3248848464": {
+   "TeleStorage.dll": "3a97dbb21f7d32270b5b3dfa17cec006d8706a57b6618b9d0ee85bcb3d97d4ed"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261029-074432-9668621b",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T08:26:16",
+    "lane": 3,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261029-143747-9481627a",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-29T15:14:54",
+    "lane": 1,
+    "reference_run": "20261029-074432-9668621b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.0
+    }
+   },
+   {
+    "run": "20261029-143747-9481627a",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-29T15:15:46",
+    "lane": 1,
+    "reference_run": "20261029-074432-9668621b",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {},
+    "shots": {
+     "product": 0.0
+    }
+   }
+  ]
+ }
+}

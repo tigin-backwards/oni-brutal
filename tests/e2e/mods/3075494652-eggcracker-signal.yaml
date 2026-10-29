@@ -1,0 +1,27 @@
+# EggCracker Signal (AutoEggCracker, 3075494652), class P; PLib.
+#
+# What it does: a postfix on EggCrackerConfig.CreateBuildingDef gives the Egg Cracker an
+# automation input at its bottom-left cell, so a signal can switch it off. (The current game
+# already gives the Egg Cracker that same port, so the postfix sets what is there.)
+# How a player reaches it: build an Egg Cracker; wire its input.
+# What changes: an egg cracker controlled by automation.
+#
+# setup builds an Egg Cracker in the corridor west of the printing pod; its def has the one
+# input port, and selected the built one has it.
+from: early-base
+mods: [3075494652]
+setup:
+  - driver: {setup.call: {target: "Assets.GetBuildingDef(\"EggCracker\")", method: Build, args: [131765, Neutral, null, [Cuprite], 293.15, DEFAULT_FACADE]}}
+steps:
+  - expect_state:
+      "Assets.GetBuildingDef(\"EggCracker\").LogicInputPorts.Count": 1
+      "Assets.GetBuildingDef(\"EggCracker\").LogicInputPorts[0].cellOffset.x": 0
+  - run: {seconds: 2}
+  - expect: {buildings: {EggCracker: 1}}
+  - driver: {camera.set: {cell: [113, 208], ortho: 8}}
+  - click_world: {cell: [113, 207], select: EggCracker}
+  - ui_wait: {path: "**/DetailsScreen", cond: stable}
+  - expect_state:
+      "selected:GetComponent<LogicPorts>.inputPortInfo.Length": 1
+  - expect_ui:
+      "**/DetailsScreen/TitleBar/Border/LabelGroup/Label": {text: "~Egg Cracker"}

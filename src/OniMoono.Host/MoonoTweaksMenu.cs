@@ -29,6 +29,7 @@ namespace OniMoono.Host
                     Array.IndexOf(row.Choices!, EffectiveOptions.DefaultGpu)),
                 GameTweakNames.RendererRow => (Array.IndexOf(row.Choices!, effective.Renderer), effective.RendererSource == OptionSource.CommandLine,
                     Array.IndexOf(row.Choices!, EffectiveOptions.DefaultRenderer)),
+                GameTweakNames.DxgiRow => (Flag(effective.Dxgi), effective.DxgiSource == OptionSource.CommandLine, Flag(EffectiveOptions.DefaultDxgi)),
                 var name => (Flag(effective.Tweaks[name].On), effective.Tweaks[name].Source == OptionSource.CommandLine,
                     Flag(EffectiveOptions.DefaultOn(name, GameTweakNames.ChangingBehaviour))),
             };
@@ -46,12 +47,13 @@ namespace OniMoono.Host
             if (effective.LogPathsSource == OptionSource.CommandLine) locked.Add("--log-paths " + effective.LogPaths);
             if (effective.GpuSource == OptionSource.CommandLine) locked.Add("--gpu " + effective.Gpu);
             if (effective.RendererSource == OptionSource.CommandLine) locked.Add("--renderer " + effective.Renderer);
+            if (effective.DxgiSource == OptionSource.CommandLine) locked.Add("--dxgi " + (effective.Dxgi ? "on" : "off"));
 
             var saved = file;
             Func<string[], int[], string?> save = (ids, values) =>
             {
                 var tweaks = new Dictionary<string, bool>(StringComparer.Ordinal);
-                bool? splash = null, frameStats = null, hideLogPaths = null;
+                bool? splash = null, frameStats = null, hideLogPaths = null, dxgi = null;
                 string? gpu = null, renderer = null;
                 for (int i = 0; i < ids.Length; i++)
                 {
@@ -60,9 +62,10 @@ namespace OniMoono.Host
                     else if (ids[i] == GameTweakNames.LogPathsRow) hideLogPaths = values[i] != 0;
                     else if (ids[i] == GameTweakNames.GpuRow) gpu = rows.First(r => r.Id == GameTweakNames.GpuRow).Choices![values[i]];
                     else if (ids[i] == GameTweakNames.RendererRow) renderer = rows.First(r => r.Id == GameTweakNames.RendererRow).Choices![values[i]];
+                    else if (ids[i] == GameTweakNames.DxgiRow) dxgi = values[i] != 0;
                     else tweaks[ids[i]] = values[i] != 0;
                 }
-                var next = EffectiveOptions.Apply(saved, GameTweakNames.ChangingBehaviour, tweaks, splash, frameStats, hideLogPaths, gpu, renderer);
+                var next = EffectiveOptions.Apply(saved, GameTweakNames.ChangingBehaviour, tweaks, splash, frameStats, hideLogPaths, gpu, renderer, dxgi);
                 try
                 {
                     next.Write(settingsPath);

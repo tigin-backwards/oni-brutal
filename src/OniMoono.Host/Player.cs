@@ -35,6 +35,8 @@ namespace OniMoono.Host
                 OniMoono.Desktop.Vulkan.VkContext.Validation = options.VulkanValidation;
                 OniMoono.Desktop.Gl.GlGpuProfile.Enabled = options.GpuProfile;
                 OniMoono.Desktop.Gl.GlBindless.Disabled = options.NoBindless;
+                OniMoono.Desktop.Gl.DxgiTarget.Enabled = options.Dxgi != false;
+                OniMoono.Desktop.Gl.DxgiTarget.Fault = options.DxgiFault;
                 (platform, var device) = OpenDevice(options);
                 OniMoono.Engine.Platform.PlatformLoop.Install(platform);
                 OniMoono.Engine.Rendering.GraphicsDevice.Install(device);

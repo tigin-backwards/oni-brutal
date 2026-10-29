@@ -230,11 +230,46 @@ namespace OniMoono.Tests
             var file = new PlayerSettings();
             file.GameTweaks["fast-b"] = false;
             Assert.Equal(["game tweaks on (default): fast-a", "game tweaks off (default): slow-c, off-d", "game tweaks off (the settings file): fast-b",
-                          "splash moo (default)", "frame stats off (default)", "log paths hidden (default)", "gpu default (default)", "renderer auto (default)"],
+                          "splash moo (default)", "frame stats off (default)", "log paths hidden (default)", "gpu default (default)", "renderer auto (default)",
+                          "dxgi on (default)"],
                 Resolve(file).Describe().ToArray());
             Assert.Equal(["game tweaks from the command line (--game-tweak none): none", "splash none (the command line)", "frame stats on (the command line)",
-                           "log paths full (the command line)", "gpu default (default)", "renderer auto (default)"],
+                           "log paths full (the command line)", "gpu default (default)", "renderer auto (default)", "dxgi on (default)"],
                 Resolve(file, ["none"], "none", true, "full").Describe().ToArray());
+        }
+
+        // ----- Windows: presenting through DXGI -----
+
+        static EffectiveOptions WithDxgi(PlayerSettings file, bool? dxgi = null)
+            => EffectiveOptions.Resolve(All, Changing, [], null, false, file, null, null, null, dxgi);
+
+        [Fact]
+        public void DxgiIsOnUnlessTheFileOrTheCommandLineSaysOff()
+        {
+            var o = WithDxgi(new PlayerSettings());
+            Assert.Equal((true, OptionSource.Default), (o.Dxgi, o.DxgiSource));
+            var file = PlayerSettings.Parse("""{ "dxgi": false }""");
+            o = WithDxgi(file);
+            Assert.Equal((false, OptionSource.SettingsFile), (o.Dxgi, o.DxgiSource));
+            o = WithDxgi(file, dxgi: true);
+            Assert.Equal((true, OptionSource.CommandLine), (o.Dxgi, o.DxgiSource));
+            o = WithDxgi(new PlayerSettings(), dxgi: false);
+            Assert.Equal((false, OptionSource.CommandLine), (o.Dxgi, o.DxgiSource));
+            Assert.Contains("dxgi off (the command line)", o.Describe());
+            Assert.Contains("dxgi on (default)", WithDxgi(new PlayerSettings()).Describe());
+        }
+
+        [Fact]
+        public void TheFileRecordsDxgiOnlyWhenOff()
+        {
+            var none = new Dictionary<string, bool>();
+            var saved = EffectiveOptions.Apply(new PlayerSettings(), Changing, none, null, null, dxgi: false);
+            Assert.Equal("{\"dxgi\":false}", saved.ToJson(indented: false));
+            Assert.False(PlayerSettings.Parse(saved.ToJson()).Dxgi);
+            Assert.Null(EffectiveOptions.Apply(saved, Changing, none, null, null, dxgi: true).Dxgi);
+            // A screen save that does not touch it keeps what the file had.
+            Assert.False(EffectiveOptions.Apply(saved, Changing, none, true, null).Dxgi);
+            Assert.Throws<InvalidOperationException>(() => PlayerSettings.Parse("""{ "dxgi": "yes" }"""));
         }
     }
 }

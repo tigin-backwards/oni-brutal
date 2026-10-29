@@ -1,0 +1,19 @@
+# 尖块兽可震落木材 Stego Shake Wood (3771247584), class P.
+#
+# What it does: a postfix on the stomp state machine's HarvestAnyOneIntersectingPlant lets an
+# adult Stego (Prehistoric Planet Pack) that stomps also harvest the nearest harvestable
+# Arbor Tree branch within 3 cells, logging the cell.
+# How a player reaches it: a Stego ranched near Arbor Trees.
+# What changes: Stegos shake wood off Arbor Trees.
+#
+# The fixture has no grown Arbor Tree near a Stego, and a stomp is the critter's own choice:
+# the spec checks the mod loads into the Prehistoric colony, which has the Stego, and the
+# colony plays on for half a minute.
+from: prehistoric1
+mods: [3771247584]
+require_log: ['\[StegoShakeWood\] Loaded\. Adult Stegos can shake Arbor Tree branches\.']
+steps:
+  - expect_state:
+      "Assets.GetPrefab(\"Stego\").GetComponent<KPrefabID>.PrefabTag.Name": Stego
+  - run: {seconds: 30}
+  - expect: {duplicants: ">= 3"}

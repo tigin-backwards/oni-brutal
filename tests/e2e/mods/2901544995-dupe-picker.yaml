@@ -1,0 +1,31 @@
+# Dupe Picker (2901544995), classes S, P.
+#
+# What it does: puts an aptitude drop-down (a copy of the character card's archetype drop-down,
+# listing the skill groups) in the printing pod's "Reject All Printables?" confirmation. The
+# aptitude picked there is kept, and the next Duplicants the pod generates are made as starters
+# with that guaranteed aptitude (a prefix on CharacterContainer.GenerateCharacter); cancelling
+# or printing clears it.
+# How a player reaches it: the printing pod's screen, Reject All, the drop-down's button.
+# What changes: the kind of Duplicant the next printing offers.
+#
+# Setup lets the pod offer Duplicants now. Its screen is opened and Reject All shows the
+# confirmation with the drop-down; a click on the drop-down's button should open its list, where
+# Builder would be picked.
+from: early-base
+mods: [2901544995]
+setup:
+  - driver: {setup.call: {target: "Immigration.Instance", method: "Sim200ms", args: [100000]}}
+steps:
+  - expect_state: {"Immigration.Instance.ImmigrantsAvailable": true}
+  - call: {tool: building_control, args: {domain: side_surface, surface: facility, kind: telepad, action: open_immigrants, confirm: true}}
+  - ui_wait: {path: "**/ImmigrantScreen/Layout", cond: stable}
+  - click: {ui: "**/ImmigrantScreen/Layout/BottomButtons/RejectButton"}
+  - ui_wait: {path: "**/ImmigrantScreen/ConfirmationBox/ConfirmationBoxBG/ArchetypeSelect", cond: stable}
+  - expect_state:
+      "ui:**/ConfirmationBoxBG/ArchetypeSelect::GetComponent<DropDown>.entries.Count": "== original"
+      "ui:**/ConfirmationBoxBG/ArchetypeSelect::GetComponent<DropDown>.open": false
+  - ui_dump: {name: confirmation, root: "**/ImmigrantScreen/ConfirmationBox/ConfirmationBoxBG"}
+  - click: {ui: "**/ImmigrantScreen/ConfirmationBox/ConfirmationBoxBG/ArchetypeSelect"}
+  - expect_state: {"ui:**/ConfirmationBoxBG/ArchetypeSelect::GetComponent<DropDown>.open": true}
+  - click: {text: "Builder", under: "**/ImmigrantScreen/ConfirmationBox/ScrollRect"}
+  - expect_state: {"all:ONIPickDupes.ChosenAptitudeComponent::[0].AptitudeID": "== 'Building'"}

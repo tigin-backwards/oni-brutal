@@ -33,8 +33,9 @@ Sources:
   - Unity compiles its assertion and profiler calls into such builds only. The game, uGUI and
     Timeline therefore call `Debug.Assert`, `Assertions.Assert` and `Profiling.Profiler`. A release
     build of U60 may not.
-  - In the original, `Debug.isDebugBuild` is probably true on this build; ours reports false. To be
-    measured, along with whether any game code branches on it.
+  - Moono treats these development-only calls as a release build does: assertions, profiler
+    samples and `Debug.isDebugBuild` (false) do nothing. The public test is a release candidate,
+    and emulating its debug behaviour would only matter until U60 ships as a release build.
 - **`boot.config`:** the graphics threading mode goes from 4 to 6, the native graphics-jobs line is
   gone, and `gc-max-time-slice=3` is new (Unity's incremental GC). None of these is read by Moono:
   CoreCLR's background GC replaces Unity's.
@@ -71,9 +72,8 @@ version is exactly what breaks the asset reader.
 
 Members U60 needs that U59 did not:
 
-- `Debug.Assert` (three overloads) and `Debug.AssertFormat`: a false condition is logged as
-  `LogType.Assert`.
-- `Assertions.Assert.IsTrue`: the same, with `raiseExceptions` off.
+- `Debug.Assert` (three overloads), `Debug.AssertFormat` and `Assertions.Assert.IsTrue`: no-ops,
+  as in a release build.
 - `Profiling.Profiler.BeginSample(string)` and `EndSample()`: no-ops.
 - `ProfilerRecorder.LastValue`: `PerformanceCaptureMonitor` reads it for "Gfx Used Memory", "Draw
   Calls Count" and "SetPass Calls Count", which report 0 here as before.

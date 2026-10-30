@@ -36,24 +36,12 @@ namespace UnityEngine
         public static void LogAssertion(object message) => s_Logger.Log(LogType.Assert, message);
         public static void LogAssertion(object message, Object context) => s_Logger.Log(LogType.Assert, message, context);
 
-        // Development builds' assertions (U60's public test build calls them): a false condition is
-        // logged as an assertion and execution goes on.
-        public static void Assert(bool condition)
-        {
-            if (!condition) s_Logger.Log(LogType.Assert, "Assertion failed");
-        }
-        public static void Assert(bool condition, string message)
-        {
-            if (!condition) s_Logger.Log(LogType.Assert, message);
-        }
-        public static void Assert(bool condition, string message, Object context)
-        {
-            if (!condition) s_Logger.Log(LogType.Assert, (object)message, context);
-        }
-        public static void AssertFormat(bool condition, string format, params object[] args)
-        {
-            if (!condition) s_Logger.LogFormat(LogType.Assert, format, args);
-        }
+        // Development builds' assertions (U60's public test build calls them). A release build
+        // compiles them out, so they do nothing here.
+        public static void Assert(bool condition) { }
+        public static void Assert(bool condition, string message) { }
+        public static void Assert(bool condition, string message, Object context) { }
+        public static void AssertFormat(bool condition, string format, params object[] args) { }
 
         // Debug lines are drawn by the editor's scene view only; a player draws nothing.
         public static void DrawLine(Vector3 start, Vector3 end, Color color, float duration, bool depthTest) { }

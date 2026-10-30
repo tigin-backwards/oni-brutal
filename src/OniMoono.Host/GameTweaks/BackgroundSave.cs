@@ -50,9 +50,11 @@ namespace OniMoono.Host.GameTweaks
             harmony.Patch(AccessTools.Method("SaveLoader:Save", [typeof(string), typeof(bool), typeof(bool)]), prefix: wait);
             harmony.Patch(AccessTools.Method("SaveLoader:Load", [typeof(string)]), prefix: wait);
             // The load screen's file operations on saves: deleting, the cloud/local migration's
-            // hash comparison and copy (FileMatch, MigrateFile) and moving a colony's folder
-            // (ConvertToLocalOrCloud). Each must exist, so a renamed one stops the start-up.
-            foreach (var name in (string[])["DeleteFileAndEmptyFolder", "FileMatch", "MigrateFile", "ConvertToLocalOrCloud"])
+            // hash comparison (FileMatch), its copies (MigrateFile, waited for in its callers
+            // CheckCloudLocalOverlap and MigrateSave: Harmony cannot patch MigrateFile, whose
+            // `catch … when` clauses fail on Mono too, ARCHITECTURE D53) and moving a colony's
+            // folder (ConvertToLocalOrCloud). Each must exist, so a renamed one stops the start-up.
+            foreach (var name in (string[])["DeleteFileAndEmptyFolder", "FileMatch", "CheckCloudLocalOverlap", "MigrateSave", "ConvertToLocalOrCloud"])
                 harmony.Patch(AccessTools.Method("LoadScreen:" + name) ?? throw new MissingMethodException("LoadScreen", name), prefix: wait);
         }
 

@@ -171,7 +171,7 @@ namespace OniMoono.Tests
         [Fact]
         public void DynamicFontAssetsAddCharactersThroughTheFontEngine()
         {
-            var font = TmpTestSupport.Load<Font>("sharedassets0.assets", 6529);
+            var font = TmpTestSupport.Load<Font>("sharedassets0.assets", "LiberationSans");
             var asset = TMP_FontAsset.CreateFontAsset(font, 48, 5, GlyphRenderMode.SDFAA, 256, 256, AtlasPopulationMode.Dynamic, true);
             Assert.NotNull(asset);
             Assert.Equal(AtlasPopulationMode.Dynamic, asset.atlasPopulationMode);
@@ -197,7 +197,7 @@ namespace OniMoono.Tests
         {
             // A 64 × 64 atlas holds one 48 pt glyph (with its padding): with multi-atlas support
             // every further glyph opens a new atlas.
-            var font = TmpTestSupport.Load<Font>("sharedassets0.assets", 6529);
+            var font = TmpTestSupport.Load<Font>("sharedassets0.assets", "LiberationSans");
             var asset = TMP_FontAsset.CreateFontAsset(font, 48, 5, GlyphRenderMode.SDFAA, 64, 64, AtlasPopulationMode.Dynamic, true);
             var t = TmpTestSupport.NewText("ABCDEF", asset, 20f, new Vector2(300f, 50f));
             var info = t.textInfo;

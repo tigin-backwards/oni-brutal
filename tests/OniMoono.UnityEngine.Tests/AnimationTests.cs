@@ -37,10 +37,11 @@ namespace OniMoono.Tests
             }
         }
 
-        static T Load<T>(string file, long pathId) where T : Object
+        /// The asset named `name` in `file` (path ids change between game builds).
+        static T Load<T>(string file, string name) where T : Object
         {
             AssetSystem.Initialize(DataDir);
-            return (T)ObjectLoader.Load(AssetSystem.Get(file), pathId);
+            return (T)ObjectLoader.Load(AssetSystem.Get(file), TmpTestSupport.FindId(file, name, typeof(T)));
         }
 
         [Fact]
@@ -93,7 +94,7 @@ namespace OniMoono.Tests
         public void StreamedClipDecodesAndSamples()
         {
             // BlurbAnimation: m_SizeDelta.y rises 0 → 420 over 1/6 s, holds, and falls back by 3.1667 s.
-            var clip = Load<AnimationClip>("sharedassets0.assets", 6506);
+            var clip = Load<AnimationClip>("sharedassets0.assets", "BlurbAnimation");
             Assert.Equal("BlurbAnimation", clip.name);
             Assert.Equal(3.1666667f, clip.length, 5);
             Assert.Equal(60f, clip.frameRate);
@@ -119,7 +120,7 @@ namespace OniMoono.Tests
         [Fact]
         public void LegacyClipLengthComesFromItsCurves()
         {
-            var clip = Load<AnimationClip>("sharedassets0.assets", 6504);
+            var clip = Load<AnimationClip>("sharedassets0.assets", "thought_bubble");
             Assert.Equal("thought_bubble", clip.name);
             Assert.True(clip.legacy);
             Assert.False(clip.empty);
@@ -142,7 +143,7 @@ namespace OniMoono.Tests
         [Fact]
         public void ControllerLoadsStatesParametersAndClips()
         {
-            var controller = Load<RuntimeAnimatorController>("sharedassets2.assets", 92);
+            var controller = Load<RuntimeAnimatorController>("sharedassets2.assets", "AnimatedToggleButton");
             Assert.Equal("AnimatedToggleButton", controller.name);
             Assert.Equal(3, controller.animationClips.Length);
             var data = ((AnimatorControllerNative)controller.Native).Data;
@@ -166,7 +167,7 @@ namespace OniMoono.Tests
         [Fact]
         public void AnimatorRunsTheStateMachineAndAppliesCurves()
         {
-            var controller = Load<RuntimeAnimatorController>("sharedassets2.assets", 92);
+            var controller = Load<RuntimeAnimatorController>("sharedassets2.assets", "AnimatedToggleButton");
             var (_, bg, fg, animator) = ToggleButton();
             Assert.False(animator.isInitialized);
             animator.runtimeAnimatorController = controller;
@@ -199,7 +200,7 @@ namespace OniMoono.Tests
         [Fact]
         public void PlayAppliesOnTheNextUpdateAndExitTimeTransitionsBack()
         {
-            var controller = Load<RuntimeAnimatorController>("sharedassets2.assets", 92);
+            var controller = Load<RuntimeAnimatorController>("sharedassets2.assets", "AnimatedToggleButton");
             var (_, _, _, animator) = ToggleButton();
             animator.runtimeAnimatorController = controller;
             Frame();
@@ -225,7 +226,7 @@ namespace OniMoono.Tests
         [Fact]
         public void TriggersAreConsumedByTheTransitionTheyFire()
         {
-            var controller = Load<RuntimeAnimatorController>("sharedassets2.assets", 91); // AnimatedButton
+            var controller = Load<RuntimeAnimatorController>("sharedassets2.assets", "AnimatedButton"); // AnimatedButton
             var (_, _, _, animator) = ToggleButton();
             animator.runtimeAnimatorController = controller;
             animator.SetTrigger("Press");
@@ -239,7 +240,7 @@ namespace OniMoono.Tests
         [Fact]
         public void DisablingReleasesTheControllerAndResetsParameters()
         {
-            var controller = Load<RuntimeAnimatorController>("sharedassets2.assets", 92);
+            var controller = Load<RuntimeAnimatorController>("sharedassets2.assets", "AnimatedToggleButton");
             var (root, _, _, animator) = ToggleButton();
             animator.runtimeAnimatorController = controller;
             animator.SetBool("Toggled", true);
@@ -307,7 +308,7 @@ namespace OniMoono.Tests
         [Fact]
         public void GenericAvatarLoadsItsHumanDescription()
         {
-            var avatar = Load<Avatar>("sharedassets2.assets", 90);
+            var avatar = Load<Avatar>("sharedassets2.assets", "markCursorAvatar");
             Assert.True(avatar.isValid);
             Assert.False(avatar.isHuman);
             var d = avatar.humanDescription;
@@ -320,7 +321,7 @@ namespace OniMoono.Tests
         /// "positioner" over 1.083 s.
         static (GameObject Root, Transform Bg, Transform Positioner, Animation Animation) ThoughtBubble()
         {
-            var clip = Load<AnimationClip>("sharedassets0.assets", 6504);
+            var clip = Load<AnimationClip>("sharedassets0.assets", "thought_bubble");
             var root = new GameObject("Thought Bubble");
             var bg = new GameObject("bg").transform;
             bg.SetParent(root.transform, false);
@@ -336,7 +337,7 @@ namespace OniMoono.Tests
         [Fact]
         public void LegacyClipLoadsItsEditorCurves()
         {
-            var clip = Load<AnimationClip>("sharedassets0.assets", 6504);
+            var clip = Load<AnimationClip>("sharedassets0.assets", "thought_bubble");
             Assert.True(clip.legacy);
             Assert.Equal("thought_bubble", clip.name);
             Assert.Equal(1.0833334f, clip.length, 5);

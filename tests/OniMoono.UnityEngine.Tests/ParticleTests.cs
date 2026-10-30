@@ -67,7 +67,16 @@ namespace OniMoono.Tests
             return ps;
         }
 
-        static readonly long[] GameEffects = [9843, 9341, 9342, 9343, 9886, 9887, 11829, 10330, 10331, 9792, 10135, 10136];
+        /// Every game prefab GameObject with a particle system (path ids change between builds).
+        static IEnumerable<long> GameEffects => GameParticleData(out _).Keys.OrderBy(id => id).ToArray();
+
+        /// The particle effect GameObject of this name (its name is unique among them).
+        static ParticleSystem FromGame(string name)
+        {
+            GameParticleData(out var file);
+            var matches = GameEffects.Where(id => TypeTreeReader.ReadNative(1, file.OpenObject(file.ObjectsById[id])).String("m_Name") == name).ToArray();
+            return FromGame(Assert.Single(matches));
+        }
 
         /// A system with Unity's AddComponent defaults, then adjusted.
         static ParticleSystem Make(Action<ParticleConfig> configure, bool play = true)
@@ -121,7 +130,7 @@ namespace OniMoono.Tests
         [Fact]
         public void MeteorShowerBackgroundEmitsAtItsRate()
         {
-            var live = FromGame(9843); // fx_meteorshower_bg: looping, 10/s, lifetime 5 s
+            var live = FromGame("fx_meteorshower_bg"); // looping, 10/s, lifetime 5 s
             Assert.True(live.main.loop);
             Assert.Equal(5f, live.main.duration);
             Assert.True(live.IsAlive());
@@ -401,7 +410,7 @@ namespace OniMoono.Tests
         [Fact]
         public void TemporalTearBeamDrawsTrails()
         {
-            var ps = FromGame(11829);
+            var ps = FromGame("fx_open_temporal_tear_beam");
             Frames(60);
             var renderer = (ParticleSystemRendererNative)ps.GetComponent<ParticleSystemRenderer>().Native;
             var mesh = new MeshNative();

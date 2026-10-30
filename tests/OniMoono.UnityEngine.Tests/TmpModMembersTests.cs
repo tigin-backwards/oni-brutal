@@ -546,7 +546,7 @@ namespace OniMoono.Tests
 
         static TMP_FontAsset NewDynamic(AtlasPopulationMode mode = AtlasPopulationMode.Dynamic)
         {
-            var font = TmpTestSupport.Load<Font>("sharedassets0.assets", 6529);
+            var font = TmpTestSupport.Load<Font>("sharedassets0.assets", "LiberationSans");
             var asset = TMP_FontAsset.CreateFontAsset(font, 48, 5, GlyphRenderMode.SDFAA, 256, 256, AtlasPopulationMode.Dynamic, true);
             asset.atlasPopulationMode = mode;
             return asset;

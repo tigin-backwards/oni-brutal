@@ -25,14 +25,15 @@ namespace OniMoono.Tests
             }
         }
 
-        static T Load<T>(string file, long pathId) where T : Object
+        /// The asset named `name` in `file` (path ids change between game builds).
+        static T Load<T>(string file, string name) where T : Object
         {
             AssetSystem.Initialize(DataDir);
-            return (T)ObjectLoader.Load(AssetSystem.Get(file), pathId);
+            return (T)ObjectLoader.Load(AssetSystem.Get(file), TmpTestSupport.FindId(file, name, typeof(T)));
         }
 
         // sharedassets0.assets: the game's Liberation Sans font (TMP's dynamic fallback source).
-        static Font LiberationSans => Load<Font>("sharedassets0.assets", 6529);
+        static Font LiberationSans => Load<Font>("sharedassets0.assets", "LiberationSans");
 
         [Fact]
         public void EveryGameFontLoads()

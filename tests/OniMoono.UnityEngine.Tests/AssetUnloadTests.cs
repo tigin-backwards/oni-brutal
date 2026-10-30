@@ -27,7 +27,7 @@ namespace OniMoono.Tests
         static Font LoadFont()
         {
             AssetSystem.Initialize(DataDir);
-            return (Font)ObjectLoader.Load(AssetSystem.Get("sharedassets0.assets"), 6528);
+            return (Font)ObjectLoader.Load(AssetSystem.Get("sharedassets0.assets"), TmpTestSupport.FindId("sharedassets0.assets", "DroidSans", typeof(Font)));
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]

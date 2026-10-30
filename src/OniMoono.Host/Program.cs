@@ -111,6 +111,7 @@ namespace OniMoono.Host
                     ModAccess.Install();
                     TranspiledCalls.Install();
                     TranspiledTryEntries.Install();
+                    MonoInstanceFieldInjection.Install();
                     UnboxedMethods.Install();
                     SharedGenerics.Install();
                     SharedInstantiations.Install();
@@ -572,6 +573,57 @@ namespace OniMoono.Host
                 harmony.Patch(target.GetMethod("Value"), transpiler: new HarmonyLib.HarmonyMethod(typeof(Program), nameof(ClosureTranspiler)));
                 int result = target.GetMethod("Value")!.CreateDelegate<Func<int, int>>()(1);
                 return result == 42 ? "the closure's call is patched in, as on Mono" : throw new InvalidOperationException($"Value(1) returned {result}");
+            });
+            Check("A prefix of a static method injecting an instance field (MonoInstanceFieldInjection)", () =>
+            {
+                MonoInstanceFieldInjection.Install();
+                // As issue #31: Fast Track's prefix of the static IdleStates.MoveToNewCell(Instance
+                // smi) takes ___loop, IdleStates' own field; Harmony reads it from smi. The original
+                // player got null; here it got another field of smi.
+                System.Reflection.Emit.ModuleBuilder Module(string name) => System.Reflection.Emit.AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(name), System.Reflection.Emit.AssemblyBuilderAccess.Run).DefineDynamicModule(name);
+                var module = Module("CheckFieldTarget");
+                var smi = module.DefineType("Smi", TypeAttributes.Public);
+                smi.DefineField("Stack", typeof(object), FieldAttributes.Public);
+                smi.DefineField("Other", typeof(object), FieldAttributes.Public);
+                smi.DefineDefaultConstructor(MethodAttributes.Public);
+                var smiType = smi.CreateType();
+                var states = module.DefineType("States", TypeAttributes.Public);
+                states.DefineField("Loop", typeof(string), FieldAttributes.Public);
+                states.DefineField("Count", typeof(int), FieldAttributes.Public);
+                var move = states.DefineMethod("Move", MethodAttributes.Public | MethodAttributes.Static, typeof(void), [smiType]);
+                move.GetILGenerator().Emit(System.Reflection.Emit.OpCodes.Ret);
+                var own = states.DefineMethod("Own", MethodAttributes.Public | MethodAttributes.Static, typeof(void), [states]);
+                own.GetILGenerator().Emit(System.Reflection.Emit.OpCodes.Ret);
+                states.DefineDefaultConstructor(MethodAttributes.Public);
+                var statesType = states.CreateType();
+                var m = Module("CheckFieldMod").DefineType("FieldMod", TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed);
+                var seenLoop = m.DefineField("SeenLoop", typeof(string), FieldAttributes.Public | FieldAttributes.Static);
+                var seenCount = m.DefineField("SeenCount", typeof(int), FieldAttributes.Public | FieldAttributes.Static);
+                var prefix = m.DefineMethod("Prefix", MethodAttributes.Public | MethodAttributes.Static, typeof(void), [typeof(string), typeof(int)]);
+                prefix.DefineParameter(1, ParameterAttributes.None, "___Loop");
+                prefix.DefineParameter(2, ParameterAttributes.None, "___Count");
+                var il = prefix.GetILGenerator();
+                il.Emit(System.Reflection.Emit.OpCodes.Ldarg_0); il.Emit(System.Reflection.Emit.OpCodes.Stsfld, seenLoop);
+                il.Emit(System.Reflection.Emit.OpCodes.Ldarg_1); il.Emit(System.Reflection.Emit.OpCodes.Stsfld, seenCount);
+                il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                var mod = m.CreateType();
+                var harmony = new HarmonyLib.Harmony("OniMoono.Host.Check");
+                harmony.Patch(statesType.GetMethod("Move"), prefix: new HarmonyLib.HarmonyMethod(mod.GetMethod("Prefix")));
+                harmony.Patch(statesType.GetMethod("Own"), prefix: new HarmonyLib.HarmonyMethod(mod.GetMethod("Prefix")));
+                var instance = Activator.CreateInstance(smiType)!;
+                smiType.GetField("Stack")!.SetValue(instance, new Stack<int>());
+                smiType.GetField("Other")!.SetValue(instance, 7);
+                mod.GetField("SeenLoop")!.SetValue(null, "unset");
+                statesType.GetMethod("Move")!.Invoke(null, [instance]);
+                var fromOther = ((string?)mod.GetField("SeenLoop")!.GetValue(null), (int)mod.GetField("SeenCount")!.GetValue(null)!);
+                var states2 = Activator.CreateInstance(statesType)!;
+                statesType.GetField("Loop")!.SetValue(states2, "loop");
+                statesType.GetField("Count")!.SetValue(states2, 3);
+                statesType.GetMethod("Own")!.Invoke(null, [states2]);
+                var fromOwn = ((string?)mod.GetField("SeenLoop")!.GetValue(null), (int)mod.GetField("SeenCount")!.GetValue(null)!);
+                return fromOther == (null, 0) && fromOwn == ("loop", 3)
+                    ? "another type's argument gives the defaults, as the original player's read gave null; the field's own type is read"
+                    : throw new InvalidOperationException($"from Smi: {fromOther}, from States: {fromOwn}");
             });
             Check("Harmony prefixes on P/Invokes, one whose export is missing (PInvokePatches)", () =>
             {

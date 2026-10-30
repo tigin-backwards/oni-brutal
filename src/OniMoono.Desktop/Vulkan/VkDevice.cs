@@ -120,8 +120,9 @@ namespace OniMoono.Desktop.Vulkan
                 programs = new VkPrograms(vk);
                 pipelines = new VkPipelines(vk);
                 VkSplash splash = GlDevice.Splash != null ? new VkSplash(vk, programs, GlDevice.Splash) : null;
-                presenter = new VkPresenter(vk, platform.Window, surface, splash, platform.FramebufferWidth, platform.FramebufferHeight, depthFormat);
+                VkContext.FailAt("device");                presenter = new VkPresenter(vk, platform.Window, surface, splash, platform.FramebufferWidth, platform.FramebufferHeight, depthFormat);
                 CreateShared();
+                VkContext.FailAt("presenter");
             }
             catch (Exception e)
             {

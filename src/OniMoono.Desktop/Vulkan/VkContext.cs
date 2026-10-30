@@ -117,6 +117,14 @@ namespace OniMoono.Desktop.Vulkan
 
         public static readonly int RequiredApi = (1 << 22) | (3 << 12);
 
+        /// Tests of the fallback (ONI_VULKAN_FAIL=context|device|presenter): start-up fails at
+        /// that step, after it has made what it makes, as a driver failing there would.
+        public static void FailAt(string step)
+        {
+            if (Environment.GetEnvironmentVariable("ONI_VULKAN_FAIL") == step)
+                throw new VulkanUnavailableException($"ONI_VULKAN_FAIL={step} (a test of the fallback)");
+        }
+
         /// Instance, device and allocator; throws VulkanUnavailableException with the reason,
         /// having released whatever it made.
         public VkContext(string gpuChoice, bool allowSoftware, string cacheDirectory)
@@ -147,7 +155,9 @@ namespace OniMoono.Desktop.Vulkan
             if (required == null) throw new VulkanUnavailableException("GLFW names no surface extensions");
             for (int i = 0; i < count; i++) extensions.Add(Marshal.PtrToStringUTF8((nint)required[i]));
             var layers = new HashSet<string>();
-            Validation |= Environment.GetEnvironmentVariable("ONI_VULKAN_VALIDATION") == "1";
+            // "info": the layer's and the loader's informational messages too (to see it is there).
+            var validationSetting = Environment.GetEnvironmentVariable("ONI_VULKAN_VALIDATION");
+            Validation |= validationSetting is "1" or "info";
             if (Validation)
             {
                 if (LayerAvailable(VK.LAYER_KHRONOS_VALIDATION))
@@ -171,7 +181,8 @@ namespace OniMoono.Desktop.Vulkan
             {
                 var info = new VkDebugUtilsMessengerCreateInfoEXT
                 {
-                    MessageSeverity = VkDebugUtilsMessageSeverityFlagsEXT.ErrorBitEXT | VkDebugUtilsMessageSeverityFlagsEXT.WarningBitEXT,
+                    MessageSeverity = VkDebugUtilsMessageSeverityFlagsEXT.ErrorBitEXT | VkDebugUtilsMessageSeverityFlagsEXT.WarningBitEXT
+                                      | (validationSetting == "info" ? VkDebugUtilsMessageSeverityFlagsEXT.InfoBitEXT : 0),
                     MessageType = VkDebugUtilsMessageTypeFlagsEXT.GeneralBitEXT | VkDebugUtilsMessageTypeFlagsEXT.ValidationBitEXT,
                     PfnUserCallback = new PfnVkDebugUtilsMessengerCallbackEXT(&OnValidationMessage),
                 };
@@ -231,6 +242,7 @@ namespace OniMoono.Desktop.Vulkan
             });
             DriverInfo = DriverDescription();
             PipelineCache = CreatePipelineCache();
+            FailAt("context");
             EngineLog.Engine($"vulkan: using {why}; {DriverInfo}; BC textures {(TextureCompressionBC ? "sampled" : "decoded on upload")}, "
                              + $"descriptors {(PushDescriptors ? "pushed" : "from per-frame pools")}");
         }
@@ -299,7 +311,8 @@ namespace OniMoono.Desktop.Vulkan
             var message = data->Message != null ? Marshal.PtrToStringUTF8((nint)data->Message) : "";
             // Each distinct message the first few times.
             int seen = messages.AddOrUpdate(data->MessageIdNumber, 1, (_, n) => n + 1);
-            if (seen <= 3) EngineLog.Engine($"vulkan validation {(error ? "error" : "warning")} (frame {UnityEngine.Time.frameCount}, #{seen}): {message}");
+            string kind = error ? "error" : (severity & VkDebugUtilsMessageSeverityFlagsEXT.WarningBitEXT) != 0 ? "warning" : "info";
+            if (seen <= 3) EngineLog.Engine($"vulkan validation {kind} (frame {UnityEngine.Time.frameCount}, #{seen}): {message}");
             return false;
         }
 

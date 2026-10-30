@@ -123,6 +123,15 @@ namespace OniMoono.Engine.Assets
                 }
         }
 
+        /// A mounted bundle node's bytes (a resource file a texture reads from), or null for a file
+        /// of the game's data folder or a node not mounted.
+        public static byte[] MountedNode(string path)
+        {
+            var key = Canonical(path);
+            if (!key.StartsWith("archive:/", StringComparison.Ordinal)) return null;
+            lock (gate) return bundleNodes.GetValueOrDefault(key);
+        }
+
         public static bool IsMounted(string nodeKey)
         {
             lock (gate) return bundleNodes.ContainsKey(nodeKey);

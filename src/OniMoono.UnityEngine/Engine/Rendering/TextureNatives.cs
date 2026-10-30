@@ -118,22 +118,26 @@ namespace OniMoono.Engine.Rendering
         }
     }
 
-    /// Where a loaded texture's texels come from until they are first needed.
-    internal readonly record struct TexelSource(byte[] Inline, string StreamPath, long Offset, long Size)
+    /// Where a loaded texture's texels come from until they are first needed. A texture from an
+    /// AssetBundle holds on to the bundle's resource node (`Node`), so its texels can still be
+    /// read after AssetBundle.Unload(false) unmounts the bundle: an upload queued for the next
+    /// frame (the Vulkan device's) or handed to OpenGL's background readers, which read later.
+    internal readonly record struct TexelSource(byte[] Inline, string StreamPath, long Offset, long Size, byte[] Node = null)
     {
         public static TexelSource From(Fields texture)
         {
             var stream = texture.Struct("m_StreamData");
             var path = stream.String("path");
             // The offset is a UInt32 in older bundles (Unity 2019.4's, as Spooky Pumpkin SO's), a UInt64 in newer ones.
-            if (path.Length > 0) return new TexelSource(null, path, Convert.ToInt64(stream["offset"]), stream.Get<uint>("size"));
+            if (path.Length > 0) return new TexelSource(null, path, Convert.ToInt64(stream["offset"]), stream.Get<uint>("size"), AssetSystem.MountedNode(path));
             return new TexelSource(texture.Get<byte[]>("image data"), null, 0, 0);
         }
 
         public byte[] Read()
         {
             long start = System.Diagnostics.Stopwatch.GetTimestamp();
-            var bytes = StreamPath != null ? AssetSystem.ReadStream(StreamPath, Offset, Size) : Inline;
+            var bytes = Node != null ? Node.AsSpan(checked((int)Offset), checked((int)Size)).ToArray()
+                : StreamPath != null ? AssetSystem.ReadStream(StreamPath, Offset, Size) : Inline;
             System.Threading.Interlocked.Add(ref StartupStats.ReadTicks, System.Diagnostics.Stopwatch.GetTimestamp() - start);
             return bytes;
         }
@@ -144,7 +148,8 @@ namespace OniMoono.Engine.Rendering
             if (StreamPath == null) return new PixelMemory(Inline);
             long start = System.Diagnostics.Stopwatch.GetTimestamp();
             var memory = new PixelMemory(Size);
-            AssetSystem.ReadStreamInto(StreamPath, Offset, memory.Span);
+            if (Node != null) Node.AsSpan(checked((int)Offset), checked((int)Size)).CopyTo(memory.Span);
+            else AssetSystem.ReadStreamInto(StreamPath, Offset, memory.Span);
             System.Threading.Interlocked.Add(ref StartupStats.ReadTicks, System.Diagnostics.Stopwatch.GetTimestamp() - start);
             return memory;
         }

@@ -259,14 +259,8 @@ namespace OniMoono.Engine.Assets
                 foreach (var obj in ObjectLoader.LoadedFrom(files))
                     if (obj != bundle && obj is not Component && obj != null) Object.DestroyImmediate(obj, true);
             }
-            else
-            {
-                // Objects kept past the unload keep their data: texels still to be read from the
-                // bundle's resource files (a texture whose upload is queued for the next frame,
-                // as the Vulkan device queues them) are read before those files go.
-                foreach (var obj in ObjectLoader.LoadedFrom(files))
-                    if (obj != null && obj.Native is OniMoono.Engine.Rendering.TexelTextureNative { TexelsUnread: true } texels) _ = texels.Memory;
-            }
+            // Objects kept past an Unload(false) keep their data: a texture's texels still to be
+            // read hold the bundle's resource node (TexelSource.Node).
             foreach (var key in native.NodeKeys) ObjectLoader.ForgetFile(key);
             AssetSystem.UnmountBundle(native.NodeKeys);
             Loaded.Remove(bundle);

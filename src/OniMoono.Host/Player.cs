@@ -29,13 +29,14 @@ namespace OniMoono.Host
             if (options.Headless || options.BatchMode) OniMoono.Engine.Platform.PlatformLoop.Install(null);
             else
             {
-                platform = new OniMoono.Desktop.GlfwPlatform(WindowSettingsFor(options));
-                OniMoono.Engine.Platform.PlatformLoop.Install(platform);
                 OniMoono.Desktop.Gl.GlDevice.DebugOutput = options.GlDebug;
                 OniMoono.Desktop.Gl.GlDevice.SwapIntervalOverride = options.VSyncCount;
+                OniMoono.Desktop.Vulkan.VkDevice.SwapIntervalOverride = options.VSyncCount;
+                OniMoono.Desktop.Vulkan.VkContext.Validation = options.VulkanValidation;
                 OniMoono.Desktop.Gl.GlGpuProfile.Enabled = options.GpuProfile;
                 OniMoono.Desktop.Gl.GlBindless.Disabled = options.NoBindless;
-                var device = new OniMoono.Desktop.Gl.GlDevice(platform);
+                (platform, var device) = OpenDevice(options);
+                OniMoono.Engine.Platform.PlatformLoop.Install(platform);
                 OniMoono.Engine.Rendering.GraphicsDevice.Install(device);
             }
             StartupStats.Mark("window and device ready");
@@ -113,6 +114,15 @@ namespace OniMoono.Host
             // no ProcessExit handlers.
             ProcessExit(PlayerLoop.ExitCode);
             return PlayerLoop.ExitCode;
+        }
+
+        /// The window and its graphics device for the renderer option (Renderers.Open: Vulkan
+        /// unless it cannot start or OpenGL was chosen).
+        internal static (OniMoono.Desktop.GlfwPlatform, OniMoono.Engine.Rendering.RenderDevice) OpenDevice(Options options, OniMoono.Desktop.WindowSettings? settings = null)
+        {
+            var cache = string.IsNullOrEmpty(EngineConfig.TemporaryCachePath) ? null : Path.Combine(EngineConfig.TemporaryCachePath, "oni-moono");
+            return OniMoono.Desktop.Renderers.Open(settings ?? WindowSettingsFor(options), options.Renderer ?? OniMoono.Desktop.Renderers.Auto,
+                options.RendererSource is { Length: > 0 } s ? s : "default", options.Gpu ?? GpuChoice.Default, cache);
         }
 
         /// Diagnostics (`--dump-hierarchy`): the subtree at a path, one line per GameObject.

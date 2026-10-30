@@ -7,7 +7,8 @@ using UnityEngine;
 namespace OniMoono.Host
 {
     /// Device gate: every OpenGLCore variant of every shader in the player data compiles and
-    /// links on this machine's GL driver.
+    /// links on this machine's driver, with the device the renderer option opens (OpenGL, or
+    /// Vulkan, where each variant is rewritten, compiled to SPIR-V and made a module).
     internal static class ShaderCheck
     {
         static readonly string[] files =
@@ -16,13 +17,13 @@ namespace OniMoono.Host
             "Resources/unity default resources", "Resources/unity_builtin_extra",
         ];
 
-        public static int Run(string dataDir)
+        public static int Run(string dataDir, Options options)
         {
             AssetSystem.Initialize(dataDir);
             ProjectSettings.Load();
             PlayerLoop.Initialize();
-            var platform = new OniMoono.Desktop.GlfwPlatform(new OniMoono.Desktop.WindowSettings("shader check", 64, 64, FullScreenMode.Windowed));
-            var device = new OniMoono.Desktop.Gl.GlDevice(platform);
+            OniMoono.Desktop.Vulkan.VkContext.Validation = options.VulkanValidation;
+            var (platform, device) = Player.OpenDevice(options, new OniMoono.Desktop.WindowSettings("shader check", 64, 64, FullScreenMode.Windowed));
             GraphicsDevice.Install(device);
             int errors = 0;
             // The GL thread logs compile and link errors: only the threaded callback sees them.

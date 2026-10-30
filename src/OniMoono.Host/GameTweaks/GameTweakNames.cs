@@ -30,6 +30,7 @@ namespace OniMoono.Host.GameTweaks
             GameTweakNames.FrameStatsRow => "--frame-stats",
             GameTweakNames.LogPathsRow => "--log-paths hidden",
             GameTweakNames.GpuRow => "--gpu " + string.Join("|", Choices!),
+            GameTweakNames.RendererRow => "--renderer " + string.Join("|", Choices!),
             _ => "--game-tweak " + Id,
         };
     }
@@ -41,7 +42,7 @@ namespace OniMoono.Host.GameTweaks
     /// before the game's assemblies (Harmony among them) can be resolved, and the tests compile it in.
     internal static class GameTweakNames
     {
-        public const string SplashRow = "splash", FrameStatsRow = "frame-stats", LogPathsRow = "log-paths", GpuRow = "gpu";
+        public const string SplashRow = "splash", FrameStatsRow = "frame-stats", LogPathsRow = "log-paths", GpuRow = "gpu", RendererRow = "renderer";
         public const string FastSaveCompression = "fast-save-compression", BackgroundSave = "background-save", NoSaveGc = "no-save-gc",
             FastSerialization = "fast-serialization", FastParticleCollision = "fast-particle-collision";
 
@@ -78,6 +79,10 @@ namespace OniMoono.Host.GameTweaks
                 + "Integrated: the power-saving one. Windows' Graphics settings page wins over this. On Linux, on a desktop whose display is "
                 + "on the discrete card, discrete may pick the integrated GPU.",
                 IsTweak: false, Choices: [OniMoono.Host.GpuChoice.Default, OniMoono.Host.GpuChoice.Discrete, OniMoono.Host.GpuChoice.Integrated]),
+            new(RendererRow, General, "Renderer", "Which graphics API the game draws with. Needs a restart.",
+                "Auto: Vulkan, or OpenGL when Vulkan can't start on this PC. Vulkan: Vulkan whenever it starts (also a software one). "
+                + "OpenGL: the original game's API. The picture is the same; Player.log names the one used and why.",
+                IsTweak: false, Choices: [OniMoono.Desktop.Renderers.Auto, OniMoono.Desktop.Renderers.Vulkan, OniMoono.Desktop.Renderers.OpenGl]),
 
             new(FastSerialization, Saving, "Faster save writing", "Autosaves take less time; the save file is the same.",
                 "Writes the colony's numbers without boxing each one in an object."),

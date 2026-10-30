@@ -27,6 +27,8 @@ namespace OniMoono.Host
                 GameTweakNames.LogPathsRow => (Flag(effective.HideLogPaths), effective.LogPathsSource == OptionSource.CommandLine, Flag(EffectiveOptions.DefaultLogPaths == "hidden")),
                 GameTweakNames.GpuRow => (Array.IndexOf(row.Choices!, effective.Gpu), effective.GpuSource == OptionSource.CommandLine,
                     Array.IndexOf(row.Choices!, EffectiveOptions.DefaultGpu)),
+                GameTweakNames.RendererRow => (Array.IndexOf(row.Choices!, effective.Renderer), effective.RendererSource == OptionSource.CommandLine,
+                    Array.IndexOf(row.Choices!, EffectiveOptions.DefaultRenderer)),
                 var name => (Flag(effective.Tweaks[name].On), effective.Tweaks[name].Source == OptionSource.CommandLine,
                     Flag(EffectiveOptions.DefaultOn(name, GameTweakNames.ChangingBehaviour))),
             };
@@ -43,22 +45,24 @@ namespace OniMoono.Host
             if (effective.FrameStatsSource == OptionSource.CommandLine) locked.Add("--frame-stats");
             if (effective.LogPathsSource == OptionSource.CommandLine) locked.Add("--log-paths " + effective.LogPaths);
             if (effective.GpuSource == OptionSource.CommandLine) locked.Add("--gpu " + effective.Gpu);
+            if (effective.RendererSource == OptionSource.CommandLine) locked.Add("--renderer " + effective.Renderer);
 
             var saved = file;
             Func<string[], int[], string?> save = (ids, values) =>
             {
                 var tweaks = new Dictionary<string, bool>(StringComparer.Ordinal);
                 bool? splash = null, frameStats = null, hideLogPaths = null;
-                string? gpu = null;
+                string? gpu = null, renderer = null;
                 for (int i = 0; i < ids.Length; i++)
                 {
                     if (ids[i] == GameTweakNames.SplashRow) splash = values[i] != 0;
                     else if (ids[i] == GameTweakNames.FrameStatsRow) frameStats = values[i] != 0;
                     else if (ids[i] == GameTweakNames.LogPathsRow) hideLogPaths = values[i] != 0;
                     else if (ids[i] == GameTweakNames.GpuRow) gpu = rows.First(r => r.Id == GameTweakNames.GpuRow).Choices![values[i]];
+                    else if (ids[i] == GameTweakNames.RendererRow) renderer = rows.First(r => r.Id == GameTweakNames.RendererRow).Choices![values[i]];
                     else tweaks[ids[i]] = values[i] != 0;
                 }
-                var next = EffectiveOptions.Apply(saved, GameTweakNames.ChangingBehaviour, tweaks, splash, frameStats, hideLogPaths, gpu);
+                var next = EffectiveOptions.Apply(saved, GameTweakNames.ChangingBehaviour, tweaks, splash, frameStats, hideLogPaths, gpu, renderer);
                 try
                 {
                     next.Write(settingsPath);

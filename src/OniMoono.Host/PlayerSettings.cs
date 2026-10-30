@@ -19,7 +19,7 @@ namespace OniMoono.Host
     /// defaults, so a default that changes in an update (a new tweak among them) reaches every user
     /// who has not chosen otherwise:
     ///
-    ///     { "gameTweaks": { "slow-reachability": true, "fast-jobs": false }, "splash": "moo", "frameStats": true, "logPaths": "full", "gpu": "discrete" }
+    ///     { "gameTweaks": { "slow-reachability": true, "fast-jobs": false }, "splash": "moo", "frameStats": true, "logPaths": "full", "gpu": "discrete", "renderer": "opengl" }
     ///
     /// Tweaks no longer known (one removed in an update) are ignored and kept.
     internal sealed class PlayerSettings
@@ -33,6 +33,8 @@ namespace OniMoono.Host
         public string? LogPaths;
         /// "default", "discrete" or "integrated" (GpuChoice); null when not chosen.
         public string? Gpu;
+        /// "auto", "vulkan" or "opengl" (OniMoono.Desktop.Renderers); null when not chosen.
+        public string? Renderer;
 
         public static string PathIn(string persistentDataPath) => Path.Combine(persistentDataPath, "oni-moono", "settings.json");
         /// Where players from before the Moono name (oni-brutal) kept the file.
@@ -102,6 +104,12 @@ namespace OniMoono.Host
                 var value = gpu.GetValue<string>();
                 settings.Gpu = GpuChoice.IsChoice(value) ? value : throw new FormatException($"gpu \"{value}\" is not one of: {string.Join(", ", GpuChoice.Choices)}");
             }
+            if (root["renderer"] is JsonNode renderer)
+            {
+                var value = renderer.GetValue<string>();
+                settings.Renderer = OniMoono.Desktop.Renderers.IsChoice(value) ? value
+                    : throw new FormatException($"renderer \"{value}\" is not one of: {string.Join(", ", OniMoono.Desktop.Renderers.Choices)}");
+            }
             return settings;
         }
 
@@ -119,6 +127,7 @@ namespace OniMoono.Host
             if (FrameStats != null) root["frameStats"] = FrameStats;
             if (LogPaths != null) root["logPaths"] = LogPaths;
             if (Gpu != null) root["gpu"] = Gpu;
+            if (Renderer != null) root["renderer"] = Renderer;
             return indented ? root.ToJsonString(new JsonSerializerOptions { WriteIndented = true }) + "\n" : root.ToJsonString();
         }
 
@@ -162,6 +171,11 @@ namespace OniMoono.Host
         public const string DefaultGpu = GpuChoice.Default;
         public string Gpu = DefaultGpu;
         public OptionSource GpuSource;
+        /// The renderer without a settings file or command line saying otherwise: Vulkan where
+        /// it starts, else OpenGL.
+        public const string DefaultRenderer = OniMoono.Desktop.Renderers.Auto;
+        public string Renderer = DefaultRenderer;
+        public OptionSource RendererSource;
         /// The command line's `--game-tweak` values, in order (empty when it names none).
         public readonly IReadOnlyList<string> CommandLineTweaks;
         /// Names in the settings file that are not tweaks of this player.
@@ -184,7 +198,7 @@ namespace OniMoono.Host
 
         public static EffectiveOptions Resolve(IReadOnlyList<string> allTweaks, IReadOnlyCollection<string> changing,
             IReadOnlyList<string> commandLineTweaks, string? commandLineSplash, bool commandLineFrameStats, PlayerSettings file,
-            string? commandLineLogPaths = null, string? commandLineGpu = null)
+            string? commandLineLogPaths = null, string? commandLineGpu = null, string? commandLineRenderer = null)
         {
             var options = new EffectiveOptions(allTweaks, commandLineTweaks);
             foreach (var name in allTweaks)
@@ -203,6 +217,8 @@ namespace OniMoono.Host
             else if (file.LogPaths != null) (options.LogPaths, options.LogPathsSource) = (file.LogPaths, OptionSource.SettingsFile);
             if (commandLineGpu != null) (options.Gpu, options.GpuSource) = (commandLineGpu, OptionSource.CommandLine);
             else if (file.Gpu != null) (options.Gpu, options.GpuSource) = (file.Gpu, OptionSource.SettingsFile);
+            if (commandLineRenderer != null) (options.Renderer, options.RendererSource) = (commandLineRenderer, OptionSource.CommandLine);
+            else if (file.Renderer != null) (options.Renderer, options.RendererSource) = (file.Renderer, OptionSource.SettingsFile);
             return options;
         }
 
@@ -212,9 +228,9 @@ namespace OniMoono.Host
         /// dropped from the file, any other recorded; options not chosen (those the command line
         /// set, shown but not changeable) keep what the file had.
         public static PlayerSettings Apply(PlayerSettings file, IReadOnlyCollection<string> changing,
-            IReadOnlyDictionary<string, bool> tweaks, bool? splashMoo, bool? frameStats, bool? hideLogPaths = null, string? gpu = null)
+            IReadOnlyDictionary<string, bool> tweaks, bool? splashMoo, bool? frameStats, bool? hideLogPaths = null, string? gpu = null, string? renderer = null)
         {
-            var result = new PlayerSettings { Splash = file.Splash, FrameStats = file.FrameStats, LogPaths = file.LogPaths, Gpu = file.Gpu };
+            var result = new PlayerSettings { Splash = file.Splash, FrameStats = file.FrameStats, LogPaths = file.LogPaths, Gpu = file.Gpu, Renderer = file.Renderer };
             foreach (var (name, on) in file.GameTweaks) result.GameTweaks[name] = on;
             foreach (var (name, on) in tweaks)
             {
@@ -225,6 +241,7 @@ namespace OniMoono.Host
             if (frameStats != null) result.FrameStats = frameStats.Value ? true : null;
             if (hideLogPaths != null) result.LogPaths = (hideLogPaths.Value ? "hidden" : "full") is var logPaths && logPaths == DefaultLogPaths ? null : logPaths;
             if (gpu != null) result.Gpu = gpu == DefaultGpu ? null : gpu;
+            if (renderer != null) result.Renderer = renderer == DefaultRenderer ? null : renderer;
             return result;
         }
 
@@ -253,6 +270,10 @@ namespace OniMoono.Host
             yield return $"frame stats {(FrameStats ? "on" : "off")} ({From(FrameStatsSource)})";
             yield return $"log paths {LogPaths} ({From(LogPathsSource)})";
             yield return $"gpu {Gpu} ({From(GpuSource)})";
+            yield return $"renderer {Renderer} ({From(RendererSource)})";
         }
+
+        /// Where the renderer choice came from, for the log's renderer line.
+        public string RendererFrom => From(RendererSource);
     }
 }

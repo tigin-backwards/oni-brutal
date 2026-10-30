@@ -71,6 +71,8 @@ namespace OniMoono.Desktop.Vulkan
             public bool Pending;
             public readonly List<Chunk> Chunks = new();
             public int ChunkIndex;
+            public readonly List<Chunk> Uniforms = new();
+            public int UniformIndex;
             public readonly List<Action> Retired = new();
             public readonly List<VkDescriptorPool> DescriptorPools = new();
             public int DescriptorPoolIndex;
@@ -238,6 +240,8 @@ namespace OniMoono.Desktop.Vulkan
             s.NextBuffer = 0;
             foreach (var c in s.Chunks) c.Used = 0;
             s.ChunkIndex = 0;
+            foreach (var c in s.Uniforms) c.Used = 0;
+            s.UniformIndex = 0;
             // Chunks made for one large copy go once the frame is over.
             for (int i = s.Chunks.Count - 1; i >= 0; i--)
                 if (s.Chunks[i].Buffer.Size > ChunkSize)
@@ -285,6 +289,38 @@ namespace OniMoono.Desktop.Vulkan
             }
         }
 
+        const long UniformChunkSize = 4L << 20;
+
+        /// Room for a draw's constant buffers, together in one buffer (a descriptor set of
+        /// dynamic uniform buffers names one buffer for all of them): the buffer, offset and
+        /// address. The frame's uniform chunks are kept for the device's life, so descriptor sets
+        /// made for them stay valid.
+        public (VkBuffer Buffer, long Offset, nint Pointer) UniformStream(long size)
+        {
+            if (size > UniformChunkSize) throw new ArgumentOutOfRangeException(nameof(size), size, "constant buffers larger than a uniform chunk");
+            var s = Current;
+            while (true)
+            {
+                if (s.UniformIndex >= s.Uniforms.Count)
+                {
+                    var buffer = VkBufferAlloc.Create(vk, UniformChunkSize, VkBufferUsageFlags.UniformBufferBit, hostWrite: true);
+                    if (buffer.Mapped == null) throw new InvalidOperationException("the uniform stream is not host visible");
+                    s.Uniforms.Add(new Chunk { Buffer = buffer });
+                }
+                var c = s.Uniforms[s.UniformIndex];
+                long at = (c.Used + uniformAlignment - 1) / uniformAlignment * uniformAlignment;
+                if (at + size <= c.Buffer.Size)
+                {
+                    c.Used = at + size;
+                    return (c.Buffer.Buffer, at, (nint)(c.Buffer.Mapped + at));
+                }
+                s.UniformIndex++;
+            }
+        }
+
+        /// The largest range a dynamic uniform buffer descriptor of the uniform stream may name.
+        public long UniformRange => UniformChunkSize;
+
         public (VkBuffer Buffer, long Offset) Stream(ReadOnlySpan<byte> data, long alignment)
         {
             var (buffer, offset, p) = Stream(data.Length, alignment);
@@ -300,9 +336,11 @@ namespace OniMoono.Desktop.Vulkan
             var s = Current;
             for (int i = 0; i <= s.ChunkIndex && i < s.Chunks.Count; i++)
                 if (s.Chunks[i].Used > 0) s.Chunks[i].Buffer.Flush(vk, s.Chunks[i].Used);
+            for (int i = 0; i <= s.UniformIndex && i < s.Uniforms.Count; i++)
+                if (s.Uniforms[i].Used > 0) s.Uniforms[i].Buffer.Flush(vk, s.Uniforms[i].Used);
         }
 
-        /// A descriptor set from the frame's pools (devices without push descriptors).
+        /// A descriptor set from the frame's pools (sets not pushed, or not kept).
         public VkDescriptorSet AllocateSet(VkDescriptorSetLayout layout)
         {
             var s = Current;
@@ -314,7 +352,9 @@ namespace OniMoono.Desktop.Vulkan
                     [
                         new VkDescriptorPoolSize { Type = VkDescriptorType.UniformBuffer, DescriptorCount = 4096 },
                         new VkDescriptorPoolSize { Type = VkDescriptorType.CombinedImageSampler, DescriptorCount = 8192 },
-                        new VkDescriptorPoolSize { Type = VkDescriptorType.StorageBuffer, DescriptorCount = 64 },
+                        new VkDescriptorPoolSize { Type = VkDescriptorType.SampledImage, DescriptorCount = 8192 },
+                        new VkDescriptorPoolSize { Type = VkDescriptorType.Sampler, DescriptorCount = 8192 },
+                        new VkDescriptorPoolSize { Type = VkDescriptorType.StorageBuffer, DescriptorCount = 256 },
                     ];
                     fixed (VkDescriptorPoolSize* p = sizes)
                         s.DescriptorPools.Add(vk.Device.CreateDescriptorPool(new VkDescriptorPoolCreateInfo { MaxSets = 2048, PoolSizeCount = sizes.Length, PoolSizes = p }, null));
@@ -343,6 +383,7 @@ namespace OniMoono.Desktop.Vulkan
                 foreach (var release in s.Retired) release();
                 s.Retired.Clear();
                 foreach (var c in s.Chunks) c.Buffer.Destroy(vk);
+                foreach (var c in s.Uniforms) c.Buffer.Destroy(vk);
                 foreach (var pool in s.DescriptorPools) vk.Device.DestroyDescriptorPool(pool, null);
                 if (!s.Timestamps.IsNull()) vk.Device.DestroyQueryPool(s.Timestamps, null);
                 vk.Device.DestroyFence(s.Fence, null);

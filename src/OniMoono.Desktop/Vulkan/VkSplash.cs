@@ -26,20 +26,32 @@ namespace OniMoono.Desktop.Vulkan
         readonly List<float> vertices = new();
         readonly List<SplashRain.BarRect> bar = new();
 
-        const string VertexSource = "#version 450\nlayout(location = 0) in vec2 pos;\nlayout(location = 1) in vec3 uva;\n"
-            + "layout(push_constant) uniform Size { vec2 size; };\nlayout(location = 0) out vec3 v;\n"
-            + "void main() { v = uva; gl_Position = vec4(pos.x / size.x * 2.0 - 1.0, pos.y / size.y * 2.0 - 1.0, 0.0, 1.0); }\n";
-        const string FragmentSource = "#version 450\nlayout(location = 0) in vec3 v;\nlayout(set = 0, binding = 0) uniform sampler2D atlas;\n"
-            + "layout(location = 0) out vec4 color;\nvoid main() { vec4 c = texture(atlas, v.xy); color = c * v.z; }\n";
+        // The splash's two programs, compiled once with shaderc (Vulkan 1.1, optimised for size)
+        // from this GLSL:
+        //
+        //   #version 450
+        //   layout(location = 0) in vec2 pos;
+        //   layout(location = 1) in vec3 uva;
+        //   layout(push_constant) uniform Size { vec2 size; };
+        //   layout(location = 0) out vec3 v;
+        //   void main() { v = uva; gl_Position = vec4(pos.x / size.x * 2.0 - 1.0, pos.y / size.y * 2.0 - 1.0, 0.0, 1.0); }
+        //
+        //   #version 450
+        //   layout(location = 0) in vec3 v;
+        //   layout(set = 0, binding = 0) uniform sampler2D atlas;
+        //   layout(location = 0) out vec4 color;
+        //   void main() { vec4 c = texture(atlas, v.xy); color = c * v.z; }
+        const string VertexSpirv =
+            "AwIjBwADAQALAA0AMwAAAAAAAAARAAIAAQAAAAsABgABAAAAR0xTTC5zdGQuNDUwAAAAAA4AAwAAAAAAAQAAAA8ACQAAAAAABAAAAG1haW4AAAAACQAAAAsAAAATAAAAGAAAAEcABAAJAAAAHgAAAAAAAABHAAQACwAAAB4AAAABAAAARwADABEAAAACAAAASAAFABEAAAAAAAAACwAAAAAAAABIAAUAEQAAAAEAAAALAAAAAQAAAEgABQARAAAAAgAAAAsAAAADAAAASAAFABEAAAADAAAACwAAAAQAAABHAAQAGAAAAB4AAAAAAAAARwADAB0AAAACAAAASAAFAB0AAAAAAAAAIwAAAAAAAAATAAIAAgAAACEAAwADAAAAAgAAABYAAwAGAAAAIAAAABcABAAHAAAABgAAAAMAAAAgAAQACAAAAAMAAAAHAAAAOwAEAAgAAAAJAAAAAwAAACAABAAKAAAAAQAAAAcAAAA7AAQACgAAAAsAAAABAAAAFwAEAA0AAAAGAAAABAAAABUABAAOAAAAIAAAAAAAAAArAAQADgAAAA8AAAABAAAAHAAEABAAAAAGAAAADwAAAB4ABgARAAAADQAAAAYAAAAQAAAAEAAAACAABAASAAAAAwAAABEAAAA7AAQAEgAAABMAAAADAAAAFQAEABQAAAAgAAAAAQAAACsABAAUAAAAFQAAAAAAAAAXAAQAFgAAAAYAAAACAAAAIAAEABcAAAABAAAAFgAAADsABAAXAAAAGAAAAAEAAAArAAQADgAAABkAAAAAAAAAIAAEABoAAAABAAAABgAAAB4AAwAdAAAAFgAAACAABAAeAAAACQAAAB0AAAA7AAQAHgAAAB8AAAAJAAAAIAAEACAAAAAJAAAABgAAACsABAAGAAAAJAAAAAAAAEArAAQABgAAACYAAAAAAIA/KwAEAAYAAAAvAAAAAAAAACAABAAxAAAAAwAAAA0AAAA2AAUAAgAAAAQAAAAAAAAAAwAAAPgAAgAFAAAAPQAEAAcAAAAMAAAACwAAAD4AAwAJAAAADAAAAEEABQAaAAAAGwAAABgAAAAZAAAAPQAEAAYAAAAcAAAAGwAAAEEABgAgAAAAIQAAAB8AAAAVAAAAGQAAAD0ABAAGAAAAIgAAACEAAACIAAUABgAAACMAAAAcAAAAIgAAAIUABQAGAAAAJQAAACMAAAAkAAAAgwAFAAYAAAAnAAAAJQAAACYAAABBAAUAGgAAACgAAAAYAAAADwAAAD0ABAAGAAAAKQAAACgAAABBAAYAIAAAACoAAAAfAAAAFQAAAA8AAAA9AAQABgAAACsAAAAqAAAAiAAFAAYAAAAsAAAAKQAAACsAAACFAAUABgAAAC0AAAAsAAAAJAAAAIMABQAGAAAALgAAAC0AAAAmAAAAUAAHAA0AAAAwAAAAJwAAAC4AAAAvAAAAJgAAAEEABQAxAAAAMgAAABMAAAAVAAAAPgADADIAAAAwAAAA/QABADgAAQA=";
+        const string FragmentSpirv =
+            "AwIjBwADAQALAA0AHwAAAAAAAAARAAIAAQAAAAsABgABAAAAR0xTTC5zdGQuNDUwAAAAAA4AAwAAAAAAAQAAAA8ABwAEAAAABAAAAG1haW4AAAAAEQAAABcAAAAQAAMABAAAAAcAAABHAAQADQAAACEAAAAAAAAARwAEAA0AAAAiAAAAAAAAAEcABAARAAAAHgAAAAAAAABHAAQAFwAAAB4AAAAAAAAAEwACAAIAAAAhAAMAAwAAAAIAAAAWAAMABgAAACAAAAAXAAQABwAAAAYAAAAEAAAAGQAJAAoAAAAGAAAAAQAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAGwADAAsAAAAKAAAAIAAEAAwAAAAAAAAACwAAADsABAAMAAAADQAAAAAAAAAXAAQADwAAAAYAAAADAAAAIAAEABAAAAABAAAADwAAADsABAAQAAAAEQAAAAEAAAAXAAQAEgAAAAYAAAACAAAAIAAEABYAAAADAAAABwAAADsABAAWAAAAFwAAAAMAAAAVAAQAGQAAACAAAAAAAAAAKwAEABkAAAAaAAAAAgAAACAABAAbAAAAAQAAAAYAAAA2AAUAAgAAAAQAAAAAAAAAAwAAAPgAAgAFAAAAPQAEAAsAAAAOAAAADQAAAD0ABAAPAAAAEwAAABEAAABPAAcAEgAAABQAAAATAAAAEwAAAAAAAAABAAAAVwAFAAcAAAAVAAAADgAAABQAAABBAAUAGwAAABwAAAARAAAAGgAAAD0ABAAGAAAAHQAAABwAAACOAAUABwAAAB4AAAAVAAAAHQAAAD4AAwAXAAAAHgAAAP0AAQA4AAEA";
 
-        /// Compiles the splash's programs (on the creating thread: the presenter's compiles
-        /// nothing).
         public VkSplash(VkContext vk, VkPrograms programs, Task<SplashArt> art)
         {
             this.vk = vk;
             rain = new SplashRain(art);
-            vertexShader = programs.Own(VertexSource, true, "splash");
-            fragmentShader = programs.Own(FragmentSource, false, "splash");
+            vertexShader = programs.Module(Convert.FromBase64String(VertexSpirv));
+            fragmentShader = programs.Module(Convert.FromBase64String(FragmentSpirv));
         }
 
         public bool Active => rain.Active;

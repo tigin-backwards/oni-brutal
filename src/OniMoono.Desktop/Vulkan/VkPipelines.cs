@@ -6,17 +6,18 @@ using OniMoono.Desktop.Gl;
 namespace OniMoono.Desktop.Vulkan
 {
     /// The attachment formats a pipeline renders into (up to eight colours, as OpenGL's
-    /// draw buffers here).
+    /// draw buffers here), and whether the target is a render texture, which Unity's Vulkan
+    /// programs render into upside down (RenderConventions), so front faces wind the other way.
     internal readonly record struct VkTargetFormats(int Count, VkFormat C0, VkFormat C1, VkFormat C2, VkFormat C3, VkFormat C4, VkFormat C5, VkFormat C6, VkFormat C7,
-        VkFormat Depth, VkFormat Stencil, int Samples)
+        VkFormat Depth, VkFormat Stencil, int Samples, bool Flipped)
     {
         public VkFormat Color(int i) => i switch { 0 => C0, 1 => C1, 2 => C2, 3 => C3, 4 => C4, 5 => C5, 6 => C6, _ => C7 };
 
-        public static VkTargetFormats Of(ReadOnlySpan<VkFormat> colors, VkFormat depth, VkFormat stencil, int samples)
+        public static VkTargetFormats Of(ReadOnlySpan<VkFormat> colors, VkFormat depth, VkFormat stencil, int samples, bool flipped)
         {
             Span<VkFormat> f = stackalloc VkFormat[8];
             colors.CopyTo(f);
-            return new(colors.Length, f[0], f[1], f[2], f[3], f[4], f[5], f[6], f[7], depth, stencil, samples);
+            return new(colors.Length, f[0], f[1], f[2], f[3], f[4], f[5], f[6], f[7], depth, stencil, samples, flipped);
         }
     }
 
@@ -26,9 +27,10 @@ namespace OniMoono.Desktop.Vulkan
     /// Pipelines made on first use and kept (with the driver's pipeline cache across launches),
     /// keyed by everything OpenGL sets as context state for a draw: the pass state ShaderLab
     /// resolved (blend, colour mask, depth, cull, offset, stencil), the vertex layout and the
-    /// target formats. OpenGL's conventions are kept: Unity's front faces wind clockwise in
-    /// OpenGL window coordinates, which the device's unflipped framebuffer has Vulkan call
-    /// counter-clockwise (Vulkan's winding is measured with y down).
+    /// target formats. Unity's Vulkan conventions: depth is reversed (comparisons and the depth
+    /// offset turned around, far at 0); front faces wind clockwise as seen on the screen, which
+    /// is clockwise in Vulkan's framebuffer (y down) for the back buffer and counter-clockwise
+    /// in a render texture, which is rendered upside down.
     internal sealed unsafe class VkPipelines
     {
         readonly VkContext vk;
@@ -85,16 +87,16 @@ namespace OniMoono.Desktop.Vulkan
             var attributes = stackalloc VkVertexInputAttributeDescription[Math.Max(1, inputs)];
             for (int i = 0; i < inputs; i++)
             {
-                var (location, kind) = program.Inputs[i];
+                var (location, channel, kind) = program.Inputs[i];
                 VkFormat format;
                 int stride;
                 if (key.VertexLayout == ImmediateLayout)
                 {
-                    bool constant = location >= (int)Channel.Count || location == (int)Channel.Normal || location == (int)Channel.Tangent;
+                    bool constant = channel < 0 || channel == (int)Channel.Normal || channel == (int)Channel.Tangent;
                     (format, stride) = constant ? (ConstantFormat(kind), 0)
-                        : (location == (int)Channel.Position ? VkFormat.R32G32B32SFloat : VkFormat.R32G32B32A32SFloat, ImmediateStride);
+                        : (channel == (int)Channel.Position ? VkFormat.R32G32B32SFloat : VkFormat.R32G32B32A32SFloat, ImmediateStride);
                 }
-                else if (location < (int)Channel.Count && layout.Components[location] != 0) (format, stride) = ChannelFormat(layout, location);
+                else if (channel >= 0 && layout.Components[channel] != 0) (format, stride) = ChannelFormat(layout, channel);
                 else (format, stride) = (ConstantFormat(kind), 0);
                 bindings[i] = new VkVertexInputBindingDescription { Binding = location, Stride = (Brutal.ByteSize32)stride, InputRate = VkVertexInputRate.Vertex };
                 attributes[i] = new VkVertexInputAttributeDescription { Location = location, Binding = location, Format = format, Offset = (Brutal.ByteSize32)0 };
@@ -111,10 +113,11 @@ namespace OniMoono.Desktop.Vulkan
             {
                 PolygonMode = VkPolygonMode.Fill,
                 CullMode = s.Cull == 1 ? VkCullModeFlags.FrontBit : s.Cull == 2 ? VkCullModeFlags.BackBit : VkCullModeFlags.None,
-                FrontFace = VkFrontFace.CounterClockwise,
+                FrontFace = t.Flipped ? VkFrontFace.CounterClockwise : VkFrontFace.Clockwise,
+                // Reversed depth: an offset towards the camera is a positive one.
                 DepthBiasEnable = offset,
-                DepthBiasConstantFactor = s.OffsetUnits,
-                DepthBiasSlopeFactor = s.OffsetFactor,
+                DepthBiasConstantFactor = -s.OffsetUnits,
+                DepthBiasSlopeFactor = -s.OffsetFactor,
                 LineWidth = 1f,
             };
             var multisample = new VkPipelineMultisampleStateCreateInfo
@@ -127,7 +130,7 @@ namespace OniMoono.Desktop.Vulkan
             {
                 DepthTestEnable = depth && s.ZTest != 0,
                 DepthWriteEnable = depth && s.ZTest != 0 && s.ZWrite != 0,
-                DepthCompareOp = Compare(s.ZTest),
+                DepthCompareOp = Compare(Reversed(s.ZTest)),
                 StencilTestEnable = stencil,
                 Front = StencilFace(s.FComp, s.FPass, s.FFail, s.FZFail, s),
                 Back = StencilFace(s.BComp, s.BPass, s.BFail, s.BZFail, s),
@@ -221,6 +224,10 @@ namespace OniMoono.Desktop.Vulkan
             4 => VkBlendOp.Max,
             _ => VkBlendOp.Add,
         };
+
+        /// A depth comparison for reversed depth (UNITY_REVERSED_Z): Less and Greater, LessEqual
+        /// and GreaterEqual swap.
+        public static int Reversed(int c) => c switch { 2 => 5, 5 => 2, 4 => 7, 7 => 4, _ => c };
 
         /// Unity CompareFunction → Vulkan.
         public static VkCompareOp Compare(int c) => c switch

@@ -18,12 +18,11 @@ namespace OniMoono.Desktop.Vulkan
         public bool Bc;
         public Func<VkFormat, VkFormatFeatureFlags> Features = _ => 0;
 
-        /// The game sees the GLCore player it runs the programs of: this device executes
-        /// Unity's OpenGLCore programs with OpenGL's conventions (clip space, texture origin,
-        /// no projection flip), so code that branches on the device type (mods; Klei's code only
-        /// reports it in its metrics) keeps the behaviour it has on OpenGL. The version string
-        /// names Vulkan (ARCHITECTURE D-entry for the Vulkan device).
-        public override GraphicsDeviceType DeviceType => GraphicsDeviceType.OpenGLCore;
+        /// The game sees the Vulkan player it runs the programs of: this device executes Unity's
+        /// Vulkan programs with Unity's Vulkan conventions (reversed depth, render textures
+        /// rendered flipped), so code that branches on the device type sees the conventions it
+        /// renders with (ARCHITECTURE D54).
+        public override GraphicsDeviceType DeviceType => GraphicsDeviceType.Vulkan;
         public override string DeviceName => Name;
         public override string DeviceVendor => Vendor;
         public override string DeviceVersion => VersionString;
@@ -70,8 +69,8 @@ namespace OniMoono.Desktop.Vulkan
         }
     }
 
-    /// The Vulkan device (ARCHITECTURE §3.5, Vulkan): Unity's OpenGLCore programs compiled to
-    /// SPIR-V and executed with OpenGL's conventions, so that it renders the pixels the OpenGL
+    /// The Vulkan device (ARCHITECTURE §3.5, Vulkan): Unity's shipped Vulkan programs (shader
+    /// platform 18) executed with Unity's Vulkan conventions, rendering the pixels the OpenGL
     /// device renders. Its main-thread side is the OpenGL device's: GlDrawRecorder records each
     /// draw (program variant, resolved state, uniform values, textures, mesh) and GlWorker
     /// hands frames to the device thread, whose resource work is this device's (IResourceWork).
@@ -132,7 +131,11 @@ namespace OniMoono.Desktop.Vulkan
             }
             platform.ContentsDamaged += presenter.Refresh;
             worker = new GlWorker("Vulkan", () => { }, () => { }, CommandFailed) { Resources = this };
-            recorder = new GlDrawRecorder(worker, DefaultTexture, RunDraw);
+            recorder = new GlDrawRecorder(worker, DefaultTexture, RunDraw)
+            {
+                Platform = ShaderNative.VulkanPlatform,
+                Conventions = new RenderConventions(Vulkan: true, Flipped: false),
+            };
             platform.Closing += Shutdown;
             EngineLog.Engine($"vulkan: device ready ({caps.Name}, depth {depthFormat}, swapchain {presenter.SwapchainFormat})");
         }
@@ -170,6 +173,7 @@ namespace OniMoono.Desktop.Vulkan
 
         public override GraphicsCaps Caps => caps;
         public override bool RendersFrames => true;
+        public override uint ShaderPlatform => ShaderNative.VulkanPlatform;
 
         /// A recorded command threw (device thread): logged, and the frame goes on; a lost
         /// device ends the game (see DeviceLost).
@@ -225,6 +229,8 @@ namespace OniMoono.Desktop.Vulkan
                 if (binding.Depth != null) depth = binding.Depth == binding.Colors[0] ? colors[0] : GlTextures.Prepare(worker, binding.Depth);
             }
             var bound = new BoundTarget(colors, depth, platform.FramebufferWidth, platform.FramebufferHeight);
+            // Unity's Vulkan programs render into render textures upside down (RenderConventions).
+            recorder.Conventions = new RenderConventions(Vulkan: true, Flipped: colors != null);
             worker.Post(() => SetTarget(bound));
         }
 
@@ -264,7 +270,7 @@ namespace OniMoono.Desktop.Vulkan
             var sub = shader.ActiveSubShader;
             if (sub == null || passIndex >= sub.Passes.Length) return null;
             var pass = sub.Passes[passIndex];
-            int blob = ShaderPrograms.SelectVariant(pass, k => GlDrawRecorder.KeywordEnabled(k, material, null));
+            int blob = ShaderPrograms.SelectVariant(recorder.VariantsOf(pass), k => GlDrawRecorder.KeywordEnabled(k, material, null));
             if (blob < 0) return null;
             var program = recorder.Program(shader, blob);
             if (program.Id == 0) return null;
@@ -272,6 +278,7 @@ namespace OniMoono.Desktop.Vulkan
             {
                 ObjectToWorld = objectToWorld,
                 Camera = camera with { View = view, Projection = projection },
+                Conventions = recorder.Conventions,
                 Material = material,
                 Shader = shader,
             };
@@ -370,7 +377,7 @@ namespace OniMoono.Desktop.Vulkan
         {
             var shaders = new List<ShaderNative>();
             foreach (var native in ObjectTable.Snapshot())
-                if (native is ShaderNative shader && shader.HasOpenGLCorePrograms) shaders.Add(shader);
+                if (native is ShaderNative shader && shader.HasProgramsFor(ShaderNative.VulkanPlatform)) shaders.Add(shader);
             worker.Call(() =>
             {
                 foreach (var shader in shaders)
@@ -378,8 +385,8 @@ namespace OniMoono.Desktop.Vulkan
                         foreach (var pass in sub.Passes)
                         {
                             if (pass.Type != 0) continue;
-                            foreach (var variant in pass.Variants)
-                                if (!GlDevice.StereoOnly(variant.Keywords)) programs.Get(shader, variant.BlobIndex);
+                            foreach (var variant in pass.VulkanVariants)
+                                if (!GlDevice.StereoOnly(variant.Keywords)) Program(shader, variant.BlobIndex);
                         }
             });
         }

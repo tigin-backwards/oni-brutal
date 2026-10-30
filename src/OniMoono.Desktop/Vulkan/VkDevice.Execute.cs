@@ -12,10 +12,11 @@ namespace OniMoono.Desktop.Vulkan
     /// draw or clear needs one and ended when the target changes, a copy must run outside it
     /// (an upload into a texture this batch already used, a resolve, mips, a readback) or the
     /// frame ends; draws as pipelines, pushed (or per-frame) descriptor sets and vertex
-    /// bindings, with OpenGL's conventions: the framebuffer is not flipped, so viewport and
-    /// scissor rectangles, gl_FragCoord and readbacks keep OpenGL's bottom-left origin in the
-    /// images' row order, and the presenter flips the frame once when it copies it to the
-    /// window.
+    /// bindings, with Unity's Vulkan conventions (RenderConventions): the back buffer is stored
+    /// top row first, as the window shows it, so viewport and scissor rectangles (given from
+    /// the bottom left, as OpenGL's) and readbacks are turned over there; render textures are
+    /// rendered flipped, so their rows keep OpenGL's order and their rectangles OpenGL's
+    /// origin. Depth is reversed: cleared to 1 - the value asked for.
     internal sealed unsafe partial class VkDevice
     {
         BoundTarget target = new(null, null, 1, 1);
@@ -138,7 +139,7 @@ namespace OniMoono.Desktop.Vulkan
             renderWidth = width;
             renderHeight = height;
             bool stencil = depth != null && VkImageResource.HasStencil(depth.Format);
-            targetFormats = VkTargetFormats.Of(formats[..count], depth?.Format ?? VkFormat.Undefined, stencil ? depth.Format : VkFormat.Undefined, samples);
+            targetFormats = VkTargetFormats.Of(formats[..count], depth?.Format ?? VkFormat.Undefined, stencil ? depth.Format : VkFormat.Undefined, samples, flipped: !toBackBuffer);
             fixed (VkRenderingAttachmentInfo* c = colors)
             {
                 var info = new VkRenderingInfo
@@ -172,12 +173,15 @@ namespace OniMoono.Desktop.Vulkan
             if (rendering) ApplyViewport();
         }
 
-        /// OpenGL's viewport in the unflipped framebuffer: the same rectangle.
+        /// The viewport (from the bottom left): the same rectangle in a render texture, turned
+        /// over in the back buffer.
         void ApplyViewport()
         {
+            int h = Math.Max(1, (int)viewport.height);
             var v = new VkViewport
             {
-                X = (int)viewport.x, Y = (int)viewport.y, Width = Math.Max(1, (int)viewport.width), Height = Math.Max(1, (int)viewport.height), MaxDepth = 1f,
+                X = (int)viewport.x, Y = toBackBuffer ? renderHeight - (int)viewport.y - h : (int)viewport.y,
+                Width = Math.Max(1, (int)viewport.width), Height = h, MaxDepth = 1f,
             };
             frames.Main.SetViewport(0, new ReadOnlySpan<VkViewport>(&v, 1));
         }
@@ -197,6 +201,7 @@ namespace OniMoono.Desktop.Vulkan
             {
                 int x0 = Math.Clamp((int)s.x, 0, renderWidth), y0 = Math.Clamp((int)s.y, 0, renderHeight);
                 int x1 = Math.Clamp((int)s.x + Math.Max(0, (int)s.width), 0, renderWidth), y1 = Math.Clamp((int)s.y + Math.Max(0, (int)s.height), 0, renderHeight);
+                if (toBackBuffer) (y0, y1) = (renderHeight - y1, renderHeight - y0);
                 r = new VkRect2D { Offset = new VkOffset2D(x0, y0), Extent = new VkExtent2D(x1 - x0, y1 - y0) };
             }
             else r = new VkRect2D(renderWidth, renderHeight);
@@ -207,6 +212,7 @@ namespace OniMoono.Desktop.Vulkan
         void ClearNow(bool color, bool depth, Color background, float depthValue)
         {
             if (deviceLost || !color && !depth) return;
+            depthValue = 1f - depthValue; // reversed depth
             if (!rendering) BeginRendering(color ? background : null, depth ? depthValue : null);
             else
             {
@@ -248,16 +254,16 @@ namespace OniMoono.Desktop.Vulkan
                     Span<Brutal.ByteSize64> offsets = stackalloc Brutal.ByteSize64[inputs.Length];
                     for (int i = 0; i < inputs.Length; i++)
                     {
-                        int location = inputs[i].Location;
-                        if (location < (int)Channel.Count && r.Layout.Components[location] != 0)
+                        int channel = inputs[i].Channel;
+                        if (channel >= 0 && r.Layout.Components[channel] != 0)
                         {
                             buffers[i] = mesh.Buffer.Buffer;
-                            offsets[i] = (Brutal.ByteSize64)mesh.ChannelOffsets[location];
+                            offsets[i] = (Brutal.ByteSize64)mesh.ChannelOffsets[channel];
                         }
                         else
                         {
                             buffers[i] = constants.Buffer;
-                            offsets[i] = (Brutal.ByteSize64)ConstantOffset(location);
+                            offsets[i] = (Brutal.ByteSize64)ConstantOffset(channel);
                         }
                     }
                     BindVertexBuffers(cb, inputs, buffers, offsets);
@@ -272,17 +278,17 @@ namespace OniMoono.Desktop.Vulkan
 
         /// The constant an absent channel reads, as OpenGL's constant attributes (GlDevice
         /// SetAbsentChannels): white colour, position (0, 0, 0, 1), zero normal, tangent and
-        /// texture coordinates; other inputs OpenGL's initial (0, 0, 0, 1).
-        static int ConstantOffset(int location) => location switch
+        /// texture coordinates; inputs no channel feeds OpenGL's initial (0, 0, 0, 1).
+        static int ConstantOffset(int channel) => channel switch
         {
             (int)Channel.Color => 16,
             (int)Channel.Position => 32,
-            < (int)Channel.Count => 0,
-            _ => 32,
+            < 0 => 32,
+            _ => 0,
         };
 
         /// Binds each input's buffer at its location, contiguous locations in one call.
-        static void BindVertexBuffers(CommandBuffer cb, (int Location, char Kind)[] inputs, Span<VkBuffer> buffers, Span<Brutal.ByteSize64> offsets)
+        static void BindVertexBuffers(CommandBuffer cb, (int Location, int Channel, char Kind)[] inputs, Span<VkBuffer> buffers, Span<Brutal.ByteSize64> offsets)
         {
             int start = 0;
             for (int i = 1; i <= inputs.Length; i++)
@@ -358,12 +364,73 @@ namespace OniMoono.Desktop.Vulkan
                 boundPipeline = pipeline;
                 pipelineBinds++;
             }
+            BindTextures(r, program, cb);
+            BindUniforms(r, program, cb);
+            return true;
+        }
+
+        /// Set 0: each binding's texture, its sampler, or an empty storage buffer; pushed, or
+        /// written to a set of the frame's.
+        void BindTextures(ProgramInputs r, VkProgram program, CommandBuffer cb)
+        {
             var slots = program.Slots;
             int n = slots.Length;
-            if (n == 0) return true;
+            if (n == 0) return;
             var writes = stackalloc VkWriteDescriptorSet[n];
             var bufferInfos = stackalloc VkDescriptorBufferInfo[n];
             var imageInfos = stackalloc VkDescriptorImageInfo[n];
+            for (int i = 0; i < n; i++)
+            {
+                var slot = slots[i];
+                writes[i] = new VkWriteDescriptorSet { DstBinding = slot.Binding, DescriptorCount = 1, DescriptorType = slot.Type };
+                if (slot.Type == VkDescriptorType.StorageBuffer)
+                {
+                    bufferInfos[i] = new VkDescriptorBufferInfo { Buffer = emptyStorage.Buffer, Offset = default, Range = (Brutal.ByteSize64)emptyStorage.Size };
+                    writes[i].BufferInfo = &bufferInfos[i];
+                    continue;
+                }
+                VkTexture vt = null;
+                if (slot.Index >= 0)
+                {
+                    vt = r.Textures[slot.Index].Texture.Vk;
+                    if (vt?.Image == null || IsAttached(vt)) vt = DefaultTexture(Unbound, r.Program.Samplers[slot.Index].Target).Vk;
+                }
+                var sampler = vt == null || vt.Sampler.IsNull() ? defaultSampler : vt.Sampler;
+                imageInfos[i] = slot.Type switch
+                {
+                    VkDescriptorType.Sampler => new VkDescriptorImageInfo { Sampler = sampler },
+                    VkDescriptorType.SampledImage => new VkDescriptorImageInfo { ImageView = vt.Image.View, ImageLayout = VkImageLayout.ShaderReadOnlyOptimal },
+                    _ => new VkDescriptorImageInfo { Sampler = sampler, ImageView = vt.Image.View, ImageLayout = VkImageLayout.ShaderReadOnlyOptimal },
+                };
+                writes[i].ImageInfo = &imageInfos[i];
+            }
+            if (program.Push)
+                vk.Device.PInvoke.vkCmdPushDescriptorSetKHR.Invoke(cb.Handle, VkPipelineBindPoint.Graphics, program.Layout, 0, n, writes);
+            else
+            {
+                var set = frames.AllocateSet(program.TextureSet);
+                for (int i = 0; i < n; i++) writes[i].DstSet = set;
+                vk.Device.PInvoke.vkUpdateDescriptorSets.Invoke(vk.Device.Handle, n, writes, 0, null);
+                vk.Device.PInvoke.vkCmdBindDescriptorSets.Invoke(cb.Handle, VkPipelineBindPoint.Graphics, program.Layout, 0, 1, &set, 0, null);
+            }
+        }
+
+        /// Set 1: the draw's constant buffers, written together to the uniform stream and
+        /// bound by dynamic offsets into the program's set for that buffer.
+        void BindUniforms(ProgramInputs r, VkProgram program, CommandBuffer cb)
+        {
+            var uniforms = program.Uniforms;
+            int n = uniforms.Length;
+            if (n == 0) return;
+            long align = frames.UniformAlignment;
+            Span<long> starts = stackalloc long[n];
+            long total = 0;
+            for (int i = 0; i < n; i++)
+            {
+                starts[i] = total;
+                total += (uniforms[i].Size + align - 1) / align * align;
+            }
+            var (buffer, offset, pointer) = frames.UniformStream(total);
             var sizes = r.Program.BlockSizes;
             Span<int> blockStarts = stackalloc int[sizes.Length];
             for (int b = 0, at = r.BlocksOffset; b < sizes.Length; b++)
@@ -372,47 +439,21 @@ namespace OniMoono.Desktop.Vulkan
                 at += Math.Max(sizes[b], 16);
             }
             for (int i = 0; i < n; i++)
+                r.Blocks.AsSpan(blockStarts[uniforms[i].Block], uniforms[i].Size).CopyTo(new Span<byte>((byte*)pointer + starts[i], uniforms[i].Size));
+            VkDescriptorSet set;
+            if (program.DynamicUniforms)
             {
-                var slot = slots[i];
-                writes[i] = new VkWriteDescriptorSet { DstBinding = slot.Binding, DescriptorCount = 1, DescriptorType = slot.Type };
-                switch (slot.Type)
-                {
-                    case VkDescriptorType.UniformBuffer:
-                    {
-                        int size = Math.Max(sizes[slot.Index], 16);
-                        var (buffer, offset) = frames.Stream(r.Blocks.AsSpan(blockStarts[slot.Index], size), frames.UniformAlignment);
-                        bufferInfos[i] = new VkDescriptorBufferInfo { Buffer = buffer, Offset = (Brutal.ByteSize64)offset, Range = (Brutal.ByteSize64)size };
-                        writes[i].BufferInfo = &bufferInfos[i];
-                        break;
-                    }
-                    case VkDescriptorType.StorageBuffer:
-                        bufferInfos[i] = new VkDescriptorBufferInfo { Buffer = emptyStorage.Buffer, Offset = default, Range = (Brutal.ByteSize64)emptyStorage.Size };
-                        writes[i].BufferInfo = &bufferInfos[i];
-                        break;
-                    default:
-                    {
-                        var st = r.Textures[slot.Index];
-                        var vt = st.Texture.Vk;
-                        if (vt?.Image == null || IsAttached(vt)) vt = DefaultTexture(Unbound, r.Program.Samplers[slot.Index].Target).Vk;
-                        imageInfos[i] = new VkDescriptorImageInfo
-                        {
-                            Sampler = vt.Sampler.IsNull() ? defaultSampler : vt.Sampler, ImageView = vt.Image.View, ImageLayout = VkImageLayout.ShaderReadOnlyOptimal,
-                        };
-                        writes[i].ImageInfo = &imageInfos[i];
-                        break;
-                    }
-                }
+                set = programs.UniformSet(program, buffer);
+                var dynamicOffsets = stackalloc int[n];
+                for (int i = 0; i < n; i++) dynamicOffsets[i] = (int)(offset + starts[i]);
+                vk.Device.PInvoke.vkCmdBindDescriptorSets.Invoke(cb.Handle, VkPipelineBindPoint.Graphics, program.Layout, 1, 1, &set, n, dynamicOffsets);
             }
-            if (program.Push)
-                vk.Device.PInvoke.vkCmdPushDescriptorSetKHR.Invoke(cb.Handle, VkPipelineBindPoint.Graphics, program.Layout, 0, n, writes);
             else
             {
-                var set = frames.AllocateSet(program.SetLayout);
-                for (int i = 0; i < n; i++) writes[i].DstSet = set;
-                vk.Device.PInvoke.vkUpdateDescriptorSets.Invoke(vk.Device.Handle, n, writes, 0, null);
-                vk.Device.PInvoke.vkCmdBindDescriptorSets.Invoke(cb.Handle, VkPipelineBindPoint.Graphics, program.Layout, 0, 1, &set, 0, null);
+                set = frames.AllocateSet(program.UniformSet);
+                programs.Write(program, set, buffer, offset, VkDescriptorType.UniformBuffer, starts);
+                vk.Device.PInvoke.vkCmdBindDescriptorSets.Invoke(cb.Handle, VkPipelineBindPoint.Graphics, program.Layout, 1, 1, &set, 0, null);
             }
-            return true;
         }
 
         void ExecuteImmediate(ProgramInputs recorded, ImmediatePrimitive primitive, float[] data, int count, int[] indices)
@@ -435,11 +476,11 @@ namespace OniMoono.Desktop.Vulkan
             Span<Brutal.ByteSize64> offsets = stackalloc Brutal.ByteSize64[inputs.Length];
             for (int i = 0; i < inputs.Length; i++)
             {
-                int location = inputs[i].Location;
-                bool constant = location >= (int)Channel.Count || location == (int)Channel.Normal || location == (int)Channel.Tangent;
+                int channel = inputs[i].Channel;
+                bool constant = channel < 0 || channel == (int)Channel.Normal || channel == (int)Channel.Tangent;
                 buffers[i] = constant ? constants.Buffer : vertices;
-                offsets[i] = (Brutal.ByteSize64)(constant ? 0
-                    : at + (location == (int)Channel.Position ? 0 : location == (int)Channel.Color ? 12 : 28 + (location - (int)Channel.Uv0) * 16));
+                offsets[i] = (Brutal.ByteSize64)(constant ? ConstantOffset(channel)
+                    : at + (channel == (int)Channel.Position ? 0 : channel == (int)Channel.Color ? 12 : 28 + (channel - (int)Channel.Uv0) * 16));
             }
             BindVertexBuffers(cb, inputs, buffers, offsets);
             if (indices != null)
@@ -476,6 +517,8 @@ namespace OniMoono.Desktop.Vulkan
             if (x1 <= x0 || y1 <= y0) return read;
             int texel = VkFormats.TexelBytes(image.Format);
             int rw = x1 - x0, rh = y1 - y0;
+            // The back buffer is stored top row first: its rows are read turned over.
+            bool turned = device == null;
             var buffer = VkBufferAlloc.Create(vk, (long)rw * rh * texel, VkBufferUsageFlags.TransferDstBit, hostWrite: false, readback: true);
             try
             {
@@ -483,7 +526,7 @@ namespace OniMoono.Desktop.Vulkan
                 var region = new VkBufferImageCopy
                 {
                     ImageSubresource = new VkImageSubresourceLayers { AspectMask = VkImageAspectFlags.ColorBit, LayerCount = 1 },
-                    ImageOffset = new VkOffset3D(x0, y0, 0),
+                    ImageOffset = new VkOffset3D(x0, turned ? image.Height - y1 : y0, 0),
                     ImageExtent = new VkExtent3D(rw, rh, 1),
                 };
                 vk.Device.PInvoke.vkCmdCopyImageToBuffer.Invoke(cb.Handle, image.Image, VkImageLayout.TransferSrcOptimal, buffer.Buffer, 1, &region);
@@ -495,7 +538,8 @@ namespace OniMoono.Desktop.Vulkan
                     for (int col = 0; col < rw; col++)
                     {
                         var c = VkFormats.ReadTexel(image.Format, buffer.Mapped + ((long)row * rw + col) * texel);
-                        int o = ((y0 - y + row) * w + (x0 - x + col)) * 4;
+                        int glRow = turned ? y1 - 1 - row : y0 + row;
+                        int o = ((glRow - y) * w + (x0 - x + col)) * 4;
                         read[o] = c.r;
                         read[o + 1] = c.g;
                         read[o + 2] = c.b;

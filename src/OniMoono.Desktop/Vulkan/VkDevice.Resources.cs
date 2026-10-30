@@ -207,7 +207,8 @@ namespace OniMoono.Desktop.Vulkan
         void ClearDepth(CommandBuffer cb, VkImageResource image)
         {
             image.ForTransferWrite(cb);
-            var value = new VkClearDepthStencilValue { Depth = 1f, Stencil = 0 };
+            // Reversed depth: far is 0 (as OpenGL's initial depth of 1).
+            var value = new VkClearDepthStencilValue { Depth = 0f, Stencil = 0 };
             var range = new VkImageSubresourceRange { AspectMask = image.Aspect, LevelCount = 1, LayerCount = 1 };
             vk.Device.PInvoke.vkCmdClearDepthStencilImage.Invoke(cb.Handle, image.Image, VkImageLayout.TransferDstOptimal, &value, 1, &range);
         }

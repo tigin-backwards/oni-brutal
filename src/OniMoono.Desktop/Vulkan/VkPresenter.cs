@@ -17,15 +17,15 @@ namespace OniMoono.Desktop.Vulkan
         public bool DrawnThisFrame, ClearedLast, DrawnSinceAllocation;
     }
 
-    /// Presentation on a thread of its own, as GlPresenter (ARCHITECTURE §3.5): the device
-    /// thread renders each frame into one of three offscreen back buffers, submits it, and hands
-    /// the buffer over; this thread acquires a swapchain image, copies the frame into it
-    /// (flipped: the back buffer is kept in OpenGL's orientation, bottom row first), draws the
-    /// loading splash over it while that runs, and presents. Up to two frames are queued for
-    /// presentation, one with vsync; the swapchain uses FIFO with vsync and IMMEDIATE (else
-    /// MAILBOX) without. The swapchain is made again when the window's size or the present mode
-    /// changes or the surface reports it out of date; a minimized window (a 0x0 surface) is
-    /// not presented to, while frames go on rendering at the size the window had (issue #29).
+    /// Presentation on a thread of its own, as GlPresenter (ARCHITECTURE §3.5): the device thread
+    /// renders each frame into one of three offscreen back buffers, submits it, and hands the
+    /// buffer over; this thread acquires a swapchain image, copies the frame into it (both are
+    /// stored top row first), draws the loading splash over it while that runs, and presents. Up to
+    /// two frames are queued for presentation, one with vsync; the swapchain uses FIFO with vsync
+    /// and IMMEDIATE (else MAILBOX) without. The swapchain is made again when the window's size or
+    /// the present mode changes or the surface reports it out of date; a minimized window (a 0x0
+    /// surface) is not presented to, while frames go on rendering at the size the window had (issue
+    /// #29).
     ///
     /// Ordering needs no semaphores between the two threads: both submit to the one queue, the
     /// frame before the copy that reads it, and each image's barriers wait for the work that
@@ -314,9 +314,9 @@ namespace OniMoono.Desktop.Vulkan
                 };
                 blit.SrcOffsets[0] = new VkOffset3D(0, 0, 0);
                 blit.SrcOffsets[1] = new VkOffset3D(b.Width, b.Height, 1);
-                // OpenGL's bottom-first rows to the window's top-first ones.
-                blit.DstOffsets[0] = new VkOffset3D(0, height, 0);
-                blit.DstOffsets[1] = new VkOffset3D(width, 0, 1);
+                // Both are stored top row first (RenderConventions).
+                blit.DstOffsets[0] = new VkOffset3D(0, 0, 0);
+                blit.DstOffsets[1] = new VkOffset3D(width, height, 1);
                 cb.BlitImage(color.Image, VkImageLayout.TransferSrcOptimal, target, VkImageLayout.TransferDstOptimal, new ReadOnlySpan<VkImageBlit>(&blit, 1),
                     scaled ? VkFilter.Linear : VkFilter.Nearest);
                 // Back to what the device thread expects.

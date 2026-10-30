@@ -74,6 +74,11 @@ namespace OniMoono.Host
                 EngineLog.Engine($"Moono's UI packages are missing from {Path.Combine(AppContext.BaseDirectory, "packages")}: {string.Join(", ", missingPackages.Select(p => p + ".dll"))}. Reinstall Moono (or rebuild the host).");
                 return 2;
             }
+            if (GameVersionCheck.Problem(dataDir) is string versionProblem)
+            {
+                GameVersionCheck.Report(versionProblem);
+                return 2;
+            }
             AssemblyPolicy.Install(layout, AppContext.BaseDirectory);
             if (options.CheckNatives) return NativeCheck.Run(layout, AssemblyPolicy.RuntimeAssemblyPaths(), options.NativeArch ?? AssemblyPolicy.ProcessCpu, options.NativeDir);
             var assemblies = AssemblyPolicy.PreloadScriptingAssemblies(dataDir);

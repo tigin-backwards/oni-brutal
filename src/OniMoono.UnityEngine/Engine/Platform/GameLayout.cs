@@ -8,7 +8,8 @@ namespace OniMoono.Engine.Platform
     /// Where an install of the game keeps its data and native plugins. Unity's players lay them out
     /// per platform:
     /// - Linux and Windows: `<game>/OxygenNotIncluded_Data` (Application.dataPath) with the plugins
-    ///   in `Plugins/` (Linux, `lib<name>.so`) or `Plugins/x86_64/` (Windows, `<name>.dll`);
+    ///   in `Plugins/` (Linux to U59, `lib<name>.so`) or `Plugins/x86_64/` (Windows; Linux from U60),
+    ///   and from U60 on Linux the plugins built for any CPU (libsteam_api.so) in `Plugins/AnyCPU/`;
     /// - macOS: the bundle `OxygenNotIncluded.app`, whose `Contents/` is Application.dataPath, the
     ///   serialized data in `Contents/Resources/Data`, and each plugin a bundle
     ///   `Contents/PlugIns/<name>.bundle` whose executable (CFBundleExecutable of its Info.plist)
@@ -24,6 +25,9 @@ namespace OniMoono.Engine.Platform
         public string StreamingAssetsPath => Path.Combine(DataDir, "StreamingAssets");
         /// The folder the native plugins are in.
         public string PluginsDir { get; private init; } = "";
+        /// Plugins/AnyCPU when the install has it (U60's Linux build keeps libsteam_api.so there),
+        /// searched after PluginsDir.
+        public string AnyCpuPluginsDir { get; private init; }
         /// The .app bundle (null for other layouts).
         public string App { get; private init; }
         /// The bundle's CFBundleIdentifier (null for other layouts).
@@ -42,7 +46,12 @@ namespace OniMoono.Engine.Platform
             {
                 // Unity's Windows player keeps 64-bit plugins in Plugins/x86_64; the Linux build in Plugins.
                 var x64 = Path.Combine(data, "Plugins", "x86_64");
-                return new GameLayout { DataDir = data, DataPath = data, PluginsDir = Directory.Exists(x64) ? x64 : Path.Combine(data, "Plugins") };
+                var anyCpu = Path.Combine(data, "Plugins", "AnyCPU");
+                return new GameLayout
+                {
+                    DataDir = data, DataPath = data, PluginsDir = Directory.Exists(x64) ? x64 : Path.Combine(data, "Plugins"),
+                    AnyCpuPluginsDir = Directory.Exists(anyCpu) ? anyCpu : null,
+                };
             }
             var app = IsBundle(gameDir) ? gameDir : SingleBundle(gameDir);
             return app == null ? null : MacBundle(app);
@@ -117,8 +126,12 @@ namespace OniMoono.Engine.Platform
                 yield return Path.Combine(PluginsDir, name + ".dylib");
                 yield break;
             }
-            foreach (var candidate in windows ? new[] { $"{name}.dll", name } : new[] { $"lib{name}.so", $"{name}.so", name })
+            var candidates = windows ? new[] { $"{name}.dll", name } : new[] { $"lib{name}.so", $"{name}.so", name };
+            foreach (var candidate in candidates)
                 yield return Path.Combine(PluginsDir, candidate);
+            if (AnyCpuPluginsDir == null) yield break;
+            foreach (var candidate in candidates)
+                yield return Path.Combine(AnyCpuPluginsDir, candidate);
         }
 
         /// The first candidate that exists, or null.

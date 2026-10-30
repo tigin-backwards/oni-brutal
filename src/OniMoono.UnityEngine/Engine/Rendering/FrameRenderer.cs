@@ -409,6 +409,7 @@ namespace OniMoono.Engine.Rendering
             // Device resources of objects the collector reclaimed (private meshes of destroyed
             // renderers and the like).
             GraphicsDevice.ReleaseOrphans();
+            TextureMemoryLog.Frame();
             GraphicsDevice.Current.Present();
         }
 

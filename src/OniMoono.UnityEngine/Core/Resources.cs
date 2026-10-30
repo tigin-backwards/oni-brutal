@@ -129,7 +129,10 @@ namespace UnityEngine
         public static void UnloadAsset(Object assetToUnload)
         {
             Threads.AssertMainThread("Resources.UnloadAsset");
-            if (assetToUnload?.Native is OniMoono.Engine.Rendering.TexelTextureNative texture) texture.Unload();
+            if (assetToUnload?.Native is not OniMoono.Engine.Rendering.TexelTextureNative texture) return;
+            long bytes = texture.SliceSize * texture.Depth;
+            bool freed = texture.Unload();
+            OniMoono.Engine.Rendering.TextureMemoryLog.Unload(texture, freed ? bytes : 0);
         }
 
         /// Unloads every asset nothing references (see AssetUnloader); completes at once.

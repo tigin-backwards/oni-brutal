@@ -309,13 +309,14 @@ stage_verify()
     build_release || return
     local out="$run/verify"
     # Overlays opened in turn (each takes a 600-frame window), for the engine's verify modes
-    # (texel copies, parallel draws, multi-target framebuffers); then three management screens
-    # are opened and closed, whose rect masks then clip out of sight. Six overlays and 6000 frames
+    # (texel copies, parallel draws, multi-target framebuffers); then four management screens
+    # are opened and closed, whose rect masks then clip out of sight (U60's Consumables, Vitals
+    # and Jobs keep few rows out of sight; the research tree keeps many). Six overlays and 6000 frames
     # cover every report, a background save and the 10 game minutes; QA_VERIFY_FULL=1 opens all
     # 21 overlays over 10500 frames (before a release).
     local overlays="Oxygen Power Temperature LiquidConduit Logic None" frames=6000
     [ "${QA_VERIFY_FULL:-0}" = 1 ] && { overlays="Oxygen Power Temperature Temperature:HeatFlow Temperature:StateChange TileMode Light Decor Disease Crop HarvestWhenReady Rooms LiquidConduit GasConduit SolidConveyor Logic Suit Radiation Priorities ThermalConductivity None"; frames=10500; }
-    U57_SCREENS="consumables vitals jobs" U57_OVERLAYS="$overlays" \
+    U57_SCREENS="consumables vitals jobs research" U57_OVERLAYS="$overlays" \
     ONI_TWEAK_VERIFY=1 ONI_VERIFY_CANVAS_SKIPS=1 ONI_VERIFY_COMPONENT_LAYOUTS=1 ONI_VERIFY_TEXEL_COPIES=1 ONI_VERIFY_PARTIAL_UPLOADS=1 ONI_VERIFY_PARALLEL_DRAWS=1 u57_run "$out" "$frames"
     u57_check verify "$out"
     [ -d "$out/hang" ] && return # a hung run has nothing more to check

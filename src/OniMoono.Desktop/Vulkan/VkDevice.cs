@@ -492,8 +492,10 @@ namespace OniMoono.Desktop.Vulkan
         public static string Take(int frames)
         {
             static string Ms(long ticks, int frames) => (ticks * 1000.0 / System.Diagnostics.Stopwatch.Frequency / frames).ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
-            var text = $"vulkan thread: draws {Ms(Draws, frames)}, texture uploads {Ms(TextureUploads, frames)}, mesh uploads {Ms(MeshUploads, frames)}, targets {Ms(Targets, frames)}, present {Ms(Present, frames)}";
+            // The thread's whole time executing frames is GlWorker's (GlTimings.Busy).
+            var text = $"vulkan thread busy {Ms(GlTimings.Busy, frames)}: draws {Ms(Draws, frames)}, texture uploads {Ms(TextureUploads, frames)}, mesh uploads {Ms(MeshUploads, frames)}, targets {Ms(Targets, frames)}, present {Ms(Present, frames)}";
             Draws = TextureUploads = MeshUploads = Targets = Present = 0;
+            GlTimings.Busy = 0;
             return text;
         }
     }

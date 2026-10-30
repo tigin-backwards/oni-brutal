@@ -77,9 +77,12 @@ Members U60 needs that U59 did not:
 - `Profiling.Profiler.BeginSample(string)` and `EndSample()`: no-ops.
 - `ProfilerRecorder.LastValue`: `PerformanceCaptureMonitor` reads it for "Gfx Used Memory", "Draw
   Calls Count" and "SetPass Calls Count", which report 0 here as before.
-- `Resources.UnloadAsset`: `VistaLayers` unloads vista textures it no longer shows. Here the data
-  stays loaded, so the behaviour is the same but the memory is not returned. Candidate for a real
-  unload if memory matters.
+- `Resources.UnloadAsset`: not a development-build call. U60's `VistaLayers` loads the new
+  starting-biome vista textures on demand and unloads those it stops showing (the patch notes'
+  "vista textures ... only load them on demand"). Moono keeps the data loaded: what is shown is
+  the same, but Klei's memory saving does not happen. To be measured (MB kept after the vistas
+  are toggled) before deciding on a real unload: freeing the pixel data and GPU copy, reloaded
+  from the asset file on next use.
 
 Other CoreModule additions (`Random.onUnitCircle`, `JobHandle` equality, `SpriteRenderer` shader
 user values, `SystemInfo.SupportsTypedUAVShaderLoadStoreOnGraphicsFormat`) are not referenced by the

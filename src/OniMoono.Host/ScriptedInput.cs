@@ -13,7 +13,8 @@ namespace OniMoono.Host
     /// `release:X,Y[,BUTTON]` (for drags), `key:KEYCODE` (down, up the next frame),
     /// `keydown:KEYCODE` / `keyup:KEYCODE` (held keys, e.g. modifiers for chords), `scroll:DX,DY` (wheel
     /// steps at the pointer), `text:STRING`, `burst:X,Y[,N]` (N clicks delivered before one frame,
-    /// the last held a frame), `resize:W,H` (Screen.SetResolution, windowed). A run
+    /// the last held a frame), `resize:W,H[,MODE]` (Screen.SetResolution, windowed unless MODE is exclusive, borderless
+    /// or maximized). A run
     /// with a script ignores the window's own mouse and keyboard, so it is reproducible.
     sealed class ScriptedInput
     {
@@ -79,9 +80,18 @@ namespace OniMoono.Host
                 }
                 case "resize":
                 {
-                    // The window to W×H, as the game's resolution options do (Screen.SetResolution).
+                    // The window to W×H, as the game's resolution options do (Screen.SetResolution),
+                    // windowed unless a mode follows (exclusive, borderless, maximized).
                     var size = Point(arg);
-                    At(frame, () => Screen.SetResolution((int)size.x, (int)size.y, FullScreenMode.Windowed));
+                    var mode = arg.Split(',') is { Length: > 2 } p ? p[2] switch
+                    {
+                        "exclusive" => FullScreenMode.ExclusiveFullScreen,
+                        "borderless" => FullScreenMode.FullScreenWindow,
+                        "maximized" => FullScreenMode.MaximizedWindow,
+                        "windowed" => FullScreenMode.Windowed,
+                        var m => throw new ArgumentException($"Unknown --input resize mode '{m}'"),
+                    } : FullScreenMode.Windowed;
+                    At(frame, () => Screen.SetResolution((int)size.x, (int)size.y, mode));
                     break;
                 }
                 default: throw new ArgumentException($"Unknown --input action '{parts[1]}'");

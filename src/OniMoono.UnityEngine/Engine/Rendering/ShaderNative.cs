@@ -64,8 +64,14 @@ namespace OniMoono.Engine.Rendering
         public ProgramVariant[] MetalVertexVariants = Array.Empty<ProgramVariant>();
         public ProgramVariant[] MetalFragmentVariants = Array.Empty<ProgramVariant>();
         /// Its Vulkan programs (every stage in one, keyed by the union of their keywords, with
-        /// their parameter blobs); empty for shaders without Vulkan programs.
-        public ProgramVariant[] VulkanVariants = Array.Empty<ProgramVariant>();
+        /// their parameter blobs); empty for shaders without Vulkan programs. Read on first use
+        /// (only the Vulkan device asks).
+        public ProgramVariant[] VulkanVariants => vulkanVariants ??= Legacy || KeywordNames == null
+            ? Array.Empty<ProgramVariant>() : ShaderPrograms.StageVariants(Data, "progVertex", KeywordNames, ShaderNative.VulkanPlatform);
+        ProgramVariant[] vulkanVariants;
+        /// The shader's keyword names, and whether it is a legacy (pre-parsed-form) shader.
+        public string[] KeywordNames;
+        public bool Legacy;
     }
 
     /// A program variant: its entry in the platform's blob table, its keywords and (Metal) its
@@ -236,7 +242,8 @@ namespace OniMoono.Engine.Rendering
                     Variants = legacy ? ShaderPrograms.LegacyVariants(p) : ShaderPrograms.Variants(p, KeywordNames),
                     MetalVertexVariants = legacy ? Array.Empty<ProgramVariant>() : ShaderPrograms.StageVariants(p, "progVertex", KeywordNames, MetalPlatform),
                     MetalFragmentVariants = legacy ? Array.Empty<ProgramVariant>() : ShaderPrograms.StageVariants(p, "progFragment", KeywordNames, MetalPlatform),
-                    VulkanVariants = legacy ? Array.Empty<ProgramVariant>() : ShaderPrograms.StageVariants(p, "progVertex", KeywordNames, VulkanPlatform),
+                    KeywordNames = KeywordNames,
+                    Legacy = legacy,
                 }).ToArray(),
             }).ToArray();
 

@@ -12,6 +12,10 @@
   <ItemGroup>
     <PackageReference Include="Ahwoo.BRUTAL.Glfw" />
     <PackageReference Include="Ahwoo.BRUTAL.OpenGl" />
+    <PackageReference Include="Ahwoo.BRUTAL.Vulkan" />
+    <PackageReference Include="Ahwoo.BRUTAL.Vulkan.Abstractions" />
+    <PackageReference Include="Ahwoo.BRUTAL.Vulkan.Vma" />
+    <PackageReference Include="Ahwoo.BRUTAL.ShaderC" />
   </ItemGroup>
   <ItemGroup>
     <!-- The window icon (GlfwPlatform.SetIcon); OniMoono.Host/Moo.ico is the same image. -->

@@ -5,6 +5,10 @@
     <PackageVersion Include="Ahwoo.BRUTAL.Logging" Version="2026.10.2" />
     <PackageVersion Include="Ahwoo.BRUTAL.Glfw" Version="2026.10.4" />
     <PackageVersion Include="Ahwoo.BRUTAL.OpenGl" Version="2026.10.1" />
+    <PackageVersion Include="Ahwoo.BRUTAL.Vulkan" Version="2026.10.2" />
+    <PackageVersion Include="Ahwoo.BRUTAL.Vulkan.Abstractions" Version="2026.10.2" />
+    <PackageVersion Include="Ahwoo.BRUTAL.Vulkan.Vma" Version="2026.10.2" />
+    <PackageVersion Include="Ahwoo.BRUTAL.ShaderC" Version="2026.10.2" />
     <PackageVersion Include="Ahwoo.BRUTAL.Stb" Version="2026.10.2" />
     <PackageVersion Include="Ahwoo.BRUTAL.FreeType" Version="2026.10.1" />
     <!-- Out-of-band .NET packages restoring what Mono's class libraries provided (ARCHITECTURE §2.1). -->

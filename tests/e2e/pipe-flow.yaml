@@ -1,0 +1,37 @@
+# U60's Pipe Flow sub-overlay on busy gas and liquid networks, with Pipe Flow Overlay's icons.
+#
+# U60 draws pipes with Klei/BatchedAnimationConduit. Each pipe's flow directions, connections
+# and sink bits (ConduitFlowKAnimVisualizer) go into the animation instance data texture as a
+# uint packed with the visibility bit, which the shader reads back with floatBitsToUint; with
+# the sub-overlay on it animates green arrows along every pipe. A player's screenshot of pipes
+# drawn as white dashed runs and blue or purple C-shaped pieces, with Pipe Flow Overlay's
+# arrows on top, matched the original U60 player: those are the overlay's packet squares and
+# its contents tints. These shots keep ours compared with the original there.
+#
+# The colony is DeCrew (onimaxxing's saves, copied to fixtures/decrew.sav), around cell
+# (157, 168): ordinary, insulated and radiant gas and liquid pipes, several networks, filters,
+# vents and pumps. Ventilation (F7) is shot with the sub-overlay off, then on (the legend's
+# second toggle, Pipe Flow); Plumbing (F6) opens with it off again and is shot both ways.
+# The arrows move with unscaled time, so shots of them differ by the arrows' phase: up to
+# 4 % of the pixels between the players, against 0.2 % with the sub-overlay off.
+from: decrew
+memory_gb: 15
+mods: [2968583663]
+steps:
+  - open: {key: F7}
+  - ui_wait: {path: "**/TopRight/OverlayLegend/**/PipeFlowOverlayCheckBox", cond: stable}
+  - expect_ui:
+      "**/OverlayParamaterMenu/**/toggleEntry/Label": {text: "Pipe Contents"}
+  - world_shot: {name: gas, ortho: 12, at: [157, 168]}
+  - click: {ui: "**/OverlayParamaterMenu/Content/List/toggleEntry/Toggle", index: 1}
+  - expect_state:
+      "type:OverlayModes+ConduitMode::IsViewConduitFlowEnabled": true
+  - world_shot: {name: gas-flow, ortho: 12, at: [157, 168]}
+  - world_shot: {name: gas-flow-near, ortho: 5, at: [150, 172]}
+  - open: {key: F6}
+  - ui_wait: {path: "**/TopRight/OverlayLegend/**/PipeFlowOverlayCheckBox", cond: stable}
+  - world_shot: {name: liquid, ortho: 12, at: [149, 163]}
+  - click: {ui: "**/OverlayParamaterMenu/Content/List/toggleEntry/Toggle", index: 1}
+  - expect_state:
+      "type:OverlayModes+ConduitMode::IsViewConduitFlowEnabled": true
+  - world_shot: {name: liquid-flow, ortho: 12, at: [149, 163]}

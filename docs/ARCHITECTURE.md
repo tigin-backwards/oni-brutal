@@ -136,21 +136,25 @@ user set is left alone; those Moono set are listed in `ONI_MOONO_GPU_ENV`, so th
 discrete card, `DRI_PRIME=1` may pick the integrated GPU. The log has a `gpu:` line with what was
 set, then the `OpenGL:` line naming the renderer.
 
-The Vulkan device (§3.5) picks its GPU itself, by the type Vulkan reports (`VkContext.Choose`):
-`integrated` an integrated GPU, `discrete` and `default` a discrete one (the original's exports
-ask the drivers for the discrete GPU), the first listed of that type; when there is none it
-takes the other kind, then a virtual GPU, and a software one only with `--renderer vulkan`. The
-log names the devices Vulkan lists and the one taken (`vulkan: using RTX 3090 (discrete, gpu
-option default)`, or `…; gpu option integrated prefers an integrated GPU, and none is usable`).
-The exports and Windows' Graphics settings page do not change that choice; they keep steering
-the OpenGL fallback as before. On Linux the same variables also order Vulkan's GPU list, which
-only decides between two GPUs of one type: NVIDIA's `__NV_PRIME_RENDER_OFFLOAD` loads its
-`VK_LAYER_NV_optimus` layer, which sorts NVIDIA's GPUs first, or last, by
-`__VK_LAYER_NV_optimus` (`NVIDIA_only` set with `discrete`, `non_NVIDIA_only` with
-`integrated`, when NVIDIA's driver is there; NVIDIA's README, "PRIME Render Offload"), and Mesa's
-device-select layer puts the `DRI_PRIME` GPU first. Neither hides a GPU. Verified on the
-Windows desktop: `--gpu integrated` renders on the AMD Radeon iGPU, `default` and `discrete` on
-the RTX 3090.
+The Vulkan device (§3.5) picks its GPU itself among those Vulkan lists (`VkContext.Choose`),
+never one that lacks a requirement, and a software one only with `--renderer vulkan`.
+`integrated` takes an integrated GPU and `discrete` a discrete one, the first listed of that
+type, else the other kind, then a virtual GPU. `default` matches the original on each system: on
+Windows a discrete GPU, as the exports ask the drivers; on Linux, where the original sets
+nothing and OpenGL draws on the driver's default GPU, the first GPU the driver lists. The log
+names the devices Vulkan lists and the one taken (`vulkan: using NVIDIA GeForce RTX 3090
+(discrete, gpu option default)`, `…; gpu option integrated prefers an integrated GPU, and none is
+usable`, or on Linux `…: the first GPU the driver lists`). The exports and Windows' Graphics
+settings page do not change the Vulkan device's choice; they steer the OpenGL fallback as
+before. On Linux the PRIME variables also reach Vulkan, where they only order the list: Mesa's
+device-select layer puts the `DRI_PRIME` GPU first, and NVIDIA's `__NV_PRIME_RENDER_OFFLOAD=1`
+loads its `VK_LAYER_NV_optimus` layer, which puts NVIDIA's GPUs first (NVIDIA's README, "PRIME
+Render Offload"). That decides `default` on a hybrid laptop, as it decides OpenGL's GPU; the
+other choices pick by type whatever the order. NVIDIA's finer `__VK_LAYER_NV_optimus` setting
+is not set: it applies only with the layer loaded, and its values hide the other vendor's GPUs
+on older drivers and sort them on newer ones, neither of which the choice by type needs.
+Verified on the Windows desktop: `--gpu integrated` renders on the AMD Radeon iGPU, `default`
+and `discrete` on the RTX 3090.
 
 ### 2.1 Replacing Mono: runtime compatibility (*runtime §0*)
 
@@ -1276,9 +1280,12 @@ game or mod code can notice. Each says how it is resolved, or why it is kept.
   and `graphicsDeviceName`, vendor and IDs are the Vulkan GPU's. Variants that sample through
   shadow-comparison or multisample textures, XR stereo (multiview) variants and programs with
   stages other than a vertex and a fragment stage are not drawn on Vulkan (logged once per
-  shader); the game selects none of them. A device lost in play ends the game with an error
-  (Unity's player does the same when its device is removed), and the next start uses OpenGL
-  until the driver changes.
+  shader); the game selects none of them. A shader without Vulkan programs U60's player reads
+  (mods' bundles built with other Unity versions; docs/research/mod-bundle-shaders.md) runs its
+  GLCore programs compiled to SPIR-V under the same conventions (§3.5, *Programs*). A device
+  lost in play, or a window it can no longer present to, ends the game with an error (Unity's
+  player does the same when its device is removed), and the next start uses OpenGL until the
+  driver changes or a Vulkan session ends cleanly.
 - **D55 Instance fields injected into patches of static methods.** A patch method's `___name`
   parameter gets the original's field `name`; Harmony emits `ldarg.0; ldfld name` for an instance
   field even when the original is static, so it reads the field's offset in whatever object the
@@ -1512,11 +1519,12 @@ Every shader ships as GLSL 150 text produced by Unity's HLSLcc and as SPIR-V for
 player, each with per-variant parameter tables (*assets §5*). The OpenGL device runs the GLSL
 text and the Vulkan device the SPIR-V (D54): no shader is hand-ported or recompiled, so every
 Klei visual effect keeps its exact logic, and the Vulkan device renders the OpenGL device's
-pixels.
+pixels. Only mods' shaders without SPIR-V U60 reads are compiled from their GLSL (*Shaders
+without U60's Vulkan programs* below).
 The renderer option (`--renderer auto|vulkan|opengl`, settings.json's `renderer`, the Moono
 Tweaks screen's "Renderer" row; `Renderers.Open`) picks one: auto and vulkan try Vulkan first,
-and any failure to start it (no loader, no GPU with dynamic rendering, synchronization2 and
-timeline semaphores, no surface or swapchain for the window) releases what was made and opens
+and any failure to start it (no loader, no GPU with dynamic rendering and synchronization2, no
+surface or swapchain for the window) releases what was made and opens
 an OpenGL window instead. Player.log names the renderer and why (`renderer: Vulkan (auto,
 default)`, `renderer: OpenGL (Vulkan unavailable: …)`). Auto also refuses software Vulkan devices
 (Mesa's lavapipe: the OpenGL driver is hardware there, under WSLg Mesa's d3d12) and a driver the
@@ -1670,6 +1678,25 @@ frames to a device thread; only the work posted for resources differs (`IResourc
   pass's Vulkan variants. Variants this device does not draw, each logged once per shader:
   shadow-comparison and multisample textures (shadow and frame-debugger variants), XR stereo
   (multiview) variants and stages other than vertex and fragment; none is used by the game.
+  A variant that cannot be built (damaged data, a module or pipeline the driver refuses) is
+  logged once per shader and kept as a program that draws nothing, so no exception reaches the
+  game each frame.
+- *Shaders without U60's Vulkan programs.* Mods' AssetBundles built with other Unity versions
+  carry Vulkan programs in another entry layout, or none (docs/research/mod-bundle-shaders.md:
+  13 of the 34 mods with shaders). The route is chosen once per shader and logged
+  (`VkPrograms.PlatformOf`): Unity's Vulkan programs when every pass with programs has Vulkan
+  variants whose first one reads as a U60 entry; else, with GLCore programs, those compiled to
+  SPIR-V at run time (`VkGlsl`, `VkShaderCompiler`, shaderc, as an OpenGL driver compiles the
+  same text); else the shader is not drawn, as on OpenGL. The rewrite lays a program out as
+  Unity's Vulkan programs are (loose uniforms in one std140 block per stage and named blocks in
+  set 1, samplers and storage buffers in set 0, by name and the same in both stages; inputs at
+  their channels' locations; varyings one location map by name) and ends the vertex stage as
+  Unity's do, negating `gl_Position.y`; the device gives these programs the same projection, so
+  they render alike and share targets, depth and pipelines with the shipped ones. Code the
+  GLCore compile fixed for OpenGL (`UNITY_REVERSED_Z` and `UNITY_UV_STARTS_AT_TOP` branches,
+  `gl_FragCoord`'s origin) keeps OpenGL's meaning; the mods' shaders met (TextMeshPro, particles,
+  tiles) use none of it. `ONI_VULKAN_ROUTE=glcore` sends every shader this way, which the QA's
+  dogfood runs against OpenGL's references.
 - *Conventions.* Unity's Vulkan programs are compiled with reversed Z and UVs starting at the
   top, as Unity's manual ("Platform-specific rendering differences") describes; the rest was
   read from the SPIR-V. Each vertex stage ends by negating `gl_Position.y`, so with the camera's
@@ -1695,9 +1722,13 @@ frames to a device thread; only the work posted for resources differs (`IResourc
   fit the device's push limit) or allocated from per-frame pools. A draw's constant buffers are
   written together to the frame's uniform stream (4 MB chunks kept for the device's life) and
   bound by dynamic offsets into a set 1 made once per program and chunk. Staging copies and
-  immediate geometry go through a host-visible stream per frame. Memory comes from VMA. Each image tracks its layout and last
-  access, and each use makes the barrier it needs (a render target's colour writes before it is
-  sampled; transfers before and after copies).
+  immediate geometry go through a host-visible stream per frame, in 8 MB chunks: the first two
+  of each frame slot are kept, the others released once unused for eight frames, so a save's
+  burst of uploads does not stay resident. Memory comes from VMA. Each image tracks its layout
+  and last access, and each use makes the barrier it needs (a render target's colour writes
+  before it is sampled; transfers before and after copies). A pipeline the driver refuses is
+  logged once per program and remembered, so draws with that state are left out without
+  trying again; a command that throws ends the open pass and is logged once per kind.
 - *Frames and uploads.* Two frames are in flight, each with its command pool, fence, stream,
   descriptor pools and the resources released while it was recorded (destroyed once its fence
   has signalled). A frame is submitted in batches (at present, and when the main thread needs a
@@ -1715,17 +1746,27 @@ frames to a device thread; only the work posted for resources differs (`IResourc
   in order (a frame before the copy that reads it), so no semaphores pass between them; the
   presenter leaves the back buffer as a colour attachment. The swapchain is made again when the
   surface's size or the present mode changes or it reports itself out of date; vsync uses FIFO,
-  no vsync IMMEDIATE (else MAILBOX). The swapchain format is B8G8R8A8 or R8G8B8A8 UNORM in sRGB
+  no vsync IMMEDIATE (else MAILBOX). `vSyncCount` 2 to 4 presents each frame that many times
+  under FIFO, an image per vertical blank, so the game runs at a half (or a third, a quarter)
+  of the refresh rate as OpenGL's swap interval makes it. A swapchain that cannot be made (out
+  of memory during a resize) is tried again at the next frame, up to five times in a row; the
+  old one is destroyed either way. The swapchain format is B8G8R8A8 or R8G8B8A8 UNORM in sRGB
   non-linear colour space, written as OpenGL's default framebuffer is (no sRGB encoding).
 - *Device loss.* At start-up any failure falls back to OpenGL. A device lost in play cannot be
   recovered in place (every texture, mesh and program would have to be made again, and the
   non-readable textures have no CPU copy): the device thread stops recording, the log names
   the loss, the game quits with an error, and a marker in the cache folder makes auto use
-  OpenGL from the next start until the driver changes.
+  OpenGL from the next start until the driver changes. Presenting that fails for good (a lost
+  surface, a swapchain still not made after its retries, a swapchain format that takes no
+  copies) is handled the same way, rather than running on with a black window. A Vulkan session
+  that ends cleanly (with `--renderer vulkan`, or after a driver change) removes the marker.
+  `ONI_VULKAN_FAIL=context|device|presenter` fails start-up at that step and
+  `ONI_VULKAN_FAIL=present-after:N` fails presenting at frame N (tests).
 - *Diagnostics.* `--vulkan-validation` (or `ONI_VULKAN_VALIDATION=1`) enables the Khronos
   validation layer when installed, its messages in the log; `--frame-stats` counts draws,
   pipeline binds, render passes, passes ended by uploads and submits; GPU frame time comes from
-  timestamp queries.
+  timestamp queries. `--check-shaders` on Vulkan builds every variant and a pipeline for its
+  pass's state, and counts what fails.
 
 On Windows the Vulkan swapchain is what the paused DXGI presenter (a D3D11 flip-model swapchain
 fed by the GL frame, for correct HDR and flip-model handling) aimed at: a modern, compositor-

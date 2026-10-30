@@ -100,7 +100,10 @@ Steamworks (`libsteam_api.so`, Steamworks.NET under MIT); `cimgui.so` (Dear ImGu
   99430333…6e017e2), © 2016–2024 Aras Pranckevicius, dual-licensed MIT or public domain (used
   under MIT). The notice is in the file's header and in `NOTICE.txt`.
 - Native libraries from BRUTAL's packages (GLFW, glad, stb, FreeType with libpng and zlib, Vulkan
-  Memory Allocator), under their own licences as shipped in those packages.
+  Memory Allocator, and shaderc with glslang, SPIRV-Tools and SPIRV-Headers, which the Vulkan
+  device uses to compile mods' GLCore shaders that carry no Vulkan programs U60 reads), under
+  their own licences as shipped in those packages (shaderc's: Apache-2.0, BSD-3-Clause and
+  others, listed in the package's `LICENSES/BRUTAL-SHADERC-THIRD-PARTY-NOTICES.txt`).
 
 ## Provenance of the bundled type trees
 

@@ -84,6 +84,23 @@ namespace OniMoono.Desktop
             }
         }
 
+        /// What a loss marker (VkDevice.WriteLostMarker: driver, device, time, reason) means for
+        /// this start under auto: the reason to use OpenGL, or null. A lost device keeps auto on
+        /// OpenGL until the driver changes (then the marker goes) or a Vulkan session ends
+        /// cleanly. Presenting that failed (a lost surface, a swapchain not made again: the
+        /// window or display rather than the driver, often) costs one start only: this one uses
+        /// OpenGL, and the marker goes so that the next tries Vulkan again.
+        internal static string MarkerVerdict(string[] lines, string driverInfo, out bool remove)
+        {
+            remove = true;
+            if (lines.Length == 0 || lines[0] != driverInfo) return null;
+            string when = lines.Length > 2 ? lines[2] : "?", why = lines.Length > 3 ? lines[3] : "";
+            if (why.StartsWith("presenting failed", StringComparison.Ordinal))
+                return $"presenting to the window failed in the last run ({when}: {why}); this start uses OpenGL, the next tries Vulkan again";
+            remove = false;
+            return $"the Vulkan device was lost in an earlier run with this driver ({when}: {why}); --renderer vulkan tries it again";
+        }
+
         /// The device was lost in an earlier run with this driver (VkDevice.WriteLostMarker):
         /// the reason auto uses OpenGL; null otherwise (another driver: the marker goes).
         static string LostBefore(VkContext context, string cacheDirectory)
@@ -93,10 +110,9 @@ namespace OniMoono.Desktop
             try
             {
                 if (!File.Exists(path)) return null;
-                var lines = File.ReadAllLines(path);
-                if (lines.Length > 0 && lines[0] == context.DriverInfo)
-                    return $"the Vulkan device was lost in an earlier run with this driver ({(lines.Length > 2 ? lines[2] : "?")}: {(lines.Length > 3 ? lines[3] : "")}); --renderer vulkan tries it again";
-                File.Delete(path);
+                var reason = MarkerVerdict(File.ReadAllLines(path), context.DriverInfo, out bool remove);
+                if (remove) File.Delete(path);
+                return reason;
             }
             catch (Exception e) when (e is IOException or UnauthorizedAccessException)
             {

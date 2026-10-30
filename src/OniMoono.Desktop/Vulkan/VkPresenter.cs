@@ -56,11 +56,11 @@ namespace OniMoono.Desktop.Vulkan
         int swapInterval = -1;
         bool outOfDate;
         readonly VkPresentModeKHR[] presentModes = Array.Empty<VkPresentModeKHR>();
-        /// Swapchain creations that failed in a row (made again at the next frame, a few times,
-        /// before presenting is given up).
+        /// Swapchain creations that failed in a row (made again after a growing delay, 0.1 s
+        /// doubling to 2 s, and given up after five tries and ten seconds).
         int recreateFailures;
         const int RecreateAttempts = 5;
-        bool disposed;
+        bool disposed, ownsSplash;
 
         // Per presenter frame in flight.
         readonly VkCommandPool pool;
@@ -111,12 +111,16 @@ namespace OniMoono.Desktop.Vulkan
                 }
                 Recreate(windowWidth, windowHeight, 1);
                 if (swapchain.IsNull()) throw new VulkanUnavailableException("no swapchain could be made for the window");
+                VkContext.FailAt("presenter-create");
             }
             catch
             {
+                // The splash stays the caller's until the presenter is made (VkDevice releases it).
+                ownsSplash = false;
                 Dispose();
                 throw;
             }
+            ownsSplash = true;
             thread = new Thread(Run) { Name = "Presenter", IsBackground = true };
             thread.Start();
         }
@@ -282,7 +286,7 @@ namespace OniMoono.Desktop.Vulkan
         {
             if (gameFrame) shown = b;
             if (gameFrame && splash != null && splash.Active) splash.GameFrame();
-            if (interval != swapInterval || outOfDate || FailNextRecreate || width != extent.Width || height != extent.Height)
+            if (interval != swapInterval || outOfDate || FailNextRecreate || OutOfMemoryRecreates > 0 || width != extent.Width || height != extent.Height)
             {
                 if (!TryRecreate(width, height, interval)) return;
                 if (swapchain.IsNull()) return; // minimized
@@ -410,26 +414,47 @@ namespace OniMoono.Desktop.Vulkan
         }
 
         /// Recreate on the presenter thread: a creation that fails (the driver out of memory
-        /// during a resize, say) leaves no swapchain and is tried again at the next frame, up to
-        /// RecreateAttempts in a row; then, or for a failure that cannot pass (a lost surface, a
-        /// format that takes no copies), it is thrown and presenting ends (Failure).
+        /// during a resize, say) leaves no swapchain and is tried again after a delay (0.1 s,
+        /// doubling to 2 s; frames meanwhile are not shown); after RecreateAttempts failures in a
+        /// row spanning RecreateGiveUp seconds, or for a failure that cannot pass (a lost surface,
+        /// a format that takes no copies), it is thrown and presenting ends (Failure).
         bool TryRecreate(int width, int height, int interval)
         {
+            long now = System.Diagnostics.Stopwatch.GetTimestamp();
+            if (recreateFailures > 0 && now < nextRecreate) return false; // backing off: the frame is not shown
             try
             {
+                if (OutOfMemoryRecreates > 0)
+                {
+                    OutOfMemoryRecreates--;
+                    outOfDate = true;
+                    throw new VkResultError(VkResult.ErrorOutOfDeviceMemory, "ONI_VULKAN_FAIL=present-oom-after (a test of a swapchain out of memory)");
+                }
                 Recreate(width, height, interval);
+                if (recreateFailures > 0) EngineLog.Engine($"vulkan: the swapchain was made after {recreateFailures} failed attempt(s)");
                 recreateFailures = 0;
                 return true;
             }
             catch (VkResultError e) when (e.Result is VkResult.ErrorOutOfHostMemory or VkResult.ErrorOutOfDeviceMemory or VkResult.ErrorInitializationFailed
                 or VkResult.ErrorNativeWindowInUseKHR or VkResult.ErrorOutOfDateKHR)
             {
-                if (++recreateFailures >= RecreateAttempts) throw;
-                EngineLog.Engine($"vulkan: the swapchain could not be made ({e.Result}); trying again at the next frame");
+                if (recreateFailures++ == 0) firstFailure = now;
+                // Given up only after both RecreateAttempts tries and RecreateGiveUp seconds, so a
+                // burst of failures (a resize while memory is short) has time to pass.
+                if (recreateFailures >= RecreateAttempts && now - firstFailure > RecreateGiveUp * System.Diagnostics.Stopwatch.Frequency) throw;
+                double delay = Math.Min(MaxBackoff, 0.1 * Math.Pow(2, recreateFailures - 1));
+                nextRecreate = now + (long)(delay * System.Diagnostics.Stopwatch.Frequency);
+                EngineLog.Engine($"vulkan: the swapchain could not be made ({e.Result}); trying again in {delay * 1000:F0} ms");
                 outOfDate = true;
                 return false;
             }
         }
+
+        long firstFailure, nextRecreate;
+        const double MaxBackoff = 2, RecreateGiveUp = 10;
+
+        /// Test hook (present-oom-after:N): swapchain creations still to fail as out of memory.
+        public volatile int OutOfMemoryRecreates;
 
         /// (Re)makes the swapchain for the window's size and the swap interval; leaves it null
         /// while the window is minimized.
@@ -546,7 +571,7 @@ namespace OniMoono.Desktop.Vulkan
                 thread.Join();
             }
             try { vk.Queue.WaitIdle(); } catch (VkResultError) { }
-            splash?.Dispose();
+            if (ownsSplash) splash?.Dispose();
             DestroyImages();
             if (!swapchain.IsNull()) vk.Device.DestroySwapchainKHR(swapchain, null);
             swapchain = default;

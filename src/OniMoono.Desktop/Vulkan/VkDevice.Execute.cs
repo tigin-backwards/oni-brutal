@@ -570,6 +570,7 @@ namespace OniMoono.Desktop.Vulkan
             FlushStreams();
             frames.Submit(endFrame: true);
             if (frame == failPresentAt) presenter.FailNextRecreate = true;
+            if (frame == presentOomAt) presenter.OutOfMemoryRecreates = 3;
             if (presenter.Failure is { } failed)
             {
                 PresenterFailed(failed);

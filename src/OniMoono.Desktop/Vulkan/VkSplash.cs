@@ -232,8 +232,13 @@ namespace OniMoono.Desktop.Vulkan
             cb.EndRendering();
         }
 
+        bool disposed;
+
+        /// Releases its objects; safe to call again.
         public void Dispose()
         {
+            if (disposed) return;
+            disposed = true;
             foreach (var vb in vertexBuffers) vb?.Destroy(vk);
             if (!pipeline.IsNull()) vk.Device.DestroyPipeline(pipeline, null);
             if (!layout.IsNull()) vk.Device.DestroyPipelineLayout(layout, null);

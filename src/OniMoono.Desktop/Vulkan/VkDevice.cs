@@ -233,9 +233,9 @@ namespace OniMoono.Desktop.Vulkan
             WriteLostMarker($"presenting failed: {e.Message}");
         }
 
-        /// Test hook: ONI_VULKAN_FAIL=present-after:N makes the swapchain fail at frame N.
-        static readonly int failPresentAt = Environment.GetEnvironmentVariable("ONI_VULKAN_FAIL") is { } f && f.StartsWith("present-after:", StringComparison.Ordinal)
-            && int.TryParse(f["present-after:".Length..], out int n) ? n : -1;
+        /// Test hooks (VkFault): presenting fails for good at frame N (present-after:N), or the
+        /// swapchain runs out of memory three times from frame N (present-oom-after:N).
+        static readonly int failPresentAt = VkFault.Number("present-after"), presentOomAt = VkFault.Number("present-oom-after");
 
         void WriteLostMarker(string reason)
         {

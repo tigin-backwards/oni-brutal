@@ -130,7 +130,7 @@ namespace OniMoono.Desktop.Vulkan
         /// that step, after it has made what it makes, as a driver failing there would.
         public static void FailAt(string step)
         {
-            if (Environment.GetEnvironmentVariable("ONI_VULKAN_FAIL") == step)
+            if (VkFault.Has(step))
                 throw new VulkanUnavailableException($"ONI_VULKAN_FAIL={step} (a test of the fallback)");
         }
 

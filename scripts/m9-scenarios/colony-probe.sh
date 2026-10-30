@@ -4,4 +4,4 @@ SAVE="${ONI_M9_SAVE:-$HOME/projects/onimaxxing/saves/DeCrew.sav}"
 FRAMES=1960
 DUMPS="1950"
 read -r -a probe <<< "${PROBE:-}"
-ARGS=(--input 620:click:891,176 --input 1600:click:511,500 --input 1750:click:946,28 --input 1880:click:918,160 --input 1950:text:oxygenx "${probe[@]}")
+ARGS=(--input 620:click:891,176 --input 1600:click:511,567 --input 1750:click:946,28 --input 1880:click:918,160 --input 1950:text:oxygenx "${probe[@]}")

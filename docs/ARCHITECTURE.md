@@ -91,8 +91,10 @@ as the player does.
 **Native libraries.** `ResolvingUnmanagedDll` on the game ALC maps the game's `DllImport`
 names (`SimDLL`, `fmodstudio`, `resonanceaudio`, `steam_api`, `cimgui`, …) to
 `OxygenNotIncluded_Data/Plugins/lib*.so`. BRUTAL installs its own per-assembly resolvers;
-we never call `SetDllImportResolver` on BRUTAL assemblies. The Vulkan loader name quirk in
-`brutal-api.md` does not affect us (no Vulkan).
+we never call `SetDllImportResolver` on BRUTAL assemblies. Brutal.Vulkan asks for `vulkan`,
+which on Linux only the loader's -dev package provides (`libvulkan.so`); the default ALC's
+`ResolvingUnmanagedDll` maps that name, for Brutal.Vulkan only, to `libvulkan.so.1`
+(`VkContext.LoaderPresent`).
 
 **The Windows executable.** On Windows `OniMoono.exe` is our own native host
 (`src/OniMoono.NativeHost/host.c`, about 150 lines of C), not the .NET SDK's apphost, which
@@ -132,9 +134,23 @@ Unix, which libGL never reads) and into .NET's, for processes the player starts.
 user set is left alone; those Moono set are listed in `ONI_MOONO_GPU_ENV`, so the run
 `App.Restart` starts replaces them with its own choice. On a desktop whose display is on the
 discrete card, `DRI_PRIME=1` may pick the integrated GPU. The log has a `gpu:` line with what was
-set, then the `OpenGL:` line naming the renderer. The Vulkan device (§3.5) chooses among the GPUs
-Vulkan lists by type instead: `integrated` the integrated one, `default` and `discrete` a
-discrete one, each when there is one (`vulkan: using …` in the log).
+set, then the `OpenGL:` line naming the renderer.
+
+The Vulkan device (§3.5) picks its GPU itself, by the type Vulkan reports (`VkContext.Choose`):
+`integrated` an integrated GPU, `discrete` and `default` a discrete one (the original's exports
+ask the drivers for the discrete GPU), the first listed of that type; when there is none it
+takes the other kind, then a virtual GPU, and a software one only with `--renderer vulkan`. The
+log names the devices Vulkan lists and the one taken (`vulkan: using RTX 3090 (discrete, gpu
+option default)`, or `…; gpu option integrated prefers an integrated GPU, and none is usable`).
+The exports and Windows' Graphics settings page do not change that choice; they keep steering
+the OpenGL fallback as before. On Linux the same variables also order Vulkan's GPU list, which
+only decides between two GPUs of one type: NVIDIA's `__NV_PRIME_RENDER_OFFLOAD` loads its
+`VK_LAYER_NV_optimus` layer, which sorts NVIDIA's GPUs first, or last, by
+`__VK_LAYER_NV_optimus` (`NVIDIA_only` set with `discrete`, `non_NVIDIA_only` with
+`integrated`, when NVIDIA's driver is there; NVIDIA's README, "PRIME Render Offload"), and Mesa's
+device-select layer puts the `DRI_PRIME` GPU first. Neither hides a GPU. Verified on the
+Windows desktop: `--gpu integrated` renders on the AMD Radeon iGPU, `default` and `discrete` on
+the RTX 3090.
 
 ### 2.1 Replacing Mono: runtime compatibility (*runtime §0*)
 
@@ -1251,17 +1267,18 @@ game or mod code can notice. Each says how it is resolved, or why it is kept.
   `FaultBlockRewriter` turns it into a catch and a finally and drops the fault block's code.
   `--check-types` patches an emitted method with a filter, expects that InvalidOperationException
   and calls the method unpatched, and patches one with a fault with a prefix and a postfix.
-- **D54 The Vulkan device reports OpenGLCore.** Unity's Vulkan player reports
-  `GraphicsDeviceType.Vulkan` and runs its Vulkan programs, with reversed Z and UVs starting at
-  the top. Ours runs the GLCore programs with OpenGL's conventions on Vulkan (§3.5), so
-  `SystemInfo.graphicsDeviceType` stays `OpenGLCore` under either device: code that branches on
-  it (mods; Klei's code only sends it with its metrics) keeps the behaviour that matches the
-  programs it gets. `graphicsDeviceVersion` names Vulkan and the driver, and
-  `graphicsDeviceName`, vendor and IDs are the Vulkan GPU's. Variants that sample through
-  shadow-comparison or multisample samplers, XR stereo variants and geometry stages are not
-  drawn on Vulkan (logged once per shader); the game selects none of them. A device lost in play
-  ends the game with an error (Unity's player does the same when its device is removed), and the
-  next start uses OpenGL until the driver changes.
+- **D54 The Vulkan device runs Unity's Vulkan programs and reports Vulkan.** U60's data carries
+  Unity's own Vulkan programs (shader platform 18) for every shader, and the Vulkan device runs
+  those, not the GLCore text, with Unity's Vulkan conventions (reversed Z, render textures
+  rendered flipped; §3.5). `SystemInfo.graphicsDeviceType` is therefore `Vulkan` there, as on
+  Unity's Vulkan player, so code that branches on it sees the conventions it renders with; it
+  is `OpenGLCore` under the OpenGL device. `graphicsDeviceVersion` names Vulkan and the driver,
+  and `graphicsDeviceName`, vendor and IDs are the Vulkan GPU's. Variants that sample through
+  shadow-comparison or multisample textures, XR stereo (multiview) variants and programs with
+  stages other than a vertex and a fragment stage are not drawn on Vulkan (logged once per
+  shader); the game selects none of them. A device lost in play ends the game with an error
+  (Unity's player does the same when its device is removed), and the next start uses OpenGL
+  until the driver changes.
 - **D55 Instance fields injected into patches of static methods.** A patch method's `___name`
   parameter gets the original's field `name`; Harmony emits `ldarg.0; ldfld name` for an instance
   field even when the original is static, so it reads the field's offset in whatever object the
@@ -1491,9 +1508,11 @@ referenced, with its dependencies. `Resources.Load` uses the `ResourceManager.m_
 ### 3.5 Rendering
 
 **Devices: Vulkan 1.3 by default, OpenGL 4.5 core as the fallback, both via BRUTAL + GLFW.**
-Every shader ships as GLSL 150 text produced by Unity's HLSLcc, with per-variant parameter
-tables (*assets §5*), and both devices run that text: no shader is hand-ported, so every Klei
-visual effect keeps its exact logic, and the Vulkan device renders the OpenGL device's pixels.
+Every shader ships as GLSL 150 text produced by Unity's HLSLcc and as SPIR-V for Unity's Vulkan
+player, each with per-variant parameter tables (*assets §5*). The OpenGL device runs the GLSL
+text and the Vulkan device the SPIR-V (D54): no shader is hand-ported or recompiled, so every
+Klei visual effect keeps its exact logic, and the Vulkan device renders the OpenGL device's
+pixels.
 The renderer option (`--renderer auto|vulkan|opengl`, settings.json's `renderer`, the Moono
 Tweaks screen's "Renderer" row; `Renderers.Open`) picks one: auto and vulkan try Vulkan first,
 and any failure to start it (no loader, no GPU with dynamic rendering, synchronization2 and
@@ -1504,11 +1523,6 @@ default)`, `renderer: OpenGL (Vulkan unavailable: …)`). Auto also refuses soft
 device was lost on in an earlier run; `--renderer vulkan` takes either. GL 4.5 is available on
 Linux drivers and on WSLg hardware via Mesa d3d12 (verified: GL 4.6 core on an RTX 3090 with
 `GALLIUM_DRIVER=d3d12`).
-
-U60's data also carries Unity's own Vulkan programs (shader platform 18, every shader, Windows
-and Linux alike), but they are SMOL-V-compressed SPIR-V compiled for Unity's Vulkan conventions
-(reversed Z, UV starting at the top, a flipped projection), which the engine's renderer does not
-model and which take other branches in Klei's shaders; the GLCore text is used instead.
 
 **Shader runtime (`OniMoono.Graphics`).** From `SerializedShader`: properties, subshaders,
 passes, tags, render state (blend/ZTest/ZWrite/Cull/ColorMask/Stencil/Offset — each either a
@@ -1643,32 +1657,45 @@ persistently mapped) halved their cost but corrupted textures on Mesa's d3d12 dr
 mesh), `GlTextures.Prepare` and `GlMeshes.Prepare` copy changed data, and `GlWorker` hands
 frames to a device thread; only the work posted for resources differs (`IResourceWork`).
 
-- *Programs* (`VkGlsl`, `VkShaderCompiler`, `SpirvReflection`). A variant's two stages are
-  preprocessed with shaderc and rewritten together: loose uniforms become one std140 block per
-  stage (vertex binding 0, fragment 1) whose members keep their names; named blocks, the one
-  storage buffer kind (procedural instancing, bound empty as OpenGL binds none) and samplers get
-  bindings by name, the same in both stages; vertex inputs take their mesh channel's location
-  (`in_POSITION0` 0 … `in_TEXCOORD7` 11) and varyings one location map by name; `gl_InstanceID`
-  reads `gl_InstanceIndex`; the vertex stage maps clip-space z from OpenGL's [-w, w] to [0, w]
-  after the program's own `main`. shaderc compiles that to SPIR-V 1.3 and the blocks' member
-  offsets are read from its decorations, so `GlUniforms` writes every value as a block member
-  exactly as OpenGL reflection would have it placed. Variants this device does not draw, each
-  logged once per shader: shadow-comparison and multisample samplers (shadow and frame-debugger
-  variants), XR stereo variants and geometry stages; none is used by the game.
-- *Conventions.* The framebuffer is not flipped: NDC y = -1 is image row 0, which is OpenGL's
-  bottom row, so viewport and scissor rectangles, `gl_FragCoord`, texture rows of render targets
-  and `ReadPixels` all keep OpenGL's meaning, and Unity's clockwise front faces are what Vulkan
-  (which measures winding with y down) calls counter-clockwise. The presenter flips each frame
-  once as it copies it to the swapchain. Absent mesh channels read OpenGL's constant attributes
-  (white colour, position (0, 0, 0, 1), zero otherwise) from a stride-0 buffer. The game sees an
-  OpenGLCore device (D54).
+- *Programs* (`VulkanProgram`, `SmolV`, `VkPrograms`, `SpirvReflection`). A Vulkan variant is
+  one entry of the shader's platform-18 blob holding every stage as SMOL-V-compressed SPIR-V
+  (decoded with a port of smol-v's decoder; each decoded size is checked against its header,
+  and `tools/ShaderSurvey vulkan` runs all 539 of U60's programs through SPIRV-Tools' validator)
+  and a table mapping mesh channels to vertex input locations. Its parameter table gives each
+  constant buffer, texture and sampler a binding as `stages << 24 | set << 16 | binding`:
+  textures, their separate samplers and storage buffers in set 0, constant buffers in set 1.
+  `GlUniforms` writes each draw's values into the programs' constant buffers at the table's
+  offsets (matrices as four 16-byte columns, arrays at a 16-byte stride: the GLCore programs'
+  layout), and `GlDrawRecorder` resolves textures and selects variants as for OpenGL, from the
+  pass's Vulkan variants. Variants this device does not draw, each logged once per shader:
+  shadow-comparison and multisample textures (shadow and frame-debugger variants), XR stereo
+  (multiview) variants and stages other than vertex and fragment; none is used by the game.
+- *Conventions.* Unity's Vulkan programs are compiled with reversed Z and UVs starting at the
+  top, as Unity's manual ("Platform-specific rendering differences") describes; the rest was
+  read from the SPIR-V. Each vertex stage ends by negating `gl_Position.y`, so with the camera's
+  projection the back buffer is stored top row first, as the window shows it, and the presenter
+  copies it unflipped. Into a render texture the projection's y is negated as well
+  (`_ProjectionParams.x` -1), which leaves render textures' rows in OpenGL's order, so sampling
+  them reads what OpenGL's do. The projection the programs read (`UNITY_MATRIX_P` and the
+  products with it; `RenderConventions`) maps depth to [1, 0], near to far, `_ZBufferParams`
+  takes the reversed form, and `unity_CameraProjection` keeps the camera's own matrix. Depth
+  tests compare the other way (Less and Greater, LessEqual and GreaterEqual swapped), depth
+  offsets are negated, clears write 1 - the value asked for, and new depth surfaces start at
+  0. Viewport and scissor rectangles keep OpenGL's bottom-left origin: unchanged in a render
+  texture, turned over in the back buffer, as are `ReadPixels` of the screen. Unity's front faces
+  are clockwise on screen, which Vulkan calls clockwise in the back buffer and counter-clockwise
+  in a flipped render texture. Absent mesh channels read OpenGL's constant attributes (white
+  colour, position (0, 0, 0, 1), zero otherwise) from a stride-0 buffer. The OpenGL device keeps
+  its own conventions; the game sees a Vulkan device (D54).
 - *Execution.* A target is a dynamic-rendering pass, begun by its first draw or clear (a clear
   with nothing drawn yet is the pass's load op) and ended when the target changes, a copy must
   run outside it, or the frame ends. Pipelines are made on first use per program, resolved pass
   state, vertex layout, topology and target formats, with the driver's pipeline cache kept in the
-  player's cache folder; descriptors are pushed (`VK_KHR_push_descriptor`) or allocated from
-  per-frame pools; per-draw uniform blocks, staging copies and immediate geometry go through a
-  host-visible stream per frame. Memory comes from VMA. Each image tracks its layout and last
+  player's cache folder. Set 0 is pushed (`VK_KHR_push_descriptor`, when the program's bindings
+  fit the device's push limit) or allocated from per-frame pools. A draw's constant buffers are
+  written together to the frame's uniform stream (4 MB chunks kept for the device's life) and
+  bound by dynamic offsets into a set 1 made once per program and chunk. Staging copies and
+  immediate geometry go through a host-visible stream per frame. Memory comes from VMA. Each image tracks its layout and last
   access, and each use makes the barrier it needs (a render target's colour writes before it is
   sampled; transfers before and after copies).
 - *Frames and uploads.* Two frames are in flight, each with its command pool, fence, stream,

@@ -46,6 +46,10 @@ namespace OniMoono.GameTweaks
     /// every kept position, transform and controller is compared with the object's own, and an
     /// object already among the targets runs the game's AddTargetIfVisible, which must leave the
     /// targets as they were.
+    ///
+    /// U60 (761015) does each part's work in the game's own rewrite of the overlays, and removes
+    /// what the targets and temperature parts patch; there every part is left out with a log
+    /// line (a retire candidate, docs/research/u60-tweaks-overlays.md).
     public static class FastOverlays
     {
         public const string Name = "fast-overlays";
@@ -55,6 +59,26 @@ namespace OniMoono.GameTweaks
 
         public static void Install(Harmony harmony)
         {
+            // U60 (761015) reworked each part's target in the game itself (docs/research/
+            // u60-tweaks-overlays.md). A part whose U59 shape is gone stays out with a log line,
+            // so the tweak cannot misbehave there; it installs nothing on U60.
+            int parts = 0;
+            if (InstallPower(harmony)) parts++;
+            if (InstallInfrared(harmony)) parts++;
+            if (InstallTargets(harmony)) parts++;
+            if (verify && parts > 0) harmony.Patch(AccessTools.Method(typeof(OverlayScreen), nameof(OverlayScreen.ToggleOverlay)), prefix: new HarmonyMethod(typeof(FastOverlays), nameof(Report)));
+        }
+
+        static void Skip(string part, string why) => global::Debug.Log($"{Name}: {part} left out, {why}");
+
+        static bool InstallPower(Harmony harmony)
+        {
+            // U60's Power.Update keeps each circuit's answers itself (a CachedNetwork per circuit id).
+            if (AccessTools.Inner(typeof(OverlayModes.Power), "CachedNetwork") != null)
+            {
+                Skip("power", "the game's Power.Update asks each circuit once an update itself");
+                return false;
+            }
             var update = AccessTools.Method(typeof(OverlayModes.Power), nameof(OverlayModes.Power.Update));
             var needed = AccessTools.Method(typeof(CircuitManager), nameof(CircuitManager.GetWattsNeededWhenActive));
             powerPatched = new System.Reflection.MethodBase[] { update, needed };
@@ -62,24 +86,61 @@ namespace OniMoono.GameTweaks
                 finalizer: new HarmonyMethod(typeof(FastOverlays), nameof(PowerEnd)));
             harmony.Patch(needed, prefix: new HarmonyMethod(typeof(FastOverlays), nameof(NeededBefore)) { priority = Priority.Last },
                 postfix: new HarmonyMethod(typeof(FastOverlays), nameof(NeededAfter)));
-            var infrared = AccessTools.Method(typeof(Infrared), "Update");
-            var dispatch = AccessTools.Method(typeof(TemperatureOverlayInfraredVisualizerBase), "OnTemperatureOverlayInfraredUpdate");
+            return true;
+        }
+
+        static bool InstallInfrared(Harmony harmony)
+        {
+            // U60: the visualizers no longer subscribe to Game's infrared event; Infrared.Update
+            // colours only those whose controller is visible (UpdateAllVisible).
+            var dispatcher = AccessTools.DeclaredField(typeof(TemperatureOverlayInfraredVisualizerBase), "OverlayInfraredUpdateDispatcher");
+            var dispatch = AccessTools.DeclaredMethod(typeof(TemperatureOverlayInfraredVisualizerBase), "OnTemperatureOverlayInfraredUpdate");
+            if (dispatcher == null || dispatch == null)
+            {
+                Skip("temperature", "the game colours only the visualizers in view itself");
+                return false;
+            }
+            gameVisit = AccessTools.MethodDelegate<Action<TemperatureOverlayInfraredVisualizerBase, object>>(dispatch);
             infraredPatched = new System.Reflection.MethodBase[] { dispatch };
-            harmony.Patch(infrared, prefix: new HarmonyMethod(typeof(FastOverlays), nameof(InfraredBegin)));
+            harmony.Patch(AccessTools.Method(typeof(Infrared), "Update"), prefix: new HarmonyMethod(typeof(FastOverlays), nameof(InfraredBegin)));
             // Visualizers subscribe with this delegate as they are made, after the tweaks install.
-            AccessTools.Field(typeof(TemperatureOverlayInfraredVisualizerBase), "OverlayInfraredUpdateDispatcher").SetValue(null, (Action<object, object>)InfraredDispatch);
-            addTarget = AccessTools.Method(typeof(OverlayModes.Mode), "AddTargetIfVisible");
-            removeOffscreen = AccessTools.GetDeclaredMethods(typeof(OverlayModes.Mode)).First(m => m.Name == "RemoveOffscreenTargets" && m.GetParameters().Length == 4);
-            highlight = AccessTools.Method(typeof(OverlayModes.Mode), "UpdateHighlightTypeOverlay");
-            clearOutside = AccessTools.GetDeclaredMethods(typeof(OverlayModes.Mode)).First(m => m.Name == "ClearOutsideViewObjects" && m.GetParameters().Length == 5 && m.GetParameters()[1].ParameterType == typeof(Vector2I));
+            dispatcher.SetValue(null, (Action<object, object>)InfraredDispatch);
+            return true;
+        }
+
+        static bool InstallTargets(Harmony harmony)
+        {
+            // The U59 helpers this part stands in for: ICollection targets, one AddTargetIfVisible
+            // with should_add, UpdateHighlightTypeOverlay and TileMode.TryAddObject. U60 replaced
+            // them with HybridListHashSet overloads and RemoveOffscreenAndUpdateHighlights.
+            var declared = AccessTools.GetDeclaredMethods(typeof(OverlayModes.Mode));
+            static bool OnCollection(System.Reflection.MethodInfo m, int index)
+            {
+                var parameters = m.GetParameters();
+                return parameters.Length > index && parameters[index].ParameterType.IsGenericType
+                    && parameters[index].ParameterType.GetGenericTypeDefinition() == typeof(ICollection<>);
+            }
+            addTarget = declared.FirstOrDefault(m => m.Name == "AddTargetIfVisible" && m.GetParameters().Length == 7 && OnCollection(m, 3));
+            removeOffscreen = declared.FirstOrDefault(m => m.Name == "RemoveOffscreenTargets" && m.GetParameters().Length == 4 && OnCollection(m, 0));
+            highlight = declared.FirstOrDefault(m => m.Name == "UpdateHighlightTypeOverlay" && OnCollection(m, 2));
+            clearOutside = declared.FirstOrDefault(m => m.Name == "ClearOutsideViewObjects" && m.GetParameters().Length == 5 && m.GetParameters()[1].ParameterType == typeof(Vector2I) && OnCollection(m, 0));
+            var tryAdd = AccessTools.DeclaredMethod(typeof(OverlayModes.TileMode), "TryAddObject");
+            var layerTargets = AccessTools.DeclaredField(typeof(OverlayModes.TileMode), "layerTargets");
+            if (addTarget == null || removeOffscreen == null || highlight == null || clearOutside == null || tryAdd == null
+                || layerTargets?.FieldType != typeof(HashSet<PrimaryElement>))
+            {
+                Skip("targets", "the game's overlay target helpers are not the U59 ones it stands in for");
+                return false;
+            }
+            tileTargets = AccessTools.FieldRefAccess<OverlayModes.TileMode, HashSet<PrimaryElement>>(layerTargets);
             var reroute = new HarmonyMethod(typeof(FastOverlays), nameof(RerouteAddTarget));
             foreach (var (type, method) in new[] { (typeof(OverlayModes.ConduitMode), "Update"), (typeof(OverlayModes.Crop), "Update"), (typeof(OverlayModes.Harvest), "Update"),
                          (typeof(OverlayModes.Decor), "Update"), (typeof(OverlayModes.Logic), "Update"), (typeof(OverlayModes.Power), "Update"),
                          (typeof(OverlayModes.SolidConveyor), "Update"), (typeof(OverlayModes.Suit), "Update"), (typeof(OverlayModes.TileMode), "TryAddObject"),
                          (typeof(OverlayModes.TileMode), "Update") })
                 harmony.Patch(AccessTools.Method(type, method), transpiler: reroute);
-            harmony.Patch(AccessTools.Method(typeof(OverlayModes.TileMode), "TryAddObject"), prefix: new HarmonyMethod(typeof(FastOverlays), nameof(TileTarget)) { priority = Priority.Last });
-            if (verify) harmony.Patch(AccessTools.Method(typeof(OverlayScreen), nameof(OverlayScreen.ToggleOverlay)), prefix: new HarmonyMethod(typeof(FastOverlays), nameof(Report)));
+            harmony.Patch(tryAdd, prefix: new HarmonyMethod(typeof(FastOverlays), nameof(TileTarget)) { priority = Priority.Last });
+            return true;
         }
 
         /// Test runs: what each part checked so far, as each overlay closes.
@@ -97,13 +158,14 @@ namespace OniMoono.GameTweaks
         static bool targetsForeign;
         static int targetChecks;
         static long targetsKept, targetsChecked, targetsWrong;
-        static readonly AccessTools.FieldRef<OverlayModes.TileMode, HashSet<PrimaryElement>> tileTargets =
-            AccessTools.FieldRefAccess<OverlayModes.TileMode, HashSet<PrimaryElement>>("layerTargets");
+        /// Set when the part installs (the field is a HybridListHashSet from U60).
+        static AccessTools.FieldRef<OverlayModes.TileMode, HashSet<PrimaryElement>> tileTargets;
 
         /// The modes' calls to Mode.AddTargetIfVisible, RemoveOffscreenTargets (the overload for
         /// components) and UpdateHighlightTypeOverlay go through the tweak's, same arguments.
-        static IEnumerable<CodeInstruction> RerouteAddTarget(IEnumerable<CodeInstruction> instructions)
+        static IEnumerable<CodeInstruction> RerouteAddTarget(IEnumerable<CodeInstruction> instructions, System.Reflection.MethodBase original)
         {
+            int rerouted = 0;
             foreach (var instruction in instructions)
             {
                 if ((instruction.opcode == System.Reflection.Emit.OpCodes.Call || instruction.opcode == System.Reflection.Emit.OpCodes.Callvirt)
@@ -115,10 +177,13 @@ namespace OniMoono.GameTweaks
                     {
                         instruction.opcode = System.Reflection.Emit.OpCodes.Call;
                         instruction.operand = AccessTools.Method(typeof(FastOverlays), ours).MakeGenericMethod(m.GetGenericArguments());
+                        rerouted++;
                     }
                 }
                 yield return instruction;
             }
+            // Each patched method calls at least one helper; none found means the game changed.
+            if (rerouted == 0) throw new InvalidOperationException($"{Name}: {original.DeclaringType}.{original.Name} calls none of the helpers it reroutes");
         }
 
         /// The game's AddTargetIfVisible without its own visit to an object already among the
@@ -341,9 +406,8 @@ namespace OniMoono.GameTweaks
                 AccessTools.Method(typeof(TemperatureOverlayInfraredVisualizerBase), "TemperatureOverlayInfraredUpdate"));
 
         /// The game's handler, as a patch of it would have it run.
-        static readonly Action<TemperatureOverlayInfraredVisualizerBase, object> gameVisit =
-            AccessTools.MethodDelegate<Action<TemperatureOverlayInfraredVisualizerBase, object>>(
-                AccessTools.Method(typeof(TemperatureOverlayInfraredVisualizerBase), "OnTemperatureOverlayInfraredUpdate"));
+        /// Set when the part installs (U60 has no such handler).
+        static Action<TemperatureOverlayInfraredVisualizerBase, object> gameVisit;
 
         /// A visualizer at its place in the event's handler order, and its position if it cannot move.
         struct Place

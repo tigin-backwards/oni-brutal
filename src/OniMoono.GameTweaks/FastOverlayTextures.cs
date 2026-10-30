@@ -36,6 +36,9 @@ namespace OniMoono.GameTweaks
     /// With ONI_TWEAK_VERIFY=1, before each release every material's textures, every component's
     /// fields holding textures (or arrays or lists of them) and the checks above are searched for
     /// the texture: a reference found is counted wrong, and the texture is kept.
+    ///
+    /// U60 (761015) fixed the leak in the game; there the tweak is left out with a log line
+    /// (a retire candidate, docs/research/u60-tweaks-overlays.md).
     public static class FastOverlayTextures
     {
         public const string Name = "fast-overlay-textures";
@@ -59,6 +62,14 @@ namespace OniMoono.GameTweaks
 
         public static void Install(Harmony harmony)
         {
+            // U60 (761015): CreateRenderTarget keeps copies of the right size and hands the ones
+            // it replaces or drops to RenderTextureDestroyer itself (RecreateCopyRT, DestroyRT).
+            // Freeing them here as well would destroy a texture the game destroys a frame later.
+            if (AccessTools.DeclaredMethod(typeof(MultipleRenderTargetProxy), "RecreateCopyRT") != null)
+            {
+                global::Debug.Log($"{Name}: left out, the game's CreateRenderTarget frees the copies it replaces itself");
+                return;
+            }
             createRenderTarget = AccessTools.Method(typeof(MultipleRenderTargetProxy), "CreateRenderTarget");
             harmony.Patch(createRenderTarget, prefix: new HarmonyMethod(typeof(FastOverlayTextures), nameof(Before)) { priority = Priority.First },
                 postfix: new HarmonyMethod(typeof(FastOverlayTextures), nameof(After)) { priority = Priority.Last });

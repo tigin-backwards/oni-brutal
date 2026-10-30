@@ -578,6 +578,7 @@ namespace OniMoono.Desktop.Vulkan
             }
             presenter.Present(interval, width, height);
             presenter.Frame = frame + 1;
+            Presented();
             VkTimings.Present += System.Diagnostics.Stopwatch.GetTimestamp() - t;
         }
 

@@ -20,15 +20,16 @@ namespace OniMoono.Desktop
         /// "auto" and "vulkan" try Vulkan first: the instance and a GPU that meets the
         /// requirements before a window exists, then the window's surface and swapchain; any
         /// failure releases what was made and opens an OpenGL window instead, with the reason in
-        /// the log. "auto" also refuses software Vulkan devices (lavapipe) and, after a lost
-        /// device, the driver it was lost on. `source` says where the choice came from.
+        /// the log. "auto" also refuses software Vulkan devices (lavapipe), the drivers on the deny
+        /// list (VkDenyList) and a GPU, driver and build whose start never got its first frames on
+        /// screen (VkStartGuard). `source` says where the choice came from.
         public static (GlfwPlatform Platform, RenderDevice Device) Open(WindowSettings settings, string choice, string source, string gpu, string cacheDirectory)
         {
             string reason = null;
             if (choice == OpenGl) reason = $"OpenGL chosen ({source})";
             else
             {
-                var (platform, device, failure) = TryVulkan(settings, gpu, allowSoftware: choice == Vulkan, honourLoss: choice == Auto, cacheDirectory);
+                var (platform, device, failure) = TryVulkan(settings, gpu, auto: choice == Auto, cacheDirectory);
                 if (device != null)
                 {
                     EngineLog.Engine($"renderer: Vulkan ({choice}, {source})");
@@ -49,76 +50,62 @@ namespace OniMoono.Desktop
             }
         }
 
-        static (GlfwPlatform, RenderDevice, string) TryVulkan(WindowSettings settings, string gpu, bool allowSoftware, bool honourLoss, string cacheDirectory)
+        static (GlfwPlatform, RenderDevice, string) TryVulkan(WindowSettings settings, string gpu, bool auto, string cacheDirectory)
         {
             VkContext context;
+            VkStartGuard guard = null;
+            string build = BuildId();
+            // Before the device is made: the deny list (auto only), then the start-up guard.
+            string Admit(VkGpuIdentity id)
+            {
+                if (auto && VkDenyList.Reason(id, OperatingSystem.IsWindows()) is { } denied)
+                    return $"{denied} is on the deny list (--renderer vulkan tries it)";
+                if (cacheDirectory == null) return null;
+                guard = new VkStartGuard(VkStartGuard.FileIn(cacheDirectory), VkStartGuard.KeyOf(id, build));
+                var refused = guard.Enter(honour: auto);
+                if (refused != null) guard = null;
+                return refused;
+            }
             try
             {
-                context = new VkContext(gpu, allowSoftware, cacheDirectory);
+                context = new VkContext(gpu, allowSoftware: !auto, cacheDirectory, Admit);
             }
             catch (VulkanUnavailableException e)
             {
+                guard?.Abandon();
                 return (null, null, e.Message);
             }
             catch (Exception e) when (e is DllNotFoundException or TypeInitializationException or EntryPointNotFoundException or BadImageFormatException)
             {
+                guard?.Abandon();
                 return (null, null, $"{e.GetType().Name}: {e.Message}");
-            }
-            if (honourLoss && LostBefore(context, cacheDirectory) is { } lost)
-            {
-                context.Dispose();
-                return (null, null, lost);
             }
             GlfwPlatform platform = null;
             try
             {
                 platform = new GlfwPlatform(settings with { Api = RenderApi.Vulkan });
-                return (platform, new VkDevice(platform, context, cacheDirectory), null);
+                return (platform, new VkDevice(platform, context, cacheDirectory, guard), null);
             }
             catch (Exception e)
             {
-                // VkDevice released what it made; the window and the context go too.
+                // VkDevice released what it made; the window and the context go too. A start that
+                // fell back cleanly is no crash.
                 platform?.Dispose();
                 context.Dispose();
+                guard?.Abandon();
                 return (null, null, e is VulkanUnavailableException ? e.Message : $"{e.GetType().Name}: {e.Message}");
             }
         }
 
-        /// What a loss marker (VkDevice.WriteLostMarker: driver, device, time, reason) means for
-        /// this start under auto: the reason to use OpenGL, or null. A lost device keeps auto on
-        /// OpenGL until the driver changes (then the marker goes) or a Vulkan session ends
-        /// cleanly. Presenting that failed (a lost surface, a swapchain not made again: the
-        /// window or display rather than the driver, often) costs one start only: this one uses
-        /// OpenGL, and the marker goes so that the next tries Vulkan again.
-        internal static string MarkerVerdict(string[] lines, string driverInfo, out bool remove)
+        /// Moono's build, as the start-up guard keys it: the host's informational version (its
+        /// commit), or ONI_VULKAN_FAIL=guard-build:X (tests).
+        static string BuildId()
         {
-            remove = true;
-            if (lines.Length == 0 || lines[0] != driverInfo) return null;
-            string when = lines.Length > 2 ? lines[2] : "?", why = lines.Length > 3 ? lines[3] : "";
-            if (why.StartsWith("presenting failed", StringComparison.Ordinal))
-                return $"presenting to the window failed in the last run ({when}: {why}); this start uses OpenGL, the next tries Vulkan again";
-            remove = false;
-            return $"the Vulkan device was lost in an earlier run with this driver ({when}: {why}); --renderer vulkan tries it again";
-        }
-
-        /// The device was lost in an earlier run with this driver (VkDevice.WriteLostMarker):
-        /// the reason auto uses OpenGL; null otherwise (another driver: the marker goes).
-        static string LostBefore(VkContext context, string cacheDirectory)
-        {
-            if (cacheDirectory == null) return null;
-            var path = VkDevice.LostMarkerPath(cacheDirectory);
-            try
-            {
-                if (!File.Exists(path)) return null;
-                var reason = MarkerVerdict(File.ReadAllLines(path), context.DriverInfo, out bool remove);
-                if (remove) File.Delete(path);
-                return reason;
-            }
-            catch (Exception e) when (e is IOException or UnauthorizedAccessException)
-            {
-                EngineLog.Engine($"renderer: {path}: {e.Message}");
-            }
-            return null;
+            var fault = VkFault.Text("guard-build");
+            if (!string.IsNullOrEmpty(fault)) return fault;
+            var assembly = System.Reflection.Assembly.GetEntryAssembly();
+            return assembly == null ? "unknown"
+                : System.Reflection.CustomAttributeExtensions.GetCustomAttribute<System.Reflection.AssemblyInformationalVersionAttribute>(assembly)?.InformationalVersion ?? "unknown";
         }
     }
 }

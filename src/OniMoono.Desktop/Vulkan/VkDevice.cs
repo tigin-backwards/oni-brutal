@@ -92,23 +92,21 @@ namespace OniMoono.Desktop.Vulkan
         readonly VkPipelines pipelines;
         readonly VkSurfaceKHR surface;
         readonly Dictionary<string, DeviceTexture> defaults = new();
-        readonly string markerPath;
+        readonly VkStartGuard guard;
+        int presented;
         CameraConstants camera;
         Material passMaterial;
         int passIndex;
 
-        /// Why the last launch's Vulkan device was lost, if it was (a file in the player's
-        /// cache folder): auto then uses OpenGL until the driver changes.
-        public static string LostMarkerPath(string cacheDirectory) => System.IO.Path.Combine(cacheDirectory, "vulkan-device-lost.txt");
-
         /// Makes the device for a window created without a GL context (WindowSettings.Api
         /// Vulkan); throws VulkanUnavailableException with the reason, having released what it
-        /// made, so the caller can open an OpenGL window instead.
-        public VkDevice(GlfwPlatform platform, VkContext vk, string cacheDirectory)
+        /// made, so the caller can open an OpenGL window instead. `guard` (VkStartGuard) is cleared
+        /// once the first frames are on screen.
+        public VkDevice(GlfwPlatform platform, VkContext vk, string cacheDirectory, VkStartGuard guard = null)
         {
             this.platform = platform;
             this.vk = vk;
-            markerPath = cacheDirectory == null ? null : LostMarkerPath(cacheDirectory);
+            this.guard = guard;
             VkSplash splash = null;
             try
             {
@@ -193,7 +191,6 @@ namespace OniMoono.Desktop.Vulkan
                 if (deviceLost) return;
                 deviceLost = true;
                 EngineLog.Engine($"vulkan: the device was lost ({caps.Name}, {vk.DriverInfo}): {e.Message}\n{e.StackTrace}");
-                WriteLostMarker(e.Message);
                 return;
             }
             if (failuresLogged.Add($"{e.GetType().FullName}: {e.Message}")) Debug.LogException(e);
@@ -212,44 +209,50 @@ namespace OniMoono.Desktop.Vulkan
         }
 
         /// Set on the device thread when the device is lost: no more work is recorded, and the
-        /// main thread ends the game at its next present, as Unity's player does when its
-        /// graphics device is removed. A device that is lost cannot be recovered in place (every
-        /// texture, mesh and program would have to be made again, and the game holds no copy of
-        /// the non-readable textures), and switching to OpenGL mid-game would need the same; the
-        /// next launch uses OpenGL (auto) until the driver changes.
+        /// main thread ends the game at its next present with an error, as Unity's player does
+        /// when its graphics device is removed. A device that is lost cannot be recovered in
+        /// place (every texture, mesh and program would have to be made again, and the game holds
+        /// no copy of the non-readable textures), and switching to OpenGL mid-game would need the
+        /// same. Nothing is recorded for the next start: the error says how to choose OpenGL.
         volatile bool deviceLost;
         /// What ended the device ("was lost", or presenting failed for good).
         string lostWhat = "was lost";
 
         /// Presenting ended for good (VkPresenter.Failure: a lost surface, a swapchain that
-        /// could not be made again): handled as a lost device, the game quitting with the error
-        /// rather than running on with a black window, and auto using OpenGL from the next start.
+        /// could not be made again): the game quits with the error, as for a lost device, rather
+        /// than running on with a black window.
         void PresenterFailed(Exception e)
         {
             if (deviceLost) return;
             lostWhat = "could no longer present to the window";
             deviceLost = true;
             EngineLog.Engine($"vulkan: presenting failed ({caps.Name}, {vk.DriverInfo}): {e.GetType().Name}: {e.Message}");
-            WriteLostMarker($"presenting failed: {e.Message}");
         }
+
+        /// A presented frame (device thread): the start-up guard is cleared once the first
+        /// VkStartGuard.FramesToClear are on screen; ONI_VULKAN_FAIL=crash-at:N ends the process
+        /// at frame N as a crash would (no shutdown, the guard left in place).
+        void Presented()
+        {
+            presented++;
+            if (presented == crashAt)
+            {
+                EngineLog.Engine($"vulkan: ONI_VULKAN_FAIL=crash-at:{crashAt}: the process ends as a crash would");
+                EngineLog.Close();
+                Environment.Exit(70);
+            }
+            if (presented == VkStartGuard.FramesToClear && guard != null)
+            {
+                guard.Clear();
+                EngineLog.Engine($"vulkan: the first {VkStartGuard.FramesToClear} frames are on screen; start-up guard cleared");
+            }
+        }
+
+        static readonly int crashAt = VkFault.Number("crash-at");
 
         /// Test hooks (VkFault): presenting fails for good at frame N (present-after:N), or the
         /// swapchain runs out of memory three times from frame N (present-oom-after:N).
         static readonly int failPresentAt = VkFault.Number("present-after"), presentOomAt = VkFault.Number("present-oom-after");
-
-        void WriteLostMarker(string reason)
-        {
-            if (markerPath == null) return;
-            try
-            {
-                System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(markerPath)!);
-                System.IO.File.WriteAllText(markerPath, $"{vk.DriverInfo}\n{caps.Name}\n{DateTime.UtcNow:O}\n{reason}\n");
-            }
-            catch (Exception e) when (e is System.IO.IOException or UnauthorizedAccessException)
-            {
-                EngineLog.Engine($"vulkan: could not record the device loss ({e.Message})");
-            }
-        }
 
         // ----- Targets, viewport, clears (main thread records) -----
 
@@ -453,7 +456,8 @@ namespace OniMoono.Desktop.Vulkan
             if (deviceLost && !quitRequested)
             {
                 quitRequested = true;
-                Debug.LogError($"The Vulkan graphics device {lostWhat}; the game quits. The next start uses OpenGL (see Player.log).");
+                Debug.LogError($"Vulkan stopped working: the graphics device {lostWhat}, so the game quits. If this keeps happening, choose OpenGL "
+                               + $"under Renderer in Moono Tweaks, or start the game with --renderer opengl. The log is {EngineLog.FilePath ?? Application.consoleLogPath}.");
                 PlayerLoop.RequestQuit(1);
             }
             int interval = SwapIntervalOverride >= 0 ? SwapIntervalOverride : QualitySettings.vSyncCount;
@@ -520,17 +524,8 @@ namespace OniMoono.Desktop.Vulkan
             vk.SavePipelineCache();
             ReleaseAll();
             vk.Dispose();
-            // A clean session on this driver: auto may use Vulkan again.
-            if (!deviceLost && markerPath != null)
-            {
-                try
-                {
-                    System.IO.File.Delete(markerPath);
-                }
-                catch (Exception e) when (e is System.IO.IOException or UnauthorizedAccessException)
-                {
-                }
-            }
+            // Ended cleanly before its first frames were all on screen: no crash either.
+            if (!deviceLost) guard?.Clear();
         }
 
         /// Destroys everything the device made (also after a failed start, from whatever was

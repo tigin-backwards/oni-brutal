@@ -13,6 +13,9 @@ namespace OniMoono.Desktop.Vulkan
     ///   memory (retried with backoff, then presenting goes on);
     /// - `alloc-every:N`, `pipeline-every:N`, `program-every:N`: every Nth texture or mesh
     ///   allocation, pipeline, or program build runs out of device memory.
+    /// - `crash-at:N`: the process ends at presented frame N without shutting down, as a
+    ///   crash would (the start-up guard's test);
+    /// - `guard-build:X`: the start-up guard keys this run's build as X.
     internal static class VkFault
     {
         static readonly Dictionary<string, string> faults = Parse(Environment.GetEnvironmentVariable("ONI_VULKAN_FAIL"));
@@ -31,6 +34,9 @@ namespace OniMoono.Desktop.Vulkan
         }
 
         public static bool Has(string name) => faults.ContainsKey(name);
+
+        /// The text a `name:X` fault carries, or null.
+        public static string Text(string name) => faults.GetValueOrDefault(name);
 
         /// The number a `name:N` fault carries, or -1.
         public static int Number(string name) => faults.TryGetValue(name, out var v) && int.TryParse(v, out int n) ? n : -1;

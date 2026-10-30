@@ -26,8 +26,12 @@ namespace OniMoono.Engine
         /// Unity's player does. With a `scrubber` (`--log-paths hidden`), the file and the console
         /// get each line with personal paths replaced; the log callbacks still get the text as
         /// logged (mods and the game's crash reporter read it there).
+        /// The log file this session writes (null before Open).
+        public static string FilePath { get; private set; }
+
         public static void Open(string path, bool keepPrevious = false, LogScrubber scrubber = null)
         {
+            FilePath = path;
             Directory.CreateDirectory(Path.GetDirectoryName(path)!);
             if (keepPrevious && File.Exists(path))
             {

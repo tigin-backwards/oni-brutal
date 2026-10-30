@@ -134,14 +134,18 @@ namespace OniMoono.Desktop.Vulkan
                 throw new VulkanUnavailableException($"ONI_VULKAN_FAIL={step} (a test of the fallback)");
         }
 
+        /// The chosen GPU and its driver (read before the device is made).
+        public VkGpuIdentity Identity;
+
         /// Instance, device and allocator; throws VulkanUnavailableException with the reason,
-        /// having released whatever it made.
-        public VkContext(string gpuChoice, bool allowSoftware, string cacheDirectory)
+        /// having released whatever it made. `admit`, given the chosen GPU and driver before the
+        /// device is made, returns why not to go on (the deny list, the start-up guard) or null.
+        public VkContext(string gpuChoice, bool allowSoftware, string cacheDirectory, Func<VkGpuIdentity, string> admit = null)
         {
             pipelineCachePath = cacheDirectory == null ? null : System.IO.Path.Combine(cacheDirectory, "vulkan-pipelines.bin");
             try
             {
-                Create(gpuChoice, allowSoftware);
+                Create(gpuChoice, allowSoftware, admit);
             }
             catch (Exception e)
             {
@@ -151,7 +155,7 @@ namespace OniMoono.Desktop.Vulkan
             }
         }
 
-        void Create(string gpuChoice, bool allowSoftware)
+        void Create(string gpuChoice, bool allowSoftware, Func<VkGpuIdentity, string> admit)
         {
             if (!LoaderPresent(out var loader)) throw new VulkanUnavailableException(loader);
             GlfwPlatform.Initialize();
@@ -223,6 +227,9 @@ namespace OniMoono.Desktop.Vulkan
             SamplerAnisotropy = features.Features.SamplerAnisotropy;
             MirrorClampToEdge = f12.SamplerMirrorClampToEdge;
             PushDescriptors = Physical.SupportsExtension("VK_KHR_push_descriptor"u8);
+            DriverInfo = DriverDescription(out int driverId);
+            Identity = new VkGpuIdentity((uint)Properties.VendorID, (uint)Properties.DeviceID, (uint)Properties.DriverVersion, driverId, DriverName, DeviceName);
+            if (admit?.Invoke(Identity) is { } refused) throw new VulkanUnavailableException(refused);
 
             var enable = new VkPhysicalDeviceFeatures2();
             enable.Features.TextureCompressionBC = TextureCompressionBC;
@@ -249,7 +256,6 @@ namespace OniMoono.Desktop.Vulkan
                 Device = Device,
                 VulkanApiVersion = (uint)RequiredApi,
             });
-            DriverInfo = DriverDescription();
             PipelineCache = CreatePipelineCache();
             FailAt("context");
             EngineLog.Engine($"vulkan: using {why}; {DriverInfo}; BC textures {(TextureCompressionBC ? "sampled" : "decoded on upload")}, "
@@ -259,7 +265,7 @@ namespace OniMoono.Desktop.Vulkan
         /// Descriptors a pushed set may hold.
         public int MaxPushDescriptors;
 
-        string DriverDescription()
+        string DriverDescription(out int driverId)
         {
             var driver = new VkPhysicalDeviceDriverProperties();
             var push = new VkPhysicalDevicePushDescriptorProperties();
@@ -268,6 +274,7 @@ namespace OniMoono.Desktop.Vulkan
             Physical.GetProperties2(ref props);
             MaxPushDescriptors = PushDescriptors ? push.MaxPushDescriptors : 0;
             DriverName = Utf8(driver.DriverName, 256);
+            driverId = (int)driver.DriverID;
             return $"Vulkan {Version(Properties.ApiVersion)}, driver {DriverName} {Utf8(driver.DriverInfo, 256)}".TrimEnd();
         }
 

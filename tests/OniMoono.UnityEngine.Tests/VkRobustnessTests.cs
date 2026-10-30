@@ -7,8 +7,7 @@ using Xunit;
 namespace OniMoono.Tests
 {
     /// The Vulkan device's handling of damaged input and failures that need no GPU: SPIR-V
-    /// reflection of a damaged module, the loss marker's meaning for the next start, and the
-    /// fault-injection settings.
+    /// reflection of a damaged module and the fault-injection settings.
     public class VkRobustnessTests
     {
         static byte[] Module(params uint[] instructions)
@@ -31,27 +30,13 @@ namespace OniMoono.Tests
         }
 
         [Fact]
-        public void APresenterFailureCostsOneOpenGLStart()
-        {
-            const string driver = "Vulkan 1.4.341, driver NVIDIA 610.88";
-            string[] lost = [driver, "RTX", "2026-10-30T00:00:00Z", "VK_ERROR_DEVICE_LOST"];
-            Assert.StartsWith("the Vulkan device was lost", Renderers.MarkerVerdict(lost, driver, out bool remove));
-            Assert.False(remove);
-            string[] presenting = [driver, "RTX", "2026-10-30T00:00:00Z", "presenting failed: VK_ERROR_SURFACE_LOST_KHR"];
-            Assert.StartsWith("presenting to the window failed in the last run", Renderers.MarkerVerdict(presenting, driver, out remove));
-            Assert.True(remove);
-            // Another driver: Vulkan again, the marker goes.
-            Assert.Null(Renderers.MarkerVerdict(lost, "Vulkan 1.4.341, driver NVIDIA 611.00", out remove));
-            Assert.True(remove);
-        }
-
-        [Fact]
         public void FaultSettingsParse()
         {
-            var f = VkFault.Parse("presenter-create, alloc-every:40,present-after:600");
+            var f = VkFault.Parse("presenter-create, alloc-every:40,present-after:600,guard-build:test");
             Assert.Equal("", f["presenter-create"]);
             Assert.Equal("40", f["alloc-every"]);
             Assert.Equal("600", f["present-after"]);
+            Assert.Equal("test", f["guard-build"]);
             Assert.Empty(VkFault.Parse(null));
         }
     }

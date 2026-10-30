@@ -78,7 +78,7 @@ namespace OniMoono.Desktop.Vulkan
         volatile Exception failure;
 
         /// Why presenting stopped for good (the presenter thread ended), or null. The device
-        /// treats it as a lost device: the game quits with the error, and auto uses OpenGL next.
+        /// treats it as a lost device: the game quits with the error.
         public Exception Failure => failure;
         volatile int windowWidth, windowHeight;
 

@@ -249,7 +249,9 @@ u57_ready()
 u57_run()
 {
     local out=$1 frames=$2; shift 2
-    local home="$out/home" d
+    local home="$out/home" d extra=()
+    # QA_EXTRA_ARGS reach these runs too (e.g. --renderer vulkan).
+    [ -n "${QA_EXTRA_ARGS:-}" ] && read -ra extra <<< "$QA_EXTRA_ARGS"
     rm -rf "${out:?}"; mkdir -p "$out"
     d="$home/config/unity3d/Klei/Oxygen Not Included"
     mkdir -p "$d/cloud_save_files/76561197960265729/U57" "$d/mods/Local"
@@ -263,7 +265,7 @@ u57_run()
     echo '{"version":1,"mods":[{"label":{"distribution_platform":0,"id":"PerfProbe","title":"PerfProbe","version":-2037174645},"status":1,"enabled":true,"enabledForDlc":["","EXPANSION1_ID"],"crash_count":0,"reinstall_path":null,"staticID":"PerfProbe"}],"mod_load_in_progress":false}' > "$d/mods/mods.json"
     ONI_GAME_DIR="$QA_U57_GAME" ONI_RUN_HOME="$home" ONI_CONFIG=release timeout 3600 xvfb-run -a -s "-screen 0 1280x1024x24" \
         "$root/scripts/run.sh" --native-override "steam_api=$QA_U57_STEAM" -screen-width 1024 -screen-height 768 -screen-fullscreen 0 \
-        --frames "$frames" --input 400:click:948,75 --input 900:click:153,192 --game-tweak all --log "$out/log.txt" "$@" > "$out/stdout.txt" 2>&1 &
+        --frames "$frames" --input 400:click:948,75 --input 900:click:153,192 --game-tweak all --log "$out/log.txt" "${extra[@]}" "$@" > "$out/stdout.txt" 2>&1 &
     local pid=$! peak=0 rss p perfs=0 n progress=$SECONDS hang=$(( ${QA_HANG_MIN:-5} * 60 ))
     while kill -0 $pid 2>/dev/null; do
         # The hang watchdog: a PERF line at least every QA_HANG_MIN minutes, the load before the

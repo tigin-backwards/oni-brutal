@@ -65,6 +65,17 @@ namespace OniMoono.Host.GameTweaks
             writeSingleFast = AccessTools.Method(ioHelperType, "WriteSingleFast", [typeof(BinaryWriter), typeof(float)]);
             // The game's Debug (not UnityEngine's), as the template reports.
             gameLogError = AccessTools.Method(AccessTools.TypeByName("Debug"), "LogError", [typeof(object)]);
+            // Every member read here must exist: a renamed one stops the start-up rather than the
+            // first save.
+            (string Name, object? Member)[] members = [("SerializationTemplate.serializableFields", fieldsField),
+                ("SerializationTemplate.serializableProperties", propertiesField), ("SerializationTemplate.onSerializing", onSerializingField),
+                ("SerializationTemplate.onSerialized", onSerializedField), ("SerializationTemplate.customSerialize", customSerializeField),
+                ("SerializationTemplate.serializableType", serializableTypeField), ("SerializationField.field", fieldInfoOfEntry),
+                ("SerializationField.typeInfo", typeInfoOfEntry), ("SerializationProperty.property", propertyOfEntry),
+                ("SerializationProperty.typeInfo", typeInfoOfPropertyEntry), ("TypeInfo.info", infoOfTypeInfo),
+                ("Helper.WriteValue", writeValue), ("IOHelper.WriteSingleFast", writeSingleFast), ("Debug.LogError", gameLogError)];
+            foreach (var (member, found) in members)
+                if (found == null) throw new MissingMemberException($"{Name}: the game has no {member}");
             harmony.Patch(AccessTools.Method(templateType, "SerializeData", [typeof(object), typeof(BinaryWriter)]),
                 prefix: new HarmonyMethod(typeof(FastSerialization), nameof(SerializeData)));
         }

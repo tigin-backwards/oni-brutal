@@ -64,7 +64,15 @@ namespace OniMoono.Desktop.Vulkan
             long start = System.Diagnostics.Stopwatch.GetTimestamp();
             try
             {
+                VkFault.OutOfMemoryEvery("pipeline-every");
                 p = Create(key, layout);
+            }
+            catch (Exception e) when (VkFault.IsOutOfMemory(e))
+            {
+                // Out of memory now, maybe not at the next draw: logged once, not remembered.
+                if (outOfMemory.Add(key.Program))
+                    OniMoono.Engine.EngineLog.Engine($"vulkan: a pipeline for shader '{key.Program.Name}' ran out of memory; tried again at its next draw");
+                return default;
             }
             catch (Exception e) when (!VkDevice.IsDeviceLost(e))
             {
@@ -79,7 +87,7 @@ namespace OniMoono.Desktop.Vulkan
             return p;
         }
 
-        readonly HashSet<VkProgram> refused = new();
+        readonly HashSet<VkProgram> refused = new(), outOfMemory = new();
 
         /// Pipelines the driver refused (--check-shaders).
         public static int Refused;

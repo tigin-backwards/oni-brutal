@@ -206,7 +206,15 @@ namespace OniMoono.Desktop.Vulkan
             long start = System.Diagnostics.Stopwatch.GetTimestamp();
             try
             {
+                VkFault.OutOfMemoryEvery("program-every");
                 p = PlatformOf(shader) == ShaderNative.VulkanPlatform ? BuildShipped(shader, blobIndex) : BuildCompiled(shader, blobIndex);
+            }
+            catch (Exception e) when (VkFault.IsOutOfMemory(e))
+            {
+                // Out of memory now, maybe not at the next draw: logged, not remembered.
+                if (reported.Add($"{shader.ShaderName}\noom"))
+                    EngineLog.Engine($"vulkan: shader '{shader.ShaderName}' variant (blob {blobIndex}) ran out of memory being built; tried again at its next draw");
+                return new DeviceProgram();
             }
             catch (Exception e) when (!VkDevice.IsDeviceLost(e))
             {

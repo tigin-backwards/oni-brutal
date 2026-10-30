@@ -269,6 +269,11 @@ namespace OniMoono.Desktop.Vulkan
                         && image.Levels == levels && image.Layers == layers && image.Depth == depth;
             if (!same)
             {
+                // Made before the old storage is retired: a failure (out of memory) leaves the
+                // texture as it was, its images still live.
+                VkFault.OutOfMemoryEvery("alloc-every");
+                var made = VkImageResource.Create(vk, f.Format, type, u.Width, u.Height, depth, levels, layers,
+                    VkImageUsageFlags.SampledBit | VkImageUsageFlags.TransferDstBit, swizzle: f.Swizzle);
                 if (image != null)
                 {
                     var (old, oldDepth, oldMulti) = (image, vt.DepthStencil, vt.Multisampled);
@@ -276,8 +281,7 @@ namespace OniMoono.Desktop.Vulkan
                 }
                 vt.DepthStencil = vt.Multisampled = null;
                 vt.RenderTarget = vt.DepthOnly = false;
-                vt.Image = image = VkImageResource.Create(vk, f.Format, type, u.Width, u.Height, depth, levels, layers,
-                    VkImageUsageFlags.SampledBit | VkImageUsageFlags.TransferDstBit, swizzle: f.Swizzle);
+                vt.Image = image = made;
                 vt.StorageFormat = u.Format;
                 vt.UploadedTexels = null;
                 vt.LastUsedBatch = -1;
@@ -302,6 +306,8 @@ namespace OniMoono.Desktop.Vulkan
             if (same && type == VkImageViewType._2D && UploadChanged(cb, u, vt, f, levels)) return;
             textureUploads++;
             image.ForTransferWrite(cb);
+            // Regions and their buffers pair up from here; a failure partway leaves none behind.
+            stagedBuffers.Clear();
             var regions = new List<VkBufferImageCopy>();
             for (int m = 0; m < levels; m++)
             {
@@ -438,20 +444,38 @@ namespace OniMoono.Desktop.Vulkan
             var vm = d.Vk ??= new VkMesh();
             liveMeshes.Add(vm);
             long total = 0;
+            Span<long> offsets = stackalloc long[vm.ChannelOffsets.Length];
             for (int c = 0; c < upload.Channels.Length; c++)
             {
                 var array = upload.Channels[c];
-                vm.ChannelOffsets[c] = -1;
+                offsets[c] = -1;
                 if (array == null) continue;
-                vm.ChannelOffsets[c] = total;
+                offsets[c] = total;
                 total = Align(total + Bytes(array), 16);
             }
-            vm.IndexOffset = total;
+            long indexOffset = total;
             total += (long)(upload.Indices?.Length ?? 0) * 4;
             var old = vm.Buffer;
+            VkBufferAlloc buffer;
+            try
+            {
+                VkFault.OutOfMemoryEvery("alloc-every");
+                buffer = VkBufferAlloc.Create(vk, Math.Max(16, total),
+                    VkBufferUsageFlags.VertexBufferBit | VkBufferUsageFlags.IndexBufferBit | VkBufferUsageFlags.TransferDstBit, hostWrite: true, allowTransferInstead: true);
+            }
+            catch
+            {
+                // The old data no longer matches the mesh's submeshes (their index ranges are the
+                // new upload's): the mesh draws nothing until its next upload. The old buffer is
+                // retired, never destroyed while recorded draws may still read it.
+                if (old != null) frames.Retire(() => old.Destroy(vk));
+                vm.Buffer = null;
+                throw;
+            }
             if (old != null) frames.Retire(() => old.Destroy(vk));
-            var buffer = vm.Buffer = VkBufferAlloc.Create(vk, Math.Max(16, total),
-                VkBufferUsageFlags.VertexBufferBit | VkBufferUsageFlags.IndexBufferBit | VkBufferUsageFlags.TransferDstBit, hostWrite: true, allowTransferInstead: true);
+            vm.Buffer = buffer;
+            offsets.CopyTo(vm.ChannelOffsets);
+            vm.IndexOffset = indexOffset;
             byte* target;
             VkBuffer staging = default;
             long stagingOffset = 0;

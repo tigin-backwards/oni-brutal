@@ -5,5 +5,10 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../../src/OniMoono.Assets/OniMoono.Assets.csproj" />
+    <!-- Its SPIRV-Tools native library validates the Vulkan programs (`vulkan` mode). -->
+    <PackageReference Include="Ahwoo.BRUTAL.ShaderC" />
   </ItemGroup>
+  <PropertyGroup>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
 </Project>

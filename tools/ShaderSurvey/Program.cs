@@ -38,6 +38,7 @@ switch (mode)
     case "dump": Dump(args[2], args[3], uint.Parse(args[4])); return 0;
     case "params": Params(args[2], uint.Parse(args[3])); return 0;
     case "check-metal": return CheckMetal();
+    case "vulkan": return VulkanSurvey.Run(dataDir, args[2], Console.Out);
     case "compare-metal": return MetalCompare.Run(Data.Shaders(dataDir), Console.Out, args.Length > 2 ? args[2] : null);
     default: Console.Error.WriteLine("unknown mode " + mode); return 2;
 }

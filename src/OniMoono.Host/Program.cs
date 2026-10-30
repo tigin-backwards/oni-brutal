@@ -2738,7 +2738,7 @@ namespace OniMoono.Host
         /// --dxgi on|off: Windows, presenting through DXGI (OniMoono.Desktop.Gl.DxgiTarget), over
         /// the Moono Tweaks settings; null when not given (then the effective value).
         public bool? Dxgi;
-        /// Diagnostics (--dxgi-fault WHAT): a made-up DXGI failure (DxgiTarget.Fault).
+        /// Diagnostics (--dxgi-fault WHAT): a made-up DXGI failure (DxgiSwapChain.Fault).
         public string? DxgiFault;
         /// --no-tweaks-menu: the main menu without our Moono Tweaks button, as the original's (test
         /// runs compared with the original game: scripts/e2e.py).

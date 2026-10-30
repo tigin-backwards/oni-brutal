@@ -81,7 +81,7 @@ namespace OniMoono.Desktop.Gl
             this.splash = splash;
             windowWidth = width;
             windowHeight = height;
-            if (OperatingSystem.IsWindows() && DxgiTarget.Enabled) dxgiWindow = (IntPtr)window.GetWin32Window();
+            if (OperatingSystem.IsWindows() && DxgiSwapChain.Enabled) dxgiWindow = (IntPtr)window.GetWin32Window();
             thread = new Thread(Run) { Name = "Presenter", IsBackground = true };
             thread.Start();
         }
@@ -368,7 +368,7 @@ namespace OniMoono.Desktop.Gl
             return null;
         }
 
-        static string MadeUp => DxgiTarget.Fault != null ? $" (a made-up fault: --dxgi-fault {DxgiTarget.Fault})" : "";
+        static string MadeUp => DxgiSwapChain.Fault != null ? $" (a made-up fault: --dxgi-fault {DxgiSwapChain.Fault})" : "";
 
         /// Makes the target ready for a `width` x `height` picture, its framebuffer bound for
         /// drawing; falls back to OpenGL's when it fails. Returns whether rows are flipped.

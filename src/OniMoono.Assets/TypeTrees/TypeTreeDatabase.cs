@@ -5,7 +5,7 @@ using System.Text.Json;
 
 namespace OniMoono.Assets.TypeTrees
 {
-    /// Unity 6000.3.5f2 release type trees for native classes, by class id. Player files strip
+    /// Unity 6000.3.17f1 (U60) release type trees for native classes, by class id. Player files strip
     /// their type trees; these describe the bytes (Data/typetrees-*.json.gz, from Unity's type
     /// metadata dump for this exact editor version).
     public static class TypeTreeDatabase

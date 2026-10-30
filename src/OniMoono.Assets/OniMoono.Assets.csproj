@@ -5,7 +5,7 @@
     <RootNamespace>OniMoono.Assets</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Data/typetrees-6000.3.5f2.json.gz" LogicalName="typetrees.json.gz" />
+    <EmbeddedResource Include="Data/typetrees-6000.3.17f1.json.gz" LogicalName="typetrees.json.gz" />
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="OniMoono.Assets.Tests" />

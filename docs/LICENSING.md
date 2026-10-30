@@ -99,10 +99,10 @@ Steamworks (`libsteam_api.so`, Steamworks.NET under MIT); `cimgui.so` (Dear ImGu
 
 ## Provenance of the bundled type trees
 
-`src/OniMoono.Assets/Data/typetrees-6000.3.5f2.json.gz` describes how Unity 6000.3.5f2 lays
+`src/OniMoono.Assets/Data/typetrees-6000.3.17f1.json.gz` describes how Unity 6000.3.17f1 lays
 out each native class's fields in a release build. The game's data files don't include this
 information, so the asset reader needs it. It is a compacted copy (field names, types, sizes and
-flags only) of the `InfoJson_6000.3.5f2.json` dump in AssetRipper's public TypeTreeDumps
+flags only) of the `InfoJson/6000.3.17f1.json` dump in AssetRipper's public TypeTreeDumps
 repository (github.com/AssetRipper/TypeTreeDumps). That repository produces its dumps with
 the TypeTreeDumper tool, running the Windows Unity Editor from Unity's download archive.
 

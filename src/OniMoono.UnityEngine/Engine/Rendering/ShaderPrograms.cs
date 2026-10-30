@@ -44,6 +44,7 @@ namespace OniMoono.Engine.Rendering
         readonly ShaderProgramTable table;
         readonly Dictionary<int, ShaderVariant> variants = new();
         readonly Dictionary<int, MetalProgram> metalPrograms = new();
+        readonly Dictionary<int, VulkanProgram> vulkanPrograms = new();
         readonly Dictionary<(Fields Pass, string Stage, int Blob), ShaderParameters> parameters = new();
         /// Legacy shaders: each blob's channel mask, from the parsed form (null otherwise).
         readonly Dictionary<int, uint> legacyChannels;
@@ -126,6 +127,19 @@ namespace OniMoono.Engine.Rendering
                 GeometrySource = stages.GetValueOrDefault("GEOMETRY"),
                 ChannelMask = channels,
             };
+        }
+
+        /// A Vulkan program (every stage), decoded on first use.
+        public VulkanProgram Vulkan(int blobIndex)
+        {
+            if (Platform != ShaderNative.VulkanPlatform) throw new InvalidOperationException($"Shader platform {Platform} has no Vulkan programs.");
+            lock (vulkanPrograms)
+            {
+                if (vulkanPrograms.TryGetValue(blobIndex, out var v)) return v;
+                v = VulkanProgram.Read(table.Get(blobIndex));
+                vulkanPrograms[blobIndex] = v;
+                return v;
+            }
         }
 
         /// A Metal stage program, decoded on first use.
@@ -234,10 +248,13 @@ namespace OniMoono.Engine.Rendering
         /// among the pass's OpenGLCore programs, an exact match of the enabled keywords the pass
         /// knows; otherwise the one with most matches, then fewest extra keywords, then the
         /// earliest.
-        public static int SelectVariant(ShaderPass pass, Func<string, bool> isEnabled)
+        public static int SelectVariant(ShaderPass pass, Func<string, bool> isEnabled) => SelectVariant(pass.Variants, isEnabled);
+
+        /// The blob index of the variant among `variants` that rule selects (-1: none).
+        public static int SelectVariant(ProgramVariant[] variants, Func<string, bool> isEnabled)
         {
-            int best = SelectIndex(pass.Variants, isEnabled);
-            return best < 0 ? -1 : pass.Variants[best].BlobIndex;
+            int best = SelectIndex(variants, isEnabled);
+            return best < 0 ? -1 : variants[best].BlobIndex;
         }
 
         /// The position in `variants` of the variant that rule selects (-1 when there is none).

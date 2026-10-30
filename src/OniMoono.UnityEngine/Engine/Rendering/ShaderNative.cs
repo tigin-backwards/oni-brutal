@@ -63,6 +63,9 @@ namespace OniMoono.Engine.Rendering
         /// (ShaderPrograms.SelectStages); empty for shaders without Metal programs.
         public ProgramVariant[] MetalVertexVariants = Array.Empty<ProgramVariant>();
         public ProgramVariant[] MetalFragmentVariants = Array.Empty<ProgramVariant>();
+        /// Its Vulkan programs (every stage in one, keyed by the union of their keywords, with
+        /// their parameter blobs); empty for shaders without Vulkan programs.
+        public ProgramVariant[] VulkanVariants = Array.Empty<ProgramVariant>();
     }
 
     /// A program variant: its entry in the platform's blob table, its keywords and (Metal) its
@@ -88,6 +91,8 @@ namespace OniMoono.Engine.Rendering
         public const uint OpenGLCorePlatform = ShaderCompilerPlatform.OpenGLCore;
         /// Metal in ShaderCompilerPlatform.
         public const uint MetalPlatform = ShaderCompilerPlatform.Metal;
+        /// Vulkan in ShaderCompilerPlatform.
+        public const uint VulkanPlatform = ShaderCompilerPlatform.Vulkan;
 
         public string ShaderName = "";
         /// The device's compiled programs (see MeshNative.Gpu).
@@ -109,6 +114,8 @@ namespace OniMoono.Engine.Rendering
         bool programsLoaded;
         ShaderPrograms metalPrograms;
         bool metalProgramsLoaded;
+        ShaderPrograms vulkanPrograms;
+        bool vulkanProgramsLoaded;
 
         /// The OpenGLCore programs (null when the shader has none).
         public ShaderPrograms Programs
@@ -127,12 +134,22 @@ namespace OniMoono.Engine.Rendering
         /// Whether the shader carries programs for a ShaderCompilerPlatform.
         public bool HasProgramsFor(uint platform) => platform == OpenGLCorePlatform ? HasOpenGLCorePrograms : Array.IndexOf(Platforms, platform) >= 0;
 
-        /// The programs for a ShaderCompilerPlatform (OpenGLCore or Metal; null when the shader
-        /// has none for it).
+        /// The programs for a ShaderCompilerPlatform (OpenGLCore, Metal or Vulkan; null when the
+        /// shader has none for it).
         public ShaderPrograms ProgramsFor(uint platform)
         {
             if (platform == OpenGLCorePlatform) return Programs;
-            if (platform != MetalPlatform) throw new ArgumentOutOfRangeException(nameof(platform), platform, "Programs are read for OpenGLCore (15) and Metal (14).");
+            if (platform == VulkanPlatform)
+                lock (this)
+                {
+                    if (!vulkanProgramsLoaded)
+                    {
+                        vulkanPrograms = Data == null ? null : ShaderPrograms.Load(Data, VulkanPlatform);
+                        vulkanProgramsLoaded = true;
+                    }
+                    return vulkanPrograms;
+                }
+            if (platform != MetalPlatform) throw new ArgumentOutOfRangeException(nameof(platform), platform, "Programs are read for OpenGLCore (15), Metal (14) and Vulkan (18).");
             lock (this)
             {
                 if (!metalProgramsLoaded)
@@ -215,6 +232,7 @@ namespace OniMoono.Engine.Rendering
                     Variants = legacy ? ShaderPrograms.LegacyVariants(p) : ShaderPrograms.Variants(p, KeywordNames),
                     MetalVertexVariants = legacy ? Array.Empty<ProgramVariant>() : ShaderPrograms.StageVariants(p, "progVertex", KeywordNames, MetalPlatform),
                     MetalFragmentVariants = legacy ? Array.Empty<ProgramVariant>() : ShaderPrograms.StageVariants(p, "progFragment", KeywordNames, MetalPlatform),
+                    VulkanVariants = legacy ? Array.Empty<ProgramVariant>() : ShaderPrograms.StageVariants(p, "progVertex", KeywordNames, VulkanPlatform),
                 }).ToArray(),
             }).ToArray();
 
@@ -223,6 +241,8 @@ namespace OniMoono.Engine.Rendering
             {
                 metalPrograms = null;
                 metalProgramsLoaded = false;
+                vulkanPrograms = null;
+                vulkanProgramsLoaded = false;
             }
             HasOpenGLCorePrograms = Platforms.Contains(OpenGLCorePlatform);
             ShaderRegistry.Register(this);

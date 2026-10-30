@@ -41,6 +41,7 @@ namespace OniMoono.Host
             ["cimgui"] = "Klei's ImGui dev tools; the Mac build compiles them out and ships no cimgui",
             ["libEOSSDK-Mac-Shipping"] = "Epic Online Services; the game never creates an EOS platform",
             ["EOSSDK-Win64-Shipping.dll"] = "Epic Online Services; the game never creates an EOS platform",
+            ["libEOSSDK-Linux-Shipping"] = "Epic Online Services (U60 names the Linux library too); the game never creates an EOS platform",
             ["rail_api64"] = "WeGame's Rail SDK (firstpass' bindings); neither the Linux nor the Mac build ships it",
             ["sdkencryptedappticket"] = "Steam's encrypted app tickets (Steamworks.NET's bindings); no game assembly names them, and the Mac build ships no library",
         };

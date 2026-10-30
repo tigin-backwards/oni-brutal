@@ -38,7 +38,11 @@ launch options:
 - `--gpu default|discrete|integrated`: the graphics card on a laptop with two
   ([ARCHITECTURE.md](ARCHITECTURE.md#2-process-and-assembly-structure), "The GPU option").
 - `--renderer auto|vulkan|opengl`: the graphics API; auto is Vulkan, or OpenGL when Vulkan can't
-  start ([ARCHITECTURE.md](ARCHITECTURE.md#35-rendering)).
+  start, the driver is on a short deny list, or an earlier start with this graphics card,
+  driver and Moono build never got its first frames on screen; vulkan always tries Vulkan
+  ([ARCHITECTURE.md](ARCHITECTURE.md#35-rendering)). If Vulkan stops working in play, the game
+  quits with an error; choose OpenGL here or under Renderer in Moono Tweaks if it keeps
+  happening.
 
 Older setups put `--game-tweak exact` in the launch options; remove it (the setup prints the new
 line) to choose in the game instead.

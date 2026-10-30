@@ -1284,9 +1284,9 @@ game or mod code can notice. Each says how it is resolved, or why it is kept.
   (mods' bundles built with other Unity versions; docs/research/mod-bundle-shaders.md) runs its
   GLCore programs compiled to SPIR-V under the same conventions (§3.5, *Programs*). A device
   lost in play, or a window it can no longer present to, ends the game with an error (Unity's
-  player does the same when its device is removed). After a lost device the next starts use
-  OpenGL until the driver changes or a Vulkan session ends cleanly; after a presenting
-  failure only the next start does.
+  player does the same when its device is removed) that says how to choose OpenGL; nothing
+  switches by itself. A start that never gets its first frames on screen makes auto use
+  OpenGL for that GPU, driver and build (§3.5, *Starting*).
 - **D55 Instance fields injected into patches of static methods.** A patch method's `___name`
   parameter gets the original's field `name`; Harmony emits `ldarg.0; ldfld name` for an instance
   field even when the original is static, so it reads the field's offset in whatever object the
@@ -1525,11 +1525,30 @@ without U60's Vulkan programs* below).
 The renderer option (`--renderer auto|vulkan|opengl`, settings.json's `renderer`, the Moono
 Tweaks screen's "Renderer" row; `Renderers.Open`) picks one: auto and vulkan try Vulkan first,
 and any failure to start it (no loader, no GPU with dynamic rendering and synchronization2, no
-surface or swapchain for the window) releases what was made and opens
-an OpenGL window instead. Player.log names the renderer and why (`renderer: Vulkan (auto,
-default)`, `renderer: OpenGL (Vulkan unavailable: …)`). Auto also refuses software Vulkan devices
-(Mesa's lavapipe: the OpenGL driver is hardware there, under WSLg Mesa's d3d12) and a driver the
-device was lost on in an earlier run; `--renderer vulkan` takes either. GL 4.5 is available on
+surface or swapchain for the window) releases what was made and opens an OpenGL window
+instead. Player.log names the renderer and why (`renderer: Vulkan (auto, default)`,
+`renderer: OpenGL (Vulkan unavailable: …)`). Auto also refuses software Vulkan devices (Mesa's
+lavapipe: the OpenGL driver is hardware there, under WSLg Mesa's d3d12), the drivers on a short
+deny list and a start the guard below recorded as crashed; `--renderer vulkan` takes all of
+them.
+
+**Starting** (`VkStartGuard`, `VkDenyList`, as Firefox's DriverCrashGuard and Unreal's
+DriverDenyList). Once the GPU is chosen and before its device is made, a line `starting KEY`
+goes into `vulkan-start-guard.txt` in the player's cache folder, KEY naming the GPU (vendor and
+device ids), the driver's version and Moono's build (the host's informational version). When
+the first 60 frames are presented (the first pipelines built and presents done), or the game
+ends cleanly before that, the key's lines go. A `starting` line found at the next launch is a
+start that never got there (a crash, or a hang the user ended): it becomes `crashed KEY`, and
+auto starts that key on OpenGL with the reason in the log, for as long as the GPU, driver and
+build stay the same; another one tries Vulkan again. `--renderer vulkan` always tries Vulkan,
+and its clean start clears the key. A start that falls back cleanly (Vulkan unavailable) leaves
+no line. The guard is not consulted for anything that happens later: a device lost in play, or
+presenting that fails for good, quits the game with an error naming Vulkan, Moono Tweaks'
+"Renderer" row and `--renderer opengl` and giving the log's path, and the next start tries
+Vulkan as before. The deny list, under auto only: Intel's Windows drivers older than 101.5333
+(the threshold Unreal's DriverDenyList uses; Intel's Windows `driverVersion` is
+`major << 14 | build` of the driver's last two version fields, as vulkan.gpuinfo.org decodes
+it), and Mesa's Dozen (Vulkan over Direct3D 12) on any system. GL 4.5 is available on
 Linux drivers and on WSLg hardware via Mesa d3d12 (verified: GL 4.6 core on an RTX 3090 with
 `GALLIUM_DRIVER=d3d12`).
 
@@ -1759,23 +1778,25 @@ frames to a device thread; only the work posted for resources differs (`IResourc
   of the refresh rate as OpenGL's swap interval makes it. A swapchain that cannot be made (out
   of memory during a resize) is tried again after 0.1 s, the delay doubling up to 2 s, with no
   frames shown meanwhile; presenting is given up only after five failures in a row spanning
-  ten seconds. The old swapchain is destroyed either way. The swapchain format is B8G8R8A8 or R8G8B8A8 UNORM in sRGB
-  non-linear colour space, written as OpenGL's default framebuffer is (no sRGB encoding).
-- *Device loss.* At start-up any failure falls back to OpenGL. A device lost in play cannot be
-  recovered in place (every texture, mesh and program would have to be made again, and the
-  non-readable textures have no CPU copy): the device thread stops recording, the log names
-  the loss, the game quits with an error, and a marker in the cache folder makes auto use
-  OpenGL from the next start until the driver changes. Presenting that fails for good (a lost
-  surface, a swapchain still not made after its retries, a swapchain format that takes no
-  copies) also quits with the error rather than running on with a black window, but its
-  marker costs one start only (`Renderers.MarkerVerdict`): the window or the display, more
-  often than the driver, is at fault, so the start after uses Vulkan again. A Vulkan session
-  that ends cleanly (with `--renderer vulkan`, or after a driver change) removes the marker.
+  ten seconds. The old swapchain is destroyed either way. The swapchain format is B8G8R8A8 or
+  R8G8B8A8 UNORM in sRGB non-linear colour space, written as OpenGL's default framebuffer is (no
+  sRGB encoding).
+- *Device loss.* At start-up any failure falls back to OpenGL (*Starting* above). A device
+  lost in play cannot be recovered in place (every texture, mesh and program would have to be
+  made again, and the non-readable textures have no CPU copy), nor switched to OpenGL, which
+  would need the same: the device thread stops recording, the log names the loss, and the game
+  quits with an error saying Vulkan stopped working, that OpenGL can be chosen under Renderer in
+  Moono Tweaks or with `--renderer opengl` if it keeps happening, and where the log is.
+  Presenting that fails for good (a lost surface, a swapchain still not made after its
+  retries, a swapchain format that takes no copies) quits the same way rather than running on
+  with a black window. Neither leaves a mark for the next start.
   `ONI_VULKAN_FAIL` takes a comma-separated list of faults for tests (`VkFault`): `context`,
   `device`, `presenter` and `presenter-create` fail start-up at that step; `present-after:N`
   fails presenting at frame N and `present-oom-after:N` makes three swapchain creations run
   out of memory from frame N; `alloc-every:N`, `pipeline-every:N` and `program-every:N` make
-  every Nth texture or mesh allocation, pipeline or program build run out of memory.
+  every Nth texture or mesh allocation, pipeline or program build run out of memory;
+  `crash-at:N` ends the process at presented frame N as a crash would, and `guard-build:X`
+  keys the start-up guard to build X.
 - *Diagnostics.* `--vulkan-validation` (or `ONI_VULKAN_VALIDATION=1`) enables the Khronos
   validation layer when installed, its messages in the log; `--frame-stats` counts draws,
   pipeline binds, render passes, passes ended by uploads and submits; GPU frame time comes from

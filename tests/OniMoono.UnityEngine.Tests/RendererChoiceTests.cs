@@ -41,7 +41,14 @@ namespace OniMoono.Tests
             Assert.Equal(0, VkContext.Choose([Integrated, Discrete], "integrated", false, out var reason));
             Assert.Equal("Radeon (integrated, gpu option integrated)", reason);
             // Integrated asked for on a machine with only a discrete GPU: that one.
-            Assert.Equal(0, VkContext.Choose([Discrete, Software], "integrated", false, out _));
+            Assert.Equal(0, VkContext.Choose([Discrete, Software], "integrated", false, out reason));
+            Assert.Equal("RTX (discrete; gpu option integrated prefers an integrated GPU, and none is usable)", reason);
+            // Default and discrete on a machine with only an integrated GPU: that one.
+            Assert.Equal(0, VkContext.Choose([Integrated, Software], "default", false, out reason));
+            Assert.Equal("Radeon (integrated; gpu option default prefers a discrete GPU, and none is usable)", reason);
+            Assert.Equal(1, VkContext.Choose([Software, Integrated], "discrete", true, out _));
+            // Two of a kind: the first Vulkan lists (the order PRIME variables steer).
+            Assert.Equal(1, VkContext.Choose([Integrated, Discrete, Discrete with { Name = "second" }], "discrete", false, out _));
         }
 
         [Fact]

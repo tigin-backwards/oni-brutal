@@ -97,7 +97,11 @@ namespace OniMoono.Desktop.Vulkan
             }
             if (best >= 0)
             {
-                reason = $"{candidates[best].Name} ({TypeName(candidates[best].Type)}, gpu option {gpuChoice})";
+                var chosen = candidates[best];
+                var wanted = gpuChoice == "integrated" ? VkPhysicalDeviceType.IntegratedGpu : VkPhysicalDeviceType.DiscreteGpu;
+                reason = chosen.Type == wanted
+                    ? $"{chosen.Name} ({TypeName(chosen.Type)}, gpu option {gpuChoice})"
+                    : $"{chosen.Name} ({TypeName(chosen.Type)}; gpu option {gpuChoice} prefers {(wanted == VkPhysicalDeviceType.IntegratedGpu ? "an integrated" : "a discrete")} GPU, and none is usable)";
                 return best;
             }
             if (candidates.Count == 0) reason = "no Vulkan device";

@@ -20,8 +20,8 @@ Sources:
 | Engine API | Done: ApiCheck back to the 13 known UI Toolkit members. |
 | UI packages | Done: `TMP_Text.SetCharArray(ReadOnlySpan<char>)` from the spec; package ApiCheck 0 missing. |
 | Game tweaks | Static review done (2 fixed, overlays left out where U60 does their work); runtime checks need a U60 player. |
-| Linux build | Waiting for the 761015 Linux depot download. |
-| Main menu and a save on U60 | Not yet run. |
+| Linux build | Done: frozen at `~/projects/oni-linux-761015`, DLC content copied (not linked) from the frozen Windows copy, test install `out/local-tools/u60orig`. |
+| Main menu and a save on U60 | Linux: main menu reached, no errors. Save: in the QA verify run. Windows: waiting for a time the user isn't playing. |
 | Performance | Not yet measured. |
 | QA and e2e on U60 | Not yet run. |
 
@@ -108,9 +108,19 @@ game.
 - **Incremental GC:** a Unity player setting plus `gc-max-time-slice`. The game's code adds no
   `GarbageCollector` calls. Not applicable to CoreCLR.
 - **IMGUI developer tools on Linux:** to be checked with the clean-room IMGUI once the Linux build runs.
-- **Vulkan as the Linux default:** the Windows data still carries OpenGL programs
-  (`--check-shaders` passes). Whether the Linux data still does needs the Linux build.
-- **Linux restarter fix:** to compare with `src/OniMoono.Restarter` once the Linux build is here.
+- **Vulkan as the Linux default:** the data of both builds still carries OpenGL programs.
+  `--check-shaders` compiles all 120 shaders with no errors on the Linux U60 data, and passes on
+  the Windows data too. Moono keeps rendering with OpenGL.
+- **Linux restarter fix:** `App.Restart` still starts `Restarter` beside the game with the same
+  arguments (only the compiler shape changed), so Klei's fix is inside their Restarter binary
+  (12.5 MB in U59, 2.3 MB in U60). Moono's own `src/OniMoono.Restarter` replaces it; no change.
+- **Plugin layout (Linux):**
+  - U60's Linux build moves its plugins into `Plugins/x86_64/` and keeps `libsteam_api.so` in
+    `Plugins/AnyCPU/`. Moono looked in `x86_64` only, so on a real install SteamAPI.Init would
+    have failed and the game quit. AnyCPU is now searched too (`GameLayout`).
+  - FMOD is the logging build, `libfmodstudioL.so` (`fmodstudioL.dll` on Windows); all 571 of
+    its entry points resolve.
+  - The Windows build adds `Plugins/ARM64/` (Windows on ARM).
 
 ## Game tweaks
 

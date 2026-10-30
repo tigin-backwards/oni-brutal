@@ -551,6 +551,28 @@ namespace OniMoono.Host
                 }
                 return results.Count == 1 && results.Contains("ConfigureBuildingTemplate") ? "two frames up is the constructor's caller, as on Mono" : throw new InvalidOperationException($"two frames up: {string.Join(", ", results)}");
             });
+            Check("A transpiler's closure call in a method a mod prefixes (PatchFrames)", () =>
+            {
+                PatchFrames.Install();
+                // As issue #32: Blueprints Expanded prefixes SelectToolHoverTextCard.UpdateHoverElements,
+                // then Better Info Cards' transpiler of it adds a CodeInstruction.CallClosure call,
+                // of a dynamic method. The patch failed with InvalidOperationException.
+                System.Reflection.Emit.ModuleBuilder Module(string name) => System.Reflection.Emit.AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(name), System.Reflection.Emit.AssemblyBuilderAccess.Run).DefineDynamicModule(name);
+                var t = Module("CheckClosureTarget").DefineType("ClosureTarget", TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed);
+                var value = t.DefineMethod("Value", MethodAttributes.Public | MethodAttributes.Static, typeof(int), [typeof(int)]);
+                var il = value.GetILGenerator();
+                il.Emit(System.Reflection.Emit.OpCodes.Ldarg_0); il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                var target = t.CreateType();
+                var m = Module("CheckClosureMod").DefineType("ClosureMod", TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed);
+                il = m.DefineMethod("Prefix", MethodAttributes.Public | MethodAttributes.Static, typeof(void), Type.EmptyTypes).GetILGenerator();
+                il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                var mod = m.CreateType();
+                var harmony = new HarmonyLib.Harmony("OniMoono.Host.Check");
+                harmony.Patch(target.GetMethod("Value"), prefix: new HarmonyLib.HarmonyMethod(mod.GetMethod("Prefix")));
+                harmony.Patch(target.GetMethod("Value"), transpiler: new HarmonyLib.HarmonyMethod(typeof(Program), nameof(ClosureTranspiler)));
+                int result = target.GetMethod("Value")!.CreateDelegate<Func<int, int>>()(1);
+                return result == 42 ? "the closure's call is patched in, as on Mono" : throw new InvalidOperationException($"Value(1) returned {result}");
+            });
             Check("Harmony prefixes on P/Invokes, one whose export is missing (PInvokePatches)", () =>
             {
                 PInvokePatches.Install();
@@ -2422,6 +2444,19 @@ namespace OniMoono.Host
         static int skipped, skippedExport;
         static bool SkipMissing() { skipped++; return false; }
         static bool SkipExport() { skippedExport++; return false; }
+
+        /// CheckRuntimeServices' transpiler: adds 41 before the ret through a closure's dynamic
+        /// method, as CodeInstruction.CallClosure makes one for a lambda with captured state.
+        static IEnumerable<HarmonyLib.CodeInstruction> ClosureTranspiler(IEnumerable<HarmonyLib.CodeInstruction> instructions)
+        {
+            int offset = 41;
+            foreach (var instruction in instructions)
+            {
+                if (instruction.opcode == System.Reflection.Emit.OpCodes.Ret)
+                    yield return HarmonyLib.CodeInstruction.CallClosure<Func<int, int>>(x => x + offset);
+                yield return instruction;
+            }
+        }
 
         /// A dynamic method calling one of Program's P/Invokes, compiled optimized in any build.
         static T Caller<T>(string pinvoke) where T : Delegate

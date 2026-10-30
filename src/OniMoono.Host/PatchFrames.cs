@@ -57,7 +57,7 @@ namespace OniMoono.Host
             var mods = new HashSet<(Module, int)>();
             foreach (var patches in new[] { patchInfo.prefixes, patchInfo.postfixes, patchInfo.finalizers, patchInfo.innerprefixes, patchInfo.innerpostfixes })
                 foreach (var patch in patches)
-                    if (patch.PatchMethod is { } method && !Ours(method.Module.Assembly.GetName().Name))
+                    if (patch.PatchMethod is { } method and not DynamicMethod && !Ours(method.Module.Assembly.GetName().Name))
                     {
                         disableInlining(method);
                         mods.Add((method.Module, method.MetadataToken));
@@ -79,7 +79,10 @@ namespace OniMoono.Host
             for (int i = 0; i < __result.Count; i++)
             {
                 var call = __result[i];
-                if (call.opcode != OpCodes.Call && call.opcode != OpCodes.Callvirt || call.operand is not MethodInfo { } target) continue;
+                // A transpiler's call of a dynamic method (CodeInstruction.CallClosure) is no patch
+                // method, and its MetadataToken throws on CoreCLR (Better Info Cards' transpiler
+                // of a method Blueprints Expanded prefixes).
+                if (call.opcode != OpCodes.Call && call.opcode != OpCodes.Callvirt || call.operand is not MethodInfo { } target || target is DynamicMethod) continue;
                 if (!mods.Contains((target.Module, target.MetadataToken))) continue;
                 int next = i + 1;
                 while (next < __result.Count && __result[next].opcode == OpCodes.Nop) next++;

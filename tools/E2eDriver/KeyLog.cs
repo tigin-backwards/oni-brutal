@@ -17,6 +17,8 @@ namespace E2eDriver
         static readonly List<string> down = new List<string>();
         static readonly List<string> events = new List<string>();
         static readonly StringBuilder chars = new StringBuilder();
+        static readonly List<string> wheel = new List<string>();
+        static readonly List<string> wheelEvents = new List<string>();
         static GameObject listener;
 
         /// The key codes Input.GetKeyDown held for, one entry a frame (codes in one frame joined
@@ -26,6 +28,11 @@ namespace E2eDriver
         public static string Events => string.Join(" ", events.ToArray());
         /// The characters of KeyDown events that type one, in order.
         public static string Chars => chars.ToString();
+        /// Each frame's Input.mouseScrollDelta and Input.GetAxis("Mouse ScrollWheel") where either
+        /// is not zero, "x,y/axis", space-separated.
+        public static string Wheel => string.Join(" ", wheel.ToArray());
+        /// The delta of each IMGUI ScrollWheel event, "x,y", space-separated.
+        public static string WheelEvents => string.Join(" ", wheelEvents.ToArray());
 
         public static bool Recording => listener != null;
 
@@ -35,6 +42,8 @@ namespace E2eDriver
             down.Clear();
             events.Clear();
             chars.Length = 0;
+            wheel.Clear();
+            wheelEvents.Clear();
             if (on && listener == null)
             {
                 if (codes == null)
@@ -68,10 +77,16 @@ namespace E2eDriver
             foreach (var c in codes)
                 if (Input.GetKeyDown(c)) frame = frame == null ? c.ToString() : frame + "+" + c;
             if (frame != null) down.Add(frame);
+            var scroll = Input.mouseScrollDelta;
+            float axis = Input.GetAxis("Mouse ScrollWheel");
+            if (scroll != Vector2.zero || axis != 0f) wheel.Add(Number(scroll.x) + "," + Number(scroll.y) + "/" + Number(axis));
         }
+
+        static string Number(float v) => v.ToString("0.####", System.Globalization.CultureInfo.InvariantCulture);
 
         internal static void Gui(Event e)
         {
+            if (e.type == EventType.ScrollWheel) wheelEvents.Add(Number(e.delta.x) + "," + Number(e.delta.y));
             if (e.type != EventType.KeyDown) return;
             if (e.keyCode != KeyCode.None) events.Add(e.keyCode.ToString());
             if (e.character != '\0') chars.Append(e.character);

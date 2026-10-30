@@ -40,6 +40,7 @@ namespace E2eDriver
                 case "count": return Counting.Start(a);
                 case "buildmenu.settled": return BuildMenu.Settled(request);
                 case "keys.log": return KeyLog.Start(a);
+                case "imgui.scrollview": return ImguiProbe.Start(a);
                 case null: throw new DriverError("the request has no cmd");
                 default: throw new DriverError("unknown command " + request.Command);
             }

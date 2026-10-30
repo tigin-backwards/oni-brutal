@@ -66,6 +66,8 @@ namespace OniMoono.Desktop.Gl
         public float[][] Sent;
         /// The bindless handle each sampler was last given (GlBindless).
         public ulong[] SamplerHandles;
+        /// The Vulkan device's program (null on OpenGL; Id is then not a GL name).
+        public Vulkan.VkProgram Vk;
     }
 
     /// What a material and the global properties give one program: its default-block values

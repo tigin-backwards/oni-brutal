@@ -47,6 +47,9 @@ namespace OniMoono.Desktop.Gl
         /// Vertex arrays by program attribute layout, with the mesh layout they were built for.
         public Dictionary<int, (uint VertexArray, MeshLayout Layout)> VertexArrays;
 
+        /// The Vulkan device's buffers (null on OpenGL, whose fields above it leaves unused).
+        public Vulkan.VkMesh Vk;
+
         public void Delete()
         {
             if (VertexArrays != null)

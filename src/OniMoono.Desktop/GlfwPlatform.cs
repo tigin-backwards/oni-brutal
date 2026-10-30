@@ -22,9 +22,15 @@ namespace OniMoono.Desktop
         public bool DebugContext { get; init; }
         /// -monitor N: the monitor to open on, 1-based as in Unity (0: the primary one).
         public int Monitor { get; init; }
+        /// The graphics API the window is made for: an OpenGL 4.5 core context (with a hidden
+        /// window sharing it, for the GL thread), or none, for a Vulkan surface.
+        public RenderApi Api { get; init; } = RenderApi.OpenGl;
     }
 
-    /// The player window (GLFW, OpenGL 4.5 core context) and its input devices.
+    internal enum RenderApi { OpenGl, Vulkan }
+
+    /// The player window (GLFW, with an OpenGL 4.5 core context or for a Vulkan surface) and
+    /// its input devices.
     internal sealed unsafe class GlfwPlatform : IPlatform, IDisposable
     {
         readonly GlfwWindow window, renderWindow;
@@ -50,12 +56,21 @@ namespace OniMoono.Desktop
         /// The original Linux player's executable name, its X11 WM_CLASS.
         const string ApplicationId = "OxygenNotIncluded";
 
-        public GlfwPlatform(WindowSettings settings)
+        /// The API the window was made for.
+        public RenderApi Api { get; }
+
+        static bool errorCallbackSet, initialized;
+
+        /// Initializes GLFW unless it is (the Vulkan device asks it about Vulkan support before
+        /// a window exists). Unity's Linux player is an X11 client (XWayland under Wayland
+        /// compositors), where window positions exist; GLFW's X11 backend is preferred, else
+        /// whatever GLFW finds.
+        public static void Initialize()
         {
-            Glfw.ErrorCallback += (code, description) => Debug.LogWarning($"GLFW {code}: {description}");
-            // Unity's Linux player is an X11 client (XWayland under Wayland compositors), where
-            // window positions exist; prefer GLFW's X11 backend, else whatever GLFW finds.
-            bool initialized = false;
+            if (initialized) return;
+            // Once a process: a platform made again (OpenGL after Vulkan could not start) keeps it.
+            if (!errorCallbackSet) Glfw.ErrorCallback += (code, description) => Debug.LogWarning($"GLFW {code}: {description}");
+            errorCallbackSet = true;
             if (OperatingSystem.IsLinux() && Environment.GetEnvironmentVariable("DISPLAY") is { Length: > 0 }
                 && Glfw.IsPlatformSupported(Brutal.GlfwApi.GlfwPlatform.X11))
             {
@@ -63,17 +78,27 @@ namespace OniMoono.Desktop
                 initialized = Glfw.Init();
                 if (!initialized) Glfw.SetInitHint(GlfwInitHint.Platform, GLFW_ANY_PLATFORM);
             }
-            if (!initialized && !Glfw.Init()) throw new InvalidOperationException("GLFW could not initialize (no display available).");
+            if (!initialized && !(initialized = Glfw.Init())) throw new InvalidOperationException("GLFW could not initialize (no display available).");
+        }
+
+        public GlfwPlatform(WindowSettings settings)
+        {
+            Api = settings.Api;
+            Initialize();
             Glfw.DefaultWindowHints();
-            Glfw.WindowHint(GlfwWindowHint.ClientApi, GLFW_OPENGL_API);
-            Glfw.WindowHint(GlfwWindowHint.ContextVersionMajor, 4);
-            Glfw.WindowHint(GlfwWindowHint.ContextVersionMinor, 5);
-            Glfw.WindowHint(GlfwWindowHint.OpenGlProfile, GLFW_OPENGL_CORE_PROFILE);
-            Glfw.WindowHint(GlfwWindowHint.OpenGlForwardCompat, GLFW_TRUE);
-            Glfw.WindowHint(GlfwWindowHint.OpenGlDebugContext, settings.DebugContext ? GLFW_TRUE : GLFW_FALSE);
-            Glfw.WindowHint(GlfwWindowHint.DepthBits, 24);
-            Glfw.WindowHint(GlfwWindowHint.StencilBits, 8);
-            Glfw.WindowHint(GlfwWindowHint.Doublebuffer, GLFW_TRUE);
+            if (Api == RenderApi.Vulkan) Glfw.WindowHint(GlfwWindowHint.ClientApi, GLFW_NO_API);
+            else
+            {
+                Glfw.WindowHint(GlfwWindowHint.ClientApi, GLFW_OPENGL_API);
+                Glfw.WindowHint(GlfwWindowHint.ContextVersionMajor, 4);
+                Glfw.WindowHint(GlfwWindowHint.ContextVersionMinor, 5);
+                Glfw.WindowHint(GlfwWindowHint.OpenGlProfile, GLFW_OPENGL_CORE_PROFILE);
+                Glfw.WindowHint(GlfwWindowHint.OpenGlForwardCompat, GLFW_TRUE);
+                Glfw.WindowHint(GlfwWindowHint.OpenGlDebugContext, settings.DebugContext ? GLFW_TRUE : GLFW_FALSE);
+                Glfw.WindowHint(GlfwWindowHint.DepthBits, 24);
+                Glfw.WindowHint(GlfwWindowHint.StencilBits, 8);
+                Glfw.WindowHint(GlfwWindowHint.Doublebuffer, GLFW_TRUE);
+            }
             Glfw.WindowHint(GlfwWindowHint.Visible, GLFW_FALSE);
             // Scripted runs take no input from the desktop and do not take its focus either.
             Glfw.WindowHint(GlfwWindowHint.FocusOnShow, settings.IgnoreUserInput ? GLFW_FALSE : GLFW_TRUE);
@@ -109,16 +134,19 @@ namespace OniMoono.Desktop
                 OniMoono.Engine.EngineLog.Engine($"window: monitor {settings.Monitor} of {monitors.Length} at {monitor.Position.X},{monitor.Position.Y}; window at {window.Position.X},{window.Position.Y}");
             SetIcon(window);
             if (mode == FullScreenMode.MaximizedWindow) window.Maximize();
-            // Rendering happens on this thread in a hidden window's context shared with the
-            // visible one, whose context belongs to the presenter thread (GlPresenter).
-            renderWindow = Glfw.CreateWindow(new GlfwWindow.CreateInfo
+            // OpenGL: rendering happens on this thread in a hidden window's context shared with
+            // the visible one, whose context belongs to the presenter thread (GlPresenter).
+            if (Api == RenderApi.OpenGl)
             {
-                Title = settings.Title,
-                Size = new int2(1, 1),
-                Monitor = GlfwMonitor.Null,
-                Share = window,
-            });
-            renderWindow.MakeContextCurrent();
+                renderWindow = Glfw.CreateWindow(new GlfwWindow.CreateInfo
+                {
+                    Title = settings.Title,
+                    Size = new int2(1, 1),
+                    Monitor = GlfwMonitor.Null,
+                    Share = window,
+                });
+                renderWindow.MakeContextCurrent();
+            }
             window.Visible = true;
             if (!settings.IgnoreUserInput) window.Focus();
 
@@ -557,9 +585,10 @@ namespace OniMoono.Desktop
             Closing?.Invoke();
             win32Cursor?.Dispose();
             if (!customCursor.IsNull()) customCursor.Dispose();
-            renderWindow.Dispose();
+            if (Api == RenderApi.OpenGl) renderWindow.Dispose();
             window.Dispose();
             Glfw.Terminate();
+            initialized = false;
         }
 
         // ----- Input -----

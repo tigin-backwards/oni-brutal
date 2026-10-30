@@ -55,6 +55,9 @@ namespace OniMoono.Desktop.Gl
         /// Multi-target framebuffers this texture is attached to (GlDevice.ForgetFramebuffers).
         public List<GlDevice.MrtFramebuffer> MrtFramebuffers;
 
+        /// The Vulkan device's texture (null on OpenGL, whose fields above it leaves unused).
+        public Vulkan.VkTexture Vk;
+
         public void Delete()
         {
             GlDevice.ForgetFramebuffers(this);

@@ -1,0 +1,502 @@
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using Brutal.GlfwApi;
+using Brutal.VulkanApi;
+using OniMoono.Desktop.Gl;
+using OniMoono.Engine;
+
+namespace OniMoono.Desktop.Vulkan
+{
+    /// One offscreen back buffer: colour and depth-stencil images the device thread renders a
+    /// frame into, with what was drawn into it (as GlPresenter's buffers).
+    internal sealed class VkBackBuffer
+    {
+        public VkImageResource Color, Depth;
+        public int Width, Height, Index, DrawnFrame = -1;
+        public bool DrawnThisFrame, ClearedLast, DrawnSinceAllocation;
+    }
+
+    /// Presentation on a thread of its own, as GlPresenter (ARCHITECTURE §3.5): the device
+    /// thread renders each frame into one of three offscreen back buffers, submits it, and hands
+    /// the buffer over; this thread acquires a swapchain image, copies the frame into it
+    /// (flipped: the back buffer is kept in OpenGL's orientation, bottom row first), draws the
+    /// loading splash over it while that runs, and presents. Up to two frames are queued for
+    /// presentation, one with vsync; the swapchain uses FIFO with vsync and IMMEDIATE (else
+    /// MAILBOX) without. The swapchain is made again when the window's size or the present mode
+    /// changes or the surface reports it out of date; a minimized window (a 0x0 surface) is
+    /// not presented to, while frames go on rendering at the size the window had (issue #29).
+    ///
+    /// Ordering needs no semaphores between the two threads: both submit to the one queue, the
+    /// frame before the copy that reads it, and each image's barriers wait for the work that
+    /// earlier submissions did on it. The copy leaves the back buffer as the device thread
+    /// left it (a colour attachment), so its layout tracking stays right.
+    internal sealed unsafe class VkPresenter : IDisposable
+    {
+        const int MaxQueued = 2, MaxQueuedWithVsync = 1, Slots = 2;
+
+        readonly VkContext vk;
+        readonly GlfwWindow window;
+        readonly VkSurfaceKHR surface;
+        readonly VkSplash splash;
+        readonly VkBackBuffer[] buffers = [new() { Index = 0 }, new() { Index = 1 }, new() { Index = 2 }];
+        readonly VkFormat depthFormat;
+        int current;
+        VkBackBuffer handedOver, shown;
+
+        // Swapchain (presenter thread after construction).
+        VkSwapchainKHR swapchain;
+        VkImage[] images = Array.Empty<VkImage>();
+        VkImageView[] views = Array.Empty<VkImageView>();
+        VkSemaphore[] renderDone = Array.Empty<VkSemaphore>();
+        VkImageLayout[] imageLayouts = Array.Empty<VkImageLayout>();
+        public VkFormat SwapchainFormat { get; private set; }
+        VkExtent2D extent;
+        VkPresentModeKHR presentMode;
+        int swapInterval = -1;
+        bool outOfDate;
+        readonly VkPresentModeKHR[] presentModes;
+
+        // Per presenter frame in flight.
+        readonly VkCommandPool pool;
+        readonly CommandBuffer[] commands = new CommandBuffer[Slots];
+        readonly VkFence[] fences = new VkFence[Slots];
+        readonly bool[] submitted = new bool[Slots];
+        readonly VkSemaphore[] acquired = new VkSemaphore[Slots];
+        int slot;
+
+        readonly Thread thread;
+        readonly object gate = new();
+        readonly Queue<(VkBackBuffer Buffer, int Interval, int Width, int Height)> queue = new();
+        int queued;
+        bool stopping, refreshWanted;
+        Exception failure;
+        volatile int windowWidth, windowHeight;
+
+        /// The main thread's frame the device thread is executing (diagnostics).
+        public int Frame;
+
+        /// Makes the surface's first swapchain at once (on the calling thread), so that a
+        /// window Vulkan cannot present to falls back to OpenGL before the game starts.
+        public VkPresenter(VkContext vk, GlfwWindow window, VkSurfaceKHR surface, VkSplash splash, int width, int height, VkFormat depthFormat)
+        {
+            this.vk = vk;
+            this.window = window;
+            this.surface = surface;
+            this.splash = splash;
+            this.depthFormat = depthFormat;
+            windowWidth = Math.Max(1, width);
+            windowHeight = Math.Max(1, height);
+            if (!vk.Physical.GetSurfaceSupportKHR(vk.QueueFamily, surface)) throw new VulkanUnavailableException("the graphics queue cannot present to the window");
+            int modes = vk.Physical.GetSurfacePresentModesKHR_Count(surface);
+            presentModes = new VkPresentModeKHR[modes];
+            vk.Physical.GetSurfacePresentModesKHR_Write(surface, presentModes);
+            try
+            {
+                pool = vk.Device.CreateCommandPool(new VkCommandPoolCreateInfo { QueueFamilyIndex = vk.QueueFamily, Flags = VkCommandPoolCreateFlags.ResetCommandBufferBit }, null);
+                for (int i = 0; i < Slots; i++)
+                {
+                    commands[i] = Brutal.VulkanApi.Abstractions.DeviceExtensions.AllocateCommandBuffer(vk.Device, new VkCommandBufferAllocateInfo { CommandPool = pool, Level = VkCommandBufferLevel.Primary });
+                    fences[i] = vk.Device.CreateFence(new VkFenceCreateInfo(), null);
+                    acquired[i] = vk.Device.CreateSemaphore(new VkSemaphoreCreateInfo(), null);
+                }
+                Recreate(windowWidth, windowHeight, 1);
+                if (swapchain.IsNull()) throw new VulkanUnavailableException("no swapchain could be made for the window");
+            }
+            catch
+            {
+                Dispose();
+                throw;
+            }
+            thread = new Thread(Run) { Name = "Presenter", IsBackground = true };
+            thread.Start();
+        }
+
+        // ----- Device thread -----
+
+        /// The back buffer this frame draws into, of the window's framebuffer size (kept at the
+        /// size a frame began drawing at; see GlPresenter.BackBuffer).
+        public VkBackBuffer BackBuffer(int width, int height, VkFrames frames)
+        {
+            var b = buffers[current];
+            width = Math.Max(1, width);
+            height = Math.Max(1, height);
+            windowWidth = width;
+            windowHeight = height;
+            if (b.Color == null || (b.Width != width || b.Height != height) && !b.DrawnThisFrame) Allocate(b, width, height, frames);
+            else if (PresentTrace.Enabled && (b.Width != width || b.Height != height))
+                PresentTrace.Log($"frame {Frame}: back buffer {b.Index} kept at {b.Width}x{b.Height} for the rest of the frame (the window is {width}x{height})");
+            return b;
+        }
+
+        /// The back buffer to read from (ReadPixels of the screen): this frame's, at the size it
+        /// was drawn.
+        public VkBackBuffer ReadBuffer(int width, int height, VkFrames frames)
+        {
+            var b = buffers[current];
+            return b.Color != null && b.DrawnThisFrame ? b : BackBuffer(width, height, frames);
+        }
+
+        public void Drew(bool clear)
+        {
+            var b = buffers[current];
+            b.DrawnThisFrame = true;
+            b.DrawnSinceAllocation = true;
+            b.ClearedLast = clear;
+        }
+
+        void Allocate(VkBackBuffer b, int width, int height, VkFrames frames)
+        {
+            if (PresentTrace.Enabled)
+                PresentTrace.Log($"frame {Frame}: back buffer {b.Index} allocated {width}x{height} (was {b.Width}x{b.Height}){(b.DrawnThisFrame ? ", discarding what the frame drew into it" : "")}");
+            var (oldColor, oldDepth) = (b.Color, b.Depth);
+            if (oldColor != null) frames.Retire(() => { oldColor.Destroy(vk); oldDepth.Destroy(vk); });
+            b.Color = VkImageResource.Create(vk, VkFormat.R8G8B8A8UNorm, VkImageViewType._2D, width, height, 1, 1, 1,
+                VkImageUsageFlags.ColorAttachmentBit | VkImageUsageFlags.TransferSrcBit | VkImageUsageFlags.TransferDstBit, name: "back buffer");
+            b.Depth = VkImageResource.Create(vk, depthFormat, VkImageViewType._2D, width, height, 1, 1, 1,
+                VkImageUsageFlags.DepthStencilAttachmentBit, name: "back buffer depth");
+            b.Width = width;
+            b.Height = height;
+            b.DrawnSinceAllocation = false;
+        }
+
+        /// Hands the frame drawn into the current back buffer to the presenter (device thread,
+        /// after the frame's commands are submitted), as GlPresenter.Present: a frame that drew
+        /// nothing shows the last frame again.
+        public void Present(int interval, int width, int height)
+        {
+            var b = buffers[current];
+            var choice = GlPresenter.Choose(b.Color != null, b.DrawnSinceAllocation, b.DrawnThisFrame, handedOver != null);
+            bool complete = choice == GlPresenter.PresentChoice.Frame;
+            if (!complete)
+            {
+                b.DrawnThisFrame = false;
+                if (choice == GlPresenter.PresentChoice.Nothing) return;
+                b = handedOver;
+            }
+            else
+            {
+                b.DrawnFrame = Frame;
+                b.DrawnThisFrame = false;
+            }
+            lock (gate)
+            {
+                while (queued >= (interval > 0 ? MaxQueuedWithVsync : MaxQueued) && failure == null) Monitor.Wait(gate);
+                if (failure != null) throw new InvalidOperationException("Presenting failed.", failure);
+                queue.Enqueue((b, interval, Math.Max(1, width), Math.Max(1, height)));
+                queued++;
+                Monitor.PulseAll(gate);
+            }
+            if (!complete) return;
+            handedOver = b;
+            current = (current + 1) % buffers.Length;
+        }
+
+        // ----- Main thread -----
+
+        /// The window's contents were damaged: the last frame is shown again (GlPresenter.Refresh).
+        public void Refresh()
+        {
+            lock (gate)
+            {
+                refreshWanted = true;
+                Monitor.PulseAll(gate);
+            }
+        }
+
+        public void WaitIdle()
+        {
+            lock (gate)
+                while (queued > 0 && failure == null) Monitor.Wait(gate);
+        }
+
+        // ----- Presenter thread -----
+
+        void Run()
+        {
+            try
+            {
+                while (true)
+                {
+                    (VkBackBuffer Buffer, int Interval, int Width, int Height) frame = default;
+                    bool redraw = false;
+                    lock (gate)
+                    {
+                        while (queue.Count == 0 && !stopping && !(refreshWanted && shown != null))
+                        {
+                            if (splash != null && splash.Active)
+                            {
+                                if (!Monitor.Wait(gate, 16)) { redraw = true; break; }
+                            }
+                            else Monitor.Wait(gate);
+                        }
+                        if (queue.Count > 0)
+                        {
+                            frame = queue.Dequeue();
+                            redraw = false;
+                        }
+                        else if (stopping) break;
+                        else redraw = true;
+                        refreshWanted = false;
+                        if (redraw) queued++;
+                    }
+                    if (redraw) Show(shown, swapInterval < 0 ? 1 : swapInterval, windowWidth, windowHeight, gameFrame: false);
+                    else Show(frame.Buffer, frame.Interval, frame.Width, frame.Height, gameFrame: true);
+                    lock (gate)
+                    {
+                        queued--;
+                        Monitor.PulseAll(gate);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                lock (gate)
+                {
+                    failure = e;
+                    queue.Clear();
+                    queued = 0;
+                    Monitor.PulseAll(gate);
+                }
+            }
+        }
+
+        /// Copies a back buffer (null: black) into a swapchain image, the splash over it, and
+        /// presents.
+        void Show(VkBackBuffer b, int interval, int width, int height, bool gameFrame)
+        {
+            if (gameFrame) shown = b;
+            if (gameFrame && splash != null && splash.Active) splash.GameFrame();
+            if (interval != swapInterval || outOfDate || width != extent.Width || height != extent.Height)
+            {
+                Recreate(width, height, interval);
+                if (swapchain.IsNull()) return; // minimized
+            }
+            var s = slot;
+            slot = (slot + 1) % Slots;
+            if (submitted[s])
+            {
+                var fence = fences[s];
+                VkCheck.Ok(vk.Device.PInvoke.vkWaitForFences.Invoke(vk.Device.Handle, 1, &fence, true, -1), "vkWaitForFences (presenter)");
+                vk.Device.PInvoke.vkResetFences.Invoke(vk.Device.Handle, 1, &fence);
+                submitted[s] = false;
+            }
+            int index = 0;
+            var r = vk.Device.PInvoke.vkAcquireNextImageKHR.Invoke(vk.Device.Handle, swapchain, -1, acquired[s], default, &index);
+            if (r == VkResult.ErrorOutOfDateKHR)
+            {
+                outOfDate = true;
+                return;
+            }
+            if (r == VkResult.SuboptimalKHR) outOfDate = true;
+            else VkCheck.Ok(r, "vkAcquireNextImageKHR");
+
+            var cb = commands[s];
+            VkCheck.Ok(vk.Device.PInvoke.vkResetCommandBuffer.Invoke(cb.Handle, 0), "vkResetCommandBuffer");
+            var begin = new VkCommandBufferBeginInfo { Flags = VkCommandBufferUsageFlags.OneTimeSubmitBit };
+            VkCheck.Ok(vk.Device.PInvoke.vkBeginCommandBuffer.Invoke(cb.Handle, &begin), "vkBeginCommandBuffer (presenter)");
+            var target = images[index];
+            Barrier(cb, target, imageLayouts[index], VkImageLayout.TransferDstOptimal, VkPipelineStageFlags2.AllTransferBit, 0, VkPipelineStageFlags2.AllTransferBit, VkAccessFlags2.TransferWriteBit);
+            if (b != null)
+            {
+                var color = b.Color;
+                // The frame is complete: it was submitted before it was handed over.
+                color.ForTransferRead(cb);
+                bool scaled = b.Width != width || b.Height != height;
+                var blit = new VkImageBlit
+                {
+                    SrcSubresource = new VkImageSubresourceLayers { AspectMask = VkImageAspectFlags.ColorBit, LayerCount = 1 },
+                    DstSubresource = new VkImageSubresourceLayers { AspectMask = VkImageAspectFlags.ColorBit, LayerCount = 1 },
+                };
+                blit.SrcOffsets[0] = new VkOffset3D(0, 0, 0);
+                blit.SrcOffsets[1] = new VkOffset3D(b.Width, b.Height, 1);
+                // OpenGL's bottom-first rows to the window's top-first ones.
+                blit.DstOffsets[0] = new VkOffset3D(0, height, 0);
+                blit.DstOffsets[1] = new VkOffset3D(width, 0, 1);
+                cb.BlitImage(color.Image, VkImageLayout.TransferSrcOptimal, target, VkImageLayout.TransferDstOptimal, new ReadOnlySpan<VkImageBlit>(&blit, 1),
+                    scaled ? VkFilter.Linear : VkFilter.Nearest);
+                // Back to what the device thread expects.
+                color.ForAttachment(cb);
+            }
+            else
+            {
+                var black = new VkClearColorValue();
+                var range = new VkImageSubresourceRange { AspectMask = VkImageAspectFlags.ColorBit, LevelCount = 1, LayerCount = 1 };
+                vk.Device.PInvoke.vkCmdClearColorImage.Invoke(cb.Handle, target, VkImageLayout.TransferDstOptimal, &black, 1, &range);
+            }
+            var layout = VkImageLayout.TransferDstOptimal;
+            if (splash != null && splash.Active)
+            {
+                Barrier(cb, target, layout, VkImageLayout.ColorAttachmentOptimal, VkPipelineStageFlags2.AllTransferBit, VkAccessFlags2.TransferWriteBit,
+                    VkPipelineStageFlags2.ColorAttachmentOutputBit, VkAccessFlags2.ColorAttachmentReadBit | VkAccessFlags2.ColorAttachmentWriteBit);
+                layout = VkImageLayout.ColorAttachmentOptimal;
+                splash.Draw(cb, views[index], SwapchainFormat, width, height, s);
+            }
+            Barrier(cb, target, layout, VkImageLayout.PresentSrcKHR, VkPipelineStageFlags2.AllCommandsBit,
+                VkAccessFlags2.TransferWriteBit | VkAccessFlags2.ColorAttachmentWriteBit, VkPipelineStageFlags2.None, 0);
+            imageLayouts[index] = VkImageLayout.PresentSrcKHR;
+            VkCheck.Ok(vk.Device.PInvoke.vkEndCommandBuffer.Invoke(cb.Handle), "vkEndCommandBuffer (presenter)");
+
+            var wait = new VkSemaphoreSubmitInfo { Semaphore = acquired[s], StageMask = VkPipelineStageFlags2.AllTransferBit };
+            var signal = new VkSemaphoreSubmitInfo { Semaphore = renderDone[index], StageMask = VkPipelineStageFlags2.AllCommandsBit };
+            var buffer = new VkCommandBufferSubmitInfo { CommandBuffer = cb.Handle };
+            var submit = new VkSubmitInfo2
+            {
+                WaitSemaphoreInfoCount = 1, WaitSemaphoreInfos = &wait,
+                CommandBufferInfoCount = 1, CommandBufferInfos = &buffer,
+                SignalSemaphoreInfoCount = 1, SignalSemaphoreInfos = &signal,
+            };
+            vk.Queue.Submit2(new Span<VkSubmitInfo2>(&submit, 1), fences[s]);
+            submitted[s] = true;
+            var sc = swapchain;
+            var done = renderDone[index];
+            var present = new VkPresentInfoKHR { WaitSemaphoreCount = 1, WaitSemaphores = &done, SwapchainCount = 1, Swapchains = &sc, ImageIndices = &index };
+            try
+            {
+                if (vk.Queue.PresentKHR(present) == VkResult.SuboptimalKHR) outOfDate = true;
+            }
+            catch (VkResultError e) when (e.Result == VkResult.ErrorOutOfDateKHR)
+            {
+                outOfDate = true;
+            }
+            if (interval > 0)
+            {
+                // With vsync a frame counts as queued until its copy is done (GlPresenter).
+                var fence = fences[s];
+                VkCheck.Ok(vk.Device.PInvoke.vkWaitForFences.Invoke(vk.Device.Handle, 1, &fence, true, -1), "vkWaitForFences (presenter)");
+            }
+        }
+
+        static void Barrier(CommandBuffer cb, VkImage image, VkImageLayout from, VkImageLayout to, VkPipelineStageFlags2 srcStage, VkAccessFlags2 srcAccess,
+            VkPipelineStageFlags2 dstStage, VkAccessFlags2 dstAccess)
+        {
+            var barrier = new VkImageMemoryBarrier2
+            {
+                SrcStageMask = srcStage, SrcAccessMask = srcAccess, DstStageMask = dstStage, DstAccessMask = dstAccess,
+                OldLayout = from == VkImageLayout.PresentSrcKHR ? VkImageLayout.Undefined : from, NewLayout = to,
+                SrcQueueFamilyIndex = VK.QUEUE_FAMILY_IGNORED, DstQueueFamilyIndex = VK.QUEUE_FAMILY_IGNORED,
+                Image = image,
+                SubresourceRange = new VkImageSubresourceRange { AspectMask = VkImageAspectFlags.ColorBit, LevelCount = 1, LayerCount = 1 },
+            };
+            var dependency = new VkDependencyInfo { ImageMemoryBarrierCount = 1, ImageMemoryBarriers = &barrier };
+            cb.PipelineBarrier2(dependency);
+        }
+
+        VkPresentModeKHR ModeFor(int interval)
+        {
+            if (interval > 0) return VkPresentModeKHR.FifoKHR;
+            if (Array.IndexOf(presentModes, VkPresentModeKHR.ImmediateKHR) >= 0) return VkPresentModeKHR.ImmediateKHR;
+            if (Array.IndexOf(presentModes, VkPresentModeKHR.MailboxKHR) >= 0) return VkPresentModeKHR.MailboxKHR;
+            return VkPresentModeKHR.FifoKHR;
+        }
+
+        /// (Re)makes the swapchain for the window's size and the swap interval; leaves it null
+        /// while the window is minimized.
+        void Recreate(int width, int height, int interval)
+        {
+            bool force = outOfDate;
+            outOfDate = false;
+            swapInterval = interval;
+            var caps = vk.Physical.GetSurfaceCapabilitiesKHR(surface);
+            var size = caps.CurrentExtent.Width != -1 ? caps.CurrentExtent : new VkExtent2D(width, height);
+            size = new VkExtent2D(Math.Clamp(size.Width, caps.MinImageExtent.Width, Math.Max(caps.MinImageExtent.Width, caps.MaxImageExtent.Width)),
+                Math.Clamp(size.Height, caps.MinImageExtent.Height, Math.Max(caps.MinImageExtent.Height, caps.MaxImageExtent.Height)));
+            var mode = ModeFor(interval);
+            if (!swapchain.IsNull() && size.Width == extent.Width && size.Height == extent.Height && mode == presentMode && !force && size.Width > 0) return;
+            // The images about to be replaced may still be read by submitted work.
+            vk.Queue.WaitIdle();
+            var old = swapchain;
+            swapchain = default;
+            DestroyImages();
+            if (size.Width == 0 || size.Height == 0)
+            {
+                if (!old.IsNull()) vk.Device.DestroySwapchainKHR(old, null);
+                extent = size;
+                return;
+            }
+            int formatCount = vk.Physical.GetSurfaceFormatsKHR_Count(surface);
+            var formats = new VkSurfaceFormatKHR[formatCount];
+            vk.Physical.GetSurfaceFormatsKHR_Write(surface, formats);
+            // Gamma colour space: the frame's values go to the display as they are, as OpenGL's
+            // default framebuffer (no sRGB encoding).
+            var chosen = formats[0];
+            foreach (var f in formats)
+                if (f.ColorSpace == VkColorSpaceKHR.SRGBNonlinearKHR && f.Format is VkFormat.B8G8R8A8UNorm or VkFormat.R8G8B8A8UNorm) { chosen = f; break; }
+            var features = vk.Physical.GetFormatProperties(chosen.Format).OptimalTilingFeatures;
+            if ((features & VkFormatFeatureFlags.BlitDstBit) == 0 || (caps.SupportedUsageFlags & VkImageUsageFlags.TransferDstBit) == 0)
+                throw new VulkanUnavailableException($"the window's swapchain format {chosen.Format} takes no copies");
+            int count = Math.Max(caps.MinImageCount, 3);
+            if (caps.MaxImageCount > 0) count = Math.Min(count, caps.MaxImageCount);
+            var composite = (caps.SupportedCompositeAlpha & VkCompositeAlphaFlagsKHR.OpaqueBitKHR) != 0 ? VkCompositeAlphaFlagsKHR.OpaqueBitKHR
+                : (VkCompositeAlphaFlagsKHR)((int)caps.SupportedCompositeAlpha & -(int)caps.SupportedCompositeAlpha);
+            swapchain = vk.Device.CreateSwapchainKHR(new VkSwapchainCreateInfoKHR
+            {
+                Surface = surface, MinImageCount = count, ImageFormat = chosen.Format, ImageColorSpace = chosen.ColorSpace, ImageExtent = size,
+                ImageArrayLayers = 1, ImageUsage = VkImageUsageFlags.ColorAttachmentBit | VkImageUsageFlags.TransferDstBit,
+                ImageSharingMode = VkSharingMode.Exclusive, PreTransform = caps.CurrentTransform, CompositeAlpha = composite,
+                PresentMode = mode, Clipped = true, OldSwapchain = old,
+            }, null);
+            if (!old.IsNull()) vk.Device.DestroySwapchainKHR(old, null);
+            SwapchainFormat = chosen.Format;
+            extent = size;
+            presentMode = mode;
+            int n = vk.Device.GetSwapchainImagesKHR_Count(swapchain);
+            images = new VkImage[n];
+            vk.Device.GetSwapchainImagesKHR_Write(swapchain, images);
+            views = new VkImageView[n];
+            renderDone = new VkSemaphore[n];
+            imageLayouts = new VkImageLayout[n];
+            for (int i = 0; i < n; i++)
+            {
+                views[i] = vk.Device.CreateImageView(new VkImageViewCreateInfo
+                {
+                    Image = images[i], ViewType = VkImageViewType._2D, Format = chosen.Format,
+                    SubresourceRange = new VkImageSubresourceRange { AspectMask = VkImageAspectFlags.ColorBit, LevelCount = 1, LayerCount = 1 },
+                }, null);
+                renderDone[i] = vk.Device.CreateSemaphore(new VkSemaphoreCreateInfo(), null);
+            }
+            EngineLog.Engine($"vulkan: swapchain {size.Width}x{size.Height} {chosen.Format}, {n} images, {mode}");
+        }
+
+        void DestroyImages()
+        {
+            foreach (var v in views) vk.Device.DestroyImageView(v, null);
+            foreach (var s in renderDone) vk.Device.DestroySemaphore(s, null);
+            views = Array.Empty<VkImageView>();
+            renderDone = Array.Empty<VkSemaphore>();
+            images = Array.Empty<VkImage>();
+        }
+
+        /// Presents what was handed over, stops the thread and releases its objects and the
+        /// back buffers (the device is idle after).
+        public void Dispose()
+        {
+            if (thread != null)
+            {
+                lock (gate)
+                {
+                    stopping = true;
+                    Monitor.PulseAll(gate);
+                }
+                thread.Join();
+            }
+            try { vk.Queue.WaitIdle(); } catch (VkResultError) { }
+            splash?.Dispose();
+            DestroyImages();
+            if (!swapchain.IsNull()) vk.Device.DestroySwapchainKHR(swapchain, null);
+            swapchain = default;
+            for (int i = 0; i < Slots; i++)
+            {
+                if (!fences[i].IsNull()) vk.Device.DestroyFence(fences[i], null);
+                if (!acquired[i].IsNull()) vk.Device.DestroySemaphore(acquired[i], null);
+            }
+            if (!pool.IsNull()) vk.Device.DestroyCommandPool(pool, null);
+            foreach (var b in buffers)
+            {
+                b.Color?.Destroy(vk);
+                b.Depth?.Destroy(vk);
+                b.Color = b.Depth = null;
+            }
+        }
+    }
+}

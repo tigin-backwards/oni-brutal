@@ -72,6 +72,18 @@ int main(int argc, char **argv)
         if (!output) { IDXGIAdapter1_Release(adapter); adapter = NULL; }
     }
     if (!output) { fprintf(stderr, "dupcap: no output holds %d,%d\n", px, py); return 1; }
+    /* The monitor's colour space now: G2084/P2020 means Windows drives it in HDR. */
+    {
+        IDXGIOutput6 *output6 = NULL;
+        if (SUCCEEDED(IDXGIOutput_QueryInterface(output, &IID_IDXGIOutput6, (void **)&output6))) {
+            DXGI_OUTPUT_DESC1 d1;
+            if (SUCCEEDED(IDXGIOutput6_GetDesc1(output6, &d1)))
+                printf("monitor colour space %d (%s), %u bits per colour, max %.0f nits\n", (int)d1.ColorSpace,
+                    d1.ColorSpace == DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020 ? "HDR" : d1.ColorSpace == DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P709 ? "SDR" : "other",
+                    d1.BitsPerColor, d1.MaxLuminance);
+            IDXGIOutput6_Release(output6);
+        }
+    }
 
     ID3D11Device *device = NULL;
     ID3D11DeviceContext *context = NULL;

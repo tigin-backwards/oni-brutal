@@ -132,6 +132,7 @@ namespace OniMoono.Assets.Tests
             Assert.Throws<InvalidDataException>(() => table.Get(2));
             Assert.Equal(ShaderCompilerPlatform.Metal, GpuProgramTypes.PlatformOf(GpuProgramTypes.MetalVertex));
             Assert.Equal(ShaderCompilerPlatform.OpenGLCore, GpuProgramTypes.PlatformOf(GpuProgramTypes.GLCore43));
+            Assert.Equal(ShaderCompilerPlatform.Vulkan, GpuProgramTypes.PlatformOf(GpuProgramTypes.SpirV));
         }
 
         [Fact]
@@ -193,6 +194,51 @@ namespace OniMoono.Assets.Tests
             Assert.Equal(120, shaders);
             Assert.Equal((522, 535), (vertex, fragment));
             Assert.Equal(1057, blobs);
+        }
+
+        /// Every Vulkan program of the build reads: its stages decode from SMOL-V to the sizes
+        /// their headers record (a whole SPIR-V module each), one vertex and one fragment stage
+        /// each, and its parameter blob reads.
+        [Fact]
+        public void EveryVulkanProgramDecodes()
+        {
+            int programs = 0, stages = 0, shaders = 0;
+            var failures = new List<string>();
+            foreach (var shader in Shaders(GameData.DataDir))
+            {
+                var table = ShaderProgramTable.Load(shader, ShaderCompilerPlatform.Vulkan);
+                if (table == null) continue;
+                shaders++;
+                var parsed = shader.Struct("m_ParsedForm");
+                var keywords = parsed.Array("m_KeywordNames").Cast<string>().ToArray();
+                var seen = new HashSet<int>();
+                foreach (var sub in parsed.Array("m_SubShaders").Cast<Fields>())
+                    foreach (var pass in sub.Array("m_Passes").Cast<Fields>())
+                        foreach (var x in PlayerSubprograms.Of(pass, "progVertex", keywords).Where(x => x.Platform == ShaderCompilerPlatform.Vulkan))
+                        {
+                            if (!seen.Add(x.BlobIndex)) continue;
+                            try
+                            {
+                                var program = VulkanProgram.Read(table.Get(x.BlobIndex));
+                                programs++;
+                                stages += program.Stages.Length;
+                                Assert.Equal(x.Keywords.Order(StringComparer.Ordinal), program.Keywords.Order(StringComparer.Ordinal));
+                                Assert.Contains(program.Stages, s => s.Index == 0);
+                                Assert.Contains(program.Stages, s => s.Index == 1);
+                                foreach (var s in program.Stages)
+                                    Assert.Equal(0x07230203u, BitConverter.ToUInt32(s.Spirv));
+                                if (x.ParameterBlobIndex >= 0) ShaderParameters.Read(table.Get(x.ParameterBlobIndex));
+                            }
+                            catch (Exception e)
+                            {
+                                failures.Add($"{parsed.String("m_Name")} [{string.Join(" ", x.Keywords)}]: {e.Message}");
+                            }
+                        }
+            }
+            Assert.True(failures.Count == 0, string.Join("\n", failures.Take(20)));
+            Assert.Equal(120, shaders);
+            Assert.Equal(539, programs);
+            Assert.Equal(1079, stages);
         }
 
         internal const string NoMacData = "macOS game data not found (set ONI_MAC_APP to OxygenNotIncluded.app; default " + GameData.DefaultMacApp + ").";

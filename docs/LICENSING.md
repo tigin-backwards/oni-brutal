@@ -94,8 +94,13 @@ Steamworks (`libsteam_api.so`, Steamworks.NET under MIT); `cimgui.so` (Dear ImGu
 - `src/OniMoono.NativeHost` (the Windows `OniMoono.exe`) links `libnethost.lib` and includes
   `nethost.h` and `hostfxr.h` from the .NET SDK's `Microsoft.NETCore.App.Host.win-x64` pack
   (dotnet/runtime, © .NET Foundation and Contributors, MIT). The notice is in `NOTICE.txt`.
-- Native libraries from BRUTAL's packages (GLFW, glad, stb, FreeType with libpng and zlib), under
-  their own licences as shipped in those packages.
+- `src/OniMoono.Assets/Shaders/SmolV.cs` (the Vulkan device reads Unity's SMOL-V-compressed
+  SPIR-V): a port of `smolv::Decode` and its opcode table from Aras Pranckevičius' smol-v
+  (`source/smolv.cpp`, github.com/aras-p/smol-v, master as of 2026-10-30, file SHA-256
+  99430333…6e017e2), © 2016–2024 Aras Pranckevicius, dual-licensed MIT or public domain (used
+  under MIT). The notice is in the file's header and in `NOTICE.txt`.
+- Native libraries from BRUTAL's packages (GLFW, glad, stb, FreeType with libpng and zlib, Vulkan
+  Memory Allocator), under their own licences as shipped in those packages.
 
 ## Provenance of the bundled type trees
 

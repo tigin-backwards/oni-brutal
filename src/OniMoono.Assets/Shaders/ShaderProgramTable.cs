@@ -10,6 +10,7 @@ namespace OniMoono.Assets.Shaders
     {
         public const uint Metal = 14;
         public const uint OpenGLCore = 15;
+        public const uint Vulkan = 18;
     }
 
     /// The GPU program types (`m_GpuProgramType`) of a player subprogram. Player program lists hold
@@ -17,14 +18,19 @@ namespace OniMoono.Assets.Shaders
     public static class GpuProgramTypes
     {
         public const int GLCore32 = 6, GLCore41 = 7, GLCore43 = 8;
-        public const int MetalVertex = 23, MetalFragment = 24, MetalCompute = 25;
+        public const int MetalVertex = 23, MetalFragment = 24;
+        /// Vulkan's SPIR-V: one program holds every stage (measured: in U60's data every
+        /// subprogram of this type names an entry of the platform-18 table, and the Vulkan table
+        /// has no other kind).
+        public const int SpirV = 25;
 
         public static bool IsGlCore(int type) => type is GLCore32 or GLCore41 or GLCore43;
 
-        public static bool IsMetal(int type) => type is MetalVertex or MetalFragment or MetalCompute;
+        public static bool IsMetal(int type) => type is MetalVertex or MetalFragment;
 
         /// The platform whose blob table holds a program of this type (0 for other platforms).
-        public static uint PlatformOf(int type) => IsGlCore(type) ? ShaderCompilerPlatform.OpenGLCore : IsMetal(type) ? ShaderCompilerPlatform.Metal : 0u;
+        public static uint PlatformOf(int type) => IsGlCore(type) ? ShaderCompilerPlatform.OpenGLCore : IsMetal(type) ? ShaderCompilerPlatform.Metal
+            : type == SpirV ? ShaderCompilerPlatform.Vulkan : 0u;
     }
 
     /// One platform's program data in a Shader (class 48): LZ4-compressed segments, the first of

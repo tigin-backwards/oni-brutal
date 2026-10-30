@@ -16,7 +16,7 @@ namespace OniMoono.Host.GameTweaks
     /// The saved file is the same. It is written beside the target and moved over it when
     /// complete; until then the target holds the header the game wrote, which is what the save
     /// lists read. Whatever reads, replaces or deletes saves waits for the writes in flight first:
-    /// loading a save, the next save, the load screen's delete and move, and the end of the run.
+    /// loading a save, the next save, the load screen's delete and its cloud/local copies and moves, and the end of the run.
     /// So overlapping saves (a pause-menu save or Save and Quit during an autosave's write) are
     /// written whole and in order, as the game writes them one after another (BackgroundSaveTests,
     /// tests/e2e/overlap-manual.yaml).
@@ -49,9 +49,11 @@ namespace OniMoono.Host.GameTweaks
             var wait = new HarmonyMethod(typeof(BackgroundSave), nameof(WaitPrefix));
             harmony.Patch(AccessTools.Method("SaveLoader:Save", [typeof(string), typeof(bool), typeof(bool)]), prefix: wait);
             harmony.Patch(AccessTools.Method("SaveLoader:Load", [typeof(string)]), prefix: wait);
-            harmony.Patch(AccessTools.Method("LoadScreen:DeleteFileAndEmptyFolder"), prefix: wait);
-            foreach (var m in AccessTools.GetDeclaredMethods(AccessTools.TypeByName("LoadScreen")))
-                if (m.Name.Contains("Move", StringComparison.Ordinal) || m.Name.Contains("Copy", StringComparison.Ordinal)) harmony.Patch(m, prefix: wait);
+            // The load screen's file operations on saves: deleting, the cloud/local migration's
+            // hash comparison and copy (FileMatch, MigrateFile) and moving a colony's folder
+            // (ConvertToLocalOrCloud). Each must exist, so a renamed one stops the start-up.
+            foreach (var name in (string[])["DeleteFileAndEmptyFolder", "FileMatch", "MigrateFile", "ConvertToLocalOrCloud"])
+                harmony.Patch(AccessTools.Method("LoadScreen:" + name) ?? throw new MissingMethodException("LoadScreen", name), prefix: wait);
         }
 
         static void WaitPrefix() => WaitAll();

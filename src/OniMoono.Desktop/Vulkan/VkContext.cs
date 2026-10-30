@@ -24,8 +24,7 @@ namespace OniMoono.Desktop.Vulkan
     /// checked once the window's surface is made, VkPresenter), so a machine without a usable
     /// Vulkan device falls back to OpenGL before a window is opened for Vulkan.
     ///
-    /// Requirements, all core in Vulkan 1.3: dynamic rendering, synchronization2 and timeline
-    /// semaphores. Optional: BC texture compression (otherwise decoded on upload, as on OpenGL
+    /// Requirements, all core in Vulkan 1.3: dynamic rendering and synchronization2. Optional: BC texture compression (otherwise decoded on upload, as on OpenGL
     /// without S3TC), anisotropic filtering, mirror-clamp-to-edge, push descriptors.
     internal sealed unsafe class VkContext : IDisposable
     {
@@ -71,21 +70,26 @@ namespace OniMoono.Desktop.Vulkan
             return true;
         }
 
-        /// Picks a GPU: by type for the GPU option ("integrated" prefers an integrated GPU, the
-        /// others a discrete one, as the original's exe asks the drivers for), never one that
-        /// lacks a requirement, and a software rasterizer (Mesa's lavapipe) only when
-        /// `allowSoftware` (an explicit `--renderer vulkan`): auto would otherwise trade a
-        /// hardware OpenGL device for a CPU one. Returns -1 with the reason when none fits.
-        public static int Choose(IReadOnlyList<VkCandidate> candidates, string gpuChoice, bool allowSoftware, out string reason)
+        /// Picks a GPU for the GPU option: "integrated" prefers an integrated GPU and "discrete" a
+        /// discrete one; "default" a discrete one as the original's exe asks the Windows drivers
+        /// for, or, with `defaultInDriverOrder` (Linux, where the original sets nothing), the
+        /// first the driver lists, as OpenGL's default device is the driver's. Among GPUs ranked
+        /// alike the first listed wins. Never one that lacks a requirement, and a software
+        /// rasterizer (Mesa's lavapipe) only when `allowSoftware` (an explicit `--renderer
+        /// vulkan`): auto would otherwise trade a hardware OpenGL device for a CPU one. Returns
+        /// -1 with the reason when none fits.
+        public static int Choose(IReadOnlyList<VkCandidate> candidates, string gpuChoice, bool allowSoftware, bool defaultInDriverOrder, out string reason)
         {
+            bool driverOrder = defaultInDriverOrder && gpuChoice is not ("integrated" or "discrete");
             int Rank(VkCandidate c) => (c.Type, gpuChoice) switch
             {
+                (VkPhysicalDeviceType.Cpu, _) => 4,
+                _ when driverOrder => 0,
                 (VkPhysicalDeviceType.IntegratedGpu, "integrated") => 0,
                 (VkPhysicalDeviceType.DiscreteGpu, "integrated") => 1,
                 (VkPhysicalDeviceType.DiscreteGpu, _) => 0,
                 (VkPhysicalDeviceType.IntegratedGpu, _) => 1,
                 (VkPhysicalDeviceType.VirtualGpu, _) => 2,
-                (VkPhysicalDeviceType.Cpu, _) => 4,
                 _ => 3,
             };
             int best = -1;
@@ -99,7 +103,8 @@ namespace OniMoono.Desktop.Vulkan
             {
                 var chosen = candidates[best];
                 var wanted = gpuChoice == "integrated" ? VkPhysicalDeviceType.IntegratedGpu : VkPhysicalDeviceType.DiscreteGpu;
-                reason = chosen.Type == wanted
+                reason = driverOrder ? $"{chosen.Name} ({TypeName(chosen.Type)}, gpu option {gpuChoice}: the first GPU the driver lists)"
+                    : chosen.Type == wanted
                     ? $"{chosen.Name} ({TypeName(chosen.Type)}, gpu option {gpuChoice})"
                     : $"{chosen.Name} ({TypeName(chosen.Type)}; gpu option {gpuChoice} prefers {(wanted == VkPhysicalDeviceType.IntegratedGpu ? "an integrated" : "a discrete")} GPU, and none is usable)";
                 return best;
@@ -202,7 +207,7 @@ namespace OniMoono.Desktop.Vulkan
             }
             foreach (var c in candidates)
                 EngineLog.Engine($"vulkan: device {c.Name} ({TypeName(c.Type)}, Vulkan {Version(c.ApiVersion)}){(c.Missing != null ? ": " + c.Missing : "")}");
-            int chosen = Choose(candidates, gpuChoice, allowSoftware, out var why);
+            int chosen = Choose(candidates, gpuChoice, allowSoftware, OperatingSystem.IsLinux(), out var why);
             if (chosen < 0) throw new VulkanUnavailableException(why);
             Physical = Instance.PhysicalDevices[chosen];
             Properties = Physical.GetProperties();
@@ -222,7 +227,7 @@ namespace OniMoono.Desktop.Vulkan
             var enable = new VkPhysicalDeviceFeatures2();
             enable.Features.TextureCompressionBC = TextureCompressionBC;
             enable.Features.SamplerAnisotropy = SamplerAnisotropy;
-            var e12 = new VkPhysicalDeviceVulkan12Features { TimelineSemaphore = true, SamplerMirrorClampToEdge = MirrorClampToEdge };
+            var e12 = new VkPhysicalDeviceVulkan12Features { SamplerMirrorClampToEdge = MirrorClampToEdge };
             var e13 = new VkPhysicalDeviceVulkan13Features { DynamicRendering = true, Synchronization2 = true };
             enable.Next = &e12;
             e12.Next = &e13;
@@ -286,7 +291,6 @@ namespace OniMoono.Desktop.Vulkan
             var missing = new List<string>();
             if (!f13.DynamicRendering) missing.Add("dynamic rendering");
             if (!f13.Synchronization2) missing.Add("synchronization2");
-            if (!f12.TimelineSemaphore) missing.Add("timeline semaphores");
             if (!pd.SupportsExtension(VK.KHR_SWAPCHAIN_EXTENSION_NAME)) missing.Add("swapchains");
             if (pd.GetFirstQueueFamilyWithFlag(VkQueueFlags.GraphicsBit) < 0) missing.Add("a graphics queue");
             return missing.Count == 0 ? null : "lacks " + string.Join(", ", missing);

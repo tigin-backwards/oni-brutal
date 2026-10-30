@@ -36,31 +36,44 @@ namespace OniMoono.Tests
         [Fact]
         public void TheGpuOptionPicksByType()
         {
-            Assert.Equal(1, VkContext.Choose([Integrated, Discrete], "default", false, out _));
-            Assert.Equal(1, VkContext.Choose([Integrated, Discrete], "discrete", false, out _));
-            Assert.Equal(0, VkContext.Choose([Integrated, Discrete], "integrated", false, out var reason));
+            Assert.Equal(1, VkContext.Choose([Integrated, Discrete], "default", false, false, out _));
+            Assert.Equal(1, VkContext.Choose([Integrated, Discrete], "discrete", false, false, out _));
+            Assert.Equal(0, VkContext.Choose([Integrated, Discrete], "integrated", false, false, out var reason));
             Assert.Equal("Radeon (integrated, gpu option integrated)", reason);
             // Integrated asked for on a machine with only a discrete GPU: that one.
-            Assert.Equal(0, VkContext.Choose([Discrete, Software], "integrated", false, out reason));
+            Assert.Equal(0, VkContext.Choose([Discrete, Software], "integrated", false, false, out reason));
             Assert.Equal("RTX (discrete; gpu option integrated prefers an integrated GPU, and none is usable)", reason);
             // Default and discrete on a machine with only an integrated GPU: that one.
-            Assert.Equal(0, VkContext.Choose([Integrated, Software], "default", false, out reason));
+            Assert.Equal(0, VkContext.Choose([Integrated, Software], "default", false, false, out reason));
             Assert.Equal("Radeon (integrated; gpu option default prefers a discrete GPU, and none is usable)", reason);
-            Assert.Equal(1, VkContext.Choose([Software, Integrated], "discrete", true, out _));
+            Assert.Equal(1, VkContext.Choose([Software, Integrated], "discrete", true, false, out _));
             // Two of a kind: the first Vulkan lists (the order PRIME variables steer).
-            Assert.Equal(1, VkContext.Choose([Integrated, Discrete, Discrete with { Name = "second" }], "discrete", false, out _));
+            Assert.Equal(1, VkContext.Choose([Integrated, Discrete, Discrete with { Name = "second" }], "discrete", false, false, out _));
+        }
+
+        /// Linux: the original sets nothing for "default", so its OpenGL device is the driver's;
+        /// Vulkan takes the first hardware GPU the driver lists. The other choices pick by type.
+        [Fact]
+        public void LinuxDefaultTakesTheDriversOrder()
+        {
+            Assert.Equal(0, VkContext.Choose([Integrated, Discrete], "default", false, true, out var reason));
+            Assert.Equal("Radeon (integrated, gpu option default: the first GPU the driver lists)", reason);
+            Assert.Equal(0, VkContext.Choose([Discrete, Integrated], "default", false, true, out _));
+            Assert.Equal(1, VkContext.Choose([Software, Integrated], "default", true, true, out _));
+            Assert.Equal(1, VkContext.Choose([Integrated, Discrete], "discrete", false, true, out _));
+            Assert.Equal(0, VkContext.Choose([Integrated, Discrete], "integrated", false, true, out _));
         }
 
         [Fact]
         public void AutoRefusesSoftwareAndDevicesMissingRequirements()
         {
-            Assert.Equal(-1, VkContext.Choose([Software], "default", false, out var reason));
+            Assert.Equal(-1, VkContext.Choose([Software], "default", false, false, out var reason));
             Assert.Equal("llvmpipe: a software rasterizer (only used with --renderer vulkan)", reason);
-            Assert.Equal(0, VkContext.Choose([Software], "default", true, out _));
-            Assert.Equal(-1, VkContext.Choose([Old], "default", true, out reason));
+            Assert.Equal(0, VkContext.Choose([Software], "default", true, false, out _));
+            Assert.Equal(-1, VkContext.Choose([Old], "default", true, false, out reason));
             Assert.Equal("old: Vulkan 1.1.0, 1.3 needed", reason);
-            Assert.Equal(1, VkContext.Choose([Old, Software], "discrete", true, out _));
-            Assert.Equal(-1, VkContext.Choose([], "default", true, out reason));
+            Assert.Equal(1, VkContext.Choose([Old, Software], "discrete", true, false, out _));
+            Assert.Equal(-1, VkContext.Choose([], "default", true, false, out reason));
             Assert.Equal("no Vulkan device", reason);
         }
     }

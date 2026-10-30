@@ -314,11 +314,37 @@ namespace OniMoono.Desktop.Gl
         };
     }
 
+    /// The conventions a device's programs were compiled for, which the built-in values follow.
+    /// OpenGL (default): Unity's GLCore conventions. Vulkan: Unity's Vulkan programs, compiled
+    /// with UNITY_REVERSED_Z and UNITY_UV_STARTS_AT_TOP: the projection maps depth to [1, 0]
+    /// (near to far), and when the target is a render texture (Flipped) it is turned upside down,
+    /// which the programs' own vertex epilogue (gl_Position.y negated) undoes, so a render
+    /// texture's rows are stored as OpenGL's are. Unity's manual, "Platform-specific rendering
+    /// differences", documents both (reversed Z on Vulkan; rendering into render textures
+    /// flipped, _ProjectionParams.x -1); the epilogue was read from the shipped SPIR-V.
+    internal readonly record struct RenderConventions(bool Vulkan, bool Flipped)
+    {
+        /// The projection the programs read as UNITY_MATRIX_P (GL.GetGPUProjectionMatrix's
+        /// role): OpenGL's as given; for Vulkan, depth reversed and, into a render texture, y
+        /// negated.
+        public Matrix4x4 GpuProjection(Matrix4x4 p)
+        {
+            if (!Vulkan) return p;
+            for (int c = 0; c < 4; c++)
+            {
+                p[2, c] = 0.5f * p[3, c] - 0.5f * p[2, c];
+                if (Flipped) p[1, c] = -p[1, c];
+            }
+            return p;
+        }
+    }
+
     /// Everything a draw's uniforms can depend on.
     internal sealed class DrawInputs
     {
         public Matrix4x4 ObjectToWorld = Matrix4x4.identity;
         public CameraConstants Camera;
+        public RenderConventions Conventions;
         public PropertySheet Block;
         public MaterialNative Material;
         public ShaderNative Shader;
@@ -427,11 +453,12 @@ namespace OniMoono.Desktop.Gl
                     UniformSource.WorldToObject => d.ObjectToWorld.inverse,
                     UniformSource.MatrixV => cam.View,
                     UniformSource.MatrixInvV => cam.View.inverse,
-                    UniformSource.MatrixP or UniformSource.CameraProjection => cam.Projection,
+                    UniformSource.MatrixP => d.Conventions.GpuProjection(cam.Projection),
+                    UniformSource.CameraProjection => cam.Projection,
                     UniformSource.CameraInvProjection => cam.Projection.inverse,
-                    UniformSource.MatrixVP => cam.Projection * cam.View,
-                    UniformSource.MatrixInvVP => (cam.Projection * cam.View).inverse,
-                    UniformSource.MatrixMVP => cam.Projection * cam.View * d.ObjectToWorld,
+                    UniformSource.MatrixVP => d.Conventions.GpuProjection(cam.Projection) * cam.View,
+                    UniformSource.MatrixInvVP => (d.Conventions.GpuProjection(cam.Projection) * cam.View).inverse,
+                    UniformSource.MatrixMVP => d.Conventions.GpuProjection(cam.Projection) * cam.View * d.ObjectToWorld,
                     UniformSource.CameraToWorld => cam.View.inverse * Matrix4x4.Scale(new Vector3(1f, 1f, -1f)),
                     UniformSource.WorldToCamera => Matrix4x4.Scale(new Vector3(1f, 1f, -1f)) * cam.View,
                     _ => d.TryMatrix(u.PropertyId, out var pm) ? pm : Matrix4x4.zero,
@@ -470,12 +497,14 @@ namespace OniMoono.Desktop.Gl
                     v = new Vector4(cam.TargetSize.x, cam.TargetSize.y, 1f + 1f / cam.TargetSize.x, 1f + 1f / cam.TargetSize.y);
                     break;
                 case UniformSource.ProjectionParams:
-                    // OpenGL renders textures upright: no projection flip.
-                    v = new Vector4(1f, cam.Near, cam.Far, 1f / cam.Far);
+                    // OpenGL renders textures upright: no projection flip. Vulkan's programs
+                    // render into render textures flipped (RenderConventions).
+                    v = new Vector4(d.Conventions.Flipped ? -1f : 1f, cam.Near, cam.Far, 1f / cam.Far);
                     break;
                 case UniformSource.ZBufferParams:
                 {
-                    float x = 1f - cam.Far / cam.Near, y = cam.Far / cam.Near;
+                    // With reversed Z (Vulkan) the documented form: x = -1 + far / near, y = 1.
+                    float x = d.Conventions.Vulkan ? -1f + cam.Far / cam.Near : 1f - cam.Far / cam.Near, y = d.Conventions.Vulkan ? 1f : cam.Far / cam.Near;
                     v = new Vector4(x, y, x / cam.Far, y / cam.Far);
                     break;
                 }

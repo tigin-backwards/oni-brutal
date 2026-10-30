@@ -82,6 +82,19 @@ namespace OniMoono.Desktop.Gl
         /// The camera constants of the following draws.
         public CameraConstants Camera;
 
+        /// The rendering conventions the following draws' built-in values follow (the device's;
+        /// for Vulkan, also whether the target is a render texture).
+        public RenderConventions Conventions;
+
+        /// The ShaderCompilerPlatform whose programs draws select (OpenGLCore unless the device
+        /// runs another platform's).
+        public uint Platform = ShaderNative.OpenGLCorePlatform;
+
+        bool HasPrograms(ShaderNative shader) => Platform == ShaderNative.OpenGLCorePlatform ? shader.HasOpenGLCorePrograms : shader.HasProgramsFor(Platform);
+
+        /// The pass's program variants on the device's platform.
+        public ProgramVariant[] VariantsOf(ShaderPass pass) => Platform == ShaderNative.OpenGLCorePlatform ? pass.Variants : pass.VulkanVariants;
+
         /// Draw queues are recorded on worker threads (ONI_PARALLEL_DRAWS=0: never).
         public static readonly bool ParallelByDefault = Environment.GetEnvironmentVariable("ONI_PARALLEL_DRAWS") != "0";
 
@@ -290,7 +303,7 @@ namespace OniMoono.Desktop.Gl
             var material = (MaterialNative)draw.Material.NativeOrThrow;
             if (material.Shader == null) return;
             var shader = (ShaderNative)material.Shader.NativeOrThrow;
-            if (!shader.HasOpenGLCorePrograms) return;
+            if (!HasPrograms(shader)) return;
             if (draw.SubMesh < 0 || draw.SubMesh >= draw.Mesh.SubMeshes.Count) return;
             var mesh = GlMeshes.Prepare(worker, draw.Mesh);
             var layout = mesh.Layout;
@@ -298,6 +311,7 @@ namespace OniMoono.Desktop.Gl
             var inputs = drawInputs;
             inputs.ObjectToWorld = draw.ObjectToWorld;
             inputs.Camera = Camera;
+            inputs.Conventions = Conventions;
             inputs.Block = draw.Properties;
             inputs.Material = material;
             drawPasses.Clear();
@@ -326,7 +340,7 @@ namespace OniMoono.Desktop.Gl
 
         /// The pass's program variant for the material's, the draw's and the global keywords,
         /// selected once per material, pass and draw keyword list while the keywords are unchanged.
-        static int Variant(MaterialNative material, ShaderNative passShader, ShaderPass pass, string[] keywords)
+        int Variant(MaterialNative material, ShaderNative passShader, ShaderPass pass, string[] keywords)
         {
             var cache = material.Variants ??= new();
             var key = (pass, keywords);
@@ -338,8 +352,8 @@ namespace OniMoono.Desktop.Gl
         }
 
         // Its own method, so the predicate's closure is allocated only when a variant is selected.
-        static int SelectVariant(MaterialNative material, ShaderNative passShader, ShaderPass pass, string[] keywords)
-            => ShaderPrograms.SelectVariant(pass, k => KeywordEnabled(k, material, keywords));
+        int SelectVariant(MaterialNative material, ShaderNative passShader, ShaderPass pass, string[] keywords)
+            => ShaderPrograms.SelectVariant(VariantsOf(pass), k => KeywordEnabled(k, material, keywords));
 
         // ----- Draw queues -----
 
@@ -544,7 +558,7 @@ namespace OniMoono.Desktop.Gl
             var material = (MaterialNative)draw.Material.NativeOrThrow;
             if (material.Shader == null) return true;
             var shader = (ShaderNative)material.Shader.NativeOrThrow;
-            if (!shader.HasOpenGLCorePrograms) return true;
+            if (!HasPrograms(shader)) return true;
             if (draw.SubMesh < 0 || draw.SubMesh >= draw.Mesh.SubMeshes.Count) return true;
             DeviceMesh mesh = null;
             if (GlMeshes.IsCurrent(draw.Mesh)) mesh = (DeviceMesh)draw.Mesh.Gpu;
@@ -552,6 +566,7 @@ namespace OniMoono.Desktop.Gl
             var inputs = c.Inputs;
             inputs.ObjectToWorld = draw.ObjectToWorld;
             inputs.Camera = Camera;
+            inputs.Conventions = Conventions;
             inputs.Block = draw.Properties;
             inputs.Material = material;
             var passes = c.Passes;

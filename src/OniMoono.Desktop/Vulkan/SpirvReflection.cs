@@ -205,7 +205,12 @@ namespace OniMoono.Desktop.Vulkan
                 int set = decorations.GetValueOrDefault((id, 34)), binding = decorations.GetValueOrDefault((id, DecorationBinding), -1);
                 if (binding < 0) continue;
                 var type = types[typeId];
-                while (type.Op == OpTypeArray) type = types[(int)type.Operands[0]];
+                // Arrays of arrays: a damaged module's self-referencing array ends the read.
+                for (int depth = 0; type.Op == OpTypeArray; depth++)
+                {
+                    if (depth >= 8) throw new FormatException("SPIR-V arrays nested too deep (a cycle?)");
+                    type = types[(int)type.Operands[0]];
+                }
                 int dim = 0;
                 bool arrayed = false, multisampled = false;
                 DescriptorKind kind;

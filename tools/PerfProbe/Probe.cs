@@ -1760,11 +1760,17 @@ namespace PerfProbe
             int colonyFrames = 0;
             float windowStart = Time.realtimeSinceStartup;
             int frames = 0;
+            // Each frame's real time in the window, for its slowest 1% (6 of 600 frames).
+            var frameTimes = new float[600];
+            float lastFrame = Time.realtimeSinceStartup;
             long contentions = RuntimeCounters.LockContentions(), paused = RuntimeCounters.GcPauseMs();
             while (true)
             {
                 yield return null;
                 if (Game.Instance == null) yield break;
+                float frameEnd = Time.realtimeSinceStartup;
+                if (frames < frameTimes.Length) frameTimes[frames] = frameEnd - lastFrame;
+                lastFrame = frameEnd;
                 // Only when the game has stopped: the search for dialogs walks the whole scene, a
                 // cost the measurement must not carry.
                 if (speed < 0 && Time.frameCount % 60 == 0 && !SpeedControlScreen.Instance.IsPaused) SpeedControlScreen.Instance.Pause(false);
@@ -1800,7 +1806,11 @@ namespace PerfProbe
                 long c = RuntimeCounters.LockContentions(), g = RuntimeCounters.GcPauseMs();
                 string runtime = c < 0 ? "" : $" contentions {c - contentions} gc-pause {g - paused} ms";
                 contentions = c; paused = g;
-                Debug.Log($"PERF f{Time.frameCount} fps {frames / (now - windowStart):F2} cycle {GameClock.Instance.GetCycle()} time {GameClock.Instance.GetTime():F0} paused {SpeedControlScreen.Instance.IsPaused}{runtime}");
+                System.Array.Sort(frameTimes);
+                float worst = 0;
+                for (int i = frameTimes.Length - frameTimes.Length / 100; i < frameTimes.Length; i++) worst += frameTimes[i];
+                worst /= frameTimes.Length / 100;
+                Debug.Log($"PERF f{Time.frameCount} fps {frames / (now - windowStart):F2} cycle {GameClock.Instance.GetCycle()} time {GameClock.Instance.GetTime():F0} paused {SpeedControlScreen.Instance.IsPaused}{runtime} worst1% {worst * 1000:F1} ms");
                 if (awake) Debug.Log($"PERF pointer: mousePosition {Input.mousePosition} present {Input.mousePresent} focused {Application.isFocused}{OsCursor()}");
                 windowStart = now;
                 frames = 0;

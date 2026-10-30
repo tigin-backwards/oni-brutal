@@ -18,8 +18,8 @@ Sources:
 | Native data layouts | Done: 6000.3.17f1 type trees. Asset, bind and shader checks pass on Windows U60. |
 | Version check | Done on `u60`: a Moono build names the game update it needs. Master: to do. |
 | Engine API | Done: ApiCheck back to the 13 known UI Toolkit members. |
-| UI packages | One TMP member (`SetCharArray(ReadOnlySpan<char>)`), being implemented from the spec. |
-| Game tweaks | Static review against the decomp in progress; runtime check needs a U60 player. |
+| UI packages | Done: `TMP_Text.SetCharArray(ReadOnlySpan<char>)` from the spec; package ApiCheck 0 missing. |
+| Game tweaks | Static review done (2 fixed, overlays left out where U60 does their work); runtime checks need a U60 player. |
 | Linux build | Waiting for the 761015 Linux depot download. |
 | Main menu and a save on U60 | Not yet run. |
 | Performance | Not yet measured. |
@@ -38,6 +38,12 @@ Sources:
 - **`boot.config`:** the graphics threading mode goes from 4 to 6, the native graphics-jobs line is
   gone, and `gc-max-time-slice=3` is new (Unity's incremental GC). None of these is read by Moono:
   CoreCLR's background GC replaces Unity's.
+- **Unoptimised game code:** the public test's `Assembly-CSharp` is compiled without
+  optimisation. It is full of `nop`s and keeps comparisons in locals; `SaveLoader.Save` alone
+  has 75 `nop`s, and U59 had none. Most of the decomp diff in untouched methods is this compiler
+  shape. Transpilers must be checked against U60's IL, not the C#. Frame rates measured on the
+  public test understate a release build of U60, for vanilla and Moono alike, since both run the
+  same game code.
 - **New Unity modules:** `UnityEngine.AMDModule`, `UnityEngine.NVIDIAModule` (FSR2 and DLSS) and
   `UnityEngine.InsightsModule`. Nothing in the game references them.
 
@@ -108,4 +114,22 @@ game.
 
 ## Game tweaks
 
-See `u60-tweaks-*.md` per area (animation, spatial, overlays, sim, save) once the reviews land.
+Each area's review is in `u60-tweaks-<area>.md` (anim, spatial, overlays, sim, save). Each table
+lists the game members a tweak touches, what U60 changed (with decomp line numbers), the verdict,
+and the runtime check that confirms it once a U60 player runs.
+
+| Area | Tweaks | Verdict |
+|---|---|---|
+| Animation | fast-anim-batches, fast-anim-cleanup, fast-anim-events, fast-symbol-overrides | fast-anim-batches **updated**. U60 renamed `GetPostProcessingParams` to `GetCustomShaderParams`, so the tweak had switched itself off; a missing write-path method now stops the install. The other three are unchanged. |
+| Spatial | fast-partitioner-cleanup, fast-offset-tables, off-world-fallers, fast-particle-collision | Unchanged. Every transpiler anchor still matches U60's unoptimised IL. `OffsetTracker` now keeps a validity flag, cleared only from paths the tweak already patches. |
+| Overlays | fast-overlays (power, temperature, targets), fast-overlay-textures | **Retire candidates.** U60 caches circuit answers in `Power.Update`, colours only visible infrared visualizers, moved the target helpers, and `MultipleRenderTargetProxy` manages its copies. On U60 fast-overlays would have stopped start-up (ambiguous `AddTargetIfVisible`, a missing handler). Each part now installs only where the U59 shape exists and logs why it is left out. Retire after the performance comparison. |
+| Simulation | fast-sublimation, fast-conveyor-paths, offscreen-conveyors, brain-rate, brain-rate-allowance, slow-reachability, fast-jobs | Unchanged. The differences are compiler shape or the event-system move, which none of them depends on. |
+| Save | fast-save-type-checks, background-save, fast-save-compression, fast-serialization, no-save-gc | Unchanged for U60. Two hardening fixes: fast-serialization checks its KSerialization members at install, and background-save now waits for a save in progress before the load screen's cloud/local migration (a gap that U59 had too). |
+
+Open checks once a U60 player runs:
+- each review's runtime checks (`ONI_TWEAK_VERIFY=1` counts, no "left out" or "off" lines where
+  none is expected);
+- the overlay frame times with the tweaks off, to confirm Klei's versions match ours;
+- `TMP_Text.SetCharArray` with unchanged text: ours now skips the update when the characters
+  equal the current text. Whether Unity's package does the same (layout and events) is to be
+  measured in the original.

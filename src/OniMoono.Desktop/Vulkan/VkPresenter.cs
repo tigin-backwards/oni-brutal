@@ -67,8 +67,8 @@ namespace OniMoono.Desktop.Vulkan
         /// Windows: DXGI's swap chain in place of Vulkan's (VkDxgiTarget; null: the
         /// VkSwapchainKHR), the window's handle, and its restarts after a failure while running:
         /// Vulkan's swapchain stands in until one succeeds (a second apart, MaxDxgiRestarts at
-        /// most), as on OpenGL, where a window that has had a flip-model swap chain was measured
-        /// to keep DXGI's last picture whatever the device's own presentation did after.
+        /// most). It does reach the screen after DXGI's (measured), unlike OpenGL's SwapBuffers;
+        /// DXGI is restarted all the same, for how Windows treats the picture.
         VkDxgiTarget dxgi;
         readonly IntPtr dxgiWindow;
         bool dxgiLost;
@@ -555,8 +555,8 @@ namespace OniMoono.Desktop.Vulkan
                 return restarted;
             }
             EngineLog.Engine(dxgiRestarts < MaxDxgiRestarts
-                ? $"present: DXGI restart {dxgiRestarts} failed: {reason}{MadeUp}; Vulkan's swapchain until the next, which Windows may not show"
-                : $"present: DXGI restart {dxgiRestarts} failed: {reason}{MadeUp}; no more tries: Vulkan's swapchain from here on, which Windows may not show");
+                ? $"present: DXGI restart {dxgiRestarts} failed: {reason}{MadeUp}; Vulkan's swapchain until the next"
+                : $"present: DXGI restart {dxgiRestarts} failed: {reason}{MadeUp}; no more tries: Vulkan's swapchain from here on");
             outOfDate = true;
             return null;
         }

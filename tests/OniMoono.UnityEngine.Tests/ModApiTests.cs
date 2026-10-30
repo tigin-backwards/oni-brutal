@@ -607,5 +607,37 @@ namespace OniMoono.Tests
         // Measured: False in the original player.
         [Fact]
         public void GarbageCollectorIsNotIncremental() => Assert.False(UnityEngine.Scripting.GarbageCollector.isIncremental);
+
+        // Mods throw Unity's exceptions although the engine does not: Advanced Mopping's filter
+        // panel names MissingComponentException, and without the type the panel's method failed to
+        // compile, so the mod blocked every new mop order. Every public exception of Unity's
+        // CoreModule is ours too, with the same base type.
+        [Fact]
+        public void EveryCoreModuleExceptionTypeExists()
+        {
+            using var stream = File.OpenRead(Path.Combine(DataDir, "Managed", "UnityEngine.CoreModule.dll"));
+            using var pe = new System.Reflection.PortableExecutable.PEReader(stream);
+            var md = System.Reflection.Metadata.PEReaderExtensions.GetMetadataReader(pe);
+            var ours = typeof(Object).Assembly;
+            int seen = 0;
+            foreach (var handle in md.TypeDefinitions)
+            {
+                var type = md.GetTypeDefinition(handle);
+                var name = md.GetString(type.Name);
+                if ((type.Attributes & System.Reflection.TypeAttributes.VisibilityMask) != System.Reflection.TypeAttributes.Public
+                    || !name.EndsWith("Exception", StringComparison.Ordinal)) continue;
+                var fullName = md.GetString(type.Namespace) + "." + name;
+                var mine = ours.GetType(fullName);
+                Assert.True(mine != null, $"{fullName} is missing");
+                Assert.True(typeof(Exception).IsAssignableFrom(mine), $"{fullName} is not an exception");
+                seen++;
+            }
+            Assert.True(seen >= 6, $"only {seen} exception types found");
+            var e = new MissingComponentException("Liquid filter requires KScrollRect.");
+            Assert.IsAssignableFrom<SystemException>(e);
+            Assert.Equal(unchecked((int)0x80004003), e.HResult);
+            Assert.Equal("A Unity Runtime error occurred!", new UnassignedReferenceException().Message);
+            Assert.Equal("user\nfailed", new UnityEngine.Assertions.AssertionException("failed", "user").Message);
+        }
     }
 }

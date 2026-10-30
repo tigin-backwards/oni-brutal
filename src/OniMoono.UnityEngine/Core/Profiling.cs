@@ -79,6 +79,9 @@ namespace Unity.Profiling
             _ => 0,
         };
 
+        /// The last sample: these counters are read when asked, so the current value.
+        public long LastValue => CurrentValue;
+
         public void Dispose() => handle = 0;
     }
 }

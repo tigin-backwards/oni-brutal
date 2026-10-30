@@ -122,6 +122,11 @@ namespace UnityEngine
             return typed;
         }
 
+        /// Unity frees the asset's data and reloads it from disk on its next use (U60's VistaLayers
+        /// unloads vista textures it no longer shows). Here the data stays loaded: the same
+        /// behaviour, only the memory is not given back.
+        public static void UnloadAsset(Object assetToUnload) { }
+
         /// Unloads every asset nothing references (see AssetUnloader); completes at once.
         public static AsyncOperation UnloadUnusedAssets()
         {

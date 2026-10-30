@@ -272,6 +272,10 @@ namespace OniMoono.Desktop.Vulkan
                 Recreate(width, height, interval);
                 if (swapchain.IsNull()) return; // minimized
             }
+            // The copy fills the swapchain's images, whose size is the surface's now, which can
+            // differ from the size the frame was handed over with (the window changed since).
+            width = extent.Width;
+            height = extent.Height;
             var s = slot;
             slot = (slot + 1) % Slots;
             if (submitted[s])

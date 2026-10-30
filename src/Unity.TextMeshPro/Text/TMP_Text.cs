@@ -140,9 +140,20 @@ namespace TMPro
 
         public void SetCharArray(char[] sourceText, int start, int length)
         {
-            string s = sourceText == null ? "" : new string(sourceText, start, length);
-            if (m_text == s) return;
-            m_text = s;
+            if (sourceText == null)
+            {
+                SetCharArray(ReadOnlySpan<char>.Empty);
+                return;
+            }
+            SetCharArray(new ReadOnlySpan<char>(sourceText, start, length));
+        }
+
+        // U60's LocText.SetContent calls this for most UI text: a string is made only when the
+        // characters differ from the current text.
+        public void SetCharArray(ReadOnlySpan<char> sourceText)
+        {
+            if (m_text != null && sourceText.SequenceEqual(m_text.AsSpan())) return;
+            m_text = sourceText.IsEmpty ? "" : new string(sourceText);
             m_SourceCache = null;
             SourceChanged();
         }

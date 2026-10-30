@@ -69,8 +69,21 @@ namespace OniMoono.Assets.Shaders
             return spirv >= 0x00010000 && spirv <= 0x00010600 && version >> 24 <= 1;
         }
 
-        /// The SPIR-V size the header records.
-        public static int DecodedSize(ReadOnlySpan<byte> data) => IsSmolV(data) ? (int)BitConverter.ToUInt32(data[20..]) : throw new InvalidDataException("Not SMOL-V data.");
+        /// The SPIR-V size the header records: whole words, and no more than the stream could
+        /// decode to (MaxExpansion).
+        public static int DecodedSize(ReadOnlySpan<byte> data)
+        {
+            if (!IsSmolV(data)) throw new InvalidDataException("Not SMOL-V data.");
+            uint size = BitConverter.ToUInt32(data[20..]);
+            if (size % 4 != 0) throw new InvalidDataException($"SMOL-V decoded size {size} is not whole words.");
+            if (size < 20 || size > (ulong)data.Length * MaxExpansion || size > int.MaxValue)
+                throw new InvalidDataException($"SMOL-V decoded size {size} does not fit a stream of {data.Length} bytes.");
+            return (int)size;
+        }
+
+        /// A bound on the SPIR-V bytes one SMOL-V byte decodes to: a one-byte instruction writes
+        /// its header word and up to four more (a compact shuffle's swizzle byte), 20 bytes.
+        const int MaxExpansion = 20;
 
         /// The SPIR-V module. Throws InvalidDataException for malformed data, and when the decoded
         /// size is not the one the header records.
@@ -78,7 +91,6 @@ namespace OniMoono.Assets.Shaders
         {
             int size = DecodedSize(smolv);
             var data = smolv.ToArray();
-            if (size % 4 != 0) throw new InvalidDataException($"SMOL-V decoded size {size} is not whole words.");
             var output = new uint[size / 4];
             int o = 0, p = 0;
             void Write(uint v)
@@ -96,15 +108,14 @@ namespace OniMoono.Assets.Shaders
             uint Varint(byte[] d)
             {
                 uint v = 0;
-                int shift = 0;
-                while (p < d.Length)
+                for (int shift = 0; ; shift += 7)
                 {
+                    if (p >= d.Length) throw new InvalidDataException("SMOL-V varint cut short.");
+                    if (shift > 28) throw new InvalidDataException("SMOL-V varint longer than 32 bits.");
                     byte b = d[p++];
                     v |= (uint)(b & 127) << shift;
-                    shift += 7;
-                    if ((b & 128) == 0) break;
+                    if ((b & 128) == 0) return v;
                 }
-                return v;
             }
             static int ZigDecode(uint u) => (u & 1) != 0 ? (int)((u >> 1) ^ ~0u) : (int)(u >> 1);
 

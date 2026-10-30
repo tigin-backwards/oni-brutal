@@ -24,9 +24,9 @@ namespace OniMoono.Tests
             Assert.Empty(GpuChoice.LinuxVariables("default", nvidiaOffload: false));
             Assert.Empty(GpuChoice.LinuxVariables("default", nvidiaOffload: true));
             Assert.Equal([("DRI_PRIME", "1")], GpuChoice.LinuxVariables("discrete", nvidiaOffload: false));
-            Assert.Equal([("__NV_PRIME_RENDER_OFFLOAD", "1"), ("__GLX_VENDOR_LIBRARY_NAME", "nvidia"), ("__VK_LAYER_NV_optimus", "NVIDIA_only")], GpuChoice.LinuxVariables("discrete", nvidiaOffload: true));
+            Assert.Equal([("__NV_PRIME_RENDER_OFFLOAD", "1"), ("__GLX_VENDOR_LIBRARY_NAME", "nvidia")], GpuChoice.LinuxVariables("discrete", nvidiaOffload: true));
             Assert.Equal([("DRI_PRIME", "0")], GpuChoice.LinuxVariables("integrated", nvidiaOffload: false));
-            Assert.Equal([("DRI_PRIME", "0"), ("__VK_LAYER_NV_optimus", "non_NVIDIA_only")], GpuChoice.LinuxVariables("integrated", nvidiaOffload: true));
+            Assert.Equal([("DRI_PRIME", "0")], GpuChoice.LinuxVariables("integrated", nvidiaOffload: true));
         }
 
         static Func<string, string> Env(params (string Name, string Value)[] vars)
@@ -54,9 +54,9 @@ namespace OniMoono.Tests
             Assert.Null(plan.Marker);
             // Only the one the user set: NVIDIA's other variable is still set.
             plan = GpuChoice.PlanLinux("discrete", true, Env(("__GLX_VENDOR_LIBRARY_NAME", "mesa")));
-            Assert.Equal([("__NV_PRIME_RENDER_OFFLOAD", "1"), ("__VK_LAYER_NV_optimus", "NVIDIA_only")], plan.Changes);
+            Assert.Equal([("__NV_PRIME_RENDER_OFFLOAD", "1")], plan.Changes);
             Assert.Equal([("__GLX_VENDOR_LIBRARY_NAME", "mesa")], plan.UserSet);
-            Assert.Equal("__NV_PRIME_RENDER_OFFLOAD,__VK_LAYER_NV_optimus", plan.Marker);
+            Assert.Equal("__NV_PRIME_RENDER_OFFLOAD", plan.Marker);
         }
 
         [Fact]
@@ -72,8 +72,8 @@ namespace OniMoono.Tests
             Assert.Equal([("DRI_PRIME", (string)null)], plan.Changes);
             Assert.Null(plan.Marker);
             plan = GpuChoice.PlanLinux("discrete", true, inherited);
-            Assert.Equal([("__NV_PRIME_RENDER_OFFLOAD", "1"), ("__GLX_VENDOR_LIBRARY_NAME", "nvidia"), ("__VK_LAYER_NV_optimus", "NVIDIA_only"), ("DRI_PRIME", null)], plan.Changes);
-            Assert.Equal("__NV_PRIME_RENDER_OFFLOAD,__GLX_VENDOR_LIBRARY_NAME,__VK_LAYER_NV_optimus", plan.Marker);
+            Assert.Equal([("__NV_PRIME_RENDER_OFFLOAD", "1"), ("__GLX_VENDOR_LIBRARY_NAME", "nvidia"), ("DRI_PRIME", null)], plan.Changes);
+            Assert.Equal("__NV_PRIME_RENDER_OFFLOAD,__GLX_VENDOR_LIBRARY_NAME", plan.Marker);
         }
 
         /// Why libc's setenv: .NET's own setter leaves the native environment alone on Unix, and

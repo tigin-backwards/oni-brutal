@@ -43,7 +43,7 @@ static class VulkanSurvey
         var words = System.Runtime.InteropServices.MemoryMarshal.Cast<byte, uint>(entry[..(entry.Length / 4 * 4)]);
         o.WriteLine("  header " + string.Join(" ", words[..28].ToArray().Select(w => w.ToString("x"))));
         var program = VulkanProgram.Read(entry);
-        o.WriteLine($"  flags {program.Flags:x}, channels {program.ChannelMask:x}, inputs {string.Join(" ", program.Inputs.Select(i => $"{i.Channel}->{i.Component}"))}, header {string.Join(" ", program.PayloadHeader.Select(h => h.ToString("x")))}, trailing {Convert.ToHexString(program.Trailing)}");
+        o.WriteLine($"  flags {program.Flags:x}, channels {program.ChannelMask:x}, inputs {string.Join(" ", program.Inputs.Select(i => $"{i.Channel}->{i.Component}"))}");
         foreach (var stage in program.Stages)
         {
             var spirv = stage.Spirv;

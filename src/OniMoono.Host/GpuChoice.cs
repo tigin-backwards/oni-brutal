@@ -19,10 +19,7 @@ namespace OniMoono.Host
     ///
     /// Linux: the original sets nothing, nor does "default". "discrete" asks for PRIME render
     /// offload (NVIDIA's proprietary driver when it is there, else Mesa's DRI_PRIME=1);
-    /// "integrated" sets DRI_PRIME=0. The same variables steer Vulkan's GPU order (NVIDIA's
-    /// VK_LAYER_NV_optimus, loaded by __NV_PRIME_RENDER_OFFLOAD and sorted by
-    /// __VK_LAYER_NV_optimus; Mesa's device-select layer reads DRI_PRIME), while the Vulkan
-    /// device picks its GPU by type itself (VkContext.Choose), whatever the order. Variables are set in the native environment (libc setenv:
+    /// "integrated" sets DRI_PRIME=0. Variables are set in the native environment (libc setenv:
     /// .NET's Environment.SetEnvironmentVariable changes only its own copy on Unix, which libGL
     /// never reads) and in .NET's, for processes the player starts. One the user set is never
     /// changed; those Moono set are named in ONI_MOONO_GPU_ENV, so that the run App.Restart starts
@@ -49,9 +46,8 @@ namespace OniMoono.Host
         /// installed (it offloads with its own variables, which Mesa ignores).
         public static IReadOnlyList<(string Name, string Value)> LinuxVariables(string choice, bool nvidiaOffload) => choice switch
         {
-            Discrete when nvidiaOffload => [("__NV_PRIME_RENDER_OFFLOAD", "1"), ("__GLX_VENDOR_LIBRARY_NAME", "nvidia"), ("__VK_LAYER_NV_optimus", "NVIDIA_only")],
+            Discrete when nvidiaOffload => [("__NV_PRIME_RENDER_OFFLOAD", "1"), ("__GLX_VENDOR_LIBRARY_NAME", "nvidia")],
             Discrete => [("DRI_PRIME", "1")],
-            Integrated when nvidiaOffload => [("DRI_PRIME", "0"), ("__VK_LAYER_NV_optimus", "non_NVIDIA_only")],
             Integrated => [("DRI_PRIME", "0")],
             _ => [],
         };

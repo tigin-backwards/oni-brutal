@@ -24,18 +24,30 @@ namespace OniMoono.Assets.Shaders
         public VulkanStage[] Stages { get; private init; } = [];
         public uint ChannelMask { get; private init; }
         public (int Channel, int Component)[] Inputs { get; private init; } = [];
-        /// The payload's header words (flags and stage slots), uninterpreted beyond the slots.
-        public uint[] PayloadHeader { get; private init; } = [];
-        public byte[] Trailing { get; private init; } = [];
 
         const int StageSlots = 6;
+        /// The flags word and the stage slots' (offset, size) pairs.
+        const int PayloadHeaderBytes = 4 + StageSlots * 8;
 
+        /// Throws InvalidDataException for an entry of another layout or a damaged one.
         public static VulkanProgram Read(ReadOnlySpan<byte> entry)
+        {
+            try
+            {
+                return ReadEntry(entry);
+            }
+            catch (Exception e) when (e is ArgumentException or IndexOutOfRangeException or OverflowException)
+            {
+                throw new InvalidDataException($"Vulkan program: {e.Message}", e);
+            }
+        }
+
+        static VulkanProgram ReadEntry(ReadOnlySpan<byte> entry)
         {
             int pos = 0;
             int Int(ReadOnlySpan<byte> d)
             {
-                if (pos + 4 > d.Length) throw new InvalidDataException("Vulkan program ends early.");
+                if (pos < 0 || pos > d.Length - 4) throw new InvalidDataException("Vulkan program ends early.");
                 int v = BitConverter.ToInt32(d[pos..]);
                 pos += 4;
                 return v;
@@ -50,30 +62,25 @@ namespace OniMoono.Assets.Shaders
             for (int i = 0; i < keywordCount; i++)
             {
                 int len = Int(entry);
-                if (len < 0 || pos + len > entry.Length) throw new InvalidDataException("Vulkan program: bad keyword.");
+                if (len < 0 || len > entry.Length - pos) throw new InvalidDataException("Vulkan program: bad keyword.");
                 keywords[i] = Encoding.UTF8.GetString(entry.Slice(pos, len));
-                pos += (len + 3) & ~3;
+                pos = (int)Math.Min(entry.Length, pos + (((long)len + 3) & ~3L));
             }
             int payloadLength = Int(entry);
-            if (payloadLength < 8 || pos + payloadLength > entry.Length) throw new InvalidDataException($"Vulkan program: bad payload length {payloadLength}.");
+            if (payloadLength < PayloadHeaderBytes || payloadLength > entry.Length - pos) throw new InvalidDataException($"Vulkan program: bad payload length {payloadLength}.");
             var payload = entry.Slice(pos, payloadLength);
-            pos += (payloadLength + 3) & ~3;
-            // The stage slots: (offset, size) pairs after the flags word, up to the first stream.
+            pos = (int)Math.Min(entry.Length, pos + (((long)payloadLength + 3) & ~3L));
             uint flags = BitConverter.ToUInt32(payload);
             var stages = new List<VulkanStage>();
-            int firstStream = payloadLength;
-            var header = new List<uint> { flags };
             for (int slot = 0; slot < StageSlots; slot++)
             {
                 int offset = BitConverter.ToInt32(payload[(4 + slot * 8)..]), size = BitConverter.ToInt32(payload[(8 + slot * 8)..]);
-                header.Add((uint)offset);
-                header.Add((uint)size);
                 if (size == 0) continue;
-                if (offset < 0 || size < 0 || offset + size > payloadLength) throw new InvalidDataException($"Vulkan program: stage slot {slot} at {offset} size {size} outside its payload of {payloadLength}.");
+                if (offset < PayloadHeaderBytes || size < 0 || (long)offset + size > payloadLength)
+                    throw new InvalidDataException($"Vulkan program: stage slot {slot} at {offset} size {size} outside its payload of {payloadLength}.");
                 var stream = payload.Slice(offset, size);
                 if (!SmolV.IsSmolV(stream)) throw new InvalidDataException($"Vulkan program: stage slot {slot} is not SMOL-V.");
                 stages.Add(new VulkanStage(slot, offset, size, SmolV.Decode(stream)));
-                firstStream = Math.Min(firstStream, offset);
             }
             uint channels = (uint)Int(entry);
             int inputCount = Int(entry);
@@ -87,8 +94,6 @@ namespace OniMoono.Assets.Shaders
                 Stages = stages.ToArray(),
                 ChannelMask = channels,
                 Inputs = inputs,
-                PayloadHeader = header.ToArray(),
-                Trailing = entry[pos..].ToArray(),
             };
         }
     }

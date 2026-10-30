@@ -23,7 +23,7 @@ Sources:
 | Linux build | Done: frozen at `~/projects/oni-linux-761015`, DLC content copied (not linked) from the frozen Windows copy, test install `out/local-tools/u60orig`. |
 | Main menu and a save on U60 | Both: Linux (QA dogfood: menu, DeCrew and new game, all 13 scenarios clean) and Windows (frozen copy `E:\tmp\oni-win-761015`, RTX 3090, OpenGL 4.5: main menu, DeCrew loaded and dismissed its mod dialog, no errors). |
 | Performance | Not yet measured. |
-| QA and e2e on U60 | Not yet run. |
+| QA and e2e on U60 | QA: unit and all 13 dogfood scenarios pass (references blessed from a reviewed U60 run); verify (U57, every tweak's verify mode) ran 840 game seconds with no mismatches and no errors logged. e2e: not yet run. |
 
 ## The build
 
@@ -138,6 +138,14 @@ and the runtime check that confirms it once a U60 player runs.
 | Overlays | fast-overlays (power, temperature, targets), fast-overlay-textures | **Retired** on this branch (removed). Evidence: U60 caches circuit answers in `Power.Update`, colours only visible infrared visualizers, moved the target helpers, and `MultipleRenderTargetProxy` manages its copies. On U60 fast-overlays would have stopped start-up (ambiguous `AddTargetIfVisible`, a missing handler). Removed on the user's call rather than after a performance comparison. |
 | Simulation | fast-sublimation, fast-conveyor-paths, offscreen-conveyors, brain-rate, brain-rate-allowance, slow-reachability, fast-jobs | Unchanged. The differences are compiler shape or the event-system move, which none of them depends on. |
 | Save | fast-save-type-checks, background-save, fast-save-compression, fast-serialization, no-save-gc | Unchanged for U60. Two hardening fixes: fast-serialization checks its KSerialization members at install, and background-save now waits for a save in progress before the load screen's cloud/local migration (a gap that U59 had too). |
+
+Engine optimizations Klei's U60 work touches:
+- **Canvas mask skips:** our canvas skips graphics clipped out of sight by rect masks. U59's
+  Consumables screen gave it 100,000 such graphics as soon as it opened. U60's Consumables,
+  Vitals and Jobs screens don't reach that in the same QA run, which fits the patch notes'
+  "significantly improved scrolling performance on the Consumables and Priorities screens".
+  The research tree still does. The skip is still correct (0 wrong); it simply has less to skip
+  on those screens.
 
 Open checks once a U60 player runs:
 - each review's runtime checks (`ONI_TWEAK_VERIFY=1` counts, no "left out" or "off" lines where

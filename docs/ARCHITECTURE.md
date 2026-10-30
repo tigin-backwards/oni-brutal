@@ -1695,8 +1695,11 @@ frames to a device thread; only the work posted for resources differs (`IResourc
   they render alike and share targets, depth and pipelines with the shipped ones. Code the
   GLCore compile fixed for OpenGL (`UNITY_REVERSED_Z` and `UNITY_UV_STARTS_AT_TOP` branches,
   `gl_FragCoord`'s origin) keeps OpenGL's meaning; the mods' shaders met (TextMeshPro, particles,
-  tiles) use none of it. `ONI_VULKAN_ROUTE=glcore` sends every shader this way, which the QA's
-  dogfood runs against OpenGL's references.
+  tiles) use none of it. `ONI_VULKAN_ROUTE=glcore` sends every shader this way (a diagnostic):
+  against OpenGL's references the menus, options, new game, research, burst and intro
+  scenarios match, while Klei's world comes out black (not pinned down; most likely its GLCore
+  programs' OpenGL depth and render-texture conventions); Klei's shaders always take the
+  shipped route.
 - *Conventions.* Unity's Vulkan programs are compiled with reversed Z and UVs starting at the
   top, as Unity's manual ("Platform-specific rendering differences") describes; the rest was
   read from the SPIR-V. Each vertex stage ends by negating `gl_Position.y`, so with the camera's

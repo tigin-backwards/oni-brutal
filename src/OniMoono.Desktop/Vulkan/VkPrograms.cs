@@ -102,7 +102,8 @@ namespace OniMoono.Desktop.Vulkan
         static (uint Platform, string Why) Route(ShaderNative shader)
         {
             uint fallback = shader.HasOpenGLCorePrograms ? ShaderNative.OpenGLCorePlatform : 0;
-            // Test hook: every shader takes the GLCore route (its QA against OpenGL's references).
+            // Diagnostic: every shader takes the GLCore route (Klei's world shaders then read depth
+            // and render textures with OpenGL's conventions, most likely why the world is black).
             if (ForceGlCore && fallback != 0) return (fallback, "ONI_VULKAN_ROUTE=glcore");
             if (!shader.HasProgramsFor(ShaderNative.VulkanPlatform)) return (fallback, "no Vulkan programs");
             try

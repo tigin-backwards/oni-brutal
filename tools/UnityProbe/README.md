@@ -413,6 +413,24 @@ whether `KObjectManager` released the event system of a destroyed `KMonoBehaviou
 `DestroyFlagsProbeDone` canvas appears at the end. `LifecycleTests`
 (`DestroyedObjectIsInactiveInItsOwnOnDestroy` and the three after it) encodes the results.
 
+With `PROBE_SCENARIO=destroycascade` only the destroy-cascade probe runs (`DestroyCascade.cs`,
+lines `DC …`, at the main menu): an owner whose OnDestroy destroys another object with a child,
+the owner destroyed in Update, in LateUpdate (with the next frame's fixed steps as they come,
+with none and with one every frame) and with DestroyImmediate; each phase logs whether the
+objects are gone. A Destroy made by an OnDestroy that a destruction point runs waits for the
+next destruction point. `DestroyCascadeTests` encodes the results.
+
+With `PROBE_SCENARIO=cellchangecrash` only the cell-change probe runs (`CellChangeCrash.cs`, lines
+`CC …`, at the main menu, U60 or later): Klei's own `CellChangeMonitor` (given a grid) with that
+cascade, a moved child carrying a `KObject` destroyed after `RenderEveryTick` read it, with and
+without a fixed step in the next frame; each frame logs whether `RenderEveryTick` threw. The
+original throws `NullReferenceException` when a fixed step comes first, as the game's own
+Disease overlay does when a critter with a `DiseaseSourceVisualizer` dies.
+
+Run these with a scratch profile as in steps 1 to 4 above (the original's executable copied into
+a folder of its own, as `scripts/e2e.py` does, beside links to the rest of its install), and the
+same mod folder in our player's run home for the comparison.
+
 With `PROBE_SCENARIO=nativerange` only the NativeArray range probe runs (`NativeRanges.cs`, lines
 `NR …`, at mod load, in the original player only): the indexer, `Copy`, `CopyFrom`, `CopyTo`
 and `GetSubArray` with indices and ranges before or past an array, through views of a larger

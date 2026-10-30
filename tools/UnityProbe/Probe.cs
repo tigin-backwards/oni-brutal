@@ -341,6 +341,16 @@ namespace SemanticsProbe
                 go.AddComponent<DestroyFlags>();
                 return;
             }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "destroycascade")
+            {
+                go.AddComponent<DestroyCascade>();
+                return;
+            }
+            if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "cellchangecrash")
+            {
+                go.AddComponent<CellChangeCrash>();
+                return;
+            }
             if (System.Environment.GetEnvironmentVariable("PROBE_SCENARIO") == "particleemit")
             {
                 go.AddComponent<ParticleEmit>();

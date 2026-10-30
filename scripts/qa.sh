@@ -174,6 +174,7 @@ run_scenario() # NAME
     [ "${kept:-0}" -le "$KEPT_MAX" ] || fail "dogfood $name: $kept multi-target framebuffers kept at the end (at most $KEPT_MAX)"
     local line
     # A REQUIRE entry may list alternatives separated by " || " (one line per renderer).
+    local line alt found
     for line in "${REQUIRE[@]}"; do
         found=""
         while IFS= read -r alt; do grep -aqF "$alt" "$out/stdout.txt" && found=1; done <<< "${line// || /$'\n'}"

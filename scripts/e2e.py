@@ -38,7 +38,8 @@ folder; default out/bin/E2eDriver/release) for specs that use it and, for --play
 both, E2E_ORIGINAL (the original player's executable, with a DLC-owning Steam double in its
 Plugins). Our player runs with the users' default game tweaks (`--game-tweak exact`), or with
 E2E_GAME_TWEAKS, space-separated `--game-tweak` values (`none`, `background-save`, `exact
--no-save-gc`). Each invocation has a run id; each run's log, results and evidence are in
+-no-save-gc`); E2E_PLAYER_ARGS adds host arguments (`--renderer vulkan`). Each invocation
+has a run id; each run's log, results and evidence are in
 out/e2e/SPEC/RUN_ID/PLAYER-N, and out/e2e/runs/RUN_ID.json holds one record per spec run.
 --record writes tests/e2e/results/SPEC.json, the committed record of the spec's verdict (played,
 warning, failed or pending), which scripts/modtable.py reads. ui_dump differences that
@@ -1777,7 +1778,9 @@ class Player:
                        'steam_api=' + self.env['QA_U57_STEAM'], *size,
                        *(a for t in os.environ.get('E2E_GAME_TWEAKS', 'exact').split() for a in ('--game-tweak', t)),
                        # The original's main menu has no Moono Tweaks button: the menus compare.
-                       '--no-tweaks-menu']
+                       '--no-tweaks-menu',
+                       # E2E_PLAYER_ARGS: more host arguments for our player (e.g. --renderer vulkan).
+                       *os.environ.get('E2E_PLAYER_ARGS', '').split()]
             stdout = self.log
         # The runner's own display (a desktop's) must reach neither the player nor xvfb-run's
         # server, whose environment find_display reads: input would land on the desktop.

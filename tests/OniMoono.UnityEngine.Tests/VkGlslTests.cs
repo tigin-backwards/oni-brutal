@@ -6,8 +6,9 @@ using Xunit;
 
 namespace OniMoono.Tests
 {
-    /// The Vulkan device's rewrite of Unity's GLCore program text (VkGlsl), its compilation
-    /// (shaderc) and the reflection of the result's uniform blocks (SpirvReflection).
+    /// The Vulkan device's rewrite of Unity's GLCore program text for shaders without a usable
+    /// Vulkan program (VkGlsl), its compilation (shaderc) and the reflection of the result's
+    /// uniform blocks (SpirvReflection).
     public class VkGlslTests
     {
         const string Header = "#version 150\n#extension GL_ARB_explicit_attrib_location : require\n"
@@ -51,7 +52,10 @@ namespace OniMoono.Tests
             Assert.Contains("layout(location = 2) in vec2 vs_TEXCOORD0", p.Fragment);
             Assert.Contains("layout(location = 0) out vec4 SV_Target0", p.Fragment);
             Assert.Contains("gl_InstanceIndex", p.Vertex);
-            Assert.Contains("gl_Position.z = (gl_Position.z + gl_Position.w) * 0.5;", p.Vertex);
+            // Unity's Vulkan vertex epilogue; blocks in set 1, samplers in set 0.
+            Assert.Contains("gl_Position.y = -gl_Position.y;", p.Vertex);
+            Assert.Contains("layout(std140, set = 1, binding = 2) uniform UnityPerCamera", p.Vertex);
+            Assert.Contains("layout(set = 0, binding = 3) uniform sampler2D _Data", p.Vertex);
 
             var vertexBlocks = SpirvReflection.UniformBlocks(compiled.Vertex).OrderBy(b => b.Binding).ToArray();
             Assert.Equal([(0, VkGlsl.VertexGlobalsBlock), (2, "UnityPerCamera")], vertexBlocks.Select(b => (b.Binding, b.Name)).ToArray());

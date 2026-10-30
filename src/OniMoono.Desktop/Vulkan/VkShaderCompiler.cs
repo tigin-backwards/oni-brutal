@@ -5,7 +5,8 @@ using Brutal.ShaderCApi;
 namespace OniMoono.Desktop.Vulkan
 {
     /// Compiles a program's two GLCore stages to SPIR-V for Vulkan 1.1 (shaderc, at run time, as
-    /// the GL driver compiles the same text): preprocessed, rewritten by VkGlsl, compiled.
+    /// the GL driver compiles the same text): preprocessed, rewritten by VkGlsl, compiled. Used
+    /// only for shaders without a usable Vulkan program of U60's (VkPrograms).
     internal sealed unsafe class VkShaderCompiler : IDisposable
     {
         readonly Compiler compiler = ShaderC.CreateCompiler();
@@ -41,13 +42,6 @@ namespace OniMoono.Desktop.Vulkan
                 Vertex = Spirv(program.Vertex, ShaderKind.VertexShader, name, options),
                 Fragment = Spirv(program.Fragment, ShaderKind.FragmentShader, name, options),
             };
-        }
-
-        /// SPIR-V of GLSL written for this device (the presenter's own programs).
-        public byte[] CompileOwn(string source, bool vertex, string name)
-        {
-            using var options = Options();
-            return Spirv(source, vertex ? ShaderKind.VertexShader : ShaderKind.FragmentShader, name, options);
         }
 
         string Preprocess(string source, ShaderKind kind, string name, CompileOptions options)

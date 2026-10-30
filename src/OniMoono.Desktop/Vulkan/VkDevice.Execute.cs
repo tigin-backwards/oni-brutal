@@ -352,12 +352,13 @@ namespace OniMoono.Desktop.Vulkan
             return true;
         }
 
-        /// Pipeline and descriptors for a draw; false when the draw cannot be made (a
-        /// pipeline the driver refused is logged once by the command's exception).
+        /// Pipeline and descriptors for a draw; false when the draw cannot be made (a pipeline
+        /// the driver refused, logged once per program by VkPipelines).
         bool Bind(ProgramInputs r, VkProgram program, long layoutKey, MeshLayout layout, VkPrimitiveTopology topology)
         {
             var key = new VkPipelineKey(program, r.State, layoutKey, topology, targetFormats);
             var pipeline = pipelines.Get(key, layout);
+            if (pipeline.IsNull()) return false;
             var cb = frames.Main;
             if (pipeline.VkHandle != boundPipeline.VkHandle)
             {
@@ -568,6 +569,12 @@ namespace OniMoono.Desktop.Vulkan
             presenter.Frame = frame;
             FlushStreams();
             frames.Submit(endFrame: true);
+            if (frame == failPresentAt) presenter.FailNextRecreate = true;
+            if (presenter.Failure is { } failed)
+            {
+                PresenterFailed(failed);
+                return;
+            }
             presenter.Present(interval, width, height);
             presenter.Frame = frame + 1;
             VkTimings.Present += System.Diagnostics.Stopwatch.GetTimestamp() - t;

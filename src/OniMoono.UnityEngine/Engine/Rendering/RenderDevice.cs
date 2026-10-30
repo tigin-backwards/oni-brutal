@@ -56,9 +56,9 @@ namespace OniMoono.Engine.Rendering
     {
         public abstract GraphicsCaps Caps { get; }
 
-        /// The ShaderCompilerPlatform whose programs the device runs (ShaderNative.ProgramsFor):
-        /// OpenGLCore unless a device says otherwise.
-        public virtual uint ShaderPlatform => ShaderNative.OpenGLCorePlatform;
+        /// Whether the device can draw a shader: one with OpenGLCore programs unless a device
+        /// says otherwise.
+        public virtual bool Supports(ShaderNative shader) => shader.HasOpenGLCorePrograms;
 
         /// False for the null device: the player renders no frames (cameras and overlay canvases
         /// are not drawn), as Unity's -nographics player.

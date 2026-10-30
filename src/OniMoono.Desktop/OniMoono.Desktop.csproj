@@ -15,6 +15,8 @@
     <PackageReference Include="Ahwoo.BRUTAL.Vulkan" />
     <PackageReference Include="Ahwoo.BRUTAL.Vulkan.Abstractions" />
     <PackageReference Include="Ahwoo.BRUTAL.Vulkan.Vma" />
+    <!-- shaderc: GLCore programs compiled to SPIR-V for shaders without U60's Vulkan programs. -->
+    <PackageReference Include="Ahwoo.BRUTAL.ShaderC" />
   </ItemGroup>
   <ItemGroup>
     <!-- The window icon (GlfwPlatform.SetIcon); OniMoono.Host/Moo.ico is the same image. -->

@@ -86,14 +86,15 @@ namespace OniMoono.Desktop.Gl
         /// for Vulkan, also whether the target is a render texture).
         public RenderConventions Conventions;
 
-        /// The ShaderCompilerPlatform whose programs draws select (OpenGLCore unless the device
-        /// runs another platform's).
-        public uint Platform = ShaderNative.OpenGLCorePlatform;
+        /// The ShaderCompilerPlatform whose programs a shader's draws select (0: none), when the
+        /// device chooses per shader (the Vulkan device); null: OpenGLCore.
+        public Func<ShaderNative, uint> PlatformOf;
 
-        bool HasPrograms(ShaderNative shader) => Platform == ShaderNative.OpenGLCorePlatform ? shader.HasOpenGLCorePrograms : shader.HasProgramsFor(Platform);
+        bool HasPrograms(ShaderNative shader) => PlatformOf == null ? shader.HasOpenGLCorePrograms : PlatformOf(shader) != 0;
 
-        /// The pass's program variants on the device's platform.
-        public ProgramVariant[] VariantsOf(ShaderPass pass) => Platform == ShaderNative.OpenGLCorePlatform ? pass.Variants : pass.VulkanVariants;
+        /// The pass's program variants on the platform the device draws the shader with.
+        public ProgramVariant[] VariantsOf(ShaderNative shader, ShaderPass pass)
+            => PlatformOf != null && PlatformOf(shader) == ShaderNative.VulkanPlatform ? pass.VulkanVariants : pass.Variants;
 
         /// Draw queues are recorded on worker threads (ONI_PARALLEL_DRAWS=0: never).
         public static readonly bool ParallelByDefault = Environment.GetEnvironmentVariable("ONI_PARALLEL_DRAWS") != "0";
@@ -353,7 +354,7 @@ namespace OniMoono.Desktop.Gl
 
         // Its own method, so the predicate's closure is allocated only when a variant is selected.
         int SelectVariant(MaterialNative material, ShaderNative passShader, ShaderPass pass, string[] keywords)
-            => ShaderPrograms.SelectVariant(VariantsOf(pass), k => KeywordEnabled(k, material, keywords));
+            => ShaderPrograms.SelectVariant(VariantsOf(passShader, pass), k => KeywordEnabled(k, material, keywords));
 
         // ----- Draw queues -----
 

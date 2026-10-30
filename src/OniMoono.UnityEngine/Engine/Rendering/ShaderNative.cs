@@ -97,6 +97,10 @@ namespace OniMoono.Engine.Rendering
         public string ShaderName = "";
         /// The device's compiled programs (see MeshNative.Gpu).
         public object Gpu;
+        /// The ShaderCompilerPlatform whose programs the device draws this shader with, once the
+        /// device has chosen (0: not yet). The Vulkan device runs U60's Vulkan programs, or the
+        /// GLCore ones for a shader without usable Vulkan programs.
+        public volatile uint DevicePlatform;
         public ShaderProperty[] Properties = Array.Empty<ShaderProperty>();
         public Dictionary<int, ShaderProperty> PropertiesById = new();
         public SubShader[] SubShaders = Array.Empty<SubShader>();

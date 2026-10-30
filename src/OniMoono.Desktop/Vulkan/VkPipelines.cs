@@ -56,16 +56,33 @@ namespace OniMoono.Desktop.Vulkan
             return key;
         }
 
+        /// The pipeline for a draw; a null handle when the driver refused it (logged once per
+        /// program, and remembered, so later draws with the key are left out without trying).
         public VkPipeline Get(in VkPipelineKey key, MeshLayout layout)
         {
             if (pipelines.TryGetValue(key, out var p)) return p;
             long start = System.Diagnostics.Stopwatch.GetTimestamp();
-            p = Create(key, layout);
+            try
+            {
+                p = Create(key, layout);
+            }
+            catch (Exception e) when (!VkDevice.IsDeviceLost(e))
+            {
+                System.Threading.Interlocked.Increment(ref Refused);
+                if (refused.Add(key.Program))
+                    OniMoono.Engine.EngineLog.Engine($"vulkan: a pipeline for shader '{key.Program.Name}' was refused, its draws with that state are left out: {e.GetType().Name}: {e.Message}");
+                p = default;
+            }
             CreateTicks += System.Diagnostics.Stopwatch.GetTimestamp() - start;
             Created++;
             pipelines[key] = p;
             return p;
         }
+
+        readonly HashSet<VkProgram> refused = new();
+
+        /// Pipelines the driver refused (--check-shaders).
+        public static int Refused;
 
         /// A channel's attribute format and stride as the mesh stores it (GlMeshes.VertexArray).
         public static (VkFormat Format, int Stride) ChannelFormat(MeshLayout layout, int c)

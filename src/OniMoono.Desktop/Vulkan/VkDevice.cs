@@ -109,6 +109,7 @@ namespace OniMoono.Desktop.Vulkan
             this.platform = platform;
             this.vk = vk;
             markerPath = cacheDirectory == null ? null : LostMarkerPath(cacheDirectory);
+            VkSplash splash = null;
             try
             {
                 if (Glfw.CreateWindowSurface(vk.Instance.Handle.VkHandle, platform.Window, out ulong rawSurface) != 0)
@@ -118,13 +119,16 @@ namespace OniMoono.Desktop.Vulkan
                 frames = new VkFrames(vk);
                 programs = new VkPrograms(vk);
                 pipelines = new VkPipelines(vk);
-                VkSplash splash = GlDevice.Splash != null ? new VkSplash(vk, programs, GlDevice.Splash) : null;
-                VkContext.FailAt("device");                presenter = new VkPresenter(vk, platform.Window, surface, splash, platform.FramebufferWidth, platform.FramebufferHeight, depthFormat);
+                splash = GlDevice.Splash != null ? new VkSplash(vk, programs, GlDevice.Splash) : null;
+                VkContext.FailAt("device");
+                presenter = new VkPresenter(vk, platform.Window, surface, splash, platform.FramebufferWidth, platform.FramebufferHeight, depthFormat);
                 CreateShared();
                 VkContext.FailAt("presenter");
             }
             catch (Exception e)
             {
+                // The presenter owns the splash once made; before that it is released here.
+                if (presenter == null) splash?.Dispose();
                 ReleaseAll();
                 if (e is VulkanUnavailableException) throw;
                 throw new VulkanUnavailableException($"{e.GetType().Name}: {e.Message}", e);
@@ -133,7 +137,7 @@ namespace OniMoono.Desktop.Vulkan
             worker = new GlWorker("Vulkan", () => { }, () => { }, CommandFailed) { Resources = this };
             recorder = new GlDrawRecorder(worker, DefaultTexture, RunDraw)
             {
-                Platform = ShaderNative.VulkanPlatform,
+                PlatformOf = VkPrograms.PlatformOf,
                 Conventions = new RenderConventions(Vulkan: true, Flipped: false),
             };
             platform.Closing += Shutdown;
@@ -173,13 +177,18 @@ namespace OniMoono.Desktop.Vulkan
 
         public override GraphicsCaps Caps => caps;
         public override bool RendersFrames => true;
-        public override uint ShaderPlatform => ShaderNative.VulkanPlatform;
+        public override bool Supports(ShaderNative shader) => VkPrograms.PlatformOf(shader) != 0;
 
-        /// A recorded command threw (device thread): logged, and the frame goes on; a lost
-        /// device ends the game (see DeviceLost).
+        public static bool IsDeviceLost(Exception e)
+            => e is VkResultError { Result: VkResult.ErrorDeviceLost } || e.InnerException is VkResultError { Result: VkResult.ErrorDeviceLost };
+
+        readonly HashSet<string> failuresLogged = new();
+
+        /// A recorded command threw (device thread): logged once per kind of failure, the open
+        /// pass ended, and the frame goes on; a lost device ends the game (see DeviceLost).
         void CommandFailed(Exception e)
         {
-            if (e is VkResultError { Result: VkResult.ErrorDeviceLost } || e.InnerException is VkResultError { Result: VkResult.ErrorDeviceLost })
+            if (IsDeviceLost(e))
             {
                 if (deviceLost) return;
                 deviceLost = true;
@@ -187,7 +196,17 @@ namespace OniMoono.Desktop.Vulkan
                 WriteLostMarker(e.Message);
                 return;
             }
-            Debug.LogException(e);
+            if (failuresLogged.Add($"{e.GetType().FullName}: {e.Message}")) Debug.LogException(e);
+            if (rendering && frames.MainOpen)
+            {
+                try
+                {
+                    frames.Main.EndRendering();
+                }
+                catch (Exception end) when (!IsDeviceLost(end))
+                {
+                }
+            }
             rendering = false;
             boundPipeline = default;
         }
@@ -199,6 +218,24 @@ namespace OniMoono.Desktop.Vulkan
         /// the non-readable textures), and switching to OpenGL mid-game would need the same; the
         /// next launch uses OpenGL (auto) until the driver changes.
         volatile bool deviceLost;
+        /// What ended the device ("was lost", or presenting failed for good).
+        string lostWhat = "was lost";
+
+        /// Presenting ended for good (VkPresenter.Failure: a lost surface, a swapchain that
+        /// could not be made again): handled as a lost device, the game quitting with the error
+        /// rather than running on with a black window, and auto using OpenGL from the next start.
+        void PresenterFailed(Exception e)
+        {
+            if (deviceLost) return;
+            lostWhat = "could no longer present to the window";
+            deviceLost = true;
+            EngineLog.Engine($"vulkan: presenting failed ({caps.Name}, {vk.DriverInfo}): {e.GetType().Name}: {e.Message}");
+            WriteLostMarker($"presenting failed: {e.Message}");
+        }
+
+        /// Test hook: ONI_VULKAN_FAIL=present-after:N makes the swapchain fail at frame N.
+        static readonly int failPresentAt = Environment.GetEnvironmentVariable("ONI_VULKAN_FAIL") is { } f && f.StartsWith("present-after:", StringComparison.Ordinal)
+            && int.TryParse(f["present-after:".Length..], out int n) ? n : -1;
 
         void WriteLostMarker(string reason)
         {
@@ -270,7 +307,7 @@ namespace OniMoono.Desktop.Vulkan
             var sub = shader.ActiveSubShader;
             if (sub == null || passIndex >= sub.Passes.Length) return null;
             var pass = sub.Passes[passIndex];
-            int blob = ShaderPrograms.SelectVariant(recorder.VariantsOf(pass), k => GlDrawRecorder.KeywordEnabled(k, material, null));
+            int blob = ShaderPrograms.SelectVariant(recorder.VariantsOf(shader, pass), k => GlDrawRecorder.KeywordEnabled(k, material, null));
             if (blob < 0) return null;
             var program = recorder.Program(shader, blob);
             if (program.Id == 0) return null;
@@ -298,14 +335,8 @@ namespace OniMoono.Desktop.Vulkan
                 int o = i * floats;
                 data[o] = v.Position.x; data[o + 1] = v.Position.y; data[o + 2] = v.Position.z;
                 data[o + 3] = v.Color.r; data[o + 4] = v.Color.g; data[o + 5] = v.Color.b; data[o + 6] = v.Color.a;
-                Vector4[] uvs = [v.Uv0, v.Uv1, v.Uv2, v.Uv3, v.Uv4, v.Uv5, v.Uv6, v.Uv7];
-                for (int u = 0; u < 8; u++)
-                {
-                    data[o + 7 + u * 4] = uvs[u].x;
-                    data[o + 8 + u * 4] = uvs[u].y;
-                    data[o + 9 + u * 4] = uvs[u].z;
-                    data[o + 10 + u * 4] = uvs[u].w;
-                }
+                Uv(data, o, 0, v.Uv0); Uv(data, o, 1, v.Uv1); Uv(data, o, 2, v.Uv2); Uv(data, o, 3, v.Uv3);
+                Uv(data, o, 4, v.Uv4); Uv(data, o, 5, v.Uv5); Uv(data, o, 6, v.Uv6); Uv(data, o, 7, v.Uv7);
             }
             int[] indices = null;
             if (primitive == ImmediatePrimitive.Quads)
@@ -320,6 +351,15 @@ namespace OniMoono.Desktop.Vulkan
             }
             int count = vertices.Length;
             worker.Post(() => ExecuteImmediate(recorded, primitive, data, count, indices));
+        }
+
+        static void Uv(float[] data, int vertex, int set, Vector4 uv)
+        {
+            int at = vertex + 7 + set * 4;
+            data[at] = uv.x;
+            data[at + 1] = uv.y;
+            data[at + 2] = uv.z;
+            data[at + 3] = uv.w;
         }
 
         public override void DrawMeshNow(MeshNative mesh, int subMesh, Matrix4x4 objectToWorld, Matrix4x4 view, Matrix4x4 projection)
@@ -371,23 +411,36 @@ namespace OniMoono.Desktop.Vulkan
             }
         }
 
-        /// Compiles every variant of every loaded shader (Shader.WarmupAllShaders), as
+        /// --check-shaders: the warm-up also makes each program's pipeline for its pass's state
+        /// (with no material), immediate geometry and the back buffer's formats.
+        public static bool CheckPipelines;
+
+        /// Programs that could not be built and pipelines the driver refused (--check-shaders).
+        public static int CheckFailures => VkPrograms.Failures + VkPipelines.Refused;
+
+        /// Builds every variant of every loaded shader (Shader.WarmupAllShaders), as
         /// GlDevice.WarmupShaders.
         public override void WarmupShaders()
         {
             var shaders = new List<ShaderNative>();
             foreach (var native in ObjectTable.Snapshot())
-                if (native is ShaderNative shader && shader.HasProgramsFor(ShaderNative.VulkanPlatform)) shaders.Add(shader);
+                if (native is ShaderNative shader && VkPrograms.PlatformOf(shader) != 0) shaders.Add(shader);
+            var work = new List<(ShaderNative Shader, int Blob, ResolvedState State)>();
+            foreach (var shader in shaders)
+                foreach (var sub in shader.SubShaders)
+                    foreach (var pass in sub.Passes)
+                    {
+                        if (pass.Type != 0) continue;
+                        var state = CheckPipelines ? ResolvedState.Of(recorder.StateOf(pass), new DrawInputs { Shader = shader }, null) : default;
+                        foreach (var variant in recorder.VariantsOf(shader, pass))
+                            if (!GlDevice.StereoOnly(variant.Keywords)) work.Add((shader, variant.BlobIndex, state));
+                    }
             worker.Call(() =>
             {
-                foreach (var shader in shaders)
-                    foreach (var sub in shader.SubShaders)
-                        foreach (var pass in sub.Passes)
-                        {
-                            if (pass.Type != 0) continue;
-                            foreach (var variant in pass.VulkanVariants)
-                                if (!GlDevice.StereoOnly(variant.Keywords)) Program(shader, variant.BlobIndex);
-                        }
+                var formats = VkTargetFormats.Of([VkFormat.R8G8B8A8UNorm], depthFormat, depthFormat, 1, flipped: false);
+                foreach (var (shader, blob, state) in work)
+                    if (Program(shader, blob) is { Vk: { } program } && CheckPipelines)
+                        pipelines.Get(new VkPipelineKey(program, state, VkPipelines.ImmediateLayout, VkPrimitiveTopology.TriangleList, formats), null);
             });
         }
 
@@ -400,7 +453,7 @@ namespace OniMoono.Desktop.Vulkan
             if (deviceLost && !quitRequested)
             {
                 quitRequested = true;
-                Debug.LogError("The Vulkan graphics device was lost; the game quits. The next start uses OpenGL (see Player.log).");
+                Debug.LogError($"The Vulkan graphics device {lostWhat}; the game quits. The next start uses OpenGL (see Player.log).");
                 PlayerLoop.RequestQuit(1);
             }
             int interval = SwapIntervalOverride >= 0 ? SwapIntervalOverride : QualitySettings.vSyncCount;
@@ -454,6 +507,8 @@ namespace OniMoono.Desktop.Vulkan
         void Shutdown()
         {
             worker.Dispose();
+            // The presenter's thread submits too: it ends before the queue is waited for.
+            presenter?.Dispose();
             try
             {
                 vk.Device.WaitIdle();
@@ -465,14 +520,31 @@ namespace OniMoono.Desktop.Vulkan
             vk.SavePipelineCache();
             ReleaseAll();
             vk.Dispose();
+            // A clean session on this driver: auto may use Vulkan again.
+            if (!deviceLost && markerPath != null)
+            {
+                try
+                {
+                    System.IO.File.Delete(markerPath);
+                }
+                catch (Exception e) when (e is System.IO.IOException or UnauthorizedAccessException)
+                {
+                }
+            }
         }
 
         /// Destroys everything the device made (also after a failed start, from whatever was
         /// made by then).
         void ReleaseAll()
         {
-            try { vk.Device?.WaitIdle(); } catch (VkResultError) { }
             presenter?.Dispose();
+            try
+            {
+                vk.Device?.WaitIdle();
+            }
+            catch (VkResultError)
+            {
+            }
             foreach (var t in defaults.Values) DestroyTexture(t.Vk);
             defaults.Clear();
             DestroyShared();

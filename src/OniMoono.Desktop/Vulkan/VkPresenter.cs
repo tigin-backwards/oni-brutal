@@ -55,7 +55,12 @@ namespace OniMoono.Desktop.Vulkan
         VkPresentModeKHR presentMode;
         int swapInterval = -1;
         bool outOfDate;
-        readonly VkPresentModeKHR[] presentModes;
+        readonly VkPresentModeKHR[] presentModes = Array.Empty<VkPresentModeKHR>();
+        /// Swapchain creations that failed in a row (made again at the next frame, a few times,
+        /// before presenting is given up).
+        int recreateFailures;
+        const int RecreateAttempts = 5;
+        bool disposed;
 
         // Per presenter frame in flight.
         readonly VkCommandPool pool;
@@ -70,7 +75,11 @@ namespace OniMoono.Desktop.Vulkan
         readonly Queue<(VkBackBuffer Buffer, int Interval, int Width, int Height)> queue = new();
         int queued;
         bool stopping, refreshWanted;
-        Exception failure;
+        volatile Exception failure;
+
+        /// Why presenting stopped for good (the presenter thread ended), or null. The device
+        /// treats it as a lost device: the game quits with the error, and auto uses OpenGL next.
+        public Exception Failure => failure;
         volatile int windowWidth, windowHeight;
 
         /// The main thread's frame the device thread is executing (diagnostics).
@@ -87,12 +96,12 @@ namespace OniMoono.Desktop.Vulkan
             this.depthFormat = depthFormat;
             windowWidth = Math.Max(1, width);
             windowHeight = Math.Max(1, height);
-            if (!vk.Physical.GetSurfaceSupportKHR(vk.QueueFamily, surface)) throw new VulkanUnavailableException("the graphics queue cannot present to the window");
-            int modes = vk.Physical.GetSurfacePresentModesKHR_Count(surface);
-            presentModes = new VkPresentModeKHR[modes];
-            vk.Physical.GetSurfacePresentModesKHR_Write(surface, presentModes);
             try
             {
+                if (!vk.Physical.GetSurfaceSupportKHR(vk.QueueFamily, surface)) throw new VulkanUnavailableException("the graphics queue cannot present to the window");
+                int modes = vk.Physical.GetSurfacePresentModesKHR_Count(surface);
+                presentModes = new VkPresentModeKHR[modes];
+                vk.Physical.GetSurfacePresentModesKHR_Write(surface, presentModes);
                 pool = vk.Device.CreateCommandPool(new VkCommandPoolCreateInfo { QueueFamilyIndex = vk.QueueFamily, Flags = VkCommandPoolCreateFlags.ResetCommandBufferBit }, null);
                 for (int i = 0; i < Slots; i++)
                 {
@@ -182,7 +191,7 @@ namespace OniMoono.Desktop.Vulkan
             lock (gate)
             {
                 while (queued >= (interval > 0 ? MaxQueuedWithVsync : MaxQueued) && failure == null) Monitor.Wait(gate);
-                if (failure != null) throw new InvalidOperationException("Presenting failed.", failure);
+                if (failure != null) return; // VkDevice reports it (Failure)
                 queue.Enqueue((b, interval, Math.Max(1, width), Math.Max(1, height)));
                 queued++;
                 Monitor.PulseAll(gate);
@@ -241,7 +250,13 @@ namespace OniMoono.Desktop.Vulkan
                         if (redraw) queued++;
                     }
                     if (redraw) Show(shown, swapInterval < 0 ? 1 : swapInterval, windowWidth, windowHeight, gameFrame: false);
-                    else Show(frame.Buffer, frame.Interval, frame.Width, frame.Height, gameFrame: true);
+                    else
+                    {
+                        // vSyncCount 2-4: FIFO shows an image per vertical blank, so the frame
+                        // is presented that many times (OpenGL's swap interval does the same).
+                        Show(frame.Buffer, frame.Interval, frame.Width, frame.Height, gameFrame: true);
+                        for (int again = 1; again < frame.Interval; again++) Show(frame.Buffer, frame.Interval, frame.Width, frame.Height, gameFrame: false);
+                    }
                     lock (gate)
                     {
                         queued--;
@@ -267,9 +282,9 @@ namespace OniMoono.Desktop.Vulkan
         {
             if (gameFrame) shown = b;
             if (gameFrame && splash != null && splash.Active) splash.GameFrame();
-            if (interval != swapInterval || outOfDate || width != extent.Width || height != extent.Height)
+            if (interval != swapInterval || outOfDate || FailNextRecreate || width != extent.Width || height != extent.Height)
             {
-                Recreate(width, height, interval);
+                if (!TryRecreate(width, height, interval)) return;
                 if (swapchain.IsNull()) return; // minimized
             }
             // The copy fills the swapchain's images, whose size is the surface's now, which can
@@ -293,7 +308,7 @@ namespace OniMoono.Desktop.Vulkan
                 return;
             }
             if (r == VkResult.SuboptimalKHR) outOfDate = true;
-            else VkCheck.Ok(r, "vkAcquireNextImageKHR");
+            else VkCheck.Ok(r, "vkAcquireNextImageKHR"); // surface lost: presenting ends (Failure)
 
             var cb = commands[s];
             VkCheck.Ok(vk.Device.PInvoke.vkResetCommandBuffer.Invoke(cb.Handle, 0), "vkResetCommandBuffer");
@@ -394,10 +409,37 @@ namespace OniMoono.Desktop.Vulkan
             return VkPresentModeKHR.FifoKHR;
         }
 
+        /// Recreate on the presenter thread: a creation that fails (the driver out of memory
+        /// during a resize, say) leaves no swapchain and is tried again at the next frame, up to
+        /// RecreateAttempts in a row; then, or for a failure that cannot pass (a lost surface, a
+        /// format that takes no copies), it is thrown and presenting ends (Failure).
+        bool TryRecreate(int width, int height, int interval)
+        {
+            try
+            {
+                Recreate(width, height, interval);
+                recreateFailures = 0;
+                return true;
+            }
+            catch (VkResultError e) when (e.Result is VkResult.ErrorOutOfHostMemory or VkResult.ErrorOutOfDeviceMemory or VkResult.ErrorInitializationFailed
+                or VkResult.ErrorNativeWindowInUseKHR or VkResult.ErrorOutOfDateKHR)
+            {
+                if (++recreateFailures >= RecreateAttempts) throw;
+                EngineLog.Engine($"vulkan: the swapchain could not be made ({e.Result}); trying again at the next frame");
+                outOfDate = true;
+                return false;
+            }
+        }
+
         /// (Re)makes the swapchain for the window's size and the swap interval; leaves it null
         /// while the window is minimized.
         void Recreate(int width, int height, int interval)
         {
+            if (FailNextRecreate)
+            {
+                FailNextRecreate = false;
+                throw new VkResultError(VkResult.ErrorSurfaceLostKHR, "ONI_VULKAN_FAIL=present (a test of a presenter failure)");
+            }
             bool force = outOfDate;
             outOfDate = false;
             swapInterval = interval;
@@ -407,6 +449,12 @@ namespace OniMoono.Desktop.Vulkan
                 Math.Clamp(size.Height, caps.MinImageExtent.Height, Math.Max(caps.MinImageExtent.Height, caps.MaxImageExtent.Height)));
             var mode = ModeFor(interval);
             if (!swapchain.IsNull() && size.Width == extent.Width && size.Height == extent.Height && mode == presentMode && !force && size.Width > 0) return;
+            // Minimized and already without a swapchain: nothing to wait for or release.
+            if (swapchain.IsNull() && (size.Width == 0 || size.Height == 0))
+            {
+                extent = size;
+                return;
+            }
             // The images about to be replaced may still be read by submitted work.
             vk.Queue.WaitIdle();
             var old = swapchain;
@@ -433,14 +481,21 @@ namespace OniMoono.Desktop.Vulkan
             if (caps.MaxImageCount > 0) count = Math.Min(count, caps.MaxImageCount);
             var composite = (caps.SupportedCompositeAlpha & VkCompositeAlphaFlagsKHR.OpaqueBitKHR) != 0 ? VkCompositeAlphaFlagsKHR.OpaqueBitKHR
                 : (VkCompositeAlphaFlagsKHR)((int)caps.SupportedCompositeAlpha & -(int)caps.SupportedCompositeAlpha);
-            swapchain = vk.Device.CreateSwapchainKHR(new VkSwapchainCreateInfoKHR
+            try
             {
-                Surface = surface, MinImageCount = count, ImageFormat = chosen.Format, ImageColorSpace = chosen.ColorSpace, ImageExtent = size,
-                ImageArrayLayers = 1, ImageUsage = VkImageUsageFlags.ColorAttachmentBit | VkImageUsageFlags.TransferDstBit,
-                ImageSharingMode = VkSharingMode.Exclusive, PreTransform = caps.CurrentTransform, CompositeAlpha = composite,
-                PresentMode = mode, Clipped = true, OldSwapchain = old,
-            }, null);
-            if (!old.IsNull()) vk.Device.DestroySwapchainKHR(old, null);
+                swapchain = vk.Device.CreateSwapchainKHR(new VkSwapchainCreateInfoKHR
+                {
+                    Surface = surface, MinImageCount = count, ImageFormat = chosen.Format, ImageColorSpace = chosen.ColorSpace, ImageExtent = size,
+                    ImageArrayLayers = 1, ImageUsage = VkImageUsageFlags.ColorAttachmentBit | VkImageUsageFlags.TransferDstBit,
+                    ImageSharingMode = VkSharingMode.Exclusive, PreTransform = caps.CurrentTransform, CompositeAlpha = composite,
+                    PresentMode = mode, Clipped = true, OldSwapchain = old,
+                }, null);
+            }
+            finally
+            {
+                // The old swapchain is retired even when the new one could not be made.
+                if (!old.IsNull()) vk.Device.DestroySwapchainKHR(old, null);
+            }
             SwapchainFormat = chosen.Format;
             extent = size;
             presentMode = mode;
@@ -471,10 +526,16 @@ namespace OniMoono.Desktop.Vulkan
             images = Array.Empty<VkImage>();
         }
 
+        /// Test hook (ONI_VULKAN_FAIL=present-after:N, VkDevice): the next swapchain creation
+        /// fails as on a lost surface.
+        public volatile bool FailNextRecreate;
+
         /// Presents what was handed over, stops the thread and releases its objects and the
-        /// back buffers (the device is idle after).
+        /// back buffers (the device is idle after). Safe to call again.
         public void Dispose()
         {
+            if (disposed) return;
+            disposed = true;
             if (thread != null)
             {
                 lock (gate)

@@ -60,7 +60,13 @@ namespace OniMoono.Desktop.Vulkan
         {
             public VkBufferAlloc Buffer;
             public long Used;
+            /// Recycles of its frame slot in a row that did not use it.
+            public int Idle;
         }
+
+        /// Staging chunks a slot keeps however long they go unused (a frame's usual uploads),
+        /// and how many recycles an extra chunk (a load's burst of uploads) survives unused.
+        const int KeptChunks = 2, IdleRecycles = 8;
 
         sealed class Slot
         {
@@ -238,8 +244,20 @@ namespace OniMoono.Desktop.Vulkan
             s.Retired.Clear();
             vk.Device.PInvoke.vkResetCommandPool.Invoke(vk.Device.Handle, s.Pool, 0);
             s.NextBuffer = 0;
-            foreach (var c in s.Chunks) c.Used = 0;
+            foreach (var c in s.Chunks)
+            {
+                c.Idle = c.Used > 0 ? 0 : c.Idle + 1;
+                c.Used = 0;
+            }
             s.ChunkIndex = 0;
+            // A burst of uploads (a save loading) leaves chunks behind: past the first few, those
+            // unused for a while are released, so the stream's memory follows what frames use.
+            for (int i = s.Chunks.Count - 1; i >= KeptChunks; i--)
+                if (s.Chunks[i].Idle > IdleRecycles)
+                {
+                    s.Chunks[i].Buffer.Destroy(vk);
+                    s.Chunks.RemoveAt(i);
+                }
             foreach (var c in s.Uniforms) c.Used = 0;
             s.UniformIndex = 0;
             // Chunks made for one large copy go once the frame is over.

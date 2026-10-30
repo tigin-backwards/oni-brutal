@@ -154,7 +154,7 @@ namespace OniMoono.Desktop.Gl
 
         void ThrowIfFailed()
         {
-            if (failure != null) throw new InvalidOperationException("Rendering failed on the GL thread.", failure);
+            if (failure != null) throw new InvalidOperationException($"Rendering failed on the {thread?.Name ?? "GL"} thread.", failure);
         }
 
         void Run(Action enter, Action exit)

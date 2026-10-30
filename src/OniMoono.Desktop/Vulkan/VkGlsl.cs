@@ -5,22 +5,27 @@ using System.Text.RegularExpressions;
 
 namespace OniMoono.Desktop.Vulkan
 {
-    /// Unity's GLCore program text made Vulkan GLSL, so that the same programs run on both
-    /// devices (ARCHITECTURE §3.5, Vulkan). Vulkan GLSL has no default uniform block, no
-    /// name-based linking and no implicit bindings, so a program's two stages are rewritten
-    /// together, after preprocessing (HLSLcc wraps its uniform blocks in #if):
+    /// Unity's GLCore program text made Vulkan GLSL, for shaders that carry no usable Vulkan
+    /// program of U60's (mods' bundles built with other Unity versions; ARCHITECTURE §3.5,
+    /// Vulkan). Vulkan GLSL has no default uniform block, no name-based linking and no implicit
+    /// bindings, so a program's two stages are rewritten together, after preprocessing (HLSLcc
+    /// wraps its uniform blocks in #if), laid out as Unity's Vulkan programs are (textures in
+    /// set 0, constant buffers in set 1):
     ///
-    /// - loose uniforms become one std140 block per stage (vertex at binding 0, fragment at 1),
-    ///   members keeping their names, so the code reads them unchanged;
-    /// - named uniform blocks, storage buffers and samplers get descriptor bindings by name,
-    ///   the same in both stages, in order of first declaration (vertex stage first);
+    /// - loose uniforms become one std140 block per stage (vertex at binding 0, fragment at 1,
+    ///   set 1), members keeping their names, so the code reads them unchanged;
+    /// - named uniform blocks (set 1), storage buffers and samplers (set 0) get descriptor
+    ///   bindings by name, the same in both stages, in order of first declaration (vertex
+    ///   stage first);
     /// - vertex inputs get the locations of their mesh channels (in_POSITION0 0 … in_TEXCOORD7
     ///   11; others from 12), and the varyings one location map by name for both stages;
     /// - gl_InstanceID reads gl_InstanceIndex (the device draws from instance 0, where they agree);
-    /// - the vertex stage maps clip-space depth from OpenGL's [-w, w] to Vulkan's [0, w] after
-    ///   the program's own main, which is all the clip-space conversion needed: the device
-    ///   renders with OpenGL's framebuffer orientation (no viewport flip), so positions, texture
-    ///   rows, gl_FragCoord and readbacks keep OpenGL's meaning.
+    /// - the vertex stage ends as Unity's Vulkan programs do, negating gl_Position.y after the
+    ///   program's own main. The device gives these programs the projection it gives Unity's
+    ///   (RenderConventions: depth reversed into [w, 0], y turned over into render textures), so
+    ///   they render as the shipped programs do. Code the GLCore compile fixed for OpenGL's
+    ///   conventions (UNITY_REVERSED_Z, UNITY_UV_STARTS_AT_TOP branches, gl_FragCoord's origin)
+    ///   keeps OpenGL's meaning; mods' UI and text shaders, the ones met, use none of it.
     internal static class VkGlsl
     {
         public const int VertexGlobalsBinding = 0, FragmentGlobalsBinding = 1;
@@ -288,7 +293,7 @@ namespace OniMoono.Desktop.Vulkan
                         o.Append($"\nlayout(set = 0, binding = {bindings[s.Name].Binding}) uniform {declarator}");
                         break;
                     case StatementKind.UniformBlock:
-                        o.Append($"\nlayout(std140, set = 0, binding = {bindings[s.Name].Binding}) uniform {s.Name} ");
+                        o.Append($"\nlayout(std140, set = 1, binding = {bindings[s.Name].Binding}) uniform {s.Name} ");
                         break;
                     case StatementKind.StorageBuffer:
                         o.Append($"\nlayout(std430, set = 0, binding = {bindings[s.Name].Binding}) readonly buffer {s.Name} ");
@@ -311,11 +316,11 @@ namespace OniMoono.Desktop.Vulkan
             {
                 string block = vertex ? VertexGlobalsBlock : FragmentGlobalsBlock;
                 int binding = vertex ? VertexGlobalsBinding : FragmentGlobalsBinding;
-                o.Insert(globalsAt, $"\nlayout(std140, set = 0, binding = {binding}) uniform {block} {{\n{globals}}};\n");
+                o.Insert(globalsAt, $"\nlayout(std140, set = 1, binding = {binding}) uniform {block} {{\n{globals}}};\n");
             }
             var text = Regex.Replace(o.ToString(), @"\bgl_InstanceID\b", "gl_InstanceIndex");
             if (vertex)
-                text += "\nvoid main()\n{\n    oni_main();\n    gl_Position.z = (gl_Position.z + gl_Position.w) * 0.5;\n}\n";
+                text += "\nvoid main()\n{\n    oni_main();\n    gl_Position.y = -gl_Position.y;\n}\n";
             return text;
         }
     }

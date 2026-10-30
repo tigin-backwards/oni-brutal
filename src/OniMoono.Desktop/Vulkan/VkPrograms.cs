@@ -60,16 +60,74 @@ namespace OniMoono.Desktop.Vulkan
         }
     }
 
-    /// Builds DevicePrograms from Unity's shipped Vulkan programs (shader platform 18), decoded
-    /// from SMOL-V, bound as their parameter tables say, so that GlUniforms writes each draw's
-    /// constants into the programs' constant buffers and GlDrawRecorder resolves their textures
-    /// as for OpenGL (device thread).
+    /// Builds DevicePrograms (device thread) from Unity's shipped Vulkan programs (shader
+    /// platform 18), decoded from SMOL-V and bound as their parameter tables say, so that
+    /// GlUniforms writes each draw's constants into the programs' constant buffers and
+    /// GlDrawRecorder resolves their textures as for OpenGL. A shader without usable Vulkan
+    /// programs (a mod's, from a bundle built with another Unity version) runs its GLCore
+    /// programs instead, compiled to SPIR-V laid out the same way (VkShaderCompiler). The route
+    /// is chosen once per shader (PlatformOf) and logged. A variant that cannot be built is
+    /// logged once per shader and kept as a program with Id 0, which draws nothing.
     internal sealed unsafe class VkPrograms
     {
         readonly VkContext vk;
         static readonly Dictionary<string, int> layouts = new();
         static int nextId = 1;
         readonly HashSet<string> reported = new();
+        VkShaderCompiler compiler;
+
+        /// Variants that could not be built (--check-shaders).
+        public static int Failures;
+        static readonly HashSet<ShaderNative> routesLogged = new();
+
+        /// The platform whose programs the device draws a shader with (any thread): Vulkan when
+        /// every pass with programs has Vulkan variants that read, else OpenGLCore when the shader
+        /// has GLCore programs, else 0 (not drawn).
+        public static uint PlatformOf(ShaderNative shader)
+        {
+            uint known = shader.DevicePlatform;
+            if (known != 0) return known == uint.MaxValue ? 0 : known;
+            var (platform, why) = Route(shader);
+            shader.DevicePlatform = platform == 0 ? uint.MaxValue : platform;
+            lock (routesLogged)
+                if (routesLogged.Add(shader))
+                    EngineLog.Engine(platform == ShaderNative.VulkanPlatform ? $"vulkan: shader '{shader.ShaderName}': Unity's Vulkan programs"
+                        : platform == ShaderNative.OpenGLCorePlatform ? $"vulkan: shader '{shader.ShaderName}': its GLCore programs compiled to SPIR-V ({why})"
+                        : $"vulkan: shader '{shader.ShaderName}' is not drawn ({why})");
+            return platform;
+        }
+
+        static readonly bool ForceGlCore = Environment.GetEnvironmentVariable("ONI_VULKAN_ROUTE") == "glcore";
+
+        static (uint Platform, string Why) Route(ShaderNative shader)
+        {
+            uint fallback = shader.HasOpenGLCorePrograms ? ShaderNative.OpenGLCorePlatform : 0;
+            // Test hook: every shader takes the GLCore route (its QA against OpenGL's references).
+            if (ForceGlCore && fallback != 0) return (fallback, "ONI_VULKAN_ROUTE=glcore");
+            if (!shader.HasProgramsFor(ShaderNative.VulkanPlatform)) return (fallback, "no Vulkan programs");
+            try
+            {
+                var programs = shader.ProgramsFor(ShaderNative.VulkanPlatform);
+                if (programs == null) return (fallback, "no Vulkan programs");
+                foreach (var sub in shader.SubShaders)
+                    foreach (var pass in sub.Passes)
+                    {
+                        if (pass.Type != 0) continue;
+                        if (pass.VulkanVariants.Length == 0)
+                        {
+                            if (pass.Variants.Length > 0) return (fallback, "a pass without Vulkan variants");
+                            continue;
+                        }
+                        // The layout of this Unity version's entries (decoded once, kept).
+                        programs.Vulkan(pass.VulkanVariants[0].BlobIndex);
+                    }
+                return (ShaderNative.VulkanPlatform, null);
+            }
+            catch (Exception e) when (e is System.IO.InvalidDataException or NotSupportedException or ArgumentException)
+            {
+                return (fallback, $"Vulkan programs not read: {e.Message}");
+            }
+        }
 
         /// Programs built and their build time (diagnostics).
         public int Built;
@@ -131,6 +189,8 @@ namespace OniMoono.Desktop.Vulkan
         {
             foreach (var pool in uniformPools) vk.Device.DestroyDescriptorPool(pool, null);
             uniformPools.Clear();
+            compiler?.Dispose();
+            compiler = null;
         }
 
         public DeviceProgram Get(ShaderNative shader, int blobIndex)
@@ -143,7 +203,19 @@ namespace OniMoono.Desktop.Vulkan
             }
             if (set.Programs.TryGetValue(blobIndex, out var p)) return p;
             long start = System.Diagnostics.Stopwatch.GetTimestamp();
-            p = Build(shader, blobIndex);
+            try
+            {
+                p = PlatformOf(shader) == ShaderNative.VulkanPlatform ? BuildShipped(shader, blobIndex) : BuildCompiled(shader, blobIndex);
+            }
+            catch (Exception e) when (!VkDevice.IsDeviceLost(e))
+            {
+                // Damaged data, a reflection or module the driver refuses: never drawn, and kept
+                // so the next draw does not try again.
+                System.Threading.Interlocked.Increment(ref Failures);
+                if (reported.Add($"{shader.ShaderName}\nfailed"))
+                    EngineLog.Engine($"vulkan: shader '{shader.ShaderName}' variant (blob {blobIndex}) could not be built, its draws are left out: {e.GetType().Name}: {e.Message}");
+                p = new DeviceProgram();
+            }
             long ticks = System.Diagnostics.Stopwatch.GetTimestamp() - start;
             BuildTicks += ticks;
             Built++;
@@ -153,11 +225,11 @@ namespace OniMoono.Desktop.Vulkan
             return p;
         }
 
-        void NotDrawn(ShaderNative shader, ProgramVariant variant, string why)
+        void NotDrawn(ShaderNative shader, IEnumerable<string> keywords, string why)
         {
             // Once per shader and reason (the warm-up meets every variant).
             if (reported.Add($"{shader.ShaderName}\n{why}"))
-                EngineLog.Engine($"vulkan: shader '{shader.ShaderName}' variants with {why} are not drawn (first: [{string.Join(" ", variant.Keywords)}])");
+                EngineLog.Engine($"vulkan: shader '{shader.ShaderName}' variants with {why} are not drawn (first: [{string.Join(" ", keywords)}])");
         }
 
         /// The pass holding a Vulkan variant, and the variant (its parameter blob).
@@ -170,7 +242,7 @@ namespace OniMoono.Desktop.Vulkan
             return (null, default);
         }
 
-        DeviceProgram Build(ShaderNative shader, int blobIndex)
+        DeviceProgram BuildShipped(ShaderNative shader, int blobIndex)
         {
             var program = new DeviceProgram();
             var programs = shader.ProgramsFor(ShaderNative.VulkanPlatform);
@@ -182,19 +254,19 @@ namespace OniMoono.Desktop.Vulkan
             var fragment = vp.Stages.FirstOrDefault(s => s.Index == 1);
             if (vertex == null || fragment == null || vp.Stages.Length != 2)
             {
-                NotDrawn(shader, variant, "stages other than a vertex and a fragment stage");
+                NotDrawn(shader, variant.Keywords, "stages other than a vertex and a fragment stage");
                 return program;
             }
             var vi = SpirvReflection.Interface(vertex.Spirv);
             var fi = SpirvReflection.Interface(fragment.Spirv);
             if (vi.DepthCompare || fi.DepthCompare)
             {
-                NotDrawn(shader, variant, "shadow (depth-comparison) samplers");
+                NotDrawn(shader, variant.Keywords, "shadow (depth-comparison) samplers");
                 return program;
             }
             if (Uses(vertex.Spirv, "MultiView") || Uses(fragment.Spirv, "MultiView"))
             {
-                NotDrawn(shader, variant, "XR stereo (multiview)");
+                NotDrawn(shader, variant.Keywords, "XR stereo (multiview)");
                 return program;
             }
             // Every descriptor either stage reads, by set and binding.
@@ -202,7 +274,7 @@ namespace OniMoono.Desktop.Vulkan
             foreach (var d in vi.Descriptors.Concat(fi.Descriptors)) descriptors[(d.Set, d.Binding)] = d;
             if (descriptors.Values.Any(d => d.Multisampled || d.Kind == SpirvReflection.DescriptorKind.Other || d.Set > 1))
             {
-                NotDrawn(shader, variant, "multisample textures or descriptors outside sets 0 and 1");
+                NotDrawn(shader, variant.Keywords, "multisample textures or descriptors outside sets 0 and 1");
                 return program;
             }
 
@@ -223,7 +295,7 @@ namespace OniMoono.Desktop.Vulkan
             foreach (var d in descriptors.Values)
                 if (d.Set == 1 && !uniforms.Any(u => u.Binding == d.Binding))
                 {
-                    NotDrawn(shader, variant, $"a constant buffer at binding {d.Binding} its parameters do not name");
+                    NotDrawn(shader, variant.Keywords, $"a constant buffer at binding {d.Binding} its parameters do not name");
                     return program;
                 }
 
@@ -253,7 +325,7 @@ namespace OniMoono.Desktop.Vulkan
                 };
                 if ((int)type < 0)
                 {
-                    NotDrawn(shader, variant, $"a texture at binding {d.Binding} its parameters do not name");
+                    NotDrawn(shader, variant.Keywords, $"a texture at binding {d.Binding} its parameters do not name");
                     return program;
                 }
                 slots[d.Binding] = new VkBindingSlot(d.Binding, type, -1);
@@ -283,6 +355,21 @@ namespace OniMoono.Desktop.Vulkan
                 Uniforms = uniforms.OrderBy(u => u.Binding).ToArray(),
                 Inputs = inputs.ToArray(),
             };
+            return Finish(program, vkProgram, vertex.Spirv, fragment.Spirv);
+        }
+
+        /// The program's ids and Vulkan objects; on failure nothing is kept (the caller logs).
+        DeviceProgram Finish(DeviceProgram program, VkProgram vkProgram, byte[] vertex, byte[] fragment)
+        {
+            try
+            {
+                CreateObjects(vkProgram, vertex, fragment);
+            }
+            catch
+            {
+                vkProgram.Destroy(vk);
+                throw;
+            }
             var layoutKey = string.Join(",", vkProgram.Inputs);
             lock (layouts)
             {
@@ -290,18 +377,121 @@ namespace OniMoono.Desktop.Vulkan
                 program.Id = (uint)nextId++;
             }
             vkProgram.Id = (int)program.Id;
-            try
-            {
-                CreateObjects(vkProgram, vertex.Spirv, fragment.Spirv);
-            }
-            catch
-            {
-                vkProgram.Destroy(vk);
-                throw;
-            }
             program.Vk = vkProgram;
             return program;
         }
+
+        /// A GLCore variant compiled to SPIR-V (VkGlsl): its loose uniforms and blocks in set 1,
+        /// samplers and storage buffers in set 0, inputs at their channels' locations.
+        DeviceProgram BuildCompiled(ShaderNative shader, int blobIndex)
+        {
+            var program = new DeviceProgram();
+            var variant = shader.Programs?.Variant(blobIndex);
+            if (variant == null) return program;
+            if (variant.GeometrySource != null)
+            {
+                NotDrawn(shader, variant.Keywords, "a geometry stage");
+                return program;
+            }
+            compiler ??= new VkShaderCompiler();
+            VkShaderCompiler.Compiled compiled;
+            try
+            {
+                compiled = compiler.Compile(variant.VertexSource, variant.FragmentSource, shader.ShaderName);
+            }
+            catch (NotSupportedException e)
+            {
+                NotDrawn(shader, variant.Keywords, e.Message);
+                return program;
+            }
+            var t = compiled.Program;
+            foreach (var r in t.Resources)
+                if (r.Kind == VkGlsl.ResourceKind.Sampler && SamplerTarget(r.Type) == 0)
+                {
+                    NotDrawn(shader, variant.Keywords, $"sampler '{r.Name}' of type {r.Type}");
+                    return program;
+                }
+            var blocks = SpirvReflection.UniformBlocks(compiled.Vertex);
+            foreach (var b in SpirvReflection.UniformBlocks(compiled.Fragment))
+                if (!blocks.Exists(k => k.Binding == b.Binding)) blocks.Add(b);
+            var blockSizes = new List<int>();
+            var uniforms = new List<(int Binding, int Block, int Size)>();
+            foreach (var b in blocks.OrderBy(b => b.Binding))
+            {
+                int block = blockSizes.Count, size = Math.Max(16, (b.Size + 15) & ~15);
+                blockSizes.Add(size);
+                uniforms.Add((b.Binding, block, size));
+                foreach (var m in b.Members)
+                {
+                    var u = new UniformBinding
+                    {
+                        Name = m.Name, Type = GlType(m), Size = m.ArrayLength > 0 ? m.ArrayLength : 1, Block = block, Offset = m.Offset,
+                        ArrayStride = m.ArrayLength > 0 ? m.ArrayStride : 0,
+                    };
+                    GlPrograms.Classify(u, m.Name);
+                    program.Uniforms.Add(u);
+                }
+            }
+            var slots = new List<VkBindingSlot>();
+            foreach (var r in t.Resources)
+                switch (r.Kind)
+                {
+                    case VkGlsl.ResourceKind.StorageBuffer:
+                        slots.Add(new VkBindingSlot(r.Binding, VkDescriptorType.StorageBuffer, -1));
+                        break;
+                    case VkGlsl.ResourceKind.Sampler:
+                        slots.Add(new VkBindingSlot(r.Binding, VkDescriptorType.CombinedImageSampler, program.Samplers.Count));
+                        program.Samplers.Add(new SamplerBinding
+                        {
+                            Location = r.Binding, Unit = program.Samplers.Count, Target = SamplerTarget(r.Type), PropertyId = ShaderPropertyIds.Get(r.Name),
+                        });
+                        break;
+                }
+            program.BlockSizes = blockSizes.ToArray();
+            foreach (var size in program.BlockSizes) program.BlocksLength += size;
+            // Inputs at their channels' locations (VkGlsl.AttributeNames), others after.
+            var inputs = new List<(int, int, char)>();
+            for (int c = 0; c < program.Attributes.Length; c++) program.Attributes[c] = -1;
+            foreach (var (location, (_, type)) in t.Inputs)
+            {
+                int channel = location < (int)Channel.Count ? location : -1;
+                if (channel >= 0) program.Attributes[channel] = location;
+                inputs.Add((location, channel, type.StartsWith('i') ? 'i' : type.StartsWith('u') ? 'u' : 'f'));
+            }
+            var vkProgram = new VkProgram
+            {
+                Name = shader.ShaderName,
+                Slots = slots.OrderBy(s => s.Binding).ToArray(),
+                Uniforms = uniforms.ToArray(),
+                Inputs = inputs.ToArray(),
+            };
+            return Finish(program, vkProgram, compiled.Vertex, compiled.Fragment);
+        }
+
+        /// The OpenGL uniform type a compiled block member has (GlUniforms writes values by it).
+        static uint GlType(SpirvReflection.Member m)
+        {
+            if (m.Columns == 4 && m.Components == 4) return FloatMat4;
+            int n = m.Components;
+            return m.Type switch
+            {
+                SpirvReflection.Scalar.Float => n switch { 1 => FloatType, 2 => FloatVec2, 3 => FloatVec3, _ => FloatVec4 },
+                SpirvReflection.Scalar.Int => n switch { 1 => IntType, 2 => IntVec2, 3 => IntVec3, _ => IntVec4 },
+                SpirvReflection.Scalar.Uint => n switch { 1 => UnsignedIntType, 2 => UintVec2, 3 => UintVec3, _ => UintVec4 },
+                _ => n switch { 1 => BoolType, 2 => BoolVec2, 3 => BoolVec3, _ => BoolVec4 },
+            };
+        }
+
+        /// The texture target a GLCore sampler reads; 0 for samplers this device does not bind
+        /// (shadow comparison and multisample samplers).
+        static uint SamplerTarget(string type) => type switch
+        {
+            "sampler2D" or "isampler2D" or "usampler2D" => TexTarget2D,
+            "sampler3D" => TexTarget3D,
+            "sampler2DArray" => TexTarget2DArray,
+            "samplerCube" => TexTargetCubeMap,
+            _ => 0,
+        };
 
         /// A constant of a constant buffer as GlUniforms writes it: matrices as four vec4
         /// columns (Unity's Vulkan programs lay them out as HLSLcc's GLSL does), arrays at a

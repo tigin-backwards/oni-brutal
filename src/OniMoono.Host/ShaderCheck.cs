@@ -6,9 +6,11 @@ using UnityEngine;
 
 namespace OniMoono.Host
 {
-    /// Device gate: every OpenGLCore variant of every shader in the player data compiles and
-    /// links on this machine's driver, with the device the renderer option opens (OpenGL, or
-    /// Vulkan, where each variant is rewritten, compiled to SPIR-V and made a module).
+    /// Device gate: every variant of every shader in the player data builds on this machine's
+    /// driver, with the device the renderer option opens: on OpenGL each GLCore variant compiles
+    /// and links; on Vulkan each of U60's Vulkan programs (or, for a shader without them, its
+    /// GLCore program compiled to SPIR-V) is made a module and a pipeline for its pass's state.
+    /// Failures are counted, and the run goes on to the end.
     internal static class ShaderCheck
     {
         static readonly string[] files =
@@ -23,6 +25,7 @@ namespace OniMoono.Host
             ProjectSettings.Load();
             PlayerLoop.Initialize();
             OniMoono.Desktop.Vulkan.VkContext.Validation = options.VulkanValidation;
+            OniMoono.Desktop.Vulkan.VkDevice.CheckPipelines = true;
             var (platform, device) = Player.OpenDevice(options, new OniMoono.Desktop.WindowSettings("shader check", 64, 64, FullScreenMode.Windowed));
             GraphicsDevice.Install(device);
             int errors = 0;
@@ -39,7 +42,9 @@ namespace OniMoono.Host
                     if (file.TypeOf(info).ClassId == 48 && ObjectLoader.Load(file, info.PathId) is Shader) shaders++;
             }
             Shader.WarmupAllShaders();
-            Console.WriteLine($"{shaders} shaders warmed up, {errors} compile/link errors");
+            // The Vulkan device logs what it cannot build without raising errors.
+            errors += OniMoono.Desktop.Vulkan.VkDevice.CheckFailures;
+            Console.WriteLine($"{shaders} shaders warmed up, {errors} compile/link errors{(device is OniMoono.Desktop.Vulkan.VkDevice ? $" ({OniMoono.Desktop.Vulkan.VkDevice.CheckFailures} Vulkan programs or pipelines not built)" : "")}");
             platform.Dispose();
             return errors == 0 ? 0 : 1;
         }

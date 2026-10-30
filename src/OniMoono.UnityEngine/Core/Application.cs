@@ -95,13 +95,16 @@ namespace UnityEngine
             }
         }
 
-        /// The Linux player hands URLs to the desktop's opener.
+        /// URLs (web pages, and file:// folders such as a mod's) go to the desktop's opener: the
+        /// shell on Windows (ShellExecute, which opens a folder in Explorer), `open` on macOS and
+        /// xdg-open on Linux.
         public static void OpenURL(string url)
         {
             if (string.IsNullOrEmpty(url)) throw new ArgumentException("URL must not be null or empty.", nameof(url));
             try
             {
-                Process.Start(new ProcessStartInfo("xdg-open", url) { UseShellExecute = false });
+                if (OperatingSystem.IsWindows()) Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+                else Process.Start(new ProcessStartInfo(OperatingSystem.IsMacOS() ? "open" : "xdg-open", url) { UseShellExecute = false });
             }
             catch (Exception e)
             {

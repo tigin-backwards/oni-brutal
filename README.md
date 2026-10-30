@@ -101,7 +101,7 @@ For a more detailed breakdown, see [docs/PERFORMANCE.md](docs/PERFORMANCE.md).
 ### Tweaks
 
 Moono also speeds up some of the game's own code. Most tweaks don't change gameplay and are on by
-default; three do, and are off. Toggle them in **Moono Tweaks** on the main menu. Full list:
+default; four do, and are off. Toggle them in **Moono Tweaks** on the main menu. Full list:
 [docs/TWEAKS.md](docs/TWEAKS.md).
 
 ![The main menu with the Moono Tweaks button under Mods](docs/images/main-menu.png)

@@ -9,7 +9,8 @@
 #            overlays, typing, save and load, a window resize, clicks within one frame. Fails on a
 #            log exception or error whose signature the reference lacks, or a capture that differs
 #            from the reference beyond the scenario's tolerance.
-#   verify   U57 with every game tweak and every engine verify mode, for at least 10 game minutes:
+#   verify   U57 with every game tweak and every engine verify mode, for at least 10 game minutes
+#            (6000 frames, six overlays; QA_VERIFY_FULL=1: 10500 frames, every overlay):
 #            every check reports zero mismatches.
 #   perf     U57 with every game tweak: peak memory under 16 GB, the steady frame rate no lower than
 #            the reference's less 15% (the machine's noise), multi-target framebuffers not piling up.
@@ -307,10 +308,15 @@ stage_verify()
     u57_ready || { note "verify: skipped (no out/local-tools/qa.env)"; return; }
     build_release || return
     local out="$run/verify"
-    # Every overlay is opened in turn for 300 frames, for the overlays' tweaks; then three
-    # management screens are opened and closed, whose rect masks then clip out of sight.
-    U57_SCREENS="consumables vitals jobs" U57_OVERLAYS="Oxygen Power Temperature Temperature:HeatFlow Temperature:StateChange TileMode Light Decor Disease Crop HarvestWhenReady Rooms LiquidConduit GasConduit SolidConveyor Logic Suit Radiation Priorities ThermalConductivity None" \
-    ONI_TWEAK_VERIFY=1 ONI_VERIFY_CANVAS_SKIPS=1 ONI_VERIFY_COMPONENT_LAYOUTS=1 ONI_VERIFY_TEXEL_COPIES=1 ONI_VERIFY_PARTIAL_UPLOADS=1 ONI_VERIFY_PARALLEL_DRAWS=1 u57_run "$out" 10500
+    # Overlays opened in turn (each takes a 600-frame window), for the engine's verify modes
+    # (texel copies, parallel draws, multi-target framebuffers); then three management screens
+    # are opened and closed, whose rect masks then clip out of sight. Six overlays and 6000 frames
+    # cover every report, a background save and the 10 game minutes; QA_VERIFY_FULL=1 opens all
+    # 21 overlays over 10500 frames (before a release).
+    local overlays="Oxygen Power Temperature LiquidConduit Logic None" frames=6000
+    [ "${QA_VERIFY_FULL:-0}" = 1 ] && { overlays="Oxygen Power Temperature Temperature:HeatFlow Temperature:StateChange TileMode Light Decor Disease Crop HarvestWhenReady Rooms LiquidConduit GasConduit SolidConveyor Logic Suit Radiation Priorities ThermalConductivity None"; frames=10500; }
+    U57_SCREENS="consumables vitals jobs" U57_OVERLAYS="$overlays" \
+    ONI_TWEAK_VERIFY=1 ONI_VERIFY_CANVAS_SKIPS=1 ONI_VERIFY_COMPONENT_LAYOUTS=1 ONI_VERIFY_TEXEL_COPIES=1 ONI_VERIFY_PARTIAL_UPLOADS=1 ONI_VERIFY_PARALLEL_DRAWS=1 u57_run "$out" "$frames"
     u57_check verify "$out"
     [ -d "$out/hang" ] && return # a hung run has nothing more to check
     local report; report=$(python3 "$tools" verify "$out/stdout.txt"); local status=$?

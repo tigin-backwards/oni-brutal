@@ -85,8 +85,9 @@ namespace OniMoono.Host.GameTweaks
                 + "OpenGL: the original game's API. The picture is the same; Player.log names the one used and why.",
                 IsTweak: false, Choices: [OniMoono.Desktop.Renderers.Auto, OniMoono.Desktop.Renderers.Vulkan, OniMoono.Desktop.Renderers.OpenGl]),
             new(DxgiRow, General, "Present through Direct3D on Windows", "Windows shows the game as it shows the original: no forced HDR or brightness. Needs a restart.",
-                "Frames go to the screen through a Direct3D 11 swap chain, as the original's do. Off: through OpenGL's own presentation, which Auto HDR "
-                + "or RTX HDR can take for HDR. If it can't start, the game uses OpenGL's and says why in Player.log. No effect on Linux.",
+                "With Vulkan or OpenGL, frames go to the screen through a Direct3D 11 swap chain, as the original's do. Off: through the renderer's own "
+                + "presentation, which Auto HDR or RTX HDR can take for HDR. If it can't start, the renderer's own is used and Player.log says why. "
+                + "No effect on Linux.",
                 IsTweak: false),
 
             new(FastSerialization, Saving, "Faster save writing", "Autosaves take less time; the save file is the same.",

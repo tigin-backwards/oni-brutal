@@ -477,7 +477,8 @@ namespace OniMoono.Desktop.Vulkan
         {
             string text = VkTimings.Take(n) + $"; draws {draws / n}, pipeline binds {pipelineBinds / n}, render passes {renderPasses / n}, passes broken by uploads {uploadBreaks / n}, "
                 + $"submits {frames.Submits / (double)n:F1}, programs built {programs.Built}, pipelines made {pipelines.Created} ({pipelines.CreateTicks * 1000.0 / System.Diagnostics.Stopwatch.Frequency:F0} ms), "
-                + $"texture uploads {textureUploads / (double)n:F1} ({textureUploadBytes / n / 1024} KiB), unchanged {unchangedUploads / (double)n:F1}";
+                + $"texture uploads {textureUploads / (double)n:F1} ({textureUploadBytes / n / 1024} KiB), unchanged {unchangedUploads / (double)n:F1}; "
+                + OniMoono.Desktop.Gl.PresenterTimings.Take();
             draws = pipelineBinds = renderPasses = uploadBreaks = 0;
             frames.Submits = 0;
             textureUploads = textureUploadBytes = unchangedUploads = 0;
@@ -503,6 +504,10 @@ namespace OniMoono.Desktop.Vulkan
                 if ((memory.MemoryHeaps[i].Flags & VkMemoryHeapFlags.DeviceLocalBit) == 0) continue;
                 text.Append(text.Length == 0 ? "" : "; ").Append($"heap {i}: {(long)budgets[i].Usage.Value >> 20} MiB used of {(long)budgets[i].Budget.Value >> 20} MiB budget");
             }
+            // Windows: the process's own video memory on the device's adapter (all of it,
+            // DXGI's swap chain and shared texture too), as Windows counts it.
+            if (OperatingSystem.IsWindows() && vk.Luid != 0 && OniMoono.Desktop.Gl.Dxgi.ProcessVideoMemory(vk.Luid) is var (local, nonLocal))
+                text.Append(text.Length == 0 ? "" : "; ").Append($"process {local >> 20} MiB local, {nonLocal >> 20} MiB non-local");
             return text.Length == 0 ? null : text.ToString();
         });
 

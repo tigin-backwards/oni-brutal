@@ -30,6 +30,10 @@ namespace OniMoono.Desktop.Gl
         public const int DriverTypeUnknown = 0;
         public const uint D3D11SdkVersion = 7;
         public const uint BindShaderResource = 0x8, BindRenderTarget = 0x20;
+        public const uint MiscSharedKeyedMutex = 0x100, MiscSharedNtHandle = 0x800;
+        public const uint SharedResourceRead = 0x80000000, SharedResourceWrite = 1;
+        /// IDXGIKeyedMutex::AcquireSync's results that are not S_OK (success codes, not failures).
+        public const int WaitAbandoned = 0x80, WaitTimedOut = 0x102;
 
         // ----- Interface IDs -----
         public static readonly Guid IIDFactory2 = new("50c83a1c-e072-4c48-87b0-3630fa36a6d0");
@@ -39,6 +43,8 @@ namespace OniMoono.Desktop.Gl
         public static readonly Guid IIDAdapter3 = new("645967a4-1392-4310-a798-8053ce3e93fd");
         public static readonly Guid IIDSwapChain2 = new("a8be2ac4-199f-4946-b331-79599fb98de7");
         public static readonly Guid IIDTexture2D = new("6f15aaf2-d208-4e89-9ab4-489535d34f9c");
+        public static readonly Guid IIDResource1 = new("30961379-4609-4a41-998e-54fe567ee0c1");
+        public static readonly Guid IIDKeyedMutex = new("9d8e1289-d7b3-465f-8126-250e349af85d");
 
         // ----- Structs -----
         [StructLayout(LayoutKind.Sequential)]
@@ -148,6 +154,12 @@ namespace OniMoono.Desktop.Gl
         public static int GetDesc1(void* swapChain, SwapChainDesc1* desc) => ((delegate* unmanaged<void*, SwapChainDesc1*, int>)Vtbl(swapChain)[18])(swapChain, desc);
         public static int SetMaximumFrameLatency(void* swapChain2, uint latency) => ((delegate* unmanaged<void*, uint, int>)Vtbl(swapChain2)[31])(swapChain2, latency);
         public static IntPtr GetFrameLatencyWaitableObject(void* swapChain2) => ((delegate* unmanaged<void*, IntPtr>)Vtbl(swapChain2)[33])(swapChain2);
+
+        // IDXGIResource1 / IDXGIKeyedMutex
+        public static int CreateSharedHandle(void* resource1, uint access, IntPtr* handle)
+            => ((delegate* unmanaged<void*, void*, uint, char*, IntPtr*, int>)Vtbl(resource1)[13])(resource1, null, access, null, handle);
+        public static int AcquireSync(void* keyedMutex, ulong key, uint milliseconds) => ((delegate* unmanaged<void*, ulong, uint, int>)Vtbl(keyedMutex)[8])(keyedMutex, key, milliseconds);
+        public static int ReleaseSync(void* keyedMutex, ulong key) => ((delegate* unmanaged<void*, ulong, int>)Vtbl(keyedMutex)[9])(keyedMutex, key);
 
         // ID3D11Device / ID3D11DeviceContext
         public static int CreateTexture2D(void* device, Texture2DDesc* desc, void** texture) => ((delegate* unmanaged<void*, Texture2DDesc*, void*, void**, int>)Vtbl(device)[5])(device, desc, null, texture);

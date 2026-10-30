@@ -38,6 +38,10 @@ namespace OniMoono.Desktop.Vulkan
         public VkPhysicalDeviceLimits Limits => Properties.Limits;
         public string DeviceName = "", DriverName = "", DriverInfo = "";
         public bool TextureCompressionBC, SamplerAnisotropy, MirrorClampToEdge, PushDescriptors;
+        /// Windows: the device's LUID (0 when the driver gives none), and whether the DXGI
+        /// interop extensions are on (VK_KHR_external_memory_win32, VK_KHR_win32_keyed_mutex).
+        public long Luid;
+        public bool DxgiInterop;
         public VkPipelineCache PipelineCache;
         VkDebugUtilsMessengerEXT messenger;
         readonly string pipelineCachePath;
@@ -227,6 +231,10 @@ namespace OniMoono.Desktop.Vulkan
             SamplerAnisotropy = features.Features.SamplerAnisotropy;
             MirrorClampToEdge = f12.SamplerMirrorClampToEdge;
             PushDescriptors = Physical.SupportsExtension("VK_KHR_push_descriptor"u8);
+            // Windows, presenting through DXGI (VkDxgiTarget): a D3D11 texture imported as an
+            // image, its keyed mutex taken and given back by the presenter's submissions.
+            DxgiInterop = OperatingSystem.IsWindows() && OniMoono.Desktop.Gl.DxgiSwapChain.Enabled
+                          && Physical.SupportsExtension("VK_KHR_external_memory_win32"u8) && Physical.SupportsExtension("VK_KHR_win32_keyed_mutex"u8);
             DriverInfo = DriverDescription(out int driverId);
             Identity = new VkGpuIdentity((uint)Properties.VendorID, (uint)Properties.DeviceID, (uint)Properties.DriverVersion, driverId, DriverName, DeviceName);
             if (admit?.Invoke(Identity) is { } refused) throw new VulkanUnavailableException(refused);
@@ -243,6 +251,11 @@ namespace OniMoono.Desktop.Vulkan
             var queueInfo = new VkDeviceQueueCreateInfo { QueueFamilyIndex = QueueFamily, QueueCount = 1, QueuePriorities = &priority };
             var deviceExtensions = new HashSet<string> { VK.KHR_SWAPCHAIN_EXTENSION_NAME };
             if (PushDescriptors) deviceExtensions.Add("VK_KHR_push_descriptor");
+            if (DxgiInterop)
+            {
+                deviceExtensions.Add("VK_KHR_external_memory_win32");
+                deviceExtensions.Add("VK_KHR_win32_keyed_mutex");
+            }
             Device = Physical.CreateDevice(new Device.CreateInfo
             {
                 Extensions = deviceExtensions,
@@ -267,11 +280,17 @@ namespace OniMoono.Desktop.Vulkan
 
         string DriverDescription(out int driverId)
         {
-            var driver = new VkPhysicalDeviceDriverProperties();
+            var ids = new VkPhysicalDeviceIdProperties();
+            var driver = new VkPhysicalDeviceDriverProperties { Next = &ids };
             var push = new VkPhysicalDevicePushDescriptorProperties();
             var props = new VkPhysicalDeviceProperties2 { Next = &driver };
-            if (PushDescriptors) driver.Next = &push;
+            if (PushDescriptors)
+            {
+                driver.Next = &push;
+                push.Next = &ids;
+            }
             Physical.GetProperties2(ref props);
+            Luid = ids.DeviceLUIDValid ? *(long*)ids.DeviceLUID : 0;
             MaxPushDescriptors = PushDescriptors ? push.MaxPushDescriptors : 0;
             DriverName = Utf8(driver.DriverName, 256);
             driverId = (int)driver.DriverID;

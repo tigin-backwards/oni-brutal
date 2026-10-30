@@ -118,10 +118,10 @@ namespace OniMoono.Host.GameTweaks
                 "The rails carry exactly the same things, but items' positions lag while off screen."),
             new("off-world-fallers", ChangesGameplay, "Land items lost below a world", "Items that fall out the bottom of a world (a rocket's chute) stop falling forever.",
                 "They hang just below the world, stepped as falling every tick; landing them where they hang stops that cost."),
-            new("fix-disease-overlay-crash", ChangesGameplay, "Fix U60's Disease overlay crash", "Stops a crash when a critter or plant showing germs dies while the Disease overlay is open.",
-                "A bug in U60's own code (the original crashes too, mostly at low frame rates): the destroyed germ marker is dropped before the game reads it. Off by default, as the original crashes."),
             new("brain-rate", ChangesGameplay, "Critter and dupe brain updates capped at 30 updates a second", "Critters and dupes would otherwise update on every frame. This trims that bookkeeping above 30 fps.",
                 "The game updates 1 Duplicant and 5 critter brains every rendered frame; this caps them at 30 and 150 a second, spread over frames. One that just finished an errand or is under threat still gets the next update. Saves time only above 30 fps."),
+            new("fix-disease-overlay-crash", ChangesGameplay, "Fix the disease overlay crash", "Stops a crash when a critter or plant showing germs dies while the Disease overlay is open.",
+                "A bug in U60's own code (the original crashes too, mostly at low frame rates): the destroyed germ marker is dropped before the game reads it. Off by default, as the original crashes."),
         ];
 
         /// The tweaks in src/OniMoono.GameTweaks (named here: options are read before that assembly is loaded).

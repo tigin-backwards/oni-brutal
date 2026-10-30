@@ -1,0 +1,19 @@
+# Issue #32: Better Info Cards (1960947963) failed to load in ours when Blueprints Expanded
+# (3468585385) came before it: HarmonyException in SelectToolHoverTextCard.UpdateHoverElements,
+# InvalidOperationException from UpdateWrapper. Blueprints prefixes that method; Better Info
+# Cards' transpiler of it then adds a call of a CodeInstruction.CallClosure dynamic method, and
+# the host's PatchFrames pass, looking for calls of mods' patch methods, read that dynamic
+# method's MetadataToken, which throws on CoreCLR. The original loads both.
+#
+# A failed load disables the mod; here both stay enabled, and the hover card over the printing
+# pod is Better Info Cards'.
+from: early-base
+mods: [3468585385, 1960947963]
+steps:
+  - expect_state:
+      "count:Global.Instance.modManager.mods[*] if .label.id == 1960947963 and .IsEnabledForActiveDlc() == true": 1
+      "count:Global.Instance.modManager.mods[*] if .label.id == 3468585385 and .IsEnabledForActiveDlc() == true": 1
+  - driver: {camera.set: {cell: [124, 208], ortho: 10}}
+  - scroll: {at: [124, 208], notches: 0}
+  - shot: {name: hover-card, pointer: stay, threshold: 0.04}
+  - run: {seconds: 2}

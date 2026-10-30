@@ -1,5 +1,7 @@
 # Moono
 
+[English](README.md) | [简体中文](README.zh-CN.md)
+
 An unofficial, super fast, super sussy replacement for the Unity layer of Oxygen Not Included,
 artisanally crafted by Claude. On a late-game colony the game runs at about 8× the original's
 frame rate ([Performance](#performance)).

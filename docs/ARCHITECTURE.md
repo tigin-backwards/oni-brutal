@@ -1249,6 +1249,22 @@ game or mod code can notice. Each says how it is resolved, or why it is kept.
   `FaultBlockRewriter` turns it into a catch and a finally and drops the fault block's code.
   `--check-types` patches an emitted method with a filter, expects that InvalidOperationException
   and calls the method unpatched, and patches one with a fault with a prefix and a postfix.
+- **D55 Instance fields injected into patches of static methods.** A patch method's `___name`
+  parameter gets the original's field `name`; Harmony emits `ldarg.0; ldfld name` for an instance
+  field even when the original is static, so it reads the field's offset in whatever object the
+  first argument is. Neither runtime checks the object's type there, and the two lay fields out
+  differently. Fast Track's prefix of the static `IdleStates.MoveToNewCell(Instance smi)` (with
+  its ReduceCritterIdleMove option) takes `___loop` and, for a critter off screen, sometimes calls
+  `smi.GoTo(___loop)`. Measured in the original player with a probe prefix of the same shape on
+  the prehistoric1 save: `___loop` is null for every critter kind there, so GoTo stops the idle
+  state machine; ours read the instance's transition stack, GoTo pushed it on its
+  `Stack<BaseState>`, and CoreCLR's array store check threw ArrayTypeMismatchException (issue
+  #31: Klei's error dialog). **Resolved in** `MonoInstanceFieldInjection`: where Harmony injects
+  an instance field into a patch of a static method whose first argument is not of the field's
+  type, the object is checked at run time; one of the field's type is read as before, anything
+  else gives the field type's default. Not matched: another layout's non-null read (none known),
+  and a field taken by `ref`, left as Harmony emits it. `--check-types` patches an emitted static
+  method taking another type, and one taking the field's own type.
 
 ## 3. The engine API (`OniMoono.UnityEngine`)
 

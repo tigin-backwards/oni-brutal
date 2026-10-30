@@ -143,7 +143,7 @@ namespace OniMoono.Desktop.Vulkan
             caps.VendorNumber = p.VendorID;
             caps.Device = p.DeviceID;
             caps.Vendor = p.VendorID switch { 0x10DE => "NVIDIA Corporation", 0x1002 => "ATI Technologies Inc.", 0x8086 => "Intel", 0x10005 => "Mesa", _ => $"0x{p.VendorID:X4}" };
-            caps.VersionString = $"Vulkan {VkContext.Version(p.ApiVersion)} [{vk.DriverInfo}]";
+            caps.VersionString = vk.DriverInfo;
             caps.MaxTexture = p.Limits.MaxImageDimension2D;
             caps.MaxTargets = Math.Min(8, p.Limits.MaxColorAttachments);
             caps.Bc = vk.TextureCompressionBC;

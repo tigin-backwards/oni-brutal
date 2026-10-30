@@ -23,10 +23,6 @@ namespace OniMoono.Desktop.Vulkan
         VkPipeline boundPipeline;
         VkTargetFormats targetFormats;
         int renderWidth = 1, renderHeight = 1;
-        /// The textures attached to the pass being rendered (a draw that samples one gets no
-        /// texture: OpenGL leaves such a feedback loop undefined).
-        readonly VkTexture[] attached = new VkTexture[9];
-        int attachedCount;
         bool toBackBuffer;
         UnityEngine.Rect viewport = new(0, 0, 1, 1);
         Rect? scissor;
@@ -72,7 +68,6 @@ namespace OniMoono.Desktop.Vulkan
             Span<VkFormat> formats = stackalloc VkFormat[8];
             int count = 0;
             VkImageResource depth = null;
-            attachedCount = 0;
             int width = int.MaxValue, height = int.MaxValue, samples = 1;
             void Size(VkImageResource image)
             {
@@ -111,7 +106,6 @@ namespace OniMoono.Desktop.Vulkan
                         image.ForAttachment(cb);
                         vt.Dirty = true;
                         vt.LastUsedBatch = frames.Batch;
-                        attached[attachedCount++] = vt;
                         colors[count] = Attachment(image, clearColor);
                         formats[count++] = image.Format;
                         Size(image);
@@ -123,7 +117,6 @@ namespace OniMoono.Desktop.Vulkan
                     {
                         depthTarget.Dirty = true;
                         depthTarget.LastUsedBatch = frames.Batch;
-                        attached[attachedCount++] = depthTarget;
                     }
                 }
             }
@@ -334,20 +327,22 @@ namespace OniMoono.Desktop.Vulkan
             }
         }
 
+        /// The texture is (or is about to be, once the pass begins) an attachment of the
+        /// current target.
         bool IsAttached(VkTexture vt)
         {
-            if (!rendering) return false;
-            for (int i = 0; i < attachedCount; i++)
-                if (attached[i] == vt)
-                {
-                    if (!feedbackReported)
-                    {
-                        feedbackReported = true;
-                        OniMoono.Engine.EngineLog.Engine("vulkan: a draw samples the texture it renders into; it reads no texture there (undefined on OpenGL)");
-                    }
-                    return true;
-                }
-            return false;
+            var t = target;
+            if (t.Colors == null) return false;
+            bool hit = t.Depth?.Vk == vt;
+            foreach (var c in t.Colors) hit |= c?.Vk == vt;
+            if (!hit) return false;
+            // A feedback loop, undefined on OpenGL: the draw reads no texture there.
+            if (!feedbackReported)
+            {
+                feedbackReported = true;
+                OniMoono.Engine.EngineLog.Engine("vulkan: a draw samples the texture it renders into; it reads no texture there (undefined on OpenGL)");
+            }
+            return true;
         }
 
         /// Pipeline and descriptors for a draw; false when the draw cannot be made (a

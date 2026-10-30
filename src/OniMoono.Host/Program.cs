@@ -105,6 +105,7 @@ namespace OniMoono.Host
             {
                 try
                 {
+                    PatchedFilters.Install();
                     ModVersionStamp.Install();
                     MonoValueTypeHashes.Install();
                     ModAccess.Install();
@@ -571,6 +572,76 @@ namespace OniMoono.Host
                 // A P/Invoke never called before still binds to its own export.
                 int pid = OtherExport();
                 return skippedExport == 1000 && pid == Environment.ProcessId ? "the prefixes run from optimized callers; other P/Invokes bind as before" : throw new InvalidOperationException($"skipped {skippedExport} of 1000 calls to an export, getpid {pid}");
+            });
+            Check("Harmony patches of methods with a filter and a fault (PatchedFilters)", () =>
+            {
+                PatchedFilters.Install();
+                PatchFrames.Install();
+                // As LoadScreen.MigrateFile's two `catch … when`. MonoMod built such a replacement
+                // with a MethodBuilder, whose code calls AssemblyBuilder.Save, missing from CoreCLR:
+                // the patch threw MissingMethodException. Harmony 2.4.2 cannot copy a filter clause
+                // on either runtime, so the patch throws InvalidOperationException, as on Mono.
+                var type = System.Reflection.Emit.AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("CheckFilters"), System.Reflection.Emit.AssemblyBuilderAccess.Run)
+                    .DefineDynamicModule("CheckFilters").DefineType("Filtered", TypeAttributes.Public | TypeAttributes.Abstract | TypeAttributes.Sealed);
+                var filters = type.DefineField("Filters", typeof(int), FieldAttributes.Public | FieldAttributes.Static);
+                // static int Guarded(Exception e) { try { throw e; } catch when (++Filters > 0 && e is InvalidOperationException) { return 7; } }
+                var guarded = type.DefineMethod("Guarded", MethodAttributes.Public | MethodAttributes.Static, typeof(int), [typeof(Exception)]);
+                var il = guarded.GetILGenerator();
+                var result = il.DeclareLocal(typeof(int));
+                il.BeginExceptionBlock();
+                il.Emit(System.Reflection.Emit.OpCodes.Ldarg_0); il.Emit(System.Reflection.Emit.OpCodes.Throw);
+                il.BeginExceptFilterBlock();
+                il.Emit(System.Reflection.Emit.OpCodes.Ldsfld, filters); il.Emit(System.Reflection.Emit.OpCodes.Ldc_I4_1); il.Emit(System.Reflection.Emit.OpCodes.Add); il.Emit(System.Reflection.Emit.OpCodes.Stsfld, filters);
+                il.Emit(System.Reflection.Emit.OpCodes.Isinst, typeof(InvalidOperationException)); il.Emit(System.Reflection.Emit.OpCodes.Ldnull); il.Emit(System.Reflection.Emit.OpCodes.Cgt_Un);
+                il.BeginCatchBlock(null);
+                il.Emit(System.Reflection.Emit.OpCodes.Pop); il.Emit(System.Reflection.Emit.OpCodes.Ldc_I4_7); il.Emit(System.Reflection.Emit.OpCodes.Stloc, result);
+                il.EndExceptionBlock();
+                il.Emit(System.Reflection.Emit.OpCodes.Ldloc, result); il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                // static void Faulted(int[] a) { try { throw new InvalidOperationException(); } fault { a[0] = 5; } }
+                var faulted = type.DefineMethod("Faulted", MethodAttributes.Public | MethodAttributes.Static, typeof(void), [typeof(int[])]);
+                il = faulted.GetILGenerator();
+                il.BeginExceptionBlock();
+                il.Emit(System.Reflection.Emit.OpCodes.Newobj, typeof(InvalidOperationException).GetConstructor(Type.EmptyTypes)!); il.Emit(System.Reflection.Emit.OpCodes.Throw);
+                il.BeginFaultBlock();
+                il.Emit(System.Reflection.Emit.OpCodes.Ldarg_0); il.Emit(System.Reflection.Emit.OpCodes.Ldc_I4_0); il.Emit(System.Reflection.Emit.OpCodes.Ldc_I4_5); il.Emit(System.Reflection.Emit.OpCodes.Stelem_I4);
+                il.EndExceptionBlock();
+                il.Emit(System.Reflection.Emit.OpCodes.Ret);
+                var filtered = type.CreateType();
+                var harmony = new HarmonyLib.Harmony("OniMoono.Host.Check");
+                try
+                {
+                    harmony.Patch(filtered.GetMethod("Guarded"), prefix: new HarmonyLib.HarmonyMethod(typeof(Program), nameof(CountFilterPrefix)), postfix: new HarmonyLib.HarmonyMethod(typeof(Program), nameof(AddFilterPostfix)));
+                    throw new ArgumentException("the filter's method was patched");
+                }
+                catch (InvalidOperationException e) when (e.Message == "Incorrect code generation for exception block.")
+                {
+                }
+                // The method still runs unpatched: its filter accepts and rejects, no prefix or postfix.
+                var guard = filtered.GetMethod("Guarded")!.CreateDelegate<Func<Exception, int>>();
+                int Filters() => (int)filtered.GetField("Filters")!.GetValue(null)!;
+                int accepted = guard(new InvalidOperationException());
+                bool rejected = false;
+                try { guard(new ArgumentException("check")); }
+                catch (ArgumentException e) when (e.Message == "check") { rejected = true; }
+                if (accepted != 7 || !rejected || Filters() != 2 || filterPrefixed != 0 || filterPostfixed != 0)
+                    throw new InvalidOperationException($"after the failed patch: returned {accepted}, rejected {rejected}, filter ran {Filters()}, prefix {filterPrefixed}, postfix {filterPostfixed}");
+                // A fault: Harmony's FaultBlockRewriter, run on every replacement on both runtimes,
+                // turns it into a catch and a finally and drops the fault block's code. The prefix
+                // runs, and the exception leaves the replacement past the postfix.
+                harmony.Patch(filtered.GetMethod("Faulted"), prefix: new HarmonyLib.HarmonyMethod(typeof(Program), nameof(CountFilterPrefix)), postfix: new HarmonyLib.HarmonyMethod(typeof(Program), nameof(CountFaultPostfix)));
+                var fault = filtered.GetMethod("Faulted")!.CreateDelegate<Action<int[]>>();
+                var array = new int[1];
+                try
+                {
+                    fault(array);
+                    throw new ArgumentException("the fault's exception was caught");
+                }
+                catch (InvalidOperationException)
+                {
+                    if (filterPrefixed != 1 || filterPostfixed != 0 || array[0] != 0)
+                        throw new InvalidOperationException($"fault: prefix {filterPrefixed}, postfix {filterPostfixed}, a[0] {array[0]}");
+                }
+                return "the filter's patch throws InvalidOperationException and the method runs unpatched; the fault's patch runs its prefix, its block dropped; as on Mono";
             });
             Check("A Harmony prefix on a method an earlier patch's replacement calls (PatchDependents)", () =>
             {
@@ -2422,6 +2493,11 @@ namespace OniMoono.Host
 
         static int orderPatched;
         static void CountOrder() => orderPatched++;
+
+        static int filterPrefixed, filterPostfixed;
+        static void CountFilterPrefix() => filterPrefixed++;
+        static void AddFilterPostfix(ref int __result) { filterPostfixed++; __result += 100; }
+        static void CountFaultPostfix() => filterPostfixed++;
 
         static int prefixedB, prefixedC, countedA;
         static void CountA() => countedA++;

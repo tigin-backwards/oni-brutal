@@ -1230,6 +1230,25 @@ game or mod code can notice. Each says how it is resolved, or why it is kept.
   the game's assemblies nor the engine is not part of a script's serialized layout, for
   Instantiate as for JsonUtility, which had the same rule measured. Not measured: a mod's enum
   (still copied as its integer).
+- **D53 Patches of methods with a filter or fault clause.** MonoMod (inside 0Harmony) builds a
+  replacement with a filter (`catch … when`) or fault clause as a MethodBuilder in a new dynamic
+  assembly, not the DynamicMethod it builds for every other replacement (.NET Framework's
+  DynamicMethod could not hold those clauses). That generator's code references
+  `AssemblyBuilder.Save`, which CoreCLR lacks, so here such a patch threw MissingMethodException,
+  and the background-save tweak's patch of `LoadScreen.MigrateFile` ended the player. **Resolved
+  in** `PatchedFilters`: MonoMod's own switch (AppContext data `MonoMod.DMDType`, which a
+  `MONOMOD_DMDType` environment variable still overrides) makes it build every replacement as a
+  DynamicMethod, whose CoreCLR IL generator holds both clauses. Harmony 2.4.2 still cannot patch a
+  method with a filter clause, on either runtime: it copies the clause with MonoMod's Cecil IL
+  generator, which never sets the clause's handler start, so the exception block is ended with
+  the filter still open and the IL generator throws InvalidOperationException ("Incorrect code
+  generation for exception block"; Mono's `ILGenerator.EndExceptionBlock` checks for an open
+  filter, and both of MonoMod's generators emit through `_DMDEmit.Generate`). `Harmony.Patch`
+  throws it as on Mono, the method stays unpatched and the game goes on; background-save waits in
+  `MigrateFile`'s callers instead. A fault clause patches as on Mono: Harmony's
+  `FaultBlockRewriter` turns it into a catch and a finally and drops the fault block's code.
+  `--check-types` patches an emitted method with a filter, expects that InvalidOperationException
+  and calls the method unpatched, and patches one with a fault with a prefix and a postfix.
 
 ## 3. The engine API (`OniMoono.UnityEngine`)
 

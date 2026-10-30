@@ -1284,8 +1284,9 @@ game or mod code can notice. Each says how it is resolved, or why it is kept.
   (mods' bundles built with other Unity versions; docs/research/mod-bundle-shaders.md) runs its
   GLCore programs compiled to SPIR-V under the same conventions (§3.5, *Programs*). A device
   lost in play, or a window it can no longer present to, ends the game with an error (Unity's
-  player does the same when its device is removed), and the next start uses OpenGL until the
-  driver changes or a Vulkan session ends cleanly.
+  player does the same when its device is removed). After a lost device the next starts use
+  OpenGL until the driver changes or a Vulkan session ends cleanly; after a presenting
+  failure only the next start does.
 - **D55 Instance fields injected into patches of static methods.** A patch method's `___name`
   parameter gets the original's field `name`; Harmony emits `ldarg.0; ldfld name` for an instance
   field even when the original is static, so it reads the field's offset in whatever object the
@@ -1680,7 +1681,7 @@ frames to a device thread; only the work posted for resources differs (`IResourc
   (multiview) variants and stages other than vertex and fragment; none is used by the game.
   A variant that cannot be built (damaged data, a module or pipeline the driver refuses) is
   logged once per shader and kept as a program that draws nothing, so no exception reaches the
-  game each frame.
+  game each frame; one that ran out of memory is logged and tried again at its next draw.
 - *Shaders without U60's Vulkan programs.* Mods' AssetBundles built with other Unity versions
   carry Vulkan programs in another entry layout, or none (docs/research/mod-bundle-shaders.md:
   13 of the 34 mods with shaders). The route is chosen once per shader and logged
@@ -1731,7 +1732,11 @@ frames to a device thread; only the work posted for resources differs (`IResourc
   and last access, and each use makes the barrier it needs (a render target's colour writes
   before it is sampled; transfers before and after copies). A pipeline the driver refuses is
   logged once per program and remembered, so draws with that state are left out without
-  trying again; a command that throws ends the open pass and is logged once per kind.
+  trying again (out of memory is not remembered: the next draw tries again); a command that
+  throws ends the open pass and is logged once per kind. A texture's new storage is made before the
+  old one is retired, so a failed allocation leaves the texture as it was; a mesh whose new
+  buffer cannot be made draws nothing until its next upload (its submeshes' ranges are the new
+  ones), its old buffer retired rather than destroyed under recorded draws.
 - *Frames and uploads.* Two frames are in flight, each with its command pool, fence, stream,
   descriptor pools and the resources released while it was recorded (destroyed once its fence
   has signalled). A frame is submitted in batches (at present, and when the main thread needs a
@@ -1752,8 +1757,9 @@ frames to a device thread; only the work posted for resources differs (`IResourc
   no vsync IMMEDIATE (else MAILBOX). `vSyncCount` 2 to 4 presents each frame that many times
   under FIFO, an image per vertical blank, so the game runs at a half (or a third, a quarter)
   of the refresh rate as OpenGL's swap interval makes it. A swapchain that cannot be made (out
-  of memory during a resize) is tried again at the next frame, up to five times in a row; the
-  old one is destroyed either way. The swapchain format is B8G8R8A8 or R8G8B8A8 UNORM in sRGB
+  of memory during a resize) is tried again after 0.1 s, the delay doubling up to 2 s, with no
+  frames shown meanwhile; presenting is given up only after five failures in a row spanning
+  ten seconds. The old swapchain is destroyed either way. The swapchain format is B8G8R8A8 or R8G8B8A8 UNORM in sRGB
   non-linear colour space, written as OpenGL's default framebuffer is (no sRGB encoding).
 - *Device loss.* At start-up any failure falls back to OpenGL. A device lost in play cannot be
   recovered in place (every texture, mesh and program would have to be made again, and the
@@ -1761,10 +1767,15 @@ frames to a device thread; only the work posted for resources differs (`IResourc
   the loss, the game quits with an error, and a marker in the cache folder makes auto use
   OpenGL from the next start until the driver changes. Presenting that fails for good (a lost
   surface, a swapchain still not made after its retries, a swapchain format that takes no
-  copies) is handled the same way, rather than running on with a black window. A Vulkan session
+  copies) also quits with the error rather than running on with a black window, but its
+  marker costs one start only (`Renderers.MarkerVerdict`): the window or the display, more
+  often than the driver, is at fault, so the start after uses Vulkan again. A Vulkan session
   that ends cleanly (with `--renderer vulkan`, or after a driver change) removes the marker.
-  `ONI_VULKAN_FAIL=context|device|presenter` fails start-up at that step and
-  `ONI_VULKAN_FAIL=present-after:N` fails presenting at frame N (tests).
+  `ONI_VULKAN_FAIL` takes a comma-separated list of faults for tests (`VkFault`): `context`,
+  `device`, `presenter` and `presenter-create` fail start-up at that step; `present-after:N`
+  fails presenting at frame N and `present-oom-after:N` makes three swapchain creations run
+  out of memory from frame N; `alloc-every:N`, `pipeline-every:N` and `program-every:N` make
+  every Nth texture or mesh allocation, pipeline or program build run out of memory.
 - *Diagnostics.* `--vulkan-validation` (or `ONI_VULKAN_VALIDATION=1`) enables the Khronos
   validation layer when installed, its messages in the log; `--frame-stats` counts draws,
   pipeline binds, render passes, passes ended by uploads and submits; GPU frame time comes from

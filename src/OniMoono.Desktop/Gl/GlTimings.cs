@@ -41,9 +41,26 @@ namespace OniMoono.Desktop.Gl
             if (On) Interlocked.Add(ref counter, ticks);
         }
 
-        /// A picture was shown (presenter thread).
-        public static void Shown()
+        /// When the presenter last issued a picture, before waiting for it to be on its way
+        /// (presenter thread; the splash's pacing).
+        static long lastPicture;
+
+        /// How long the presenter waits for a frame before drawing the splash again: 16 ms, or
+        /// when its presents are paced to the display (DXGI waits until each picture is on its
+        /// way, up to a vertical blank), what is left of 16 ms since the last picture, so the
+        /// splash keeps one picture per blank instead of one per two.
+        public static int SplashWait(bool pacedByPresent)
         {
+            if (!pacedByPresent) return 16;
+            long elapsed = (Stopwatch.GetTimestamp() - lastPicture) * 1000 / Stopwatch.Frequency;
+            return (int)System.Math.Clamp(16 - elapsed, 1, 16);
+        }
+
+        /// A picture was shown (presenter thread); `waited`, the ticks spent after issuing it
+        /// waiting for it to be on its way.
+        public static void Shown(long waited)
+        {
+            lastPicture = Stopwatch.GetTimestamp() - waited;
             if (!On) return;
             Interlocked.Increment(ref Pictures);
             long now = Stopwatch.GetTimestamp();

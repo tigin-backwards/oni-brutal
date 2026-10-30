@@ -103,6 +103,19 @@ namespace OniMoono.Tests
             Assert.Equal("NVIDIA GeForce RTX 3090", desc.Name);
         }
 
+        /// The splash's redraws: every 16 ms after the last picture, counting from when it was
+        /// issued, so a present that waits for the vertical blank does not add its wait to that.
+        [Fact]
+        public void TheSplashWaitsWhatIsLeftOf16MsWhenPresentsArePaced()
+        {
+            Assert.Equal(16, PresenterTimings.SplashWait(pacedByPresent: false));
+            PresenterTimings.Shown(waited: System.Diagnostics.Stopwatch.Frequency / 50); // 20 ms ago
+            Assert.Equal(1, PresenterTimings.SplashWait(pacedByPresent: true));
+            Assert.Equal(16, PresenterTimings.SplashWait(pacedByPresent: false));
+            PresenterTimings.Shown(waited: 0);
+            Assert.InRange(PresenterTimings.SplashWait(pacedByPresent: true), 10, 16);
+        }
+
         [Fact]
         public void TheSlowestPercentIsTheMeanOfTheLongestIntervals()
         {

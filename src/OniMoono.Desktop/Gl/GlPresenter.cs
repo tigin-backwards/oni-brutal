@@ -259,7 +259,7 @@ namespace OniMoono.Desktop.Gl
                             // second when no game frame comes.
                             if (splash != null && splash.Active)
                             {
-                                if (!Monitor.Wait(gate, 16)) { redraw = true; break; }
+                                if (!Monitor.Wait(gate, PresenterTimings.SplashWait(target is DxgiTarget))) { redraw = true; break; }
                             }
                             else Monitor.Wait(gate);
                         }
@@ -397,7 +397,7 @@ namespace OniMoono.Desktop.Gl
             PresenterTimings.Add(ref PresenterTimings.Wait, wait);
             if (shownOk)
             {
-                PresenterTimings.Shown();
+                PresenterTimings.Shown(wait);
                 return;
             }
             FallBack();

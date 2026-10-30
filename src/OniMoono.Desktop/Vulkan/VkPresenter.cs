@@ -268,7 +268,7 @@ namespace OniMoono.Desktop.Vulkan
                         {
                             if (splash != null && splash.Active)
                             {
-                                if (!Monitor.Wait(gate, 16)) { redraw = true; break; }
+                                if (!Monitor.Wait(gate, PresenterTimings.SplashWait(dxgi != null))) { redraw = true; break; }
                             }
                             else Monitor.Wait(gate);
                         }
@@ -323,7 +323,7 @@ namespace OniMoono.Desktop.Vulkan
             else ShowSwapchain(b, interval, width, height);
             PresenterTimings.Add(ref PresenterTimings.Show, GlTimings.Now - t - lastWait);
             PresenterTimings.Add(ref PresenterTimings.Wait, lastWait);
-            PresenterTimings.Shown();
+            PresenterTimings.Shown(lastWait);
         }
 
         /// Time the last Show waited for its picture to be on its way (Stopwatch ticks).

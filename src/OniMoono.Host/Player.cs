@@ -101,6 +101,7 @@ namespace OniMoono.Host
                 platform.Dispose();
             }
             GameTweaks.GameTweaks.Shutdown();
+            OniMoono.Engine.UI.CanvasSystem.LogSkipTotals();
             EngineLog.Engine($"Exiting after {frame} frames with code {PlayerLoop.ExitCode}");
             EngineLog.Close();
             Console.Out.Flush();

@@ -770,6 +770,17 @@ namespace OniMoono.Engine.UI
 
         static readonly bool verifySkips = Environment.GetEnvironmentVariable("ONI_VERIFY_CANVAS_SKIPS") == "1";
         internal static bool VerifyingSkips => verifySkips;
+
+        /// ONI_VERIFY_CANVAS_SKIPS: each check's totals at exit, as its periodic line, so one that
+        /// ran fewer times than that line's step (U60's screens keep few masked graphics out of
+        /// sight) still reports.
+        internal static void LogSkipTotals()
+        {
+            if (!verifySkips) return;
+            EngineLog.Engine($"canvas skips: {skipsVerified} verified, {skipsWrong} wrong");
+            EngineLog.Engine($"canvas skips: {clipSkipsVerified} graphics skipped by masks, {clipSkipsWrong} wrong");
+            EngineLog.Engine($"canvas skips: {raycastSkipsVerified} graphics left out of raycasts, {raycastSkipsWrong} wrong");
+        }
         /// ONI_CANVAS_STATS=1: the build's time and the objects it walks, a frame, every 600 frames.
         static readonly bool stats = Environment.GetEnvironmentVariable("ONI_CANVAS_STATS") == "1";
         static int statsFrames;

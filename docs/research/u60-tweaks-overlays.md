@@ -38,3 +38,9 @@ candidates, to retire after the U60 perf measurement.
 
 - `tweaks: leave the overlay tweaks out where U60 does their work`
 - `docs: U60 review of the overlay tweaks`
+
+
+## Outcome
+
+Both tweaks are removed on the `u60` branch (their sources, registry rows, QA verify checks and
+user docs); U59 keeps them on master until U60 ships.

@@ -132,14 +132,15 @@ and the runtime check that confirms it once a U60 player runs.
 |---|---|---|
 | Animation | fast-anim-batches, fast-anim-cleanup, fast-anim-events, fast-symbol-overrides | fast-anim-batches **updated**. U60 renamed `GetPostProcessingParams` to `GetCustomShaderParams`, so the tweak had switched itself off; a missing write-path method now stops the install. The other three are unchanged. |
 | Spatial | fast-partitioner-cleanup, fast-offset-tables, off-world-fallers, fast-particle-collision | Unchanged. Every transpiler anchor still matches U60's unoptimised IL. `OffsetTracker` now keeps a validity flag, cleared only from paths the tweak already patches. |
-| Overlays | fast-overlays (power, temperature, targets), fast-overlay-textures | **Retire candidates.** U60 caches circuit answers in `Power.Update`, colours only visible infrared visualizers, moved the target helpers, and `MultipleRenderTargetProxy` manages its copies. On U60 fast-overlays would have stopped start-up (ambiguous `AddTargetIfVisible`, a missing handler). Each part now installs only where the U59 shape exists and logs why it is left out. Retire after the performance comparison. |
+| Overlays | fast-overlays (power, temperature, targets), fast-overlay-textures | **Retired** on this branch (removed). Evidence: U60 caches circuit answers in `Power.Update`, colours only visible infrared visualizers, moved the target helpers, and `MultipleRenderTargetProxy` manages its copies. On U60 fast-overlays would have stopped start-up (ambiguous `AddTargetIfVisible`, a missing handler). Removed on the user's call rather than after a performance comparison. |
 | Simulation | fast-sublimation, fast-conveyor-paths, offscreen-conveyors, brain-rate, brain-rate-allowance, slow-reachability, fast-jobs | Unchanged. The differences are compiler shape or the event-system move, which none of them depends on. |
 | Save | fast-save-type-checks, background-save, fast-save-compression, fast-serialization, no-save-gc | Unchanged for U60. Two hardening fixes: fast-serialization checks its KSerialization members at install, and background-save now waits for a save in progress before the load screen's cloud/local migration (a gap that U59 had too). |
 
 Open checks once a U60 player runs:
 - each review's runtime checks (`ONI_TWEAK_VERIFY=1` counts, no "left out" or "off" lines where
   none is expected);
-- the overlay frame times with the tweaks off, to confirm Klei's versions match ours;
+- the overlay frame times in U60 (vanilla and ours), to confirm Klei's own work covers what
+  the retired overlay tweaks did;
 - `TMP_Text.SetCharArray` with unchanged text: ours now skips the update when the characters
   equal the current text. Whether Unity's package does the same (layout and events) is to be
   measured in the original.

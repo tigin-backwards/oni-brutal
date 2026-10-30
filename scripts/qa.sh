@@ -317,14 +317,10 @@ stage_verify()
     echo "$report" | sed 's/^/     /' | tee -a "$run/summary.txt"
     [ $status -eq 0 ] || fail "verify: a verify mode reported mismatches"
     local tweak
-    for tweak in fast-anim-events fast-anim-batches fast-sublimation fast-jobs fast-particle-collision fast-offset-tables fast-anim-cleanup fast-partitioner-cleanup fast-overlays fast-conveyor-paths fast-overlay-textures "canvas skips" "component layouts" "texel copies" "partial uploads" "parallel draws"; do
+    for tweak in fast-anim-events fast-anim-batches fast-sublimation fast-jobs fast-particle-collision fast-offset-tables fast-anim-cleanup fast-partitioner-cleanup fast-conveyor-paths "canvas skips" "component layouts" "texel copies" "partial uploads" "parallel draws"; do
         echo "$report" | grep -q "$tweak:" || fail "verify: no report from $tweak"
     done
-    # The overlays tweak reports each of its parts.
     local part
-    for part in "power answers" "kept positions" "kept targets"; do
-        echo "$report" | grep -q "fast-overlays: .*$part" || fail "verify: no $part report from fast-overlays"
-    done
     # The canvas skips: the walk's, the rect masks' and the raycasts'.
     for part in "verified" "graphics skipped by masks" "graphics left out of raycasts"; do
         echo "$report" | grep -q "canvas skips: .*$part" || fail "verify: no canvas skips report on $part"

@@ -53,8 +53,6 @@ namespace OniMoono.Host.GameTweaks
             "U57", "Linux under WSL2", "by 2026-10-20", "docs/PERFORMANCE.md#the-tweaks (save tweaks: 11.7 → 4.8 s)");
         static readonly TweakGain JobsGain = new("+11% frame rate on a large colony",
             "U57", "Linux under WSL2", "by 2026-10-20", "docs/PERFORMANCE.md#the-tweaks (fast-jobs)");
-        static readonly TweakGain OverlaysGain = new("temperature overlay ~40% cheaper",
-            "U57", "Linux under WSL2", "2026-10-24", "docs/research/overlays.md (Infrared.Update 10.44 → 6.0 ms; 2minnow 6.53 → 3.9)");
         static readonly TweakGain ConveyorGain = new("no hitch on rail edits (was 0.05–0.5 s)",
             "U57", "Linux under WSL2", "2026-10-25", "docs/PERFORMANCE.md#the-tweaks (a rebuild 50–510 → 2–14 ms)");
 
@@ -113,10 +111,6 @@ namespace OniMoono.Host.GameTweaks
                 "Animation batches write their instance and symbol data on worker threads, the rest in the game's order."),
             new("fast-symbol-overrides", Graphics, "Fewer animation uploads", "Swapped animation parts are re-sent to the graphics card only when they change.",
                 "Unchanged symbol-override blocks of Duplicants and buildings aren't uploaded again."),
-            new("fast-overlays", Graphics, "Faster overlays", "Overlays skip rereading what can't have changed since the last frame.",
-                "Temperature passes over buildings out of view without reading them, power asks each circuit's load once a frame, the rest keep what their targets' visits read.", OverlaysGain),
-            new("fast-overlay-textures", Graphics, "Overlay texture cleanup", "Opening and closing overlays no longer piles up video memory.",
-                "The screen-sized textures the game remakes on each coloured overlay toggle are freed, instead of kept until the next load (about 18 MB a toggle at 1024×768)."),
 
             new("slow-reachability", ChangesGameplay, "Slower reachability checks", "Duplicants notice a newly opened or blocked path up to 3 s later.",
                 "Which errands and items can be reached is rechecked every 4 s instead of every second; temperature and building checks are never delayed."),
@@ -129,7 +123,7 @@ namespace OniMoono.Host.GameTweaks
         ];
 
         /// The tweaks in src/OniMoono.GameTweaks (named here: options are read before that assembly is loaded).
-        public static readonly string[] Typed = ["off-screen-conveyors", "fast-save-type-checks", "fast-anim-cleanup", "fast-sublimation", "fast-anim-events", "fast-symbol-overrides", "fast-jobs", "fast-offset-tables", "slow-reachability", "off-world-fallers", "fast-partitioner-cleanup", "fast-anim-batches", "fast-overlays", "fast-conveyor-paths", "fast-overlay-textures", "brain-rate"];
+        public static readonly string[] Typed = ["off-screen-conveyors", "fast-save-type-checks", "fast-anim-cleanup", "fast-sublimation", "fast-anim-events", "fast-symbol-overrides", "fast-jobs", "fast-offset-tables", "slow-reachability", "off-world-fallers", "fast-partitioner-cleanup", "fast-anim-batches", "fast-conveyor-paths", "brain-rate"];
 
         /// Every `--game-tweak` name, in the screen's order.
         public static readonly string[] All = Rows.Where(r => r.IsTweak).Select(r => r.Id).ToArray();

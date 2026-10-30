@@ -2968,6 +2968,21 @@ and the quads' triangles, bounds zero, and uv and colours not set by the constru
 with the probe's `tmp.*` lines (`diff` of the two players' `MS` lines shows no difference in
 them) and with the spec above, which must reach its last step without the crash dialog.
 
+### U60's package (Unity 6000.3.17f1, game build 761015)
+
+U60 ships a newer TextMeshPro. Against our package, the game's assemblies need one more member:
+
+- `TMP_Text.SetCharArray(ReadOnlySpan<char> sourceText)`, public. It behaves exactly as
+  `SetCharArray(char[] sourceText)` given an array holding the span's characters in order (an
+  empty span as an empty array). The game's `LocText.SetContent` calls it for most UI text, so it
+  must not allocate a string per call; the text property, layout, preferred sizes and events are
+  those of the `char[]` overload.
+
+The shipped `TMP_InputField` also calls three Windows functions of its own (`GetFocus`,
+`GetWindowRect`, `ClientToScreen`), private members whose purpose is not yet measured; the
+probable one is placing the IME candidate window near the caret. To be measured in the original
+U60 player on Windows with an IME before anything is specified for it.
+
 ## Verification
 
 1. **Build:**

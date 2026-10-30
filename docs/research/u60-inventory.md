@@ -21,7 +21,7 @@ Sources:
 | UI packages | Done: `TMP_Text.SetCharArray(ReadOnlySpan<char>)` from the spec; package ApiCheck 0 missing. |
 | Game tweaks | Static review done (2 fixed, overlays left out where U60 does their work); runtime checks need a U60 player. |
 | Linux build | Done: frozen at `~/projects/oni-linux-761015`, DLC content copied (not linked) from the frozen Windows copy, test install `out/local-tools/u60orig`. |
-| Main menu and a save on U60 | Both: Linux (QA dogfood: menu, DeCrew and new game, all 13 scenarios clean) and Windows (frozen copy `E:\tmp\oni-win-761015`, RTX 3090, OpenGL 4.5: main menu, DeCrew loaded and dismissed its mod dialog, no errors). |
+| Main menu and a save on U60 | Both: Linux (QA dogfood: menu, DeCrew and new game, all 13 scenarios clean) and Windows (frozen copy `E:\oni-builds\oni-win-761015`, RTX 3090, OpenGL 4.5: main menu, DeCrew loaded and dismissed its mod dialog, no errors). |
 | Performance | Not yet measured. |
 | QA and e2e on U60 | QA: unit and all 13 dogfood scenarios pass (references blessed from a reviewed U60 run); verify (U57, every tweak's verify mode) ran 840 game seconds with no mismatches and no errors logged. e2e: not yet run. |
 

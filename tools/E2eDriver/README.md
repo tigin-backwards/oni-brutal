@@ -491,7 +491,16 @@ driver records the key codes `Input.GetKeyDown` is true for in each frame (all k
 `Mouse0`), the key code of each IMGUI `KeyDown` event that names one, and the characters
 `KeyDown` events type. Read them as state: `type:E2eDriver.KeyLog::Down` (one entry a frame,
 codes of one frame joined by `+`, entries by spaces), `::Events` (space-separated) and
-`::Chars`. Answers `{"recording": true}`.
+`::Chars`. It also records each frame's `Input.mouseScrollDelta` and
+`Input.GetAxis("Mouse ScrollWheel")` where either is not zero (`::Wheel`, `x,y/axis` entries
+separated by spaces) and the delta of each IMGUI `ScrollWheel` event (`::WheelEvents`, `x,y`).
+Answers `{"recording": true}`.
+
+### imgui.scrollview `{on?}`
+
+Shows an IMGUI scroll view 300 by 300 pixels centred on the screen, over content 3000 high, and
+resets its scroll position (`on: false` removes it). The wheel over it scrolls it; read the
+position as state: `type:E2eDriver.ImguiProbe::ScrollY`. Answers `{"on": true}`.
 
 ## Errors
 

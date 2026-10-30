@@ -57,12 +57,28 @@ namespace OniMoono.Desktop.Gl
             lock (gate) Monitor.PulseAll(gate);
         }
 
+        /// What recorded resource work does on this thread: the device's (GL's by default).
+        public IResourceWork Resources = GlResourceWork.Instance;
+
         public GlWorker(GlfwWindow context, Action<Exception> commandFailed)
+            : this("GL", MoveContext(context), () => Glfw.PInvoke.MakeContextCurrent(null!), commandFailed)
+        {
+        }
+
+        /// The context moves from the creating thread to the GL thread: released here, before
+        /// the thread starts, and made current there.
+        static Action MoveContext(GlfwWindow context)
+        {
+            Glfw.PInvoke.MakeContextCurrent(null!);
+            return () => context.MakeContextCurrent();
+        }
+
+        /// A worker whose thread runs `enter` first and `exit` last (the GL device makes its
+        /// context current there; the Vulkan device has nothing to do).
+        public GlWorker(string name, Action enter, Action exit, Action<Exception> commandFailed)
         {
             this.commandFailed = commandFailed;
-            // The context moves from the creating thread to the GL thread.
-            Glfw.PInvoke.MakeContextCurrent(null!);
-            thread = new Thread(() => Run(context)) { Name = "GL", IsBackground = true };
+            thread = new Thread(() => Run(enter, exit)) { Name = name, IsBackground = true };
             thread.Start();
         }
 
@@ -141,11 +157,11 @@ namespace OniMoono.Desktop.Gl
             if (failure != null) throw new InvalidOperationException("Rendering failed on the GL thread.", failure);
         }
 
-        void Run(GlfwWindow context)
+        void Run(Action enter, Action exit)
         {
             try
             {
-                context.MakeContextCurrent();
+                enter();
                 while (true)
                 {
                     Frame frame;
@@ -194,7 +210,7 @@ namespace OniMoono.Desktop.Gl
             }
             finally
             {
-                Glfw.PInvoke.MakeContextCurrent(null!);
+                exit();
             }
         }
 

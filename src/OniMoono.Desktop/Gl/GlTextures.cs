@@ -376,24 +376,23 @@ namespace OniMoono.Desktop.Gl
 
         // The GL-thread work Prepare posts, each in its own method so that its closure is
         // allocated only when there is work (Prepare runs for every texture of every draw).
-        static void PostRenderTexture(GlWorker worker, DeviceTexture g, RenderShape shape, string name) => worker.Post(() =>
+        static void PostRenderTexture(GlWorker worker, DeviceTexture g, RenderShape shape, string name)
         {
-            long t = GlTimings.Now;
-            EnsureRenderTexture(g, shape, name);
-            GlTimings.Targets += GlTimings.Now - t;
-        });
+            var work = worker.Resources;
+            worker.Post(() => work.CreateRenderTexture(g, shape, name));
+        }
 
-        internal static void PostUpload(GlWorker worker, DeviceTexture g, TexelUpload upload) => worker.Post(() =>
+        internal static void PostUpload(GlWorker worker, DeviceTexture g, TexelUpload upload)
         {
-            long t = GlTimings.Now;
-            uint q = GlGpuProfile.Enabled ? GlGpuProfile.Begin() : 0;
-            upload.Execute(g);
-            if (GlGpuProfile.Enabled) GlGpuProfile.End($"texture upload {upload.Width}x{upload.Height} {upload.Format}", q);
-            GlTimings.TextureUploads += GlTimings.Now - t;
-            System.Threading.Interlocked.Add(ref OniMoono.Engine.StartupStats.GlUploadTicks, GlTimings.Now - t);
-        });
+            var work = worker.Resources;
+            worker.Post(() => work.UploadTexture(g, upload));
+        }
 
-        internal static void PostSampler(GlWorker worker, DeviceTexture g, SamplerSettings sampler) => worker.Post(() => ApplySampler(sampler, g));
+        internal static void PostSampler(GlWorker worker, DeviceTexture g, SamplerSettings sampler)
+        {
+            var work = worker.Resources;
+            worker.Post(() => work.ApplySampler(g, sampler));
+        }
 
         internal static void ApplySamplerNow(SamplerSettings sampler, DeviceTexture g) => ApplySampler(sampler, g);
 
@@ -629,7 +628,7 @@ namespace OniMoono.Desktop.Gl
 
         /// Colour texture (or depth texture for depth-only formats), depth-stencil buffer,
         /// framebuffer, and multisampled surfaces when anti-aliased.
-        static void EnsureRenderTexture(DeviceTexture g, RenderShape rt, string name)
+        internal static void EnsureRenderTexture(DeviceTexture g, RenderShape rt, string name)
         {
             bool depthOnly = rt.ColorFormat == GraphicsFormat.None;
             int levels = rt.Levels;

@@ -190,12 +190,13 @@ namespace OniMoono.Desktop.Gl
         public static bool KeywordEnabled(string keyword, MaterialNative material, string[] extra)
             => material.Keywords.Contains(keyword) || ShaderGlobals.Keywords.Contains(keyword) || (extra != null && Array.IndexOf(extra, keyword) >= 0);
 
-        /// A shader variant's program: compiled on the GL thread the first time it is used.
+        /// A shader variant's program: compiled on the device thread the first time it is used.
         public DeviceProgram Program(ShaderNative shader, int blob)
         {
             if (shader.Gpu is DeviceProgramSet set && set.Programs.TryGetValue(blob, out var p)) return p;
             long waitStart = System.Diagnostics.Stopwatch.GetTimestamp();
-            var built = worker.Call(() => GlPrograms.Get(shader, blob));
+            var work = worker.Resources;
+            var built = worker.Call(() => work.Program(shader, blob));
             System.Threading.Interlocked.Add(ref OniMoono.Engine.StartupStats.ProgramWaitTicks, System.Diagnostics.Stopwatch.GetTimestamp() - waitStart);
             return built;
         }

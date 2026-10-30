@@ -127,14 +127,11 @@ namespace OniMoono.Desktop.Gl
 
         // Its own method, so the closure is allocated only for a changed mesh (Prepare runs for
         // every draw).
-        static void PostUpload(GlWorker worker, DeviceMesh d, MeshUpload upload) => worker.Post(() =>
+        static void PostUpload(GlWorker worker, DeviceMesh d, MeshUpload upload)
         {
-            long t = GlTimings.Now;
-            uint q = GlGpuProfile.Enabled ? GlGpuProfile.Begin() : 0;
-            Upload(d, upload);
-            if (GlGpuProfile.Enabled) GlGpuProfile.End("mesh upload", q);
-            GlTimings.MeshUploads += GlTimings.Now - t;
-        });
+            var work = worker.Resources;
+            worker.Post(() => work.UploadMesh(d, upload));
+        }
 
         static void AddChannel<T>(MeshUpload upload, MeshLayout layout, Channel c, T[] data, int components) where T : unmanaged
         {
@@ -144,7 +141,7 @@ namespace OniMoono.Desktop.Gl
         }
 
         /// Writes the recorded data into the mesh's buffers (GL thread).
-        static void Upload(DeviceMesh d, MeshUpload upload)
+        internal static void Upload(DeviceMesh d, MeshUpload upload)
         {
             for (int i = 0; i < upload.Channels.Length; i++)
             {

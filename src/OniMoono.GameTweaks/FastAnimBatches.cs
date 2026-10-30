@@ -31,7 +31,10 @@ namespace OniMoono.GameTweaks
     /// What the writes read (frame, visibility, position, transforms, the symbol instance and
     /// override blocks) is not changed by applying another controller's overrides, so writing
     /// them earlier or later gives the same bytes. The engine's transform caches are safe for
-    /// concurrent readers.
+    /// concurrent readers. Since U60 a controller's override block is created on first read
+    /// (KAnimControllerBase.symbolOverrideInfoGpuData); the loop's own read in WriteOverrides,
+    /// on the main thread, creates it before a deferred write reads it on a worker, and only
+    /// LoadAnims (never reached from the loop) can reset it.
     ///
     /// Written on the main thread in the game's order as before: batches being set up (Init),
     /// UI batches (their transform reads UI layout), controllers that are not exactly a
@@ -124,6 +127,10 @@ namespace OniMoono.GameTweaks
         {
             if (writeInstanceMethod == null || writeSymbolsMethod == null || writeOverridesMethod == null || trackerPosition == null)
                 throw new InvalidOperationException($"{Name}: the game's batch write methods were not found");
+            // Every write-path method must exist: a missing one (a game update renamed it) fails
+            // the install here, naming it, instead of turning the tweak off at its first frame.
+            foreach (var method in WritePath())
+                if (method == null) throw new InvalidOperationException($"{Name}: a write-path method was not found");
             harmony.Patch(AccessTools.Method(typeof(KAnimBatch), nameof(KAnimBatch.UpdateDirty)),
                 transpiler: new HarmonyMethod(typeof(FastAnimBatches), nameof(Transpile)));
             harmony.Patch(AccessTools.Method(typeof(KAnimBatchManager), nameof(KAnimBatchManager.UpdateDirty)),
@@ -158,9 +165,11 @@ namespace OniMoono.GameTweaks
             yield return AccessTools.Method(typeof(KBatchedAnimInstanceData), nameof(KBatchedAnimInstanceData.WriteToTexture));
             yield return AccessTools.Method(typeof(SymbolInstanceGpuData), nameof(SymbolInstanceGpuData.WriteToTexture));
             var c = typeof(KBatchedAnimController);
-            foreach (var name in new[] { "GetCurrentFrameIndex", "IsVisible", "GetCurrentNumFrames", "GetPostProcessingParams", "GetFirstFrameIndex",
+            // U60 renamed GetPostProcessingParams (a float) to GetCustomShaderParams (a uint,
+            // packed with the visibility bit by KBatchedAnimInstanceData).
+            foreach (var name in new[] { "GetCurrentFrameIndex", "IsVisible", "GetCurrentNumFrames", "GetCustomShaderParams", "GetFirstFrameIndex",
                          "GetPositionData", "GetBatchInstanceData", "GetSymbolTransform", "GetSymbolLocalTransform" })
-                yield return AccessTools.Method(c, name);
+                yield return AccessTools.Method(c, name) ?? throw new MissingMethodException(nameof(KBatchedAnimController), name);
             yield return AccessTools.Method(c, nameof(KBatchedAnimController.GetTransformMatrix), Type.EmptyTypes);
             yield return AccessTools.PropertyGetter(c, "symbolInstanceGpuData");
             var b = typeof(KAnimControllerBase);
@@ -173,7 +182,10 @@ namespace OniMoono.GameTweaks
 
         static void CheckPatches()
         {
-            foreach (var method in WritePath())
+            IEnumerable<MethodBase> path;
+            try { path = new List<MethodBase>(WritePath()); }
+            catch (MissingMethodException e) { Disable(e.Message); return; }
+            foreach (var method in path)
             {
                 if (method == null) { Disable("a write-path method was not found"); return; }
                 var info = Harmony.GetPatchInfo(method);

@@ -122,10 +122,15 @@ namespace UnityEngine
             return typed;
         }
 
-        /// Unity frees the asset's data and reloads it from disk on its next use (U60's VistaLayers
-        /// unloads vista textures it no longer shows). Here the data stays loaded: the same
-        /// behaviour, only the memory is not given back.
-        public static void UnloadAsset(Object assetToUnload) { }
+        /// Frees the asset's data; the object stays valid and is read from its asset file again on
+        /// its next use, as in Unity (U60's VistaLayers unloads the vista sprites and textures it
+        /// stops showing). Here that is a texture's texels and device copy (see
+        /// TexelTextureNative.Unload); other assets hold little and keep theirs.
+        public static void UnloadAsset(Object assetToUnload)
+        {
+            Threads.AssertMainThread("Resources.UnloadAsset");
+            if (assetToUnload?.Native is OniMoono.Engine.Rendering.TexelTextureNative texture) texture.Unload();
+        }
 
         /// Unloads every asset nothing references (see AssetUnloader); completes at once.
         public static AsyncOperation UnloadUnusedAssets()

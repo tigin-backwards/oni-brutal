@@ -156,6 +156,15 @@ namespace OniMoono.Engine.Assets
             return file == null ? null : Load(file, pptr.PathId);
         }
 
+        /// An object's fields read again from its file (an asset Resources.UnloadAsset freed,
+        /// reloading).
+        public static Fields ReadFields(AssetSource source)
+        {
+            var file = AssetSystem.Get(source.File);
+            var info = file.ObjectsById[source.PathId];
+            return new LoadRequest { File = file, Info = info, ClassId = file.TypeOf(info).ClassId }.ReadNative();
+        }
+
         /// Forgets a destroyed or unloaded object.
         public static void Forget(AssetSource source) => loaded.Remove(new Key(source.File, source.PathId));
 

@@ -75,7 +75,7 @@ https://github.com/user-attachments/assets/3106d24d-67d3-4bf3-ba23-8f8dc78910f8
 
 ### 调整项
 
-Moono 也会加速游戏自身的一些代码。大多数调整项不会改变玩法，且默认开启；有三项会改变玩法，默认关闭。可在主菜单的 **Moono Tweaks** 中切换。完整列表见 [docs/TWEAKS.md](docs/TWEAKS.md)。
+Moono 也会加速游戏自身的一些代码。大多数调整项不会改变玩法，且默认开启；有四项会改变玩法，默认关闭。可在主菜单的 **Moono Tweaks** 中切换。完整列表见 [docs/TWEAKS.md](docs/TWEAKS.md)。
 
 ![主菜单中 Mods 下方的 Moono Tweaks 按钮](docs/images/zh-CN/main-menu.png)
 

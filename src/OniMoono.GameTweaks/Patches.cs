@@ -22,6 +22,7 @@ namespace OniMoono.GameTweaks
                 case FastPartitionerCleanup.Name: FastPartitionerCleanup.Install(harmony); return true;
                 case FastAnimBatches.Name: FastAnimBatches.Install(harmony); return true;
                 case FastConveyorPaths.Name: FastConveyorPaths.Install(harmony); return true;
+                case DestroyedCellChangeObjects.Name: DestroyedCellChangeObjects.Install(harmony); return true;
                 case BrainRate.Name: BrainRate.Install(harmony); return true;
                 default: return false;
             }

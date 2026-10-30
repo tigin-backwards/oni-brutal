@@ -105,6 +105,7 @@ namespace OniMoono.Desktop.Vulkan
                             continue;
                         }
                         image.ForAttachment(cb);
+                        vt.MultiTarget |= t.Colors.Length > 1;
                         vt.Dirty = true;
                         vt.LastUsedBatch = frames.Batch;
                         colors[count] = Attachment(image, clearColor);

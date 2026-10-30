@@ -6,4 +6,5 @@ FRAMES=1900
 DUMPS="500 600 1700 1880"
 ARGS=(--input 450:resize:800,600 --input 550:resize:1024,768
       --input 620:click:891,176 --input 1600:click:511,567 --input 1750:resize:800,600)
-REQUIRE=("multi-target framebuffer deleted with its textures") # the in-game resize recreates the world's targets
+# The in-game resize recreates the world's targets (OpenGL's line, then Vulkan's).
+REQUIRE=("multi-target framebuffer deleted with its textures || vulkan: multi-target render texture released")

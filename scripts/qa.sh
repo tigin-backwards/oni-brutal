@@ -173,7 +173,12 @@ run_scenario() # NAME
     local kept; kept=$(grep -aoE '[0-9]+ kept' "$out/stdout.txt" | tail -1 | cut -d' ' -f1)
     [ "${kept:-0}" -le "$KEPT_MAX" ] || fail "dogfood $name: $kept multi-target framebuffers kept at the end (at most $KEPT_MAX)"
     local line
-    for line in "${REQUIRE[@]}"; do grep -aqF "$line" "$out/stdout.txt" || fail "dogfood $name: the log lacks \"$line\""; done
+    # A REQUIRE entry may list alternatives separated by " || " (one line per renderer).
+    for line in "${REQUIRE[@]}"; do
+        found=""
+        while IFS= read -r alt; do grep -aqF "$alt" "$out/stdout.txt" && found=1; done <<< "${line// || /$'\n'}"
+        [ -n "$found" ] || fail "dogfood $name: the log lacks \"$line\""
+    done
     local check
     for check in "${DUMP_MATCH[@]}"; do
         grep -aqE "${check#*:}" "$out/f${check%%:*}.txt" 2>/dev/null || fail "dogfood $name: the f${check%%:*} UI dump has no line matching ${check#*:}"

@@ -506,6 +506,8 @@ namespace OniMoono.Desktop.Vulkan
             if (vt == null) return;
             g.Vk = null;
             liveTextures.Remove(vt);
+            // As the OpenGL device's multi-target framebuffer line (the QA's resize scenario).
+            if (vt.MultiTarget) OniMoono.Engine.EngineLog.Engine("vulkan: multi-target render texture released");
             frames.Retire(() => DestroyTexture(vt));
         }
 

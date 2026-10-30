@@ -154,6 +154,8 @@ namespace OniMoono.Desktop.Vulkan
         /// multisampled colour surface rendered into before a resolve into Image.
         public VkImageResource DepthStencil, Multisampled;
         public bool RenderTarget, DepthOnly;
+        /// Rendered into together with other colour targets (logged when released).
+        public bool MultiTarget;
         /// Rendered into since the last resolve or mip generation.
         public bool Dirty;
         /// The last batch whose commands use it (VkFrames.Batch): an update in a later batch

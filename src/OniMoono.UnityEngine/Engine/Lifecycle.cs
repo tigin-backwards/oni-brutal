@@ -457,8 +457,17 @@ namespace OniMoono.Engine
         }
 
         /// Carries out the Destroy requests made so far: the player loop calls it after the fixed
-        /// steps, after the Update pass and after LateUpdate (PlayerLoop.RunFrame).
-        public static void ProcessDestroyQueue()
+        /// steps, after the Update pass and after LateUpdate (PlayerLoop.RunFrame). Destroy called
+        /// by the callbacks it runs (an OnDestroy destroying another object) waits for the next
+        /// of these points, as in Unity's player (UnityProbe destroycascade): after LateUpdate
+        /// for a request made after the Update pass, and for one made after LateUpdate, after
+        /// the next frame's first fixed step or, without one, its Update pass. A critter dying in
+        /// U60's Disease overlay destroys its ResourceVisualizer from OnDestroy; carried out in
+        /// the same pass, its child was always gone by the next Game.Update, whose
+        /// CellChangeMonitor then threw on the child's KObject (in the original only when a
+        /// fixed step comes first, UnityProbe cellchangecrash). DRAIN (the quit) carries out
+        /// every request, those made meanwhile too.
+        public static void ProcessDestroyQueue(bool drain = false)
         {
             float now = Time.time;
             for (int i = timedDestroy.Count - 1; i >= 0; i--)
@@ -468,13 +477,14 @@ namespace OniMoono.Engine
                 timedDestroy.RemoveAt(i);
                 ScheduleDestroy(obj, 0f);
             }
-            // Destroy callbacks may request more destruction; drain until empty.
-            while (pendingDestroy.Count > 0)
+            do
             {
+                if (pendingDestroy.Count == 0) return;
                 var batch = pendingDestroy.ToArray();
                 pendingDestroy.Clear();
                 foreach (var obj in batch) DestroyNow(obj);
             }
+            while (drain);
         }
 
         /// Destroys OBJ now. A scene's unload passes `unloading`: its roots keep their active flag

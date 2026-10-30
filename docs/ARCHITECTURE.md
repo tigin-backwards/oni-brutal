@@ -1319,7 +1319,8 @@ citing why.
     inactive itself (`activeSelf` false) before its subtree's callbacks, its descendants keeping
     their own flag, and a component destroyed alone leaves its object active (UnityProbe's
     destroyflags): `KMonoBehaviour.OnDestroy` releases the object's `KObject` event system only
-    on `!activeSelf`.
+    on `!activeSelf`. A `Destroy` made by an `OnDestroy` while requests are carried out waits for
+    the next destruction point (UnityProbe's destroycascade).
   - Exceptions in a message are logged through `Debug.LogException` and do not stop the frame,
     as in Unity.
 - **Script execution order** comes from `MonoScript.m_ExecutionOrder` in

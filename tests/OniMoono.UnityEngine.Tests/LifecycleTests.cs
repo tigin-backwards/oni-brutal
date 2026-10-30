@@ -794,6 +794,98 @@ namespace OniMoono.Tests
         }
     }
 
+    /// An owner whose OnDestroy destroys another object (with a child), as
+    /// DiseaseSourceVisualizer.OnCleanUp destroys its ResourceVisualizer. Logs each phase's view
+    /// of the other object and the OnDestroy calls (UnityProbe's destroycascade).
+    public class CascadeRecorder : MonoBehaviour
+    {
+        public static readonly List<string> Log = new();
+        public static GameObject Other;
+        public string Tag;
+        public GameObject DestroyOnDestroy;
+        public string DestroyOwnerIn;
+        public GameObject Owner;
+        int frames;
+
+        void Watch(string at)
+        {
+            if (DestroyOwnerIn == null) return;
+            if (frames > 0 && frames < 3) Log.Add($"{at} other={(Other == null ? "null" : "alive")}");
+            if (at == DestroyOwnerIn && frames == 0)
+            {
+                Object.Destroy(Owner);
+                Log.Add(at + " destroyed the owner");
+                frames = 1;
+            }
+        }
+
+        void FixedUpdate() => Watch("FixedUpdate");
+        void Update() { Watch("Update"); }
+        void LateUpdate() { Watch("LateUpdate"); if (frames > 0) frames++; }
+
+        void OnDestroy()
+        {
+            if (Tag == null) return;
+            Log.Add(Tag + " OnDestroy");
+            if (DestroyOnDestroy != null) Object.Destroy(DestroyOnDestroy);
+        }
+    }
+
+    public class DestroyCascadeTests : EngineTest
+    {
+        public DestroyCascadeTests() => CascadeRecorder.Log.Clear();
+
+        /// The owner destroyed in PHASE of the first frame (without fixed steps); the second
+        /// frame has fixed steps if FIXED_NEXT.
+        static List<string> Run(string phase, bool fixedNext)
+        {
+            var other = new GameObject("Other");
+            other.AddComponent<CascadeRecorder>().Tag = "other";
+            var child = new GameObject("Child");
+            child.transform.SetParent(other.transform, false);
+            child.AddComponent<CascadeRecorder>().Tag = "child";
+            CascadeRecorder.Other = other;
+            var owner = new GameObject("Owner");
+            var o = owner.AddComponent<CascadeRecorder>();
+            o.Tag = "owner"; o.DestroyOnDestroy = other;
+            var w = new GameObject("Watcher").AddComponent<CascadeRecorder>();
+            w.DestroyOwnerIn = phase; w.Owner = owner;
+            float step = Time.fixedDeltaTime;
+            Time.fixedDeltaTime = 100f;
+            try
+            {
+                Frame();
+                if (fixedNext) Time.fixedDeltaTime = 1f / 120f;
+                Frame();
+                Time.fixedDeltaTime = 100f;
+                Frame();
+            }
+            finally
+            {
+                Time.fixedDeltaTime = step;
+            }
+            return CascadeRecorder.Log;
+        }
+
+        // As measured in the original player (UnityProbe destroycascade): a Destroy made by an
+        // OnDestroy that a destruction point runs waits for the next destruction point.
+
+        [Fact]
+        public void ADestroyFromOnDestroyAfterTheUpdatePassIsCarriedOutAfterLateUpdate()
+            => Assert.Equal(["Update destroyed the owner", "owner OnDestroy", "LateUpdate other=alive", "other OnDestroy", "child OnDestroy", "Update other=null"],
+                Run("Update", false).GetRange(0, 6));
+
+        [Fact]
+        public void ADestroyFromOnDestroyAfterLateUpdateWaitsForTheNextUpdatePass()
+            => Assert.Equal(["LateUpdate destroyed the owner", "owner OnDestroy", "Update other=alive", "other OnDestroy", "child OnDestroy", "LateUpdate other=null"],
+                Run("LateUpdate", false).GetRange(0, 6));
+
+        [Fact]
+        public void ADestroyFromOnDestroyAfterLateUpdateIsCarriedOutAfterTheNextFixedStep()
+            => Assert.Equal(["LateUpdate destroyed the owner", "owner OnDestroy", "FixedUpdate other=alive", "other OnDestroy", "child OnDestroy", "FixedUpdate other=null"],
+                Run("LateUpdate", true).GetRange(0, 6));
+    }
+
     public class CloneTests : EngineTest
     {
         [System.Serializable]

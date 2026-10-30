@@ -92,7 +92,7 @@ namespace OniMoono.Host
                     .Select(b => $"{b.File}\t{b.PathId}\t{b.ClassId}\t{b.Type}\t{b.Name}"));
             PlayerLoop.SendApplicationQuit();
             SceneLoader.UnloadAll();
-            Lifecycle.ProcessDestroyQueue();
+            Lifecycle.ProcessDestroyQueue(drain: true);
             // The graphics device and window go before the process exits, as in Unity's player
             // (a GL context left current into process exit can hang driver exit handlers).
             if (platform != null)

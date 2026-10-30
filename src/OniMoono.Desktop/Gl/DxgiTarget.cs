@@ -124,7 +124,7 @@ namespace OniMoono.Desktop.Gl
                 long luid = 0;
                 const uint DeviceLuid = 0x9599;
                 if (getUnsignedBytes != null) getUnsignedBytes(DeviceLuid, (byte*)&luid);
-                if (luid != 0)
+                if (luid != 0 && DxgiHasAdapter(luid))
                 {
                     how = "the OpenGL context's LUID";
                     return luid;
@@ -160,6 +160,25 @@ namespace OniMoono.Desktop.Gl
             }
             how = "matched by GL_RENDERER";
             return luids[index];
+        }
+
+        /// DXGI has an adapter with this LUID (else the GL driver's LUID is not used: GL_RENDERER
+        /// decides).
+        static bool DxgiHasAdapter(long luid)
+        {
+            void* factory = null, factory4 = null, adapter = null;
+            try
+            {
+                var iid = Dxgi.IIDFactory2;
+                return !Dxgi.Failed(Dxgi.CreateDXGIFactory2(0, &iid, &factory)) && !Dxgi.Failed(Dxgi.QueryInterface(factory, Dxgi.IIDFactory4, &factory4))
+                       && !Dxgi.Failed(Dxgi.EnumAdapterByLuid(factory4, luid, Dxgi.IIDAdapter1, &adapter));
+            }
+            finally
+            {
+                Dxgi.Release(ref adapter);
+                Dxgi.Release(ref factory4);
+                Dxgi.Release(ref factory);
+            }
         }
 
         bool Fail(string reason)

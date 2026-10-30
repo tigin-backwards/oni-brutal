@@ -458,6 +458,8 @@ namespace OniMoono.Desktop.Vulkan
         [System.Runtime.Versioning.SupportedOSPlatform("windows")]
         void ShowDxgi(VkBackBuffer b, int interval, int width, int height)
         {
+            // The interval redraws between frames use (Run).
+            swapInterval = interval;
             var cb = BeginSlot(out int s);
             if (!dxgi.Prepare(width, height, waitIdle ??= () => vk.Queue.WaitIdle()))
             {

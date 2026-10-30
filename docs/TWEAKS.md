@@ -37,6 +37,8 @@ launch options:
   replaced (`%USERPROFILE%` or `~`, `%DOCUMENTS%`, `<steam id>`), or as logged.
 - `--gpu default|discrete|integrated`: the graphics card on a laptop with two
   ([ARCHITECTURE.md](ARCHITECTURE.md#2-process-and-assembly-structure), "The GPU option").
+- `--renderer auto|vulkan|opengl`: the graphics API; auto is Vulkan, or OpenGL when Vulkan can't
+  start ([ARCHITECTURE.md](ARCHITECTURE.md#35-rendering)).
 
 Older setups put `--game-tweak exact` in the launch options; remove it (the setup prints the new
 line) to choose in the game instead.

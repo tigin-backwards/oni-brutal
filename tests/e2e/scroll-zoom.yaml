@@ -1,0 +1,43 @@
+# Mouse wheel: zoom and scrolling per notch, against the original's.
+#
+# Unity's X11 player reports a notch as Input.mouseScrollDelta (0, ±1) and
+# GetAxis("Mouse ScrollWheel") ±0.1 in its frame. The game's camera zooms by zoomFactor (1.25)
+# once a frame the axis is not zero (KInputController's MouseScrollUp/Down), so notches one frame
+# apart zoom once each; notches arriving within one frame zoom once. The scroll step sends one
+# notch a frame. The KeyLog records each frame's delta and axis, and IMGUI's ScrollWheel event
+# deltas (one a notch on Linux); E2eDriver's IMGUI scroll view scrolls 20 pixels a notch.
+from: early-base
+steps:
+  - driver: {camera.set: {cell: [113, 207], ortho: 8}}
+  - driver: {keys.log: {}}
+  - expect_state: {"CameraController.Instance.targetOrthographicSize": 8}
+  - scroll: {at: center, notches: -1}
+  - expect_state:
+      "CameraController.Instance.targetOrthographicSize": [10, "== original"]
+      "type:E2eDriver.KeyLog::Wheel": [{equals: "0,-1/-0.1"}, "== original"]
+      "type:E2eDriver.KeyLog::WheelEvents": [{equals: "0,1"}, "== original"]
+  - driver: {keys.log: {}}
+  - scroll: {at: center, notches: 1}
+  - expect_state:
+      "CameraController.Instance.targetOrthographicSize": [8, "== original"]
+      "type:E2eDriver.KeyLog::Wheel": [{equals: "0,1/0.1"}, "== original"]
+      "type:E2eDriver.KeyLog::WheelEvents": [{equals: "0,-1"}, "== original"]
+  # A burst, a notch a frame: four zooms (8 * 1.25^4).
+  - driver: {keys.log: {}}
+  - scroll: {at: center, notches: -4}
+  - expect_state:
+      "CameraController.Instance.targetOrthographicSize": ["== 19.53125", "== original"]
+      "type:E2eDriver.KeyLog::Wheel": [{equals: "0,-1/-0.1 0,-1/-0.1 0,-1/-0.1 0,-1/-0.1"}, "== original"]
+      "type:E2eDriver.KeyLog::WheelEvents": [{equals: "0,1 0,1 0,1 0,1"}, "== original"]
+  # IMGUI: a scroll view centred on the screen.
+  - driver: {imgui.scrollview: {}}
+  - scroll: {at: center, notches: -1}
+  - expect_state:
+      "type:E2eDriver.ImguiProbe::ScrollY": [20, "== original"]
+  - scroll: {at: center, notches: -3}
+  - expect_state:
+      "type:E2eDriver.ImguiProbe::ScrollY": [80, "== original"]
+  - scroll: {at: center, notches: 2}
+  - expect_state:
+      "type:E2eDriver.ImguiProbe::ScrollY": [40, "== original"]
+  - driver: {imgui.scrollview: {"on": false}}

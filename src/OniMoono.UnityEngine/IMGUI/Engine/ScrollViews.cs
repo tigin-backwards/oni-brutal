@@ -7,8 +7,9 @@ namespace OniMoono.Engine.IMGUI
     /// shown through a clip, with scrollbars where the content does not fit.
     internal static class ScrollViews
     {
-        /// Pixels scrolled per scroll-wheel line (the platform reports three lines a notch).
-        const float WheelLine = 10f;
+        /// Pixels scrolled per unit of a ScrollWheel event's delta (Unity's Linux player scrolls
+        /// 20 pixels a notch, whose delta is 1).
+        internal const float WheelLine = 20f;
 
         /// Scroll positions set by the wheel, ScrollTo or ScrollTowards; the next
         /// BeginScrollView of the view returns them.

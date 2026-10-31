@@ -13,6 +13,11 @@
 #            every check reports zero mismatches.
 #   perf     U57 with every game tweak: peak memory under 16 GB, the steady frame rate no lower than
 #            the reference's less 15% (the machine's noise), multi-target framebuffers not piling up.
+#            It holds the machine (see quiet_begin): new e2e specs wait for it.
+#   memory   (not in the default list; also --memory or QA_MEMORY_ONLY=1, which runs it alone) U57's
+#            peak resident memory only, under 16 GB: no perf lock, no wait for a quiet machine, and
+#            it stops once the first autosave has passed and RSS has settled. It reports the
+#            peak, the frame of the peak and the RssAnon/RssFile split (STAGE/memory.json).
 # verify and perf need a large Spaced Out colony and its DLC content, which cannot be published:
 # out/local-tools/qa.env sets QA_U57_GAME (a game folder with the DLC content), QA_U57_STEAM (a
 # Steam double owning the DLC) and QA_U57_SAVE; without it those stages are skipped, and say so.
@@ -25,6 +30,9 @@
 # hangs a player on purpose, to try it.
 # --bless stores this run's captures, signatures and frame rate as the references
 # (out/qa/reference), once they have been looked at; --bless-from=RUN stores a past run's.
+# Players end with qa.sh, however it ends (a `timeout`, ^C, kill -9): each runs in a systemd scope
+# of its own that qa.sh stops on exit, and a watcher stops when qa.sh is killed outright (see
+# "the players' teardown"). scripts/e2e.py --status shows what runs and who waits for whom.
 set -uo pipefail
 source "$(dirname "$0")/env.sh"
 # Its builds, players and tests run in the memory-capped test slice (scripts/contain.sh).
@@ -35,9 +43,11 @@ for a in "$@"; do
     case $a in
         --bless) bless=1 ;;
         --bless-from=*) bless_from=${a#--bless-from=} ;;
+        --memory) stages+=(memory) ;;
         *) stages+=("$a") ;;
     esac
 done
+[ "${QA_MEMORY_ONLY:-}" = 1 ] && stages=(memory)
 # --bless-from=RUN: a past run's dogfood captures and signatures, once looked at, become the
 # references (without running the scenarios again).
 if [ -n "$bless_from" ]; then
@@ -62,6 +72,29 @@ failures=0
 fail() { echo "FAIL $*"; echo "FAIL $*" >> "$run/summary.txt"; failures=$((failures + 1)); }
 ok() { echo "ok   $*"; echo "ok   $*" >> "$run/summary.txt"; }
 note() { echo "     $*"; echo "     $*" >> "$run/summary.txt"; }
+
+# ---- the players' teardown ----
+# Every player runs in a systemd scope of its own (scripts/contain.sh, ONI_SCOPE) and carries
+# E2E_OWNER, this run's pid and start time. On any exit (the end, an error, SIGTERM from a
+# `timeout`, ^C, a closed terminal) qa.sh stops them all (scripts/e2e.py --teardown-owner); a
+# watcher in a session of its own (e2e.py --reap-after) does when qa.sh is killed outright.
+qa_start=$(cut -d')' -f2 "/proc/$$/stat" | awk '{print $20}')
+qa_owner="$$:$qa_start"; players=0
+setsid -f python3 "$root/scripts/e2e.py" --reap-after $$ "$qa_start" < /dev/null > /dev/null 2>&1
+player() # LABEL CMD...: runs CMD in the background as one of this run's players; its pid in player_pid
+{
+    local label=$1; shift; players=$((players + 1))
+    E2E_OWNER=$qa_owner ONI_SCOPE="oni-test-$$-$qa_start-qa-$label-$players.scope" "$root/scripts/contain.sh" "$@" &
+    player_pid=$!
+}
+on_exit()
+{
+    [ -z "${quiet_flock:-}" ] || kill "$quiet_flock" 2> /dev/null
+    [ -z "${quiet_fd:-}" ] || rm -f "$quiet_lockdir/perf.wanted"
+    [ "$players" -eq 0 ] || python3 "$root/scripts/e2e.py" --teardown-owner "$qa_owner" > /dev/null 2>&1
+}
+trap on_exit EXIT
+trap 'exit 143' TERM; trap 'exit 130' INT; trap 'exit 129' HUP
 
 # ---- build ----
 # The release player every stage runs: the engine, the UI packages and the host, which carries its
@@ -131,10 +164,12 @@ run_scenario() # NAME
     fi
     local caps=() f
     for f in $DUMPS; do caps+=(--capture "$f:$out/f$f.png" --dump-ui "$f:$out/f$f.txt"); done
-    ONI_GAME_DIR="$gamedir" ONI_RUN_HOME="$home" ONI_CONFIG=release timeout 1800 xvfb-run -a -s "-screen 0 1280x1024x24" \
+    # In the background and waited for, so that a signal's trap runs at once.
+    ONI_GAME_DIR="$gamedir" ONI_RUN_HOME="$home" ONI_CONFIG=release player "dogfood-$name" timeout 1800 xvfb-run -a -s "-screen 0 1280x1024x24" \
         "$root/scripts/audio-sink/record.sh" "$out/audio.raw" "${runner[@]}" \
         -screen-width 1024 -screen-height 768 -screen-fullscreen 0 --frames "$FRAMES" --max-frame-rate 60 \
         --log "$out/log.txt" "${caps[@]}" "${ARGS[@]}" > "$out/stdout.txt" 2>&1
+    wait "$player_pid"
     local status=$?
     rm -f "$out/audio.raw"
     # The game's own log (Debug.Log, exceptions) goes to stdout with the engine's.
@@ -185,23 +220,25 @@ run_scenario() # NAME
 # The perf stage measures frame rates, so it holds the machine: perf.wanted keeps new e2e specs
 # from starting, and the exclusive hold of perf.lock waits for the running ones. The other stages
 # run beside specs (a scenario that waits on real time, as newgame's worldgen, leaves it ample
-# frames).
+# frames), and so does the memory stage: peak memory does not depend on the machine's load.
 quiet_lockdir="${E2E_LOCK_DIR:-$HOME/.cache/oni-brutal-e2e}"
 quiet_fd=""
 quiet_begin() # STAGE
 {
     mkdir -p "$quiet_lockdir"
+    # What dead e2e runners left (players, Xvfbs) would keep the machine busy for nothing.
+    python3 "$root/scripts/e2e.py" --clean | grep -v '^cleaned 0 ' | sed "s/^/     $1: /"
     echo $$ > "$quiet_lockdir/perf.wanted"
     exec {quiet_fd}>>"$quiet_lockdir/perf.lock"
-    note "$1: waiting for running e2e specs to finish"
-    flock -x "$quiet_fd"
+    note "$1: waiting for running e2e specs to finish (scripts/e2e.py --status shows them)"
+    flock -x "$quiet_fd" & quiet_flock=$!; wait $quiet_flock; quiet_flock=""
     # The lock keeps players out, not other work (another project's build or verifier on many
     # cores skewed a perf run by 13%): wait, at most QA_QUIET_MAX_MIN minutes, until under
     # QA_QUIET_CORES cores' worth of CPU is busy.
     local busy waited=0 max=$(( ${QA_QUIET_MAX_MIN:-30} * 60 ))
     while busy=$(cores_busy); win=$(windows_game); [ -n "$win" ] || awk -v b="$busy" -v m="${QA_QUIET_CORES:-2}" 'BEGIN { exit !(b > m) }'; do
         [ $waited -eq 0 ] && [ -n "$win" ] && note "$1: waiting while a game runs on Windows ($win), whose load WSL can't see"
-        [ $waited -eq 0 ] && note "$1: waiting for the machine to go quiet ($busy cores busy; most: $(ps -eo pcpu=,comm= --sort=-pcpu | head -1 | xargs))"
+        [ $waited -eq 0 ] && note "$1: waiting for the machine to go quiet ($busy cores busy; most: $(ps -eo pid=,pcpu=,comm= --sort=-pcpu | head -3 | xargs -L1 echo | paste -sd';' -))"
         if [ $waited -ge $max ]; then note "$1: still $busy cores busy after ${QA_QUIET_MAX_MIN:-30} min; measuring anyway"; break; fi
         sleep 15; waited=$((waited + 20))
     done
@@ -220,10 +257,9 @@ cores_busy() # cores' worth of CPU busy over 5 s, from /proc/stat
 }
 quiet_end()
 {
-    flock -u "$quiet_fd"; exec {quiet_fd}>&-
+    flock -u "$quiet_fd"; exec {quiet_fd}>&-; quiet_fd=""
     rm -f "$quiet_lockdir/perf.wanted"
 }
-trap '[ -z "$quiet_fd" ] || rm -f "$quiet_lockdir/perf.wanted"' EXIT
 
 stage_dogfood()
 {
@@ -255,10 +291,18 @@ u57_run()
     # U57_SCREENS: then PerfProbe opens and closes these management screens in turn (its screens.txt).
     [ -n "${U57_SCREENS:-}" ] && { echo 'wait overlays'; for s in $U57_SCREENS; do printf 'open %s\nclose\n' "$s"; done; echo 'hold 600 after-screens'; } > "$d/mods/Local/PerfProbe/screens.txt"
     echo '{"version":1,"mods":[{"label":{"distribution_platform":0,"id":"PerfProbe","title":"PerfProbe","version":-2037174645},"status":1,"enabled":true,"enabledForDlc":["","EXPANSION1_ID"],"crash_count":0,"reinstall_path":null,"staticID":"PerfProbe"}],"mod_load_in_progress":false}' > "$d/mods/mods.json"
-    ONI_GAME_DIR="$QA_U57_GAME" ONI_RUN_HOME="$home" ONI_CONFIG=release timeout 3600 xvfb-run -a -s "-screen 0 1280x1024x24" \
+    ONI_GAME_DIR="$QA_U57_GAME" ONI_RUN_HOME="$home" ONI_CONFIG=release player "u57-$(basename "$out")" timeout 3600 xvfb-run -a -s "-screen 0 1280x1024x24" \
         "$root/scripts/run.sh" --native-override "steam_api=$QA_U57_STEAM" -screen-width 1024 -screen-height 768 -screen-fullscreen 0 \
-        --frames "$frames" --input 400:click:948,75 --input 900:click:153,192 --game-tweak all --log "$out/log.txt" "$@" > "$out/stdout.txt" 2>&1 &
-    local pid=$! peak=0 rss p perfs=0 n progress=$SECONDS hang=$(( ${QA_HANG_MIN:-5} * 60 ))
+        --frames "$frames" --input 400:click:948,75 --input 900:click:153,192 --game-tweak all --log "$out/log.txt" "$@" > "$out/stdout.txt" 2>&1
+    local pid=$player_pid peak=0 rss p perfs=0 n progress=$SECONDS hang=$(( ${QA_HANG_MIN:-5} * 60 ))
+    # U57_MEMWATCH=1 (the memory stage): qa-tools.py memwatch watches it instead, and stops it
+    # once the first autosave has passed and its memory has settled.
+    if [ -n "${U57_MEMWATCH:-}" ]; then
+        python3 "$tools" memwatch "$out" "$home" "$pid" > "$out/memory.txt" 2>&1 &
+        wait $!
+        wait $pid; echo $? > "$out/exit"
+        return
+    fi
     while kill -0 $pid 2>/dev/null; do
         # The hang watchdog: a PERF line at least every QA_HANG_MIN minutes, the load before the
         # first one included (see the header).
@@ -366,9 +410,28 @@ stage_perf()
     if awk -v f="$fps" -v b="$base" 'BEGIN { exit !(f >= b * 0.85) }'; then ok "perf: $fps fps over $windows windows (baseline $base)"; else fail "perf: $fps fps, below the baseline $base less 15%"; fi
 }
 
+# The memory stage: U57's peak resident memory alone, beside whatever else runs (it takes no
+# perf lock and waits for no quiet machine). memwatch stops the player once the first autosave
+# has passed and RSS has not risen by QA_MEMORY_RISE_MB (64) for QA_MEMORY_SETTLE_FRAMES (1200)
+# frames; QA_MEMORY_MAX_FRAMES (9000) caps the run.
+stage_memory()
+{
+    u57_ready || { note "memory: skipped (no out/local-tools/qa.env)"; return; }
+    build_release || return
+    local out="$run/memory"
+    U57_MEMWATCH=1 u57_run "$out" "${QA_MEMORY_MAX_FRAMES:-9000}"
+    note "memory: $(tail -1 "$out/memory.txt")"
+    if [ -d "$out/hang" ]; then fail "memory: the player hung (no PERF line for ${QA_HANG_MIN:-5} min); diagnostics in $out/hang"; return; fi
+    local peak autosave; peak=$(cat "$out/peak-rss" 2>/dev/null); peak=${peak:-0}
+    autosave=$(python3 -c 'import json, sys; print(json.load(open(sys.argv[1])).get("autosave_frame") or "")' "$out/memory.json" 2>/dev/null)
+    [ "$peak" -gt 0 ] || { fail "memory: no memory measured (see $out/stdout.txt)"; return; }
+    [ -n "$autosave" ] || fail "memory: no autosave within ${QA_MEMORY_MAX_FRAMES:-9000} frames: the peak may be later"
+    if [ "$peak" -lt $((16 * 1024 * 1024)) ]; then ok "memory: peak $((peak / 1024)) MB"; else fail "memory: peak $((peak / 1024)) MB (16 GB limit)"; fi
+}
+
 for s in "${stages[@]}"; do
     case $s in
-        unit|dogfood|verify|perf) echo "== $s"; "stage_$s" ;;
+        unit|dogfood|verify|perf|memory) echo "== $s"; "stage_$s" ;;
         *) echo "unknown stage $s"; exit 2 ;;
     esac
 done

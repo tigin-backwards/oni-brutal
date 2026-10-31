@@ -1,0 +1,18 @@
+# Issue #41 with the reporter's Fast Track (GitHub build 0.18.6, installed as Workshop ID
+# 9000000001 from ONI_WS; it is not on the Workshop). Fast Track draws tiles and animations with
+# MeshRenderers of its own (MeshRendererOptions = All by default). The conduits-in-tiles
+# fixture: a wire, a gas pipe and a liquid pipe through five tiles and on into open air.
+from: conduits-in-tiles
+mods: [9000000001]
+steps:
+  - driver: {camera.set: {cell: [114, 208], ortho: 6}}
+  - world_shot: {name: plain, ortho: 6, at: [114, 208]}
+  - open: {key: F2}
+  - run: {seconds: 1, speed: 1}
+  - world_shot: {name: power, ortho: 6, at: [114, 208]}
+  - open: {key: F6}
+  - run: {seconds: 1, speed: 1}
+  - world_shot: {name: liquid, ortho: 6, at: [114, 208]}
+  - open: {key: F7}
+  - run: {seconds: 1, speed: 1}
+  - world_shot: {name: gas, ortho: 6, at: [114, 208]}

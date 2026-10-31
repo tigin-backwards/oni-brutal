@@ -1,0 +1,37 @@
+# Issue #41: in the Power overlay, wire laid through a floor of built tiles was not drawn, while
+# wire in open air and the stubs up to the buildings' plugs were. A player's gas overlay showed
+# the same for pipes. In an overlay, the wires or pipes are moved to the MaskedOverlay layer and
+# drawn over the colony by an overlay camera; the tiles in front of them are drawn earlier, by the
+# colony's own camera.
+#
+# A wire, a gas pipe and a liquid pipe run along the floor of the dug-out corridor west of the
+# printing pod (y 207, x 110 to 118); tiles are built over the first five cells (x 110 to 114).
+# The world shots, in the Power, Plumbing and Ventilation overlays, show all three runs through
+# the tiles and beside them. Saves the conduits-in-tiles checkpoint.
+from: early-base
+setup:
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"GasPiping\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+  - driver: {setup.call: {target: "Research.Instance", method: SetActiveResearch, args: [{"$": "Db.Get().Techs.Get(\"LiquidPiping\")"}, true]}}
+  - driver: {setup.call: {target: "Research.Instance", method: CompleteQueue}}
+steps:
+  - build: {prefab: Wire, cells: [[110, 207], [111, 207], [112, 207], [113, 207], [114, 207], [115, 207], [116, 207], [117, 207], [118, 207]], material: Cuprite}
+  - build: {prefab: GasConduit, cells: [[110, 207], [111, 207], [112, 207], [113, 207], [114, 207], [115, 207], [116, 207], [117, 207], [118, 207]], material: SandStone}
+  - build: {prefab: LiquidConduit, cells: [[110, 207], [111, 207], [112, 207], [113, 207], [114, 207], [115, 207], [116, 207], [117, 207], [118, 207]], material: SandStone}
+  - run: {seconds: 1800, until: {buildings: {Wire: ">=9", GasConduit: ">=9", LiquidConduit: ">=9"}, pending_construction: 0}}
+  - build: {prefab: Tile, cells: [[110, 207], [111, 207], [112, 207], [113, 207], [114, 207]], material: SandStone}
+  - run: {seconds: 1800, until: {buildings: {Tile: ">=5"}, pending_construction: 0}}
+  - expect:
+      buildings: {Wire: ">=9", GasConduit: ">=9", LiquidConduit: ">=9", Tile: ">=5"}
+  - save: conduits-in-tiles
+  - driver: {camera.set: {cell: [114, 208], ortho: 6}}
+  - world_shot: {name: plain, ortho: 6, at: [114, 208]}
+  - open: {key: F2}
+  - run: {seconds: 1, speed: 1}
+  - world_shot: {name: power, ortho: 6, at: [114, 208]}
+  - open: {key: F6}
+  - run: {seconds: 1, speed: 1}
+  - world_shot: {name: liquid, ortho: 6, at: [114, 208]}
+  - open: {key: F7}
+  - run: {seconds: 1, speed: 1}
+  - world_shot: {name: gas, ortho: 6, at: [114, 208]}

@@ -72,7 +72,7 @@ namespace OniMoono.GameTweaks
             removeOffscreen = AccessTools.GetDeclaredMethods(typeof(OverlayModes.Mode)).First(m => m.Name == "RemoveOffscreenTargets" && m.GetParameters().Length == 4);
             highlight = AccessTools.Method(typeof(OverlayModes.Mode), "UpdateHighlightTypeOverlay");
             clearOutside = AccessTools.GetDeclaredMethods(typeof(OverlayModes.Mode)).First(m => m.Name == "ClearOutsideViewObjects" && m.GetParameters().Length == 5 && m.GetParameters()[1].ParameterType == typeof(Vector2I));
-            var reroute = new HarmonyMethod(typeof(FastOverlays), nameof(RerouteAddTarget));
+            var reroute = CallSiteReroute.Transpiler(typeof(FastOverlays), nameof(RerouteAddTarget));
             foreach (var (type, method) in new[] { (typeof(OverlayModes.ConduitMode), "Update"), (typeof(OverlayModes.Crop), "Update"), (typeof(OverlayModes.Harvest), "Update"),
                          (typeof(OverlayModes.Decor), "Update"), (typeof(OverlayModes.Logic), "Update"), (typeof(OverlayModes.Power), "Update"),
                          (typeof(OverlayModes.SolidConveyor), "Update"), (typeof(OverlayModes.Suit), "Update"), (typeof(OverlayModes.TileMode), "TryAddObject"),
@@ -102,24 +102,14 @@ namespace OniMoono.GameTweaks
 
         /// The modes' calls to Mode.AddTargetIfVisible, RemoveOffscreenTargets (the overload for
         /// components) and UpdateHighlightTypeOverlay go through the tweak's, same arguments.
+        /// It runs after every other owner's transpilers (CallSiteReroute): a mod that replaces
+        /// one of these calls with its own (Fast Track's CullConduits) still finds it.
         static IEnumerable<CodeInstruction> RerouteAddTarget(IEnumerable<CodeInstruction> instructions)
-        {
-            foreach (var instruction in instructions)
+            => CallSiteReroute.Rewrite(instructions, definition =>
             {
-                if ((instruction.opcode == System.Reflection.Emit.OpCodes.Call || instruction.opcode == System.Reflection.Emit.OpCodes.Callvirt)
-                    && instruction.operand is System.Reflection.MethodInfo m && m.IsGenericMethod)
-                {
-                    var definition = m.GetGenericMethodDefinition();
-                    string ours = definition == addTarget ? nameof(AddTarget) : definition == removeOffscreen ? nameof(RemoveOffscreen) : definition == highlight ? nameof(Highlight) : null;
-                    if (ours != null)
-                    {
-                        instruction.opcode = System.Reflection.Emit.OpCodes.Call;
-                        instruction.operand = AccessTools.Method(typeof(FastOverlays), ours).MakeGenericMethod(m.GetGenericArguments());
-                    }
-                }
-                yield return instruction;
-            }
-        }
+                string ours = definition == addTarget ? nameof(AddTarget) : definition == removeOffscreen ? nameof(RemoveOffscreen) : definition == highlight ? nameof(Highlight) : null;
+                return ours != null ? AccessTools.Method(typeof(FastOverlays), ours) : null;
+            });
 
         /// The game's AddTargetIfVisible without its own visit to an object already among the
         /// targets: the method's test for that ends it with nothing done.

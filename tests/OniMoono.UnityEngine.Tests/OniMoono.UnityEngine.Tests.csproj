@@ -38,6 +38,8 @@
     <Compile Include="../../src/OniMoono.Host/GameTweaks/TweakStrings.cs" Link="Host/TweakStrings.cs" />
     <!-- The brain-rate game tweak's allowance (BrainRateAllowanceTests). -->
     <Compile Include="../../src/OniMoono.GameTweaks/BrainRateAllowance.cs" Link="GameTweaks/BrainRateAllowance.cs" />
+    <!-- The tweaks' call-site transpilers run after mods' (CallSiteRerouteTests). -->
+    <Compile Include="../../src/OniMoono.GameTweaks/CallSiteReroute.cs" Link="GameTweaks/CallSiteReroute.cs" />
     <!-- The background-save game tweak's writes (BackgroundSaveTests), with the game's zlib. -->
     <Compile Include="../../src/OniMoono.Host/GameTweaks/BackgroundSave.cs" Link="Host/BackgroundSave.cs" />
     <Reference Include="Ionic.Zip">

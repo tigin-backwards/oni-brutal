@@ -222,6 +222,22 @@ namespace OniMoono.Tests
             finally { OniMoono.Engine.PlayerLoop.FrameStats = was; }
         }
 
+        /// --dxgi-fault takes this build's (OpenGL's) faults only: the shared DxgiSwapChain also
+        /// lists the Vulkan branch's, which would do nothing here.
+        [Fact]
+        public void EveryFaultThisBuildHasIsAccepted()
+        {
+            foreach (var ok in new[] { "extension", "adapter", "device", "register", "swapchain", "association", "norestart",
+                                       "import", "queuelock", "lock:1", "resize:3", "removed:300", "importview:2", "mutextimeout:5",
+                                       "removed:300,norestart", "association,norestart" })
+                Assert.Null(OniMoono.Host.DxgiFaultOption.Unknown(ok));
+            Assert.Equal("bogus", OniMoono.Host.DxgiFaultOption.Unknown("removed:3,bogus"));
+            foreach (var bad in new[] { "", "lock", "lock:", "lock:0", "lock:-1", "lock:x", "removed", "norestart:1", "Removed:3", "import:1" })
+                Assert.Equal(bad, OniMoono.Host.DxgiFaultOption.Unknown(bad));
+            Assert.Equal("extension, adapter, device, register, swapchain, association, import, queuelock, norestart, "
+                + "lock:N, resize:N, removed:N, importview:N, mutextimeout:N", OniMoono.Host.DxgiFaultOption.Known);
+        }
+
         [Fact]
         public void TheSlowestPercentIsTheMeanOfTheLongestIntervals()
         {

@@ -530,6 +530,44 @@ in the pilot:
 - Some game actions need the game to have run since the load (Blueprints Expanded placed nothing
   before): a short `run` before the UI steps is allowed.
 
+## Run time
+
+On this machine's lanes (WSL, Xvfb, Mesa's d3d12 driver on the GPU) the original player is CPU
+bound in one thread: Unity's graphics worker spends about 85 % of its time copying memory inside
+Mesa's d3d12 driver. It shows its main menu after about 125 s, loads `early-base` in 20-30 s,
+draws about 2.2 frames a second whatever the window size, vsync, GL level, buffer storage or
+Unity's graphics threading, and a `run: {seconds: 60}` takes about 140 s. Vulkan is not offered
+(WSL has no d3d12 Vulkan driver, and Unity refuses llvmpipe's), and zink needs one.
+
+Mesa's software rasteriser is faster for it: `E2E_ORIGINAL_ENV` gives the original player its
+own environment, for example in `out/local-tools/qa.env`:
+
+```sh
+export E2E_ORIGINAL_ENV="GALLIUM_DRIVER=llvmpipe MESA_SHADER_CACHE_DIR=$HOME/.cache/oni-brutal-e2e/mesa-shader-cache"
+```
+
+With it the main menu is up in about 18 s and `early-base` loads in about 22 s (48 s the first
+time: llvmpipe compiles Unity's shaders, which the shared shader cache keeps; each run's own
+cache folder would start empty). It draws 8-11 frames a second on 9-11 cores, and the 60 game
+seconds take about 39 s. Its shots differ from the d3d12 ones in under 0.05 % of the pixels, and
+ours compared with them gives the same fractions as before. With several lanes at once,
+`LP_NUM_THREADS=4` keeps each to four cores (about 5 frames a second). Ours keeps the d3d12
+driver: it draws about 28 frames a second paused there, though a `run` also slows it (about 3
+frames a second while the simulation runs, the same 60 game seconds in about 100 s against 37 s
+on llvmpipe).
+
+`scripts/e2e-bench.py` measures such launch variants (Mesa driver, environment, Unity arguments,
+a copy of boot.config, the display's depth and size) and `scripts/e2e-warm.py` runs several specs
+in one player per kind, loading each fixture over the last colony instead of relaunching: an
+`early-base` load takes 5-7 s there in the original and 2-4 s in ours. It applies only to specs
+that agree on what a launch fixes (mods, options, language, keyboard, Spaced Out), so for mod
+specs it serves a spec's repeats rather than a batch.
+
+Five of the specs without mods (`geyser-title`, `build-menu-search`, `consumables-scroll`,
+`overlap-manual`, `issue-23-storage-row-click`), `--player both` on one lane, all passing:
+1206 s as the lanes run now, 506 s with `E2E_ORIGINAL_ENV` above, and 253 s in warm players (the
+five and `geyser-title` again).
+
 ## Load sweeps
 
 Before mods get specs, `scripts/mod-sweep.py` finds which of them load at all: in batches of

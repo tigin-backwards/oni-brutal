@@ -6,7 +6,7 @@ namespace OniMoono.Desktop.Gl
     /// Windows: the D3D11 device and flip-model swap chain both devices present through
     /// (DxgiTarget for OpenGL, Vulkan.VkDxgiTarget for Vulkan), as the original (Unity 6 on D3D11)
     /// presents, so that Windows knows the game is SDR: R8G8B8A8_UNORM, FLIP_DISCARD, two buffers,
-    /// the default colour space, a frame-latency waitable object at a latency of 1, tearing only
+    /// the default colour space, a frame-latency waitable object at a latency of 2, tearing only
     /// without vsync. Each device renders into a D3D11 texture of the target's, shared with it;
     /// Present copies it into the back buffer (CopySubresourceRegion) and presents.
     /// ARCHITECTURE §3.5, "Presentation on Windows".
@@ -56,7 +56,15 @@ namespace OniMoono.Desktop.Gl
         /// A restart after a made-up fault, with "norestart": it fails.
         public static bool RestartRefused => faultDone && HasFault("norestart");
 
-        public const uint BufferCount = 2, MaximumFrameLatency = 1;
+        public const uint BufferCount = 2;
+        /// Pictures in flight with vsync: 2, Unity's default of two queued frames. Measured on U60
+        /// at 60 Hz (a light colony): with 1, Vulkan on the AMD iGPU ran at 55.2 fps against 59.9
+        /// on its own swapchain; with 2, at 59.5; on the RTX 3090 both held 60. Diagnostics:
+        /// ONI_DXGI_LATENCY=1 to 3.
+        public static readonly uint MaximumFrameLatency = uint.TryParse(Environment.GetEnvironmentVariable("ONI_DXGI_LATENCY"), out uint l) && l is >= 1 and <= 3 ? l : 2;
+        /// Presents that may still go before one is waited for (MaximumFrameLatency - 1 after a
+        /// resync).
+        int freeSlots;
         /// How long a present waits for its picture to be on its way before going on regardless.
         const uint WaitMilliseconds = 1000;
 
@@ -218,9 +226,9 @@ namespace OniMoono.Desktop.Gl
 
         /// Copies the top-left Width x Height of `source` (a D3D11 texture of the device's) into
         /// the back buffer, presents it `interval` vertical blanks after the last (0: at once)
-        /// and, with vsync, waits until it is on its way (one picture in flight, as the OpenGL
-        /// and Vulkan swapchain paths have with vsync): the waitable object is signalled as each
-        /// presented picture retires; an occluded picture was not queued and is not waited for. The
+        /// and, with vsync, waits until the picture before it is on its way (MaximumFrameLatency
+        /// pictures in flight): the waitable object is signalled as each presented picture
+        /// retires; an occluded picture was not queued and is not waited for. The
         /// caller has made `source` ready for D3D11 (the interop unlock, the keyed mutex).
         public bool Present(void* source, int interval)
         {
@@ -240,6 +248,7 @@ namespace OniMoono.Desktop.Gl
             {
                 for (int i = 0; i < 16 && Dxgi.WaitForSingleObjectEx(waitable, 0, 1) == Dxgi.WaitObject0; i++) { }
                 resync = false;
+                freeSlots = (int)MaximumFrameLatency - 1;
             }
             uint sync = (uint)Math.Clamp(interval, 0, 4);
             uint flags = sync == 0 && tearing ? Dxgi.PresentAllowTearing : 0;
@@ -253,6 +262,7 @@ namespace OniMoono.Desktop.Gl
             // a picture), which would cap the frame rate. The next Present resyncs the count; the
             // interop lock or keyed mutex keeps at most a picture in flight meanwhile.
             if (nowOccluded || sync == 0) resync = true;
+            else if (freeSlots > 0) freeSlots--;
             else
             {
                 long t = GlTimings.Now;

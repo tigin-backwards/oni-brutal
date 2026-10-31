@@ -2870,7 +2870,14 @@ namespace OniMoono.Host
                             o.Dxgi = value == "on";
                             break;
                         }
-                    case "--dxgi-fault": o.DxgiFault = args[++i]; break;
+                    case "--dxgi-fault":
+                        o.DxgiFault = args[++i];
+                        if (DxgiFaultOption.Unknown(o.DxgiFault) is { } fault)
+                        {
+                            Console.Error.WriteLine($"Unknown dxgi fault {fault}; known: {DxgiFaultOption.Known}");
+                            return null;
+                        }
+                        break;
                     case "--no-tweaks-menu": o.NoTweaksMenu = true; break;
                     case "--max-frame-rate":
                         {

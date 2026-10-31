@@ -1608,8 +1608,12 @@ burst, so a later failure gets ten tries again. Until a restart succeeds SwapBuf
 but it does not reach the screen on a window whose flip-model swap chain has presented
 (measured: the window kept DXGI's last picture while frames went on), so a DXGI that cannot
 restart leaves the window still. The `present:` line at start-up names the adapter and the swap
-chain's settings; `--dxgi-fault STEP` makes up a failure at one step, for testing the ways back
-(`DxgiSwapChain.Fault` lists them); with `--frame-stats` the frame counts include the
+chain's settings; `--dxgi-fault STEP[,STEP]` makes up a failure at one step, once, for testing
+the ways back: at start-up `extension` (no `WGL_NV_DX_interop2`), `adapter`, `device`,
+`register`, `swapchain` and `association` (the last after the swap chain is made, so DXGI is
+restarted); while running `lock:N`, `resize:N` and `removed:N` (the Nth interop lock, resize or
+`Present`); `norestart` makes every restart fail too. The host refuses any other step (the
+shared `DxgiSwapChain` also lists the Vulkan branch's); with `--frame-stats` the frame counts include the
 presenter's time per picture by step, the time from a game frame's start to its picture's
 present, and, every 600 frames, the process's video memory on the adapter as DXGI counts it
 (only while DXGI presents). Captures and `ReadPixels` read the offscreen back buffers, never the

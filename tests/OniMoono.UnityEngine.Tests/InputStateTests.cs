@@ -98,8 +98,9 @@ namespace OniMoono.Tests
             Assert.Equal(0f, input.GetAxis("Mouse ScrollWheel"));
         }
 
-        // IMGUI's ScrollWheel event: down for wheel-down, one per notch on Linux as Unity's X11
-        // player has it (measured: tests/e2e/scroll-zoom.yaml), three on Windows.
+        // IMGUI's ScrollWheel event: down for wheel-down, one per notch on Linux and three on
+        // Windows, as the original players report it (Linux: tests/e2e/scroll-zoom.yaml; Windows:
+        // real WHEEL_DELTA notches in the U59 player, delta 3 and 60 px a notch in a scroll view).
         [Fact]
         public void WheelEventDeltaIsOneANotchOnLinuxAndThreeOnWindows()
         {
@@ -107,6 +108,7 @@ namespace OniMoono.Tests
             Assert.Equal(new Vector2(0f, -2f), InputStateFeed.WheelEventDelta(new Vector2(0f, 2f), windows: false));
             Assert.Equal(new Vector2(-1f, 0f), InputStateFeed.WheelEventDelta(new Vector2(1f, 0f), windows: false));
             Assert.Equal(new Vector2(0f, 3f), InputStateFeed.WheelEventDelta(new Vector2(0f, -1f), windows: true));
+            Assert.Equal(new Vector2(0f, -6f), InputStateFeed.WheelEventDelta(new Vector2(0f, 2f), windows: true));
         }
     }
 }

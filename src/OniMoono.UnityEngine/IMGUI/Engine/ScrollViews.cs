@@ -7,8 +7,8 @@ namespace OniMoono.Engine.IMGUI
     /// shown through a clip, with scrollbars where the content does not fit.
     internal static class ScrollViews
     {
-        /// Pixels scrolled per unit of a ScrollWheel event's delta (Unity's Linux player scrolls
-        /// 20 pixels a notch, whose delta is 1).
+        /// Pixels scrolled per unit of a ScrollWheel event's delta, as in Unity's players: 20 a
+        /// notch on Linux (delta 1), 60 on Windows (delta 3).
         internal const float WheelLine = 20f;
 
         /// Scroll positions set by the wheel, ScrollTo or ScrollTowards; the next

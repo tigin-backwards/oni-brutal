@@ -72,6 +72,10 @@ namespace OniMoono.Tests
             var (memory, source) = native.DetachTexels();
             var bytes = memory != null ? memory.Span.ToArray() : source.Value.Read();
             Assert.Equal(before, bytes);
+            // The texture is shared with the other tests (the loader hands out one object per
+            // asset): unloaded again, its next use reads the file instead of finding no texels.
+            Resources.UnloadAsset(texture);
+            Assert.Equal(before, native.Memory.Span.ToArray());
         }
 
         [Fact]

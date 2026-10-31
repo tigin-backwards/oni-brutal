@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using Brutal.GlfwApi;
+using Brutal.GlfwApi.Win32;
 using Brutal.OpenGlApi;
 using OniMoono.Engine;
 using static OniMoono.Desktop.Gl.GlConst;
@@ -53,11 +54,10 @@ namespace OniMoono.Desktop.Gl
         readonly object gate = new();
         // Handed to the presenter under the gate; a frame counts as queued until it has been
         // presented.
-        readonly System.Collections.Generic.Queue<(Buffer Buffer, GlSync Fence, int Interval, int Width, int Height)> queue = new();
+        readonly System.Collections.Generic.Queue<(Buffer Buffer, GlSync Fence, int Interval, int Width, int Height, long Started)> queue = new();
         int queued;
         bool stopping;
         Exception failure;
-        int swapInterval = -1;
 
         /// The player's loading splash, drawn over the window by this thread (null: none).
         readonly GlSplash splash;
@@ -67,12 +67,21 @@ namespace OniMoono.Desktop.Gl
         // The buffer last copied to the window (presenter thread).
         Buffer shown;
 
+        /// Where pictures go (presenter thread): DXGI when it is on and starts, else OpenGL's own
+        /// SwapBuffers, from start-up or from the moment DXGI fails.
+        IWindowTarget target;
+        /// Windows, DXGI on: the window's handle (taken on the main thread, the window's).
+        readonly IntPtr dxgiWindow;
+        /// The adapter DXGI found for the GL context (0: none), for the video memory counters.
+        public long DxgiAdapterLuid { get; private set; }
+
         public GlPresenter(GlfwWindow window, GlSplash splash = null, int width = 0, int height = 0)
         {
             this.window = window;
             this.splash = splash;
             windowWidth = width;
             windowHeight = height;
+            if (OperatingSystem.IsWindows() && DxgiSwapChain.Enabled) dxgiWindow = (IntPtr)window.GetWin32Window();
             thread = new Thread(Run) { Name = "Presenter", IsBackground = true };
             thread.Start();
         }
@@ -121,6 +130,8 @@ namespace OniMoono.Desktop.Gl
 
         /// The main thread's frame the GL thread is executing (diagnostics).
         public int Frame;
+        /// When the game frame being handed over began (GL thread; PresenterTimings).
+        public long FrameStarted;
 
         void Allocate(Buffer b, int width, int height)
         {
@@ -199,7 +210,7 @@ namespace OniMoono.Desktop.Gl
             {
                 while (queued >= (interval > 0 ? MaxQueuedWithVsync : MaxQueued) && failure == null) Monitor.Wait(gate);
                 if (failure != null) throw new InvalidOperationException("Presenting failed.", failure);
-                queue.Enqueue((b, fence, interval, Math.Max(1, width), Math.Max(1, height)));
+                queue.Enqueue((b, fence, interval, Math.Max(1, width), Math.Max(1, height), complete ? FrameStarted : 0));
                 queued++;
                 Monitor.PulseAll(gate);
             }
@@ -237,9 +248,10 @@ namespace OniMoono.Desktop.Gl
             try
             {
                 window.MakeContextCurrent();
+                target = StartTarget();
                 while (true)
                 {
-                    (Buffer Buffer, GlSync Fence, int Interval, int Width, int Height) frame = default;
+                    (Buffer Buffer, GlSync Fence, int Interval, int Width, int Height, long Started) frame = default;
                     bool redraw = false;
                     lock (gate)
                     {
@@ -249,7 +261,7 @@ namespace OniMoono.Desktop.Gl
                             // second when no game frame comes.
                             if (splash != null && splash.Active)
                             {
-                                if (!Monitor.Wait(gate, 16)) { redraw = true; break; }
+                                if (!Monitor.Wait(gate, PresenterTimings.SplashWait(target is DxgiTarget))) { redraw = true; break; }
                             }
                             else Monitor.Wait(gate);
                         }
@@ -269,7 +281,12 @@ namespace OniMoono.Desktop.Gl
                         if (redraw) queued++;
                     }
                     if (redraw) Redraw();
-                    else PresentBuffer(frame.Buffer, frame.Fence, frame.Interval, frame.Width, frame.Height);
+                    else
+                    {
+                        PresenterTimings.FrameStarted = frame.Started;
+                        PresentBuffer(frame.Buffer, frame.Fence, frame.Interval, frame.Width, frame.Height);
+                        PresenterTimings.FrameStarted = 0;
+                    }
                     lock (gate)
                     {
                         queued--;
@@ -289,25 +306,132 @@ namespace OniMoono.Desktop.Gl
             }
             finally
             {
+                target?.Dispose();
+                target = null;
                 Glfw.PInvoke.MakeContextCurrent(null!);
             }
         }
 
+        /// DXGI's target when it is on (Windows) and starts, else OpenGL's; one log line says
+        /// which, and why not DXGI.
+        IWindowTarget StartTarget()
+        {
+            if (dxgiWindow != IntPtr.Zero)
+            {
+                var dxgi = DxgiTarget.Create(dxgiWindow, windowWidth, windowHeight, out string reason, out bool windowTouched);
+                if (dxgi != null)
+                {
+                    DxgiAdapterLuid = dxgi.AdapterLuid;
+                    return dxgi;
+                }
+                // A failure after the swap chain was made (its last steps) is one while running:
+                // DXGI is restarted, as SwapBuffers may not show on the window from here on.
+                dxgiLost = windowTouched;
+                EngineLog.Engine($"present: OpenGL's SwapBuffers, since DXGI could not start: {reason}{MadeUp}"
+                    + (windowTouched ? "; the window had DXGI's swap chain by then, so DXGI is restarted" : ""));
+            }
+            else if (OperatingSystem.IsWindows()) EngineLog.Engine("present: OpenGL's SwapBuffers (DXGI is off)");
+            return new GlSwapTarget(window);
+        }
+
+        /// DXGI's restarts after it failed while running (DxgiRestarts: bursts of at most ten
+        /// tries, 1 to 8 s apart).
+        readonly DxgiRestarts dxgiRestarts = new();
+        bool dxgiLost;
+
+        /// The target failed while running (DXGI: the device was lost, or a call failed). DXGI is
+        /// started anew (a new device and swap chain), as a lost Direct3D device is recovered:
+        /// OpenGL's SwapBuffers does not reach the screen on a window whose flip-model swap chain
+        /// has presented (measured: the window kept showing DXGI's last picture). Until a restart
+        /// succeeds, and after the last, OpenGL's SwapBuffers stands in.
+        void FallBack()
+        {
+            EngineLog.Engine($"present: {target.Name} failed: {target.Failure}{MadeUp}");
+            bool wasDxgi = target is DxgiTarget;
+            target.Dispose();
+            target = null;
+            if (wasDxgi)
+            {
+                dxgiLost = true;
+                DxgiAdapterLuid = 0;
+                target = RestartDxgi();
+            }
+            target ??= new GlSwapTarget(window);
+        }
+
+        /// DXGI started anew after it failed, when DxgiRestarts allows a try; null when it does
+        /// not start (or may not be tried yet).
+        IWindowTarget RestartDxgi()
+        {
+            long now = GlTimings.Now;
+            if (!dxgiRestarts.MayTry(now)) return null;
+            dxgiRestarts.Tried(now);
+            int tries = dxgiRestarts.Tries;
+            var dxgi = DxgiTarget.Create(dxgiWindow, windowWidth, windowHeight, out string reason, out _);
+            if (dxgi != null)
+            {
+                EngineLog.Engine($"present: DXGI started again (restart {tries})");
+                dxgiRestarts.Started(GlTimings.Now);
+                dxgiLost = false;
+                DxgiAdapterLuid = dxgi.AdapterLuid;
+                return dxgi;
+            }
+            EngineLog.Engine(!dxgiRestarts.Exhausted
+                ? $"present: DXGI restart {tries} failed: {reason}{MadeUp}; OpenGL's SwapBuffers until the next in {DxgiRestarts.DelaySeconds(tries):F0} s, which Windows may not show"
+                : $"present: DXGI restart {tries} failed: {reason}{MadeUp}; no more tries: OpenGL's SwapBuffers from here on, which Windows may not show");
+            return null;
+        }
+
+        static string MadeUp => DxgiSwapChain.Fault != null ? $" (a made-up fault: --dxgi-fault {DxgiSwapChain.Fault})" : "";
+
+        /// Makes the target ready for a `width` x `height` picture, its framebuffer bound for
+        /// drawing; falls back to OpenGL's when it fails. Returns whether rows are flipped.
+        bool BeginTarget(int width, int height)
+        {
+            long t = GlTimings.Now;
+            if (dxgiLost && RestartDxgi() is { } restarted)
+            {
+                target.Dispose();
+                target = restarted;
+            }
+            // Ends: restarts are at least a second apart, and OpenGL's Begin never fails.
+            while (!target.Begin(width, height)) FallBack();
+            PresenterTimings.Add(ref PresenterTimings.Begin, GlTimings.Now - t);
+            return target.FlipY;
+        }
+
+        /// Shows the picture; when the target fails, falls back to OpenGL's and shows the last
+        /// frame again through it.
+        void ShowTarget(int interval, bool again)
+        {
+            long t = GlTimings.Now;
+            bool shownOk = target.Show(interval, again);
+            long wait = target.LastWait;
+            PresenterTimings.Add(ref PresenterTimings.Show, GlTimings.Now - t - wait);
+            PresenterTimings.Add(ref PresenterTimings.Wait, wait);
+            if (shownOk)
+            {
+                PresenterTimings.Shown(wait);
+                if (target is DxgiTarget) dxgiRestarts.Presented(GlTimings.Now);
+                return;
+            }
+            FallBack();
+            Redraw();
+        }
+
         void PresentBuffer(Buffer b, GlSync? frameFence, int interval, int width, int height)
         {
-            if (interval != swapInterval)
-            {
-                Glfw.SwapInterval(interval);
-                swapInterval = interval;
-            }
             // The frame's commands complete before the copy reads them. The wait is on this
             // thread rather than on the window context's GPU queue, so neither context's queue
             // ever waits on the other's. (A frame shown again was complete already.)
+            long t = GlTimings.Now;
             if (frameFence is { } fence)
             {
                 while (N.glClientWaitSync(fence, default, WaitSliceNanoseconds) == TimeoutExpired) { }
                 N.glDeleteSync(fence);
             }
+            PresenterTimings.Add(ref PresenterTimings.FrameWait, GlTimings.Now - t);
+            lastInterval = interval;
             if (b.PresentGeneration != b.Generation)
             {
                 if (b.PresentFramebuffer == 0) b.PresentFramebuffer = GlApi.GenFramebuffer();
@@ -315,12 +439,14 @@ namespace OniMoono.Desktop.Gl
                 N.glFramebufferTexture2D(ReadFramebuffer, ColorAttachment0, TexTarget2D, b.Color, 0);
                 b.PresentGeneration = b.Generation;
             }
+            bool flip = BeginTarget(width, height);
+            long copyStart = GlTimings.Now;
             GlApi.BindFramebuffer(ReadFramebuffer, b.PresentFramebuffer);
-            GlApi.BindFramebuffer(DrawFramebuffer, 0);
             // A frame drawn before the window changed size fills the window scaled, rather than
-            // leaving part of it undefined.
+            // leaving part of it undefined. A target whose rows run top-down (DXGI) gets the frame
+            // flipped by the same copy.
             bool scaled = b.Width != width || b.Height != height;
-            N.glBlitFramebuffer(0, 0, b.Width, b.Height, 0, 0, width, height, ColorBufferBit, scaled ? Linear : Nearest);
+            N.glBlitFramebuffer(0, 0, b.Width, b.Height, 0, flip ? height : 0, width, flip ? 0 : height, ColorBufferBit, scaled ? Linear : Nearest);
             // The GL thread draws into the buffer again only after the copy has read it. A frame
             // shown again replaces the fence of its earlier copy (the GL thread waits for a
             // buffer's fence only once it draws into it again, which it does not while the
@@ -332,20 +458,16 @@ namespace OniMoono.Desktop.Gl
             if (splash != null && splash.Active)
             {
                 splash.GameFrame();
-                splash.Draw(width, height);
+                splash.Draw(width, height, flip);
             }
             N.glFlush();
+            PresenterTimings.Add(ref PresenterTimings.Copy, GlTimings.Now - copyStart);
             if (PresentTrace.Enabled) Probe(b, width, height);
-            window.SwapBuffers();
-            if (interval > 0)
-            {
-                // With vsync the swap is done when the frame is on its way to the display.
-                var swapped = N.glFenceSync(SyncGpuCommandsComplete, default);
-                N.glFlush();
-                while (N.glClientWaitSync(swapped, default, WaitSliceNanoseconds) == TimeoutExpired) { }
-                N.glDeleteSync(swapped);
-            }
+            ShowTarget(interval, again: false);
         }
+
+        /// The swap interval of the last frame presented, for redraws between frames.
+        int lastInterval = 1;
 
         /// Copies the frame last shown to the window again (black before the first), scaled to
         /// the window's size now, with the splash over it while it runs, and swaps.
@@ -353,21 +475,21 @@ namespace OniMoono.Desktop.Gl
         {
             int width = windowWidth, height = windowHeight;
             if (PresentTrace.Enabled && !(splash != null && splash.Active)) PresentTrace.Log($"window contents damaged: frame {shown?.DrawnFrame ?? -1} shown again");
-            GlApi.BindFramebuffer(DrawFramebuffer, 0);
+            bool flip = BeginTarget(width, height);
             if (shown != null)
             {
                 GlApi.BindFramebuffer(ReadFramebuffer, shown.PresentFramebuffer);
                 bool scaled = shown.Width != width || shown.Height != height;
-                N.glBlitFramebuffer(0, 0, shown.Width, shown.Height, 0, 0, width, height, ColorBufferBit, scaled ? Linear : Nearest);
+                N.glBlitFramebuffer(0, 0, shown.Width, shown.Height, 0, flip ? height : 0, width, flip ? 0 : height, ColorBufferBit, scaled ? Linear : Nearest);
             }
             else
             {
                 N.glClearColor(0f, 0f, 0f, 1f);
                 N.glClear(ColorBufferBit);
             }
-            if (splash != null && splash.Active) splash.Draw(width, height);
+            if (splash != null && splash.Active) splash.Draw(width, height, flip);
             N.glFlush();
-            window.SwapBuffers();
+            ShowTarget(lastInterval, again: true);
         }
 
         // ----- Diagnostics (presenter thread) -----
@@ -393,13 +515,13 @@ namespace OniMoono.Desktop.Gl
                 GlApi.BindFramebuffer(DrawFramebuffer, probeFramebuffer);
                 N.glFramebufferTexture2D(DrawFramebuffer, ColorAttachment0, TexTarget2D, probeTexture, 0);
             }
-            GlApi.BindFramebuffer(ReadFramebuffer, 0);
+            GlApi.BindFramebuffer(ReadFramebuffer, target.Framebuffer);
             GlApi.BindFramebuffer(DrawFramebuffer, probeFramebuffer);
             N.glBlitFramebuffer(0, 0, width, height, 0, 0, ProbeSize, ProbeSize, ColorBufferBit, Linear);
             GlApi.BindFramebuffer(ReadFramebuffer, probeFramebuffer);
             N.glPixelStorei(PackAlignment, 4);
             fixed (byte* p = probePixels) N.glReadPixels(0, 0, ProbeSize, ProbeSize, Rgba, UnsignedByte, p);
-            GlApi.BindFramebuffer(DrawFramebuffer, 0);
+            GlApi.BindFramebuffer(DrawFramebuffer, target.Framebuffer);
             double sum = 0;
             for (int i = 0; i < probePixels.Length; i += 4) sum += 0.299 * probePixels[i] + 0.587 * probePixels[i + 1] + 0.114 * probePixels[i + 2];
             double mean = sum / (ProbeSize * ProbeSize);

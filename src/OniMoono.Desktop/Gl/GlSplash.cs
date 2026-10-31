@@ -24,7 +24,7 @@ namespace OniMoono.Desktop.Gl
         readonly Task<SplashArt> art;
         readonly Stopwatch clock = Stopwatch.StartNew();
         uint program, texture, buffer, vertexArray;
-        int sizeLocation;
+        int sizeLocation, flipLocation;
         bool failed;
 
         // Steady frames: this many in a row, each within SteadyGap of the one before.
@@ -92,7 +92,7 @@ namespace OniMoono.Desktop.Gl
                 return false;
             }
             var a = art.Result;
-            const string vs = "#version 330 core\nlayout(location = 0) in vec2 pos;\nlayout(location = 1) in vec3 uva;\nuniform vec2 size;\nout vec3 v;\nvoid main() { v = uva; gl_Position = vec4(pos.x / size.x * 2.0 - 1.0, 1.0 - pos.y / size.y * 2.0, 0.0, 1.0); }\n";
+            const string vs = "#version 330 core\nlayout(location = 0) in vec2 pos;\nlayout(location = 1) in vec3 uva;\nuniform vec2 size;\nuniform float flip;\nout vec3 v;\nvoid main() { v = uva; gl_Position = vec4(pos.x / size.x * 2.0 - 1.0, (1.0 - pos.y / size.y * 2.0) * flip, 0.0, 1.0); }\n";
             const string fs = "#version 330 core\nin vec3 v;\nuniform sampler2D atlas;\nout vec4 color;\nvoid main() { vec4 c = texture(atlas, v.xy); color = c * v.z; }\n";
             uint v = GlApi.CompileShader(VertexShader, vs, out var vlog), f = GlApi.CompileShader(FragmentShader, fs, out var flog);
             program = v != 0 && f != 0 ? GlApi.LinkProgram(v, f, 0, out _) : 0;
@@ -105,6 +105,7 @@ namespace OniMoono.Desktop.Gl
                 return false;
             }
             sizeLocation = GlApi.UniformLocation(program, "size");
+            flipLocation = GlApi.UniformLocation(program, "flip");
             texture = GlApi.GenTexture();
             N.glBindTexture(TexTarget2D, texture);
             // Premultiplied: the atlas's transparent texels are white, which filtering and the
@@ -146,15 +147,16 @@ namespace OniMoono.Desktop.Gl
         static readonly (float R, float G, float B) Track = (0.20f, 0.18f, 0.27f), Fill = (0.83f, 0.35f, 0.55f);
 
         /// Start-up done so far (StartupProgress), as a thin bar low in the window, over a dark
-        /// track; gone once the rain fades.
-        static void DrawBar(int width, int height, float fade)
+        /// track; gone once the rain fades. `flip`: the framebuffer's rows run top-down.
+        static void DrawBar(int width, int height, float fade, bool flip)
         {
             if (fade < 1f) return;
+            void Scissor(int sx, int sy, int sw, int sh) => N.glScissor(sx, flip ? height - sy - sh : sy, sw, sh);
             float progress = StartupProgress.Value;
             int barWidth = Math.Max(120, width * 2 / 5), barHeight = Math.Max(4, height / 160);
             int x = (width - barWidth) / 2, y = Math.Max(barHeight * 2, height / 14);
             GlApi.Enable(ScissorTest, true);
-            N.glScissor(x - 2, y - 2, barWidth + 4, barHeight + 4);
+            Scissor(x - 2, y - 2, barWidth + 4, barHeight + 4);
             N.glClearColor(Track.R, Track.G, Track.B, 1f);
             N.glClear(ColorBufferBit);
             // The fill's edge column is part-covered, so the edge moves on smoothly even when
@@ -163,14 +165,14 @@ namespace OniMoono.Desktop.Gl
             int filled = (int)edge;
             if (filled > 0)
             {
-                N.glScissor(x, y, filled, barHeight);
+                Scissor(x, y, filled, barHeight);
                 N.glClearColor(Fill.R, Fill.G, Fill.B, 1f);
                 N.glClear(ColorBufferBit);
             }
             float cover = edge - filled;
             if (filled < barWidth && cover > 0)
             {
-                N.glScissor(x + filled, y, 1, barHeight);
+                Scissor(x + filled, y, 1, barHeight);
                 N.glClearColor(Track.R + (Fill.R - Track.R) * cover, Track.G + (Fill.G - Track.G) * cover, Track.B + (Fill.B - Track.B) * cover, 1f);
                 N.glClear(ColorBufferBit);
             }
@@ -178,7 +180,8 @@ namespace OniMoono.Desktop.Gl
         }
 
         /// Draws the comets into the window's framebuffer (bound), `width`×`height` pixels.
-        public void Draw(int width, int height)
+        /// `flip`: its rows run top-down (the DXGI target's).
+        public void Draw(int width, int height, bool flip = false)
         {
             if (!Ready() || !Active || width <= 0 || height <= 0) return;
             var a = art.Result;
@@ -215,7 +218,7 @@ namespace OniMoono.Desktop.Gl
                 }
             }
             N.glViewport(0, 0, width, height);
-            DrawBar(width, height, fade);
+            DrawBar(width, height, fade, flip);
             if (vertices.Count == 0) return;
             GlApi.Enable(Blend, true);
             GlApi.Enable(DepthTest, false);
@@ -225,6 +228,7 @@ namespace OniMoono.Desktop.Gl
             N.glBlendFuncSeparate(One, OneMinusSrcAlpha, One, OneMinusSrcAlpha);
             N.glUseProgram(new GlProgram(program));
             N.glUniform2f(sizeLocation, width, height);
+            N.glUniform1f(flipLocation, flip ? -1f : 1f);
             N.glActiveTexture(Texture0);
             N.glBindTexture(TexTarget2D, texture);
             N.glBindVertexArray(new GlVertexArray(vertexArray));

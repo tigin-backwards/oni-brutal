@@ -122,9 +122,14 @@ namespace OniMoono.Engine
             }
         }
 
+        /// When the running frame began (Stopwatch ticks; input was polled just before): frame
+        /// stats' time from a frame's start to its picture's present.
+        public static long FrameStartedAt;
+
         public static void RunFrame(float realDelta)
         {
             if (!started) throw new InvalidOperationException("PlayerLoop.Initialize must run first");
+            FrameStartedAt = System.Diagnostics.Stopwatch.GetTimestamp();
             if (FrameStats) statClock.Restart();
             // The device's texel copies from the last frame finish before scripts can write texels.
             Rendering.TexelCopies.Fence();

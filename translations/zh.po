@@ -389,3 +389,51 @@ msgstr "小动物和复制人原本每帧都会更新。此项在 30 fps 以上�
 msgctxt "STRINGS.MOONO.TWEAKS.ROWS.BRAIN_RATE.DETAIL"
 msgid "The game updates 1 Duplicant and 5 critter brains every rendered frame; this caps them at 30 and 150 a second, spread over frames. One that just finished an errand or is under threat still gets the next update. Saves time only above 30 fps."
 msgstr "游戏每渲染帧更新 1 个复制人和 5 个小动物的脑；此项将其限制为每秒 30 和 150 次，并分摊到各帧。刚完成任务或受到威胁的个体仍会立即获得下一次更新。仅在 30 fps 以上节省时间。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.RENDERER.TITLE"
+msgid "Renderer"
+msgstr "渲染器"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.RENDERER.EFFECT"
+msgid "Which graphics API the game draws with. Needs a restart."
+msgstr "游戏使用哪种图形 API 绘制。需要重启。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.RENDERER.DETAIL"
+msgid "Auto: Vulkan, or OpenGL when Vulkan can't start on this PC. Vulkan: Vulkan whenever it starts (also a software one). OpenGL: the original game's API. The picture is the same; Player.log names the one used and why."
+msgstr "自动：使用 Vulkan，若此电脑上 Vulkan 无法启动则使用 OpenGL。Vulkan：只要能启动就使用 Vulkan（包括软件实现）。OpenGL：原版游戏使用的 API。画面相同；Player.log 会写明使用了哪一个以及原因。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.CHOICES.RENDERER.AUTO"
+msgid "auto"
+msgstr "自动"
+
+msgctxt "STRINGS.MOONO.TWEAKS.CHOICES.RENDERER.VULKAN"
+msgid "vulkan"
+msgstr "vulkan"
+
+msgctxt "STRINGS.MOONO.TWEAKS.CHOICES.RENDERER.OPENGL"
+msgid "opengl"
+msgstr "opengl"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.DXGI.TITLE"
+msgid "Present through Direct3D on Windows"
+msgstr "Windows 上通过 Direct3D 显示"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.DXGI.EFFECT"
+msgid "Windows shows the game as it shows the original: no forced HDR or brightness. Needs a restart."
+msgstr "Windows 像显示原版一样显示游戏：不会被强制开启 HDR 或调高亮度。需要重启。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.DXGI.DETAIL"
+msgid "With Vulkan or OpenGL, frames go to the screen through a Direct3D 11 swap chain, as the original's do. Off: through the renderer's own presentation, which Auto HDR or RTX HDR can take for HDR. If it can't start, the renderer's own is used and Player.log says why. No effect on Linux."
+msgstr "无论使用 Vulkan 还是 OpenGL，画面都像原版一样通过 Direct3D 11 交换链送到屏幕。关闭时使用渲染器自身的呈现方式，可能被自动 HDR 或 RTX HDR 当作 HDR 内容。无法启动时改用渲染器自身的方式，Player.log 会说明原因。在 Linux 上无效。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FIX_DISEASE_OVERLAY_CRASH.TITLE"
+msgid "Fix the disease overlay crash"
+msgstr "修复病菌叠加层崩溃"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FIX_DISEASE_OVERLAY_CRASH.EFFECT"
+msgid "Stops a crash when a critter or plant showing germs dies while the Disease overlay is open."
+msgstr "病菌叠加层打开时，带有病菌的小动物或植物死亡不再导致崩溃。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FIX_DISEASE_OVERLAY_CRASH.DETAIL"
+msgid "A bug in U60's own code (the original crashes too, mostly at low frame rates): the destroyed germ marker is dropped before the game reads it. Off by default, as the original crashes."
+msgstr "这是 U60 自身代码的错误（原版也会崩溃，多在低帧率时）：游戏读取被销毁的病菌标记前，该标记已被丢弃。默认关闭，因为原版也会崩溃。"

@@ -195,6 +195,21 @@ msgctxt "STRINGS.MOONO.TWEAKS.CHOICES.RENDERER.OPENGL"
 msgid "opengl"
 msgstr ""
 
+#. Row title (dxgi)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.DXGI.TITLE"
+msgid "Present through Direct3D on Windows"
+msgstr ""
+
+#. The line under the title (dxgi)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.DXGI.EFFECT"
+msgid "Windows shows the game as it shows the original: no forced HDR or brightness. Needs a restart."
+msgstr ""
+
+#. Tooltip: how it works (dxgi)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.DXGI.DETAIL"
+msgid "With Vulkan or OpenGL, frames go to the screen through a Direct3D 11 swap chain, as the original's do. Off: through the renderer's own presentation, which Auto HDR or RTX HDR can take for HDR. If it can't start, the renderer's own is used and Player.log says why. No effect on Linux."
+msgstr ""
+
 #. Section heading (shown in capitals)
 msgctxt "STRINGS.MOONO.TWEAKS.GROUPS.SAVING"
 msgid "Saving"

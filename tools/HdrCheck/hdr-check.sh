@@ -56,8 +56,8 @@ pfms=()
 for which in $only; do
     home "$which"
     if [ "$which" = original ]; then
-        (cd "$root" && ONI_RUN_HOME="$workw\\original" ORIG_SECONDS=120 ONI_STEAM_STUB="$work/steam_api64.dll" scripts/original-windows.sh -monitor "$monitor" > /dev/null 2>&1) &
-        capture original 80
+        (cd "$root" && ONI_RUN_HOME="$workw\\original" ORIG_SECONDS=180 ONI_STEAM_STUB="$work/steam_api64.dll" scripts/original-windows.sh -monitor "$monitor" > /dev/null 2>&1) &
+        capture original 140 # the original reaches the menu later than Moono
         stop "$workw\\original\\Player.log"
     else
         renderer=${which#ours-}; renderer=${renderer%-*}

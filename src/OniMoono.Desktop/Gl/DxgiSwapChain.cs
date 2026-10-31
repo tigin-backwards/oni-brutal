@@ -29,7 +29,8 @@ namespace OniMoono.Desktop.Gl
         /// "association" (after the swap chain is made: DXGI is then restarted);
         /// OpenGL's "extension" (no WGL_NV_DX_interop2) and "register"; Vulkan's "import". While
         /// running (DXGI is then restarted): "lock:N" (the Nth interop lock, or keyed-mutex
-        /// acquire), "resize:N", "removed:N" (the Nth Present failing with
+        /// acquire), "mutextimeout:N" (Vulkan: the Nth submission timing out on the keyed mutex),
+        /// "resize:N", "removed:N" (the Nth Present failing with
         /// DXGI_ERROR_DEVICE_REMOVED). "norestart": every restart fails too. Each happens once,
         /// so a restart succeeds.
         public static string Fault;

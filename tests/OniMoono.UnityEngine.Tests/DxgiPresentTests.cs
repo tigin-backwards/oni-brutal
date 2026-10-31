@@ -116,6 +116,20 @@ namespace OniMoono.Tests
             Assert.InRange(PresenterTimings.SplashWait(pacedByPresent: true), 10, 16);
         }
 
+        /// The Vulkan presenter's DXGI submission takes the lock Brutal's Queue.Submit2 takes (its
+        /// only Lock field), to call vkQueueSubmit2 itself and see VK_TIMEOUT; a binding update
+        /// that renames it must not silently drop the serialization with the device thread.
+        [Fact]
+        public void TheQueueLockIsBrutalsOwn()
+        {
+            Assert.NotNull(OniMoono.Desktop.Vulkan.VkPresenter.QueueLockField);
+            Assert.Equal(typeof(System.Threading.Lock), OniMoono.Desktop.Vulkan.VkPresenter.QueueLockField.FieldType);
+            int locks = 0;
+            foreach (var f in typeof(Brutal.VulkanApi.Queue).GetFields(System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance))
+                if (f.FieldType == typeof(System.Threading.Lock)) locks++;
+            Assert.Equal(1, locks);
+        }
+
         [Fact]
         public void TheSlowestPercentIsTheMeanOfTheLongestIntervals()
         {

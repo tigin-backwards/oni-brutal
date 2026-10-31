@@ -144,7 +144,7 @@ def ws_mods():
 
 TOP_KEYS = {'name', 'from', 'mods', 'options', 'setup', 'steps', 'require_log', 'mask_text', 'tolerance',
             'thresholds', 'ignore_fields', 'memory_gb', 'spaced_out', 'translation', 'language',
-            'keyboard'}
+            'keyboard', 'tweaks_menu'}
 # The game's own translations (`language`), as Localization.PreinstalledLanguages names them.
 PREINSTALLED_LANGUAGES = ('zh_klei', 'ko_klei', 'ru_klei')
 # `from: main-menu` loads no fixture: the steps start at the main menu (a new game's spec).
@@ -306,6 +306,8 @@ def check_spec(spec):
         problems.append('`from` names the fixture')
     if not isinstance(spec.get('spaced_out', True), bool):
         problems.append('`spaced_out` is true or false')
+    if not isinstance(spec.get('tweaks_menu', False), bool):
+        problems.append('`tweaks_menu` is true or false')
     if not isinstance(spec.get('steps'), list):
         problems.append('`steps` is a list')
     mods = spec.get('mods', [])
@@ -1677,9 +1679,10 @@ class Player:
     the spec's mods and options, and a fixture."""
 
     def __init__(self, kind, out, env, fixture, lane, mods=(), options=None, driver=False, expansion1=True,
-                 translation=None, language=None, keyboard=None):
+                 translation=None, language=None, keyboard=None, tweaks_menu=False):
         self.kind, self.out, self.env, self.lane = kind, out, env, lane
         self.keyboard = keyboard
+        self.tweaks_menu = tweaks_menu
         self.home = os.path.join(out, 'home')
         self.profile = os.path.join(self.home, *PROFILE)
         self.log = os.path.join(out, 'player.log' if kind == 'original' else 'stdout.txt')
@@ -1777,8 +1780,9 @@ class Player:
             command = [os.path.join(ROOT, 'scripts', 'run.sh'), '--native-override',
                        'steam_api=' + self.env['QA_U57_STEAM'], *size,
                        *(a for t in os.environ.get('E2E_GAME_TWEAKS', 'exact').split() for a in ('--game-tweak', t)),
-                       # The original's main menu has no Moono Tweaks button: the menus compare.
-                       '--no-tweaks-menu',
+                       # The original's main menu has no Moono Tweaks button: the menus compare
+                       # (a spec of the Moono Tweaks screen keeps it: `tweaks_menu: true`).
+                       *([] if self.tweaks_menu else ['--no-tweaks-menu']),
                        # E2E_PLAYER_ARGS: more host arguments for our player (e.g. --renderer vulkan).
                        *os.environ.get('E2E_PLAYER_ARGS', '').split()]
             stdout = self.log
@@ -2946,7 +2950,8 @@ class Run:
                 raise SpecFailure(f'no fixture {fixture}')
             self.player = Player(self.kind, self.out, self.env, fixture, self.lane, spec['mods'], spec.get('options'),
                                  driver=uses_driver, expansion1=spaced_out(spec), translation=spec.get('translation'),
-                                 language=spec.get('language'), keyboard=spec.get('keyboard'))
+                                 language=spec.get('language'), keyboard=spec.get('keyboard'),
+                                 tweaks_menu=spec.get('tweaks_menu', False))
             self.mcp.on_reply = self.player.watchdog.progress
             records = open(os.path.join(self.out, 'results.jsonl'), 'w')
             started = time.time()

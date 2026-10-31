@@ -122,6 +122,7 @@ spaced_out: false                # Spaced Out off in both players (default: the 
                                  # header's dlcIds; on for `from: main-menu`)
 translation: 929139073           # the language of this translation mod (one of `mods`), picked in the prefs
 language: zh_klei                # or one of the game's own languages (zh_klei, ko_klei, ru_klei)
+tweaks_menu: true                # ours keeps the main menu's Moono Tweaks button (run with --player ours)
 setup: [...]                     # steps run first; the only place for driver setup.call
 steps: [...]
 ```

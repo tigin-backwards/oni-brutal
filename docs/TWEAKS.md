@@ -98,3 +98,31 @@ All 5 together: autosave freeze ~12 s → ~5 s on a large colony; U57, Linux und
 - **Critter and dupe brain updates capped at 30 updates a second** (`brain-rate`): Critters and dupes would otherwise update on every frame. This trims that bookkeeping above 30 fps. The game updates 1 Duplicant and 5 critter brains every rendered frame; this caps them at 30 and 150 a second, spread over frames. One that just finished an errand or is under threat still gets the next update. Saves time only above 30 fps.
 - **Fix the disease overlay crash** (`fix-disease-overlay-crash`): Stops a crash when a critter or plant showing germs dies while the Disease overlay is open. A bug in U60's own code (the original crashes too, mostly at low frame rates): the destroyed germ marker is dropped before the game reads it. Off by default, as the original crashes.
 <!-- tweaks:end -->
+
+## Translating Moono Tweaks
+
+The screen shows the game's language when the player has a translation for it, and English
+otherwise. Translations are `.po` files in the game's format, in `translations/` (beside the
+player in a release): `zh.po` is Simplified Chinese. The player picks the file named after the
+game's language code (`Localization.GetLocale().Code`), then that code's part before `_` or `-`.
+The code is `zh`, `ko` or `ru` for the game's own Chinese, Korean and Russian, and also `zh` for
+a translation mod whose language contains it (Traditional Chinese packs too). For other
+translation mods it is the `Language:` header of the mod's `strings.po`, such as `de` or `pt_BR`.
+
+Each string has a key (`msgctxt`, such as `STRINGS.MOONO.TWEAKS.ROWS.FAST_JOBS.TITLE`), the
+English it was translated from (`msgid`) and its translation (`msgstr`). A string that is
+missing, empty, or whose placeholders (`{0}`) or tags differ from the English shows in English.
+Launch options and paths are not translated.
+
+To add a language:
+1. Copy `translations/moono.pot` to `translations/CODE.po` (CODE as above) and fill in each
+   `msgstr`. Only `\"` and `\n` work as escapes.
+2. Run the catalog tests:
+   `out/bin/OniMoono.UnityEngine.Tests/debug/OniMoono.UnityEngine.Tests -class OniMoono.Tests.TweakTranslationTests -showLiveOutput`
+   (after `scripts/check.sh` or a build). They fail on an unknown key or a placeholder that does
+   not match the English, and list the strings that are missing or were translated from older
+   English (stale).
+
+When the English changes in `src/OniMoono.Host/GameTweaks/GameTweakNames.cs` or `TweakStrings.cs`,
+run the unit tests with `ONI_UPDATE_DOCS=1` to regenerate `moono.pot`; the tests then list each
+translation's stale strings.

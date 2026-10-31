@@ -22,18 +22,19 @@ scripts_log=$(python3 -m unittest discover -s "$root/tests/scripts" 2>&1) || fai
 echo "scripts: $(tail -1 <<< "$scripts_log")"
 grep -A12 -E '^(FAIL|ERROR): ' <<< "$scripts_log" | sed 's/^/  /' || true
 # Each publish carries what the host's build adds to its output: the UI packages, the game
-# tweaks, the engine facades (as many as the debug build's), the Restarter and NOTICE.txt. An
-# earlier publish's are removed first, so they cannot stand in.
+# tweaks, the engine facades (as many as the debug build's), the Restarter, NOTICE.txt and the
+# Moono Tweaks screen's translations. An earlier publish's are removed first, so they cannot
+# stand in.
 host_files() {
     local f facades
     for f in packages/UnityEngine.UI.dll packages/Unity.TextMeshPro.dll packages/Unity.Timeline.dll \
-             OniMoono.GameTweaks.dll engine/UnityEngine.CoreModule.dll Restarter NOTICE.txt; do
+             OniMoono.GameTweaks.dll engine/UnityEngine.CoreModule.dll Restarter NOTICE.txt translations/zh.po; do
         [ -f "$1/$f" ] || { echo "$1/$f missing"; return 1; }
     done
     facades=$(ls "$root/out/bin/OniMoono.Host/debug/engine" | wc -l)
     [ "$(ls "$1/engine" | wc -l)" = "$facades" ] || { echo "$1/engine: $(ls "$1/engine" | wc -l) files, the build has $facades"; return 1; }
 }
-clean_publish() { rm -rf "$1/packages" "$1/engine" "$1/OniMoono.GameTweaks."* "$1/Restarter" "$1/NOTICE.txt"; }
+clean_publish() { rm -rf "$1/packages" "$1/engine" "$1/OniMoono.GameTweaks."* "$1/Restarter" "$1/NOTICE.txt" "$1/translations"; }
 # The host cross-published for macOS (x86_64, run under Rosetta on Apple Silicon): it must build,
 # and its apphost must be an x86_64 Mach-O executable (magic feedfacf, CPU type 0x01000007).
 osx="$root/out/publish/osx-x64"; clean_publish "$osx"

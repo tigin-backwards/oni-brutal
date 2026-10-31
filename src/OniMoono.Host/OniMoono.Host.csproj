@@ -68,6 +68,8 @@
     <!-- BRUTAL License §2.2 and §2.3: the logo on the main menu (BrutalCredit), NOTICE.txt beside the player. -->
     <EmbeddedResource Include="Branding/LOGO_BRUTAL_WHT.png" LogicalName="LOGO_BRUTAL_WHT.png" />
     <None Include="../../NOTICE.txt" Link="NOTICE.txt" CopyToOutputDirectory="PreserveNewest" />
+    <!-- The Moono Tweaks screen's translations, in translations/ beside the player (TweakStrings). -->
+    <None Include="../../translations/*.po" Link="translations/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <Target Name="CopyUiPackages" AfterTargets="Build">
     <Copy SourceFiles="@(UiPackage);@(UiPackage->'%(RootDir)%(Directory)%(Filename).pdb')" DestinationFolder="$(OutDir)packages" SkipUnchangedFiles="true" />

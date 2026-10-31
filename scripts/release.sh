@@ -42,6 +42,11 @@ cp -r "$root/out/bin/OniMoono.Host/release_linux-x64/." "$lin/player/"
 rm -f "$lin/player/"FacadeGen*
 chmod +x "$lin/setup.sh" "$lin/player/OniMoono" "$lin/player/Restarter"
 
+# Each player carries the Moono Tweaks screen's translations (translations/*.po from the build).
+for player in "$win/player" "$lin/player"; do
+    [ -f "$player/translations/zh.po" ] || { echo "$player/translations/zh.po missing"; exit 1; }
+done
+
 # zip for Windows; tar.gz for Linux, which keeps the executable bits.
 (cd "$out/windows" && python3 -I -c "
 import os, sys, zipfile

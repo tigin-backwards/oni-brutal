@@ -111,7 +111,9 @@ namespace OniMoono.Desktop
             if (settings.Monitor > 0)
                 OniMoono.Engine.EngineLog.Engine($"window: monitor {settings.Monitor} of {monitors.Length} at {monitor.Position.X},{monitor.Position.Y}; window at {window.Position.X},{window.Position.Y}");
             SetIcon(window);
-            if (mode == FullScreenMode.MaximizedWindow) window.Maximize();
+            if (mode == FullScreenMode.MaximizedWindow
+                || mode == FullScreenMode.Windowed && TooLargeForWorkArea(monitor, new int2(width, height)))
+                window.Maximize();
             // Rendering happens on this thread in a hidden window's context shared with the
             // visible one, whose context belongs to the presenter thread (GlPresenter).
             renderWindow = Glfw.CreateWindow(new GlfwWindow.CreateInfo
@@ -352,6 +354,24 @@ namespace OniMoono.Desktop
         static FullScreenMode Supported(FullScreenMode mode)
             => mode == FullScreenMode.ExclusiveFullScreen && !OperatingSystem.IsWindows() ? FullScreenMode.FullScreenWindow : mode;
 
+        /// Windows keeps a window within the monitor's size with its frame: a windowed request as
+        /// tall as the monitor (the game's windowed mode at the native resolution) came out shorter
+        /// than asked, its title bar above the screen and the desktop showing below it (measured:
+        /// 3840x2160 at 150% scaling gave a 3840x2130 client area, the window at y -45). Such a
+        /// window is maximized instead, which fills the work area with its title bar shown. The
+        /// side borders don't count: Windows 10 and 11 draw them invisible, so a window as wide as
+        /// the monitor shows whole.
+        bool TooLargeForWorkArea(GlfwMonitor monitor, int2 size)
+        {
+            if (!OperatingSystem.IsWindows()) return false;
+            window.GetWindowFrameSize(out _, out int top, out _, out int bottom);
+            monitor.GetMonitorWorkArea(out _, out var workArea);
+            return !FitsWorkArea(size, top + bottom, workArea);
+        }
+
+        internal static bool FitsWorkArea(int2 size, int frameHeight, int2 workArea)
+            => size.X <= workArea.X && size.Y + frameHeight <= workArea.Y;
+
         public void SetResolution(int width, int height, FullScreenMode newMode, uint refreshNumerator, uint refreshDenominator)
         {
             newMode = Supported(newMode);
@@ -367,21 +387,31 @@ namespace OniMoono.Desktop
             {
                 case FullScreenMode.ExclusiveFullScreen:
                 {
+                    if (window.IsMaximised) window.Restore();
                     int refresh = refreshDenominator == 0 || refreshNumerator == 0 ? desktop.RefreshRate : (int)Math.Round((double)refreshNumerator / refreshDenominator);
                     window.SetFullscreen(monitor, new int2(width, height), refresh);
                     break;
                 }
                 case FullScreenMode.FullScreenWindow:
+                {
+                    // A maximized window keeps its maximized placement under the new size.
+                    if (window.IsMaximised) window.Restore();
                     window.SetAttribute(GlfwWindowAttribute.Decorated, GLFW_FALSE);
                     window.SetWindowed(monitor.Position, new int2(desktop.Width, desktop.Height));
                     break;
+                }
                 default:
+                {
                     window.SetAttribute(GlfwWindowAttribute.Decorated, GLFW_TRUE);
+                    var size = new int2(width, height);
+                    bool maximize = newMode == FullScreenMode.MaximizedWindow || TooLargeForWorkArea(monitor, size);
+                    if (window.IsMaximised && !maximize) window.Restore();
                     if (mode is FullScreenMode.ExclusiveFullScreen or FullScreenMode.FullScreenWindow)
-                        window.SetWindowed(windowedPosition, new int2(width, height));
-                    else window.Size = new int2(width, height);
-                    if (newMode == FullScreenMode.MaximizedWindow) window.Maximize();
+                        window.SetWindowed(windowedPosition, size);
+                    else if (!window.IsMaximised) window.Size = size;
+                    if (maximize) window.Maximize();
                     break;
+                }
             }
             mode = newMode;
             window.Refresh();

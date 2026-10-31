@@ -726,9 +726,15 @@ namespace OniMoono.Desktop
         public void Scrolled(Vector2 delta, Vector2 guiPosition)
         {
             State.Scrolled(delta);
-            // IMGUI scroll deltas point down for wheel-down, in lines (three per notch).
-            Queue(EventType.ScrollWheel, 0, guiPosition, e => e.delta = new Vector2(-delta.x, -delta.y) * 3f);
+            var lines = WheelEventDelta(delta, OperatingSystem.IsWindows());
+            Queue(EventType.ScrollWheel, 0, guiPosition, e => e.delta = lines);
         }
+
+        /// An IMGUI ScrollWheel event's delta for a wheel scroll of `notches` (up positive, as
+        /// Input.mouseScrollDelta has it): it points down for wheel-down, one per notch on Linux
+        /// as Unity's X11 player reports it, three on Windows (its default wheel lines).
+        internal static Vector2 WheelEventDelta(Vector2 notches, bool windows)
+            => new Vector2(-notches.x, -notches.y) * (windows ? 3f : 1f);
 
         public void MouseDown(int button, EventModifiers modifiers, Vector2 guiPosition)
         {

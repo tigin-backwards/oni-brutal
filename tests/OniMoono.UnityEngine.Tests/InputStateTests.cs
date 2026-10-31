@@ -1,3 +1,5 @@
+using OniMoono.Desktop;
+using OniMoono.Engine.Assets;
 using OniMoono.Engine.Platform;
 using UnityEngine;
 using Xunit;
@@ -68,6 +70,43 @@ namespace OniMoono.Tests
             input.BeginFrame(0.05f);
             Assert.False(input.KeyDown(KeyCode.B));
             Assert.True(input.Key(KeyCode.B));
+        }
+        // ONI's "Mouse ScrollWheel" axis (sensitivity 0.1). Unity's X11 and Windows players report
+        // a wheel notch as a mouseScrollDelta of one; the game zooms once a frame the axis is not
+        // zero, so the notches of one frame zoom once in both players.
+        static readonly ProjectSettings.InputAxis ScrollWheelAxis =
+            new("Mouse ScrollWheel", "", "", "", "", 0f, 0f, 0.1f, false, false, 1, 2, 0);
+
+        [Fact]
+        public void WheelNotchesAddUpWithinAFrameAndHoldForThatFrame()
+        {
+            var input = new InputState();
+            input.InstallAxes(new[] { ScrollWheelAxis });
+            input.Scrolled(new Vector2(0f, -1f));
+            input.BeginFrame(0.05f);
+            Assert.Equal(new Vector2(0f, -1f), input.ScrollDelta);
+            Assert.Equal(-0.1f, input.GetAxis("Mouse ScrollWheel"));
+
+            input.Scrolled(new Vector2(0f, -1f));
+            input.Scrolled(new Vector2(0f, -1f));
+            input.BeginFrame(0.05f);
+            Assert.Equal(new Vector2(0f, -2f), input.ScrollDelta);
+            Assert.Equal(-0.2f, input.GetAxis("Mouse ScrollWheel"), 6);
+
+            input.BeginFrame(0.05f);
+            Assert.Equal(Vector2.zero, input.ScrollDelta);
+            Assert.Equal(0f, input.GetAxis("Mouse ScrollWheel"));
+        }
+
+        // IMGUI's ScrollWheel event: down for wheel-down, one per notch on Linux as Unity's X11
+        // player has it (measured: tests/e2e/scroll-zoom.yaml), three on Windows.
+        [Fact]
+        public void WheelEventDeltaIsOneANotchOnLinuxAndThreeOnWindows()
+        {
+            Assert.Equal(new Vector2(0f, 1f), InputStateFeed.WheelEventDelta(new Vector2(0f, -1f), windows: false));
+            Assert.Equal(new Vector2(0f, -2f), InputStateFeed.WheelEventDelta(new Vector2(0f, 2f), windows: false));
+            Assert.Equal(new Vector2(-1f, 0f), InputStateFeed.WheelEventDelta(new Vector2(1f, 0f), windows: false));
+            Assert.Equal(new Vector2(0f, 3f), InputStateFeed.WheelEventDelta(new Vector2(0f, -1f), windows: true));
         }
     }
 }

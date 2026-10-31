@@ -691,13 +691,14 @@ namespace OniMoono.Tests
             scroll = new Vector2(30f, 1000f);
             Frame();
             Assert.Equal(new Vector2(0f, 300f), scroll);
-            // The scroll wheel over the view scrolls it.
+            // The scroll wheel over the view scrolls it, 20 pixels a unit of delta (a notch on
+            // Linux) as in Unity's player.
             scroll = new Vector2(0f, 50f);
             Frame();
-            Event.Enqueue(new Event { type = EventType.ScrollWheel, mousePosition = new Vector2(50f, 50f), delta = new Vector2(0f, 3f) });
+            Event.Enqueue(new Event { type = EventType.ScrollWheel, mousePosition = new Vector2(50f, 50f), delta = new Vector2(0f, 1f) });
             Frame();
             Frame();
-            Assert.True(scroll.y > 50f);
+            Assert.Equal(70f, scroll.y);
             // ScrollTo brings a rect of the content into view.
             GUIProbe.Body = _ =>
             {

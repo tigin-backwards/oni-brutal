@@ -172,15 +172,22 @@ namespace OniMoono.Desktop.Vulkan
             if (required == null) throw new VulkanUnavailableException("GLFW names no surface extensions");
             for (int i = 0; i < count; i++) extensions.Add(Marshal.PtrToStringUTF8((nint)required[i]));
             var layers = new HashSet<string>();
-            // "info": the layer's and the loader's informational messages too (to see it is there).
+            // "info": the layer's and the loader's informational messages too (to see it is there);
+            // "sync": synchronization validation too (VK_EXT_validation_features), off by default.
             var validationSetting = Environment.GetEnvironmentVariable("ONI_VULKAN_VALIDATION");
-            Validation |= validationSetting is "1" or "info";
+            Validation |= validationSetting is "1" or "info" or "sync";
+            bool syncValidation = false;
             if (Validation)
             {
                 if (LayerAvailable(VK.LAYER_KHRONOS_VALIDATION) || (AddLocalValidationLayer() && LayerAvailable(VK.LAYER_KHRONOS_VALIDATION)))
                 {
                     layers.Add(VK.LAYER_KHRONOS_VALIDATION);
                     extensions.Add(VK.EXT_DEBUG_UTILS_EXTENSION_NAME);
+                    if (validationSetting == "sync")
+                    {
+                        extensions.Add("VK_EXT_validation_features");
+                        syncValidation = true;
+                    }
                 }
                 else
                 {
@@ -192,7 +199,12 @@ namespace OniMoono.Desktop.Vulkan
             fixed (byte* engineName = "Moono\0"u8)
             {
                 var app = new VkApplicationInfo { ApplicationName = appName, EngineName = engineName, ApiVersion = RequiredApi };
-                Instance = Brutal.VulkanApi.Vulkan.CreateInstance(new Instance.CreateInfo { AppInfo = app, EnabledExtensions = extensions, EnabledLayers = layers });
+                var syncFeature = VkValidationFeatureEnableEXT.SynchronizationValidationEXT;
+                var validationFeatures = new VkValidationFeaturesEXT { EnabledValidationFeatureCount = 1, EnabledValidationFeatures = &syncFeature };
+                Instance = Brutal.VulkanApi.Vulkan.CreateInstance(new Instance.CreateInfo
+                {
+                    AppInfo = app, EnabledExtensions = extensions, EnabledLayers = layers, Next = syncValidation ? &validationFeatures : null,
+                });
             }
             if (Validation)
             {
@@ -204,7 +216,7 @@ namespace OniMoono.Desktop.Vulkan
                     PfnUserCallback = new PfnVkDebugUtilsMessengerCallbackEXT(&OnValidationMessage),
                 };
                 messenger = Instance.CreateDebugUtilsMessengerEXT(info, null);
-                EngineLog.Engine("vulkan: Khronos validation layer on");
+                EngineLog.Engine(syncValidation ? "vulkan: Khronos validation layer on, with synchronization validation" : "vulkan: Khronos validation layer on");
             }
 
             var candidates = new List<VkCandidate>();

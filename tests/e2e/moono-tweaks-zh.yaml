@@ -1,0 +1,29 @@
+# The main menu's Moono Tweaks screen in the game's Simplified Chinese (zh_klei): its strings from
+# the player's translations/zh.po (docs/TWEAKS.md, "Translating Moono Tweaks"), for a look at how
+# the Chinese fits. Ours only (`--player ours`): the original has no Moono Tweaks button.
+# moono-tweaks-en.yaml is the same screen in English.
+from: main-menu
+language: zh_klei
+tweaks_menu: true
+steps:
+  - ui_wait: {path: "**/VideoScreen/CloseButton", cond: stable, frames: 3000}
+  - click: {ui: "**/VideoScreen/CloseButton"}
+  - ui_wait: {path: "**/VideoScreen", cond: gone, frames: 600}
+  - ui_wait: {path: "**/MainMenu_SpacedOut/MainMenuMenubar/MainMenuButtons", cond: stable, frames: 3000}
+  - shot: {name: menu, crop: "**/MainMenu_SpacedOut/MainMenuMenubar/MainMenuButtons"}
+  - click: {ui: "**/MainMenuButtons/MoonoTweaksButton"}
+  - ui_wait: {path: "**/MoonoTweaksScreen", cond: stable}
+  - ui_dump: {name: screen, root: "**/MoonoTweaksScreen"}
+  - shot: screen
+  # A row's tooltip (how it works, the launch option), then the choice button's.
+  - scroll: {at: "**/MoonoTweaksScreen/**/frame-stats", notches: 0}
+  - shot: {name: row-tip, pointer: stay}
+  - scroll: {at: "**/MoonoTweaksScreen/**/gpu/**/ManageButton", notches: 0}
+  - shot: {name: choice-tip, pointer: stay}
+  # The list's end: the gameplay-changing section, its note, a measured gain's tooltip.
+  - scroll: {at: "**/MoonoTweaksScreen/**/ListView/Files/Viewport", notches: -60}
+  - shot: {name: end}
+  - scroll: {at: "**/MoonoTweaksScreen/**/brain-rate", notches: 0}
+  - shot: {name: gameplay-tip, pointer: stay}
+  - scroll: {at: "**/MoonoTweaksScreen/**/fast-overlays", notches: 0}
+  - shot: {name: gain-tip, pointer: stay}

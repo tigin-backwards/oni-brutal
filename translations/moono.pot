@@ -1,0 +1,521 @@
+# The Moono Tweaks screen's strings: the template for a translation.
+# Generated from src/OniMoono.Host/GameTweaks/TweakStrings.cs; ONI_UPDATE_DOCS=1 with the unit tests rewrites it.
+# Copy it to CODE.po (the game's language code: zh, ko, ru, ...) and fill in each msgstr (docs/TWEAKS.md).
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+
+#. The main menu's button and the screen's title
+msgctxt "STRINGS.MOONO.TWEAKS.UI.TITLE"
+msgid "MOONO TWEAKS"
+msgstr ""
+
+#. The footer, left of the buttons (one line)
+msgctxt "STRINGS.MOONO.TWEAKS.UI.CHANGES_APPLY_ON_RESTART"
+msgid "Changes apply when the game restarts."
+msgstr ""
+
+#. Footer button
+msgctxt "STRINGS.MOONO.TWEAKS.UI.RESET_TO_DEFAULTS"
+msgid "RESET TO DEFAULTS"
+msgstr ""
+
+#. Footer button
+msgctxt "STRINGS.MOONO.TWEAKS.UI.RESTART_TO_APPLY"
+msgid "RESTART TO APPLY"
+msgstr ""
+
+#. A note above the rows; {0}: the launch options
+msgctxt "STRINGS.MOONO.TWEAKS.UI.LOCKED_NOTE"
+msgid "Set by the launch options: {0}"
+msgstr ""
+
+#. The note's second line
+msgctxt "STRINGS.MOONO.TWEAKS.UI.LOCKED_NOTE_BODY"
+msgid "Those rows can't be changed here. Remove the options from the game's launch options to choose them here."
+msgstr ""
+
+#. Under the Changes gameplay heading
+msgctxt "STRINGS.MOONO.TWEAKS.UI.CHANGES_GAMEPLAY_NOTE"
+msgid "Off by default: these trade a little exactness for speed."
+msgstr ""
+
+#. Beside a row the launch options set (one line)
+msgctxt "STRINGS.MOONO.TWEAKS.UI.LAUNCH_OPTION"
+msgid "LAUNCH OPTION"
+msgstr ""
+
+#. A row's tooltip, last line; {0}: the launch option
+msgctxt "STRINGS.MOONO.TWEAKS.UI.LAUNCH_OPTION_LINE"
+msgid "Launch option: {0}"
+msgstr ""
+
+#. Tooltip of a toggle the launch options set
+msgctxt "STRINGS.MOONO.TWEAKS.UI.LOCKED_ON"
+msgid "Set by the launch options (on)"
+msgstr ""
+
+#. Tooltip of a toggle the launch options set
+msgctxt "STRINGS.MOONO.TWEAKS.UI.LOCKED_OFF"
+msgid "Set by the launch options (off)"
+msgstr ""
+
+#. Tooltip of a choice button the launch options set; {0}: the choice
+msgctxt "STRINGS.MOONO.TWEAKS.UI.LOCKED_CHOICE"
+msgid "Set by the launch options ({0})"
+msgstr ""
+
+#. Tooltip of a choice button; {0}: the choices, LIST_SEPARATOR between them
+msgctxt "STRINGS.MOONO.TWEAKS.UI.NEXT_CHOICE"
+msgid "Click for the next choice: {0}"
+msgstr ""
+
+#. Between the choices in NEXT_CHOICE
+msgctxt "STRINGS.MOONO.TWEAKS.UI.LIST_SEPARATOR"
+msgid ", "
+msgstr ""
+
+#. Dialog; {0}: the settings file, {1}: the error
+msgctxt "STRINGS.MOONO.TWEAKS.UI.SAVE_FAILED"
+msgid "The settings could not be saved to {0}:\n{1}"
+msgstr ""
+
+#. Dialog on closing with changes
+msgctxt "STRINGS.MOONO.TWEAKS.UI.SAVED_RESTART"
+msgid "Your changes are saved and apply when the game restarts."
+msgstr ""
+
+#. The dialog's button beside Restart
+msgctxt "STRINGS.MOONO.TWEAKS.UI.LATER"
+msgid "LATER"
+msgstr ""
+
+#. Section heading (shown in capitals)
+msgctxt "STRINGS.MOONO.TWEAKS.GROUPS.GENERAL"
+msgid "General"
+msgstr ""
+
+#. Row title (splash)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.SPLASH.TITLE"
+msgid "Gassy Moo loading splash"
+msgstr ""
+
+#. The line under the title (splash)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.SPLASH.EFFECT"
+msgid "Gassy Moos rain over the window while the game starts, with a progress bar."
+msgstr ""
+
+#. Row title (frame-stats)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FRAME_STATS.TITLE"
+msgid "Frame stats in the log"
+msgstr ""
+
+#. The line under the title (frame-stats)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FRAME_STATS.EFFECT"
+msgid "Notes where the frame time goes in Player.log, for reporting slowness."
+msgstr ""
+
+#. Tooltip: how it works (frame-stats)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FRAME_STATS.DETAIL"
+msgid "Every 60 frames."
+msgstr ""
+
+#. Row title (log-paths)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.LOG_PATHS.TITLE"
+msgid "Hide personal paths in the log"
+msgstr ""
+
+#. The line under the title (log-paths)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.LOG_PATHS.EFFECT"
+msgid "Your user folder reads %USERPROFILE% or ~ in Player.log, and your Steam ID is hidden."
+msgstr ""
+
+#. Tooltip: how it works (log-paths)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.LOG_PATHS.DETAIL"
+msgid "Mods still get the full text."
+msgstr ""
+
+#. Row title (gpu)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.GPU.TITLE"
+msgid "Graphics card"
+msgstr ""
+
+#. The line under the title (gpu)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.GPU.EFFECT"
+msgid "For laptops with two GPUs: which one the game draws with. Needs a restart."
+msgstr ""
+
+#. Tooltip: how it works (gpu)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.GPU.DETAIL"
+msgid "Default: as the original game (on Windows the faster, discrete GPU; on Linux the system's choice). Discrete: the faster GPU. Integrated: the power-saving one. Windows' Graphics settings page wins over this. On Linux, on a desktop whose display is on the discrete card, discrete may pick the integrated GPU."
+msgstr ""
+
+#. A choice on the row's button (shown in capitals) and in its tooltip (gpu)
+msgctxt "STRINGS.MOONO.TWEAKS.CHOICES.GPU.DEFAULT"
+msgid "default"
+msgstr ""
+
+#. A choice on the row's button (shown in capitals) and in its tooltip (gpu)
+msgctxt "STRINGS.MOONO.TWEAKS.CHOICES.GPU.DISCRETE"
+msgid "discrete"
+msgstr ""
+
+#. A choice on the row's button (shown in capitals) and in its tooltip (gpu)
+msgctxt "STRINGS.MOONO.TWEAKS.CHOICES.GPU.INTEGRATED"
+msgid "integrated"
+msgstr ""
+
+#. Section heading (shown in capitals)
+msgctxt "STRINGS.MOONO.TWEAKS.GROUPS.SAVING"
+msgid "Saving"
+msgstr ""
+
+#. Row title (fast-serialization)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_SERIALIZATION.TITLE"
+msgid "Faster save writing"
+msgstr ""
+
+#. The line under the title (fast-serialization)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_SERIALIZATION.EFFECT"
+msgid "Autosaves take less time; the save file is the same."
+msgstr ""
+
+#. Tooltip: how it works (fast-serialization)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_SERIALIZATION.DETAIL"
+msgid "Writes the colony's numbers without boxing each one in an object."
+msgstr ""
+
+#. Tooltip: the measured gain (every Saving row)
+msgctxt "STRINGS.MOONO.TWEAKS.GAINS.SAVE"
+msgid "Saving together: autosave freeze ~12 s → ~5 s on a large colony"
+msgstr ""
+
+#. Row title (fast-save-type-checks)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_SAVE_TYPE_CHECKS.TITLE"
+msgid "Faster save checks"
+msgstr ""
+
+#. The line under the title (fast-save-type-checks)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_SAVE_TYPE_CHECKS.EFFECT"
+msgid "Autosaves skip repeating the same checks for every object."
+msgstr ""
+
+#. Tooltip: how it works (fast-save-type-checks)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_SAVE_TYPE_CHECKS.DETAIL"
+msgid "Remembers what saving asks about each kind of component instead of asking again for every object."
+msgstr ""
+
+#. Row title (fast-save-compression)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_SAVE_COMPRESSION.TITLE"
+msgid "Faster save compression"
+msgstr ""
+
+#. The line under the title (fast-save-compression)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_SAVE_COMPRESSION.EFFECT"
+msgid "Saving and loading take seconds less; files stay compatible, a little larger."
+msgstr ""
+
+#. Tooltip: how it works (fast-save-compression)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_SAVE_COMPRESSION.DETAIL"
+msgid "Compresses with .NET's zlib instead of the game's own; the files are about 14% larger."
+msgstr ""
+
+#. Row title (background-save)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.BACKGROUND_SAVE.TITLE"
+msgid "Background saving"
+msgstr ""
+
+#. The line under the title (background-save)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.BACKGROUND_SAVE.EFFECT"
+msgid "The save is compressed and written to disk while the game plays on."
+msgstr ""
+
+#. Tooltip: how it works (background-save)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.BACKGROUND_SAVE.DETAIL"
+msgid "Compression and the file write move to another thread; quitting waits for them."
+msgstr ""
+
+#. Row title (no-save-gc)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.NO_SAVE_GC.TITLE"
+msgid "No cleanup pause when saving"
+msgstr ""
+
+#. The line under the title (no-save-gc)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.NO_SAVE_GC.EFFECT"
+msgid "Skips the memory cleanup the game forces after each save, a pause of its own."
+msgstr ""
+
+#. Tooltip: how it works (no-save-gc)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.NO_SAVE_GC.DETAIL"
+msgid "Skips the full garbage collection the game asks for after saving."
+msgstr ""
+
+#. Section heading (shown in capitals)
+msgctxt "STRINGS.MOONO.TWEAKS.GROUPS.SIMULATION"
+msgid "Simulation"
+msgstr ""
+
+#. Row title (fast-jobs)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_JOBS.TITLE"
+msgid "Faster worker threads"
+msgstr ""
+
+#. The line under the title (fast-jobs)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_JOBS.EFFECT"
+msgid "Less time lost waking idle worker threads every frame."
+msgstr ""
+
+#. Tooltip: how it works (fast-jobs)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_JOBS.DETAIL"
+msgid "Wakes only as many of the game's worker threads as a job has work for, instead of all of them for every job (about 14 a frame)."
+msgstr ""
+
+#. Tooltip: the measured gain (fast-jobs)
+msgctxt "STRINGS.MOONO.TWEAKS.GAINS.JOBS"
+msgid "+11% frame rate on a large colony"
+msgstr ""
+
+#. Row title (fast-sublimation)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_SUBLIMATION.TITLE"
+msgid "Faster sublimation"
+msgstr ""
+
+#. The line under the title (fast-sublimation)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_SUBLIMATION.EFFECT"
+msgid "Items that can't sublimate (polluted dirt in full gas) are skipped."
+msgstr ""
+
+#. Tooltip: how it works (fast-sublimation)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_SUBLIMATION.DETAIL"
+msgid "Items already blocked by full gas cells are skipped in one batched update."
+msgstr ""
+
+#. Row title (fast-particle-collision)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_PARTICLE_COLLISION.TITLE"
+msgid "Faster radbolt collisions"
+msgstr ""
+
+#. The line under the title (fast-particle-collision)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_PARTICLE_COLLISION.EFFECT"
+msgid "Radbolts look for each other only where one can be."
+msgstr ""
+
+#. Tooltip: how it works (fast-particle-collision)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_PARTICLE_COLLISION.DETAIL"
+msgid "A radbolt skips searching every stored item nearby when no other radbolt is close."
+msgstr ""
+
+#. Row title (fast-offset-tables)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_OFFSET_TABLES.TITLE"
+msgid "Faster pickup checks"
+msgstr ""
+
+#. The line under the title (fast-offset-tables)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_OFFSET_TABLES.EFFECT"
+msgid "Where an item can be picked up from is rechecked only when its surroundings change."
+msgstr ""
+
+#. Tooltip: how it works (fast-offset-tables)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_OFFSET_TABLES.DETAIL"
+msgid "Fetch updates recheck only the items whose work spots can have changed."
+msgstr ""
+
+#. Row title (fast-partitioner-cleanup)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_PARTITIONER_CLEANUP.TITLE"
+msgid "Faster spatial index cleanup"
+msgstr ""
+
+#. The line under the title (fast-partitioner-cleanup)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_PARTITIONER_CLEANUP.EFFECT"
+msgid "The once-a-second tidy-up of what is where looks only at what was removed."
+msgstr ""
+
+#. Tooltip: how it works (fast-partitioner-cleanup)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_PARTITIONER_CLEANUP.DETAIL"
+msgid "The spatial index's cleanup visits only the entries that were removed."
+msgstr ""
+
+#. Row title (fast-conveyor-paths)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_CONVEYOR_PATHS.TITLE"
+msgid "Faster conveyor rebuilds"
+msgstr ""
+
+#. The line under the title (fast-conveyor-paths)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_CONVEYOR_PATHS.EFFECT"
+msgid "Building or removing conveyor rails no longer stalls the game."
+msgstr ""
+
+#. Tooltip: how it works (fast-conveyor-paths)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_CONVEYOR_PATHS.DETAIL"
+msgid "The rails' network rebuild finds its routes from an index instead of searching every kept route again."
+msgstr ""
+
+#. Tooltip: the measured gain (fast-conveyor-paths)
+msgctxt "STRINGS.MOONO.TWEAKS.GAINS.CONVEYOR"
+msgid "No hitch on rail edits (was 0.05–0.5 s)"
+msgstr ""
+
+#. Section heading (shown in capitals)
+msgctxt "STRINGS.MOONO.TWEAKS.GROUPS.GRAPHICS"
+msgid "Graphics & overlays"
+msgstr ""
+
+#. Row title (fast-anim-events)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_ANIM_EVENTS.TITLE"
+msgid "Faster animation events"
+msgstr ""
+
+#. The line under the title (fast-anim-events)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_ANIM_EVENTS.EFFECT"
+msgid "Animations check their sound and effect cues with less work."
+msgstr ""
+
+#. Tooltip: how it works (fast-anim-events)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_ANIM_EVENTS.DETAIL"
+msgid "Keeps a compact copy of what each playing animation's per-frame event check reads."
+msgstr ""
+
+#. Row title (fast-anim-cleanup)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_ANIM_CLEANUP.TITLE"
+msgid "Faster animation cleanup"
+msgstr ""
+
+#. The line under the title (fast-anim-cleanup)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_ANIM_CLEANUP.EFFECT"
+msgid "Removed animations are swept out only where one was removed."
+msgstr ""
+
+#. Tooltip: how it works (fast-anim-cleanup)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_ANIM_CLEANUP.DETAIL"
+msgid "The sweep for destroyed animations skips grid chunks that can't hold any."
+msgstr ""
+
+#. Row title (fast-anim-batches)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_ANIM_BATCHES.TITLE"
+msgid "Parallel animation uploads"
+msgstr ""
+
+#. The line under the title (fast-anim-batches)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_ANIM_BATCHES.EFFECT"
+msgid "Animation data for the graphics card is prepared on several threads."
+msgstr ""
+
+#. Tooltip: how it works (fast-anim-batches)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_ANIM_BATCHES.DETAIL"
+msgid "Animation batches write their instance and symbol data on worker threads, the rest in the game's order."
+msgstr ""
+
+#. Row title (fast-symbol-overrides)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_SYMBOL_OVERRIDES.TITLE"
+msgid "Fewer animation uploads"
+msgstr ""
+
+#. The line under the title (fast-symbol-overrides)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_SYMBOL_OVERRIDES.EFFECT"
+msgid "Swapped animation parts are re-sent to the graphics card only when they change."
+msgstr ""
+
+#. Tooltip: how it works (fast-symbol-overrides)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_SYMBOL_OVERRIDES.DETAIL"
+msgid "Unchanged symbol-override blocks of Duplicants and buildings aren't uploaded again."
+msgstr ""
+
+#. Row title (fast-overlays)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_OVERLAYS.TITLE"
+msgid "Faster overlays"
+msgstr ""
+
+#. The line under the title (fast-overlays)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_OVERLAYS.EFFECT"
+msgid "Overlays skip rereading what can't have changed since the last frame."
+msgstr ""
+
+#. Tooltip: how it works (fast-overlays)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_OVERLAYS.DETAIL"
+msgid "Temperature passes over buildings out of view without reading them, power asks each circuit's load once a frame, the rest keep what their targets' visits read."
+msgstr ""
+
+#. Tooltip: the measured gain (fast-overlays)
+msgctxt "STRINGS.MOONO.TWEAKS.GAINS.OVERLAYS"
+msgid "Temperature overlay ~40% cheaper"
+msgstr ""
+
+#. Row title (fast-overlay-textures)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_OVERLAY_TEXTURES.TITLE"
+msgid "Overlay texture cleanup"
+msgstr ""
+
+#. The line under the title (fast-overlay-textures)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_OVERLAY_TEXTURES.EFFECT"
+msgid "Opening and closing overlays no longer piles up video memory."
+msgstr ""
+
+#. Tooltip: how it works (fast-overlay-textures)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_OVERLAY_TEXTURES.DETAIL"
+msgid "The screen-sized textures the game remakes on each coloured overlay toggle are freed, instead of kept until the next load (about 18 MB a toggle at 1024×768)."
+msgstr ""
+
+#. Section heading (shown in capitals)
+msgctxt "STRINGS.MOONO.TWEAKS.GROUPS.CHANGES_GAMEPLAY"
+msgid "Changes gameplay"
+msgstr ""
+
+#. Row title (slow-reachability)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.SLOW_REACHABILITY.TITLE"
+msgid "Slower reachability checks"
+msgstr ""
+
+#. The line under the title (slow-reachability)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.SLOW_REACHABILITY.EFFECT"
+msgid "Duplicants notice a newly opened or blocked path up to 3 s later."
+msgstr ""
+
+#. Tooltip: how it works (slow-reachability)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.SLOW_REACHABILITY.DETAIL"
+msgid "Which errands and items can be reached is rechecked every 4 s instead of every second; temperature and building checks are never delayed."
+msgstr ""
+
+#. Row title (off-screen-conveyors)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.OFF_SCREEN_CONVEYORS.TITLE"
+msgid "Lazy unseen conveyor items"
+msgstr ""
+
+#. The line under the title (off-screen-conveyors)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.OFF_SCREEN_CONVEYORS.EFFECT"
+msgid "Items riding rails off screen are placed only when they stop or come into view."
+msgstr ""
+
+#. Tooltip: how it works (off-screen-conveyors)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.OFF_SCREEN_CONVEYORS.DETAIL"
+msgid "The rails carry exactly the same things, but items' positions lag while off screen."
+msgstr ""
+
+#. Row title (off-world-fallers)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.OFF_WORLD_FALLERS.TITLE"
+msgid "Land items lost below a world"
+msgstr ""
+
+#. The line under the title (off-world-fallers)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.OFF_WORLD_FALLERS.EFFECT"
+msgid "Items that fall out the bottom of a world (a rocket's chute) stop falling forever."
+msgstr ""
+
+#. Tooltip: how it works (off-world-fallers)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.OFF_WORLD_FALLERS.DETAIL"
+msgid "They hang just below the world, stepped as falling every tick; landing them where they hang stops that cost."
+msgstr ""
+
+#. Row title (brain-rate)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.BRAIN_RATE.TITLE"
+msgid "Critter and dupe brain updates capped at 30 updates a second"
+msgstr ""
+
+#. The line under the title (brain-rate)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.BRAIN_RATE.EFFECT"
+msgid "Critters and dupes would otherwise update on every frame. This trims that bookkeeping above 30 fps."
+msgstr ""
+
+#. Tooltip: how it works (brain-rate)
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.BRAIN_RATE.DETAIL"
+msgid "The game updates 1 Duplicant and 5 critter brains every rendered frame; this caps them at 30 and 150 a second, spread over frames. One that just finished an errand or is under threat still gets the next update. Saves time only above 30 fps."
+msgstr ""

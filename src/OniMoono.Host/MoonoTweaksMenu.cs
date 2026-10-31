@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using HarmonyLib;
 using OniMoono.Engine;
@@ -31,12 +32,13 @@ namespace OniMoono.Host
                     Flag(EffectiveOptions.DefaultOn(name, GameTweakNames.ChangingBehaviour))),
             };
             var states = rows.Select(State).ToArray();
-            // The tooltip's parts (the screen styles the gain): the row's gain, or its group's
-            // ("Saving together: ..."); then the launch option.
-            static string Capitalized(string s) => s.Length > 0 ? char.ToUpperInvariant(s[0]) + s[1..] : s;
-            string GainText(TweakInfo row) => row.Gain != null ? Capitalized(row.Gain.Effect)
-                : row.Group.Gain != null ? $"{row.Group.Title} together: {row.Group.Gain.Effect}" : "";
-            string Notes(TweakInfo row) => "Launch option: " + row.LaunchOption;
+            // The screen's text goes by its translation keys (TweakStrings; "" for none), with
+            // every key's English: the screen shows the game's language from translations/CODE.po
+            // beside the player, English where it has none. The launch options stay as they are.
+            static string GainKey(TweakInfo row) => GameTweakNames.GainText(row) is { } gain ? TweakStrings.GainKey(gain.Gain) : "";
+            static string DetailKey(TweakInfo row) => row.Detail.Length > 0 ? TweakStrings.RowKey(row, "DETAIL") : "";
+            Func<Dictionary<string, string>, string[]> resolve = po => TweakStrings.Resolve(po);
+            string translations = Path.Combine(AppContext.BaseDirectory, "translations");
             var locked = new List<string>();
             foreach (var value in effective.CommandLineTweaks) locked.Add("--game-tweak " + value);
             if (effective.SplashSource == OptionSource.CommandLine) locked.Add("--splash " + effective.Splash);
@@ -75,12 +77,14 @@ namespace OniMoono.Host
 
             var install = GameTweaks.GameTweaks.TypedAssembly.GetType("OniMoono.GameTweaks.MoonoTweaksMenu", throwOnError: true)!.GetMethod("Install")!;
             install.Invoke(null, [new Harmony("OniMoono.Host.MoonoTweaksMenu"),
-                rows.Select(r => r.Id).ToArray(), rows.Select(r => r.Group.Title).ToArray(),
-                rows.Select(r => r.Title).ToArray(), rows.Select(r => r.Effect).ToArray(),
-                rows.Select(r => r.Detail).ToArray(), rows.Select(GainText).ToArray(), rows.Select(Notes).ToArray(),
-                rows.Select(r => r.Group == GameTweakNames.ChangesGameplay).ToArray(), rows.Select(r => r.Choices).ToArray(),
+                rows.Select(r => r.Id).ToArray(), rows.Select(r => TweakStrings.GroupKey(r.Group)).ToArray(),
+                rows.Select(r => TweakStrings.RowKey(r, "TITLE")).ToArray(), rows.Select(r => TweakStrings.RowKey(r, "EFFECT")).ToArray(),
+                rows.Select(DetailKey).ToArray(), rows.Select(GainKey).ToArray(), rows.Select(r => r.LaunchOption).ToArray(),
+                rows.Select(r => r.Group == GameTweakNames.ChangesGameplay).ToArray(),
+                rows.Select(r => r.Choices?.Select(c => TweakStrings.ChoiceKey(r, c)).ToArray()).ToArray(),
                 states.Select(s => s.Value).ToArray(), states.Select(s => s.Default).ToArray(), states.Select(s => s.Locked).ToArray(),
-                string.Join(" ", locked), settingsPath, save]);
+                string.Join(" ", locked), settingsPath, save,
+                TweakStrings.All.Select(t => t.Key).ToArray(), TweakStrings.All.Select(t => t.English).ToArray(), resolve, translations]);
         }
     }
 }

@@ -1,0 +1,419 @@
+# The Moono Tweaks screen in Simplified Chinese.
+# Translation by hao7259 (https://github.com/hao7259), from PR #38.
+# msgctxt: the string's key; msgid: the English it was translated from (translations/moono.pot).
+msgid ""
+msgstr ""
+"Language: zh\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgctxt "STRINGS.MOONO.TWEAKS.UI.TITLE"
+msgid "MOONO TWEAKS"
+msgstr "MOONO 调整项"
+
+msgctxt "STRINGS.MOONO.TWEAKS.UI.CHANGES_APPLY_ON_RESTART"
+msgid "Changes apply when the game restarts."
+msgstr "更改将在游戏重启后生效。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.UI.RESET_TO_DEFAULTS"
+msgid "RESET TO DEFAULTS"
+msgstr "恢复默认"
+
+msgctxt "STRINGS.MOONO.TWEAKS.UI.RESTART_TO_APPLY"
+msgid "RESTART TO APPLY"
+msgstr "重启以应用"
+
+msgctxt "STRINGS.MOONO.TWEAKS.UI.LOCKED_NOTE"
+msgid "Set by the launch options: {0}"
+msgstr "由启动选项设置：{0}"
+
+msgctxt "STRINGS.MOONO.TWEAKS.UI.LOCKED_NOTE_BODY"
+msgid "Those rows can't be changed here. Remove the options from the game's launch options to choose them here."
+msgstr "这些行无法在此更改。请从游戏的启动选项中移除相应参数，以便在此选择。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.UI.CHANGES_GAMEPLAY_NOTE"
+msgid "Off by default: these trade a little exactness for speed."
+msgstr "默认关闭：这些选项会牺牲一点精确性来换取速度。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.UI.LAUNCH_OPTION"
+msgid "LAUNCH OPTION"
+msgstr "启动选项"
+
+msgctxt "STRINGS.MOONO.TWEAKS.UI.LAUNCH_OPTION_LINE"
+msgid "Launch option: {0}"
+msgstr "启动选项：{0}"
+
+msgctxt "STRINGS.MOONO.TWEAKS.UI.LOCKED_ON"
+msgid "Set by the launch options (on)"
+msgstr "由启动选项设置（开）"
+
+msgctxt "STRINGS.MOONO.TWEAKS.UI.LOCKED_OFF"
+msgid "Set by the launch options (off)"
+msgstr "由启动选项设置（关）"
+
+msgctxt "STRINGS.MOONO.TWEAKS.UI.LOCKED_CHOICE"
+msgid "Set by the launch options ({0})"
+msgstr "由启动选项设置（{0}）"
+
+msgctxt "STRINGS.MOONO.TWEAKS.UI.NEXT_CHOICE"
+msgid "Click for the next choice: {0}"
+msgstr "点击切换到下一个选项：{0}"
+
+msgctxt "STRINGS.MOONO.TWEAKS.UI.LIST_SEPARATOR"
+msgid ", "
+msgstr "、"
+
+msgctxt "STRINGS.MOONO.TWEAKS.UI.SAVE_FAILED"
+msgid "The settings could not be saved to {0}:\n{1}"
+msgstr "无法将设置保存到 {0}：\n{1}"
+
+msgctxt "STRINGS.MOONO.TWEAKS.UI.SAVED_RESTART"
+msgid "Your changes are saved and apply when the game restarts."
+msgstr "你的更改已保存，将在游戏重启后生效。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.UI.LATER"
+msgid "LATER"
+msgstr "稍后"
+
+msgctxt "STRINGS.MOONO.TWEAKS.GROUPS.GENERAL"
+msgid "General"
+msgstr "通用"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.SPLASH.TITLE"
+msgid "Gassy Moo loading splash"
+msgstr "释气海牛加载画面"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.SPLASH.EFFECT"
+msgid "Gassy Moos rain over the window while the game starts, with a progress bar."
+msgstr "游戏启动时，窗口上会下雨般落下释气海牛，并显示进度条。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FRAME_STATS.TITLE"
+msgid "Frame stats in the log"
+msgstr "日志中的帧统计"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FRAME_STATS.EFFECT"
+msgid "Notes where the frame time goes in Player.log, for reporting slowness."
+msgstr "在 Player.log 中记录帧时间花在哪里，用于反馈卡顿问题。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FRAME_STATS.DETAIL"
+msgid "Every 60 frames."
+msgstr "每 60 帧一次。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.LOG_PATHS.TITLE"
+msgid "Hide personal paths in the log"
+msgstr "隐藏日志中的个人路径"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.LOG_PATHS.EFFECT"
+msgid "Your user folder reads %USERPROFILE% or ~ in Player.log, and your Steam ID is hidden."
+msgstr "Player.log 中你的用户文件夹会显示为 %USERPROFILE% 或 ~，Steam ID 也会被隐藏。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.LOG_PATHS.DETAIL"
+msgid "Mods still get the full text."
+msgstr "模组仍能读到完整文本。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.GPU.TITLE"
+msgid "Graphics card"
+msgstr "显卡"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.GPU.EFFECT"
+msgid "For laptops with two GPUs: which one the game draws with. Needs a restart."
+msgstr "适用于双显卡笔记本——选择游戏用哪块 GPU 渲染。需要重启。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.GPU.DETAIL"
+msgid "Default: as the original game (on Windows the faster, discrete GPU; on Linux the system's choice). Discrete: the faster GPU. Integrated: the power-saving one. Windows' Graphics settings page wins over this. On Linux, on a desktop whose display is on the discrete card, discrete may pick the integrated GPU."
+msgstr "默认：与原版游戏相同（Windows 上选较快的独立显卡；Linux 上由系统决定）。独立：较快的 GPU。集成：省电的那块。Windows 的“图形设置”页面优先级高于此项。在 Linux 上，如果桌面显示输出接在独立显卡上，选“独立”可能会选中集成显卡。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.CHOICES.GPU.DEFAULT"
+msgid "default"
+msgstr "默认"
+
+msgctxt "STRINGS.MOONO.TWEAKS.CHOICES.GPU.DISCRETE"
+msgid "discrete"
+msgstr "独立"
+
+msgctxt "STRINGS.MOONO.TWEAKS.CHOICES.GPU.INTEGRATED"
+msgid "integrated"
+msgstr "集成"
+
+msgctxt "STRINGS.MOONO.TWEAKS.GROUPS.SAVING"
+msgid "Saving"
+msgstr "存档"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_SERIALIZATION.TITLE"
+msgid "Faster save writing"
+msgstr "更快的存档写入"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_SERIALIZATION.EFFECT"
+msgid "Autosaves take less time; the save file is the same."
+msgstr "自动存档耗时更短；存档文件不变。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_SERIALIZATION.DETAIL"
+msgid "Writes the colony's numbers without boxing each one in an object."
+msgstr "写入殖民地数据时不再把每个数值装箱成对象。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.GAINS.SAVE"
+msgid "Saving together: autosave freeze ~12 s → ~5 s on a large colony"
+msgstr "存档调整项合计：大型殖民地自动存档冻结约 12 秒 → 约 5 秒"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_SAVE_TYPE_CHECKS.TITLE"
+msgid "Faster save checks"
+msgstr "更快的存档检查"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_SAVE_TYPE_CHECKS.EFFECT"
+msgid "Autosaves skip repeating the same checks for every object."
+msgstr "自动存档不再对每个对象重复相同的检查。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_SAVE_TYPE_CHECKS.DETAIL"
+msgid "Remembers what saving asks about each kind of component instead of asking again for every object."
+msgstr "记住每种组件在存档时会被问什么，而不是每个对象都再问一遍。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_SAVE_COMPRESSION.TITLE"
+msgid "Faster save compression"
+msgstr "更快的存档压缩"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_SAVE_COMPRESSION.EFFECT"
+msgid "Saving and loading take seconds less; files stay compatible, a little larger."
+msgstr "存档和读档快几秒；文件保持兼容，但略大一些。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_SAVE_COMPRESSION.DETAIL"
+msgid "Compresses with .NET's zlib instead of the game's own; the files are about 14% larger."
+msgstr "改用 .NET 的 zlib 压缩，而不是游戏自带的；文件大约大 14%。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.BACKGROUND_SAVE.TITLE"
+msgid "Background saving"
+msgstr "后台存档"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.BACKGROUND_SAVE.EFFECT"
+msgid "The save is compressed and written to disk while the game plays on."
+msgstr "游戏继续运行时，存档在后台压缩并写入磁盘。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.BACKGROUND_SAVE.DETAIL"
+msgid "Compression and the file write move to another thread; quitting waits for them."
+msgstr "压缩和写文件移到另一个线程；退出游戏时会等待它们完成。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.NO_SAVE_GC.TITLE"
+msgid "No cleanup pause when saving"
+msgstr "存档时不再强制清理内存"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.NO_SAVE_GC.EFFECT"
+msgid "Skips the memory cleanup the game forces after each save, a pause of its own."
+msgstr "跳过游戏每次存档后强制进行的内存清理——那本身也是一次卡顿。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.NO_SAVE_GC.DETAIL"
+msgid "Skips the full garbage collection the game asks for after saving."
+msgstr "跳过存档后游戏请求的完整垃圾回收。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.GROUPS.SIMULATION"
+msgid "Simulation"
+msgstr "模拟"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_JOBS.TITLE"
+msgid "Faster worker threads"
+msgstr "更快的工作线程"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_JOBS.EFFECT"
+msgid "Less time lost waking idle worker threads every frame."
+msgstr "减少每帧唤醒空闲工作线程的时间损失。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_JOBS.DETAIL"
+msgid "Wakes only as many of the game's worker threads as a job has work for, instead of all of them for every job (about 14 a frame)."
+msgstr "只唤醒当前任务实际需要的游戏工作线程，而不是每个任务都唤醒全部（每帧约 14 个任务）。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.GAINS.JOBS"
+msgid "+11% frame rate on a large colony"
+msgstr "大型殖民地帧率提升 11%"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_SUBLIMATION.TITLE"
+msgid "Faster sublimation"
+msgstr "更快的升华"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_SUBLIMATION.EFFECT"
+msgid "Items that can't sublimate (polluted dirt in full gas) are skipped."
+msgstr "无法升华的物品（如满气体环境中的污染土）会被跳过。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_SUBLIMATION.DETAIL"
+msgid "Items already blocked by full gas cells are skipped in one batched update."
+msgstr "已被满气体格挡住的物品会合并成一次批量更新跳过。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_PARTICLE_COLLISION.TITLE"
+msgid "Faster radbolt collisions"
+msgstr "更快的辐射粒子碰撞"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_PARTICLE_COLLISION.EFFECT"
+msgid "Radbolts look for each other only where one can be."
+msgstr "辐射粒子只在可能有其他粒子的地方互相查找。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_PARTICLE_COLLISION.DETAIL"
+msgid "A radbolt skips searching every stored item nearby when no other radbolt is close."
+msgstr "附近没有其他辐射粒子时，粒子不再搜索附近所有存储物品。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_OFFSET_TABLES.TITLE"
+msgid "Faster pickup checks"
+msgstr "更快的拾取检查"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_OFFSET_TABLES.EFFECT"
+msgid "Where an item can be picked up from is rechecked only when its surroundings change."
+msgstr "物品可被拾取的位置只在其周围环境变化时才重新检查。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_OFFSET_TABLES.DETAIL"
+msgid "Fetch updates recheck only the items whose work spots can have changed."
+msgstr "搬运更新只重新检查工作点可能发生变化的物品。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_PARTITIONER_CLEANUP.TITLE"
+msgid "Faster spatial index cleanup"
+msgstr "更快的空间索引清理"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_PARTITIONER_CLEANUP.EFFECT"
+msgid "The once-a-second tidy-up of what is where looks only at what was removed."
+msgstr "每秒一次“什么在哪里”的整理只查看被移除的内容。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_PARTITIONER_CLEANUP.DETAIL"
+msgid "The spatial index's cleanup visits only the entries that were removed."
+msgstr "空间索引的清理只访问被移除的条目。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_CONVEYOR_PATHS.TITLE"
+msgid "Faster conveyor rebuilds"
+msgstr "更快的传送带重建"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_CONVEYOR_PATHS.EFFECT"
+msgid "Building or removing conveyor rails no longer stalls the game."
+msgstr "建造或拆除传送带轨道不再让游戏卡顿。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_CONVEYOR_PATHS.DETAIL"
+msgid "The rails' network rebuild finds its routes from an index instead of searching every kept route again."
+msgstr "轨道网络重建从索引中查找路线，而不是把保留的每条路线都重新搜索一遍。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.GAINS.CONVEYOR"
+msgid "No hitch on rail edits (was 0.05–0.5 s)"
+msgstr "修改轨道不再卡顿（原本 0.05–0.5 秒）"
+
+msgctxt "STRINGS.MOONO.TWEAKS.GROUPS.GRAPHICS"
+msgid "Graphics & overlays"
+msgstr "图形"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_ANIM_EVENTS.TITLE"
+msgid "Faster animation events"
+msgstr "更快的动画事件"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_ANIM_EVENTS.EFFECT"
+msgid "Animations check their sound and effect cues with less work."
+msgstr "动画检查音效和特效提示时工作量更少。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_ANIM_EVENTS.DETAIL"
+msgid "Keeps a compact copy of what each playing animation's per-frame event check reads."
+msgstr "为每个正在播放的动画保留一份紧凑副本，供其每帧事件检查读取。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_ANIM_CLEANUP.TITLE"
+msgid "Faster animation cleanup"
+msgstr "更快的动画清理"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_ANIM_CLEANUP.EFFECT"
+msgid "Removed animations are swept out only where one was removed."
+msgstr "被移除的动画只在发生移除的地方被清扫。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_ANIM_CLEANUP.DETAIL"
+msgid "The sweep for destroyed animations skips grid chunks that can't hold any."
+msgstr "销毁动画的清扫会跳过不可能含有动画的网格区块。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_ANIM_BATCHES.TITLE"
+msgid "Parallel animation uploads"
+msgstr "并行动画上传"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_ANIM_BATCHES.EFFECT"
+msgid "Animation data for the graphics card is prepared on several threads."
+msgstr "显卡所需的动画数据在多个线程上准备。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_ANIM_BATCHES.DETAIL"
+msgid "Animation batches write their instance and symbol data on worker threads, the rest in the game's order."
+msgstr "动画批次在工作线程上写入实例和符号数据，其余按游戏原有顺序进行。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_SYMBOL_OVERRIDES.TITLE"
+msgid "Fewer animation uploads"
+msgstr "更少的动画上传"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_SYMBOL_OVERRIDES.EFFECT"
+msgid "Swapped animation parts are re-sent to the graphics card only when they change."
+msgstr "被替换的动画部件只在变化时才重新发送到显卡。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_SYMBOL_OVERRIDES.DETAIL"
+msgid "Unchanged symbol-override blocks of Duplicants and buildings aren't uploaded again."
+msgstr "复制人和建筑未变的符号覆盖块不再重复上传。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_OVERLAYS.TITLE"
+msgid "Faster overlays"
+msgstr "更快的叠加层"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_OVERLAYS.EFFECT"
+msgid "Overlays skip rereading what can't have changed since the last frame."
+msgstr "叠加层跳过重读上一帧以来不可能变化的内容。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_OVERLAYS.DETAIL"
+msgid "Temperature passes over buildings out of view without reading them, power asks each circuit's load once a frame, the rest keep what their targets' visits read."
+msgstr "温度叠加层对视野外建筑直接略过不读取，电力每帧只查询每个电路负载一次，其余保留其目标访问时读到的值。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.GAINS.OVERLAYS"
+msgid "Temperature overlay ~40% cheaper"
+msgstr "温度叠加层开销降低约 40%"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_OVERLAY_TEXTURES.TITLE"
+msgid "Overlay texture cleanup"
+msgstr "叠加层纹理清理"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_OVERLAY_TEXTURES.EFFECT"
+msgid "Opening and closing overlays no longer piles up video memory."
+msgstr "反复开关叠加层不再累积显存。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.FAST_OVERLAY_TEXTURES.DETAIL"
+msgid "The screen-sized textures the game remakes on each coloured overlay toggle are freed, instead of kept until the next load (about 18 MB a toggle at 1024×768)."
+msgstr "游戏每次切换彩色叠加层时重建的全屏纹理现在会被释放，而不是保留到下次加载（1024×768 下每次切换约 18 MB）。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.GROUPS.CHANGES_GAMEPLAY"
+msgid "Changes gameplay"
+msgstr "改变玩法"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.SLOW_REACHABILITY.TITLE"
+msgid "Slower reachability checks"
+msgstr "更慢的可达性检查"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.SLOW_REACHABILITY.EFFECT"
+msgid "Duplicants notice a newly opened or blocked path up to 3 s later."
+msgstr "复制人对新打开或被阻断的路径最多晚 3 秒才察觉。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.SLOW_REACHABILITY.DETAIL"
+msgid "Which errands and items can be reached is rechecked every 4 s instead of every second; temperature and building checks are never delayed."
+msgstr "哪些任务和物品可达改为每 4 秒重新检查一次，而不是每秒；温度和建筑检查永不延迟。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.OFF_SCREEN_CONVEYORS.TITLE"
+msgid "Lazy unseen conveyor items"
+msgstr "屏幕外传送带物品延迟处理"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.OFF_SCREEN_CONVEYORS.EFFECT"
+msgid "Items riding rails off screen are placed only when they stop or come into view."
+msgstr "屏幕外轨道上的物品只在停下或进入视野时才放置。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.OFF_SCREEN_CONVEYORS.DETAIL"
+msgid "The rails carry exactly the same things, but items' positions lag while off screen."
+msgstr "轨道运送的东西完全相同，但物品位置在屏幕外会滞后。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.OFF_WORLD_FALLERS.TITLE"
+msgid "Land items lost below a world"
+msgstr "让掉出世界底部的物品落地"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.OFF_WORLD_FALLERS.EFFECT"
+msgid "Items that fall out the bottom of a world (a rocket's chute) stop falling forever."
+msgstr "掉出世界底部（火箭发射井）的物品不再无限下落。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.OFF_WORLD_FALLERS.DETAIL"
+msgid "They hang just below the world, stepped as falling every tick; landing them where they hang stops that cost."
+msgstr "它们会悬在世界正下方，每个 tick 都按下落步进；让它们停在悬挂处即可消除这项开销。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.BRAIN_RATE.TITLE"
+msgid "Critter and dupe brain updates capped at 30 updates a second"
+msgstr "小动物和复制人脑更新上限为每秒 30 次"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.BRAIN_RATE.EFFECT"
+msgid "Critters and dupes would otherwise update on every frame. This trims that bookkeeping above 30 fps."
+msgstr "小动物和复制人原本每帧都会更新。此项在 30 fps 以上削减这部分簿记开销。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.BRAIN_RATE.DETAIL"
+msgid "The game updates 1 Duplicant and 5 critter brains every rendered frame; this caps them at 30 and 150 a second, spread over frames. One that just finished an errand or is under threat still gets the next update. Saves time only above 30 fps."
+msgstr "游戏每渲染帧更新 1 个复制人和 5 个小动物的脑；此项将其限制为每秒 30 和 150 次，并分摊到各帧。刚完成任务或受到威胁的个体仍会立即获得下一次更新。仅在 30 fps 以上节省时间。"

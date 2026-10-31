@@ -17,8 +17,15 @@ namespace OniMoono.GameTweaks
     /// Everything on it is the game's: the button is made as MainMenu makes its own, and the
     /// screen is an instance of the Mods screen's prefab (its window, list, rows, toggles and
     /// buttons) whose ModsScreen behaviour is swapped for MoonoTweaksScreen before it wakes.
+    ///
+    /// Its text is in the game's language: each string has a key (STRINGS.MOONO.TWEAKS....,
+    /// OniMoono.Host.GameTweaks.TweakStrings), and Localize reads the player's
+    /// translations/CODE.po for the game's locale with the game's own reader, as a mod reads its
+    /// translations, falling back to English string by string, and puts the result in the game's
+    /// string table (Strings).
     public static class MoonoTweaksMenu
     {
+        /// The rows' text in the game's language (Localize), and the launch options (`Notes`).
         internal static string[] Ids, Groups, Titles, Effects, Details, Gains, Notes;
         internal static bool[] ChangesGameplay, Locked;
         /// Each row's value: 0 or 1 for a toggle, else the index in its Choices.
@@ -26,6 +33,15 @@ namespace OniMoono.GameTweaks
         internal static string[][] Choices;
         internal static string LockedNote, SettingsPath;
         internal static Func<string[], int[], string> Save;
+        /// The rows' text as keys ("" for none); every key, its English and its text in the
+        /// game's language (Localize).
+        static string[] groupKeys, titleKeys, effectKeys, detailKeys, gainKeys;
+        static string[][] choiceKeys;
+        static string[] stringKeys, english, text;
+        static Dictionary<string, int> keyIndex;
+        static Func<Dictionary<string, string>, string[]> resolve;
+        static string translationsDir, loaded;
+        const string UiPrefix = "STRINGS.MOONO.TWEAKS.UI.";
 
         /// One entry per row, in order: its section (`groups`), title and one-line effect, and
         /// its tooltip's parts: how it works (`details`), its measured gain ("" for none) and the
@@ -34,20 +50,31 @@ namespace OniMoono.GameTweaks
         /// run has it (0 or 1 for a toggle, else the index in its choices); `defaults`: as Reset
         /// to defaults sets it; `locked`: set by the command line (shown, not changeable;
         /// `lockedNote` names those arguments). `save(ids, values)` writes the changeable rows to
-        /// the settings file, returning why it could not or null.
+        /// the settings file, returning why it could not or null. The text (`groups` to `gains`,
+        /// `choices`) is given as keys ("" for none) into `keys`, whose English is `englishTexts`;
+        /// `resolveTexts` gives every key's text from a .po's strings (key to text, English where
+        /// it has none), read from the folder `translations`.
         public static void Install(Harmony harmony, string[] ids, string[] groups, string[] titles, string[] effects,
             string[] details, string[] gains, string[] notes, bool[] changesGameplay, string[][] choices, int[] running, int[] defaults, bool[] locked,
-            string lockedNote, string settingsPath, Func<string[], int[], string> save)
+            string lockedNote, string settingsPath, Func<string[], int[], string> save,
+            string[] keys, string[] englishTexts, Func<Dictionary<string, string>, string[]> resolveTexts, string translations)
         {
             Ids = ids;
-            Groups = groups;
-            Titles = titles;
-            Effects = effects;
-            Details = details;
-            Gains = gains;
+            groupKeys = groups;
+            titleKeys = titles;
+            effectKeys = effects;
+            detailKeys = details;
+            gainKeys = gains;
             Notes = notes;
             ChangesGameplay = changesGameplay;
-            Choices = choices;
+            choiceKeys = choices;
+            stringKeys = keys;
+            english = englishTexts;
+            keyIndex = new Dictionary<string, int>(StringComparer.Ordinal);
+            for (int i = 0; i < keys.Length; i++) keyIndex[keys[i]] = i;
+            resolve = resolveTexts;
+            translationsDir = translations;
+            Localize();
             Running = running;
             Defaults = defaults;
             Saved = (int[])running.Clone();
@@ -58,10 +85,82 @@ namespace OniMoono.GameTweaks
             harmony.Patch(AccessTools.Method(typeof(MainMenu), "OnPrefabInit"), postfix: new HarmonyMethod(typeof(MoonoTweaksMenu), nameof(AddButton)));
         }
 
+        /// The translation for the game's language: translations/CODE.po for its locale's code
+        /// (Localization.GetLocale().Code: "zh" for the game's Simplified Chinese, zh_klei, and
+        /// for any translation mod whose language contains "zh"; a mod's own code for a language
+        /// the game does not know), else for the code's language part ("pt" for "pt_BR"); null
+        /// in English (no locale) or when there is none.
+        static string TranslationFile()
+        {
+            string code;
+            try
+            {
+                code = Localization.GetLocale()?.Code;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+            if (string.IsNullOrEmpty(code)) return null;
+            int cut = code.IndexOfAny(new[] { '_', '-' });
+            foreach (var name in cut > 0 ? new[] { code, code.Substring(0, cut) } : new[] { code })
+            {
+                var path = System.IO.Path.Combine(translationsDir, name + ".po");
+                if (System.IO.File.Exists(path)) return path;
+            }
+            return null;
+        }
+
+        /// Every string in the game's language, into the game's string table and the rows' text:
+        /// at install, and again when the menu and the screen open (the language is loaded after
+        /// the player installs its tweaks). A string the .po lacks, leaves empty or whose
+        /// placeholders differ stays English.
+        internal static void Localize()
+        {
+            var path = TranslationFile();
+            var next = english;
+            if (path != null)
+            {
+                try
+                {
+                    next = resolve(Localization.LoadStringsFile(path, false));
+                }
+                catch (Exception e)
+                {
+                    Debug.LogWarning($"[Moono] Moono Tweaks: {path} could not be read, English instead: {e.Message}");
+                }
+            }
+            if (path != loaded)
+            {
+                loaded = path;
+                if (path != null) Debug.Log($"[Moono] Moono Tweaks: strings from {path}");
+            }
+            if (next != text)
+            {
+                text = next;
+                for (int i = 0; i < stringKeys.Length; i++) Strings.Add(stringKeys[i], text[i]);
+            }
+            string[] Texts(string[] keys) => Array.ConvertAll(keys, Text);
+            Groups = Texts(groupKeys);
+            Titles = Texts(titleKeys);
+            Effects = Texts(effectKeys);
+            Details = Texts(detailKeys);
+            Gains = Texts(gainKeys);
+            Choices = Array.ConvertAll(choiceKeys, c => c == null ? null : Texts(c));
+        }
+
+        /// A key's text in the game's language ("" for no key).
+        internal static string Text(string key) =>
+            string.IsNullOrEmpty(key) ? "" : keyIndex.TryGetValue(key, out int i) ? text[i] : key;
+
+        /// One of the screen's own labels (STRINGS.MOONO.TWEAKS.UI.NAME) in the game's language.
+        internal static string Ui(string name) => Text(UiPrefix + name);
+
         /// After MainMenu.OnPrefabInit has made its buttons: one more, as its MakeButton makes them
         /// (the menu's button prefab, normal style, 14 pt).
         static void AddButton(MainMenu __instance)
         {
+            Localize();
             try
             {
                 var menu = Traverse.Create(__instance);
@@ -75,7 +174,7 @@ namespace OniMoono.GameTweaks
                 image.colorStyleSetting = style;
                 image.ApplyColorStyleSetting();
                 var label = button.GetComponentInChildren<LocText>();
-                label.text = "MOONO TWEAKS";
+                label.text = Ui("TITLE");
                 label.fontSize = 14;
                 int index = -1;
                 foreach (Transform child in parent.transform)
@@ -122,7 +221,7 @@ namespace OniMoono.GameTweaks
     /// defaults, Restart to apply and Close.
     public class MoonoTweaksScreen : KModalScreen
     {
-        const string Title = "MOONO TWEAKS";
+        static string Title => MoonoTweaksMenu.Ui("TITLE");
         /// The warning colour of the gameplay-changing section's heading (amber).
         const string Warning = "FFB040";
         /// Row padding (above and below, and the left inset) and the spacing between rows: a
@@ -157,19 +256,20 @@ namespace OniMoono.GameTweaks
         protected override void OnActivate()
         {
             base.OnActivate();
+            MoonoTweaksMenu.Localize();
             windowTitle.text = Title;
             windowTitle.ApplySettings();
             closeTitle.onClick += Close;
             close.onClick += Close;
-            apply.GetComponentInChildren<LocText>().text = "RESTART TO APPLY";
+            apply.GetComponentInChildren<LocText>().text = MoonoTweaksMenu.Ui("RESTART_TO_APPLY");
             apply.onClick += Apply;
             // The Mods screen's Workshop button, as Reset to defaults (wider for its label).
-            reset.GetComponentInChildren<LocText>().text = "RESET TO DEFAULTS";
+            reset.GetComponentInChildren<LocText>().text = MoonoTweaksMenu.Ui("RESET_TO_DEFAULTS");
             var resetRect = reset.GetComponent<RectTransform>();
             resetRect.sizeDelta = new Vector2(166f, resetRect.sizeDelta.y);
             reset.onClick += ResetToDefaults;
             reset.gameObject.SetActive(true);
-            FooterNote("Changes apply when the game restarts.");
+            FooterNote(MoonoTweaksMenu.Ui("CHANGES_APPLY_ON_RESTART"));
             var list = entryParent.GetComponent<VerticalLayoutGroup>();
             if (list != null)
             {
@@ -181,8 +281,7 @@ namespace OniMoono.GameTweaks
             toggles = new MultiToggle[shown.Length];
             choiceButtons = new KButton[shown.Length];
             if (MoonoTweaksMenu.LockedNote.Length > 0)
-                Note($"Set by the launch options: {MoonoTweaksMenu.LockedNote}",
-                    "Those rows can't be changed here. Remove the options from the game's launch options to choose them here.");
+                Note(string.Format(MoonoTweaksMenu.Ui("LOCKED_NOTE"), MoonoTweaksMenu.LockedNote), MoonoTweaksMenu.Ui("LOCKED_NOTE_BODY"));
             string group = null;
             for (int i = 0; i < MoonoTweaksMenu.Ids.Length; i++)
             {
@@ -244,7 +343,7 @@ namespace OniMoono.GameTweaks
             title.text = group.ToUpperInvariant();
             title.fontSize = 18;
             title.color = changesGameplay ? Util.ColorFromHex(Warning) : Color.white;
-            if (changesGameplay) BodyLine(title, "Off by default: these trade a little exactness for speed.");
+            if (changesGameplay) BodyLine(title, MoonoTweaksMenu.Ui("CHANGES_GAMEPLAY_NOTE"));
             entry.GetReference<MultiToggle>("EnabledToggle").gameObject.SetActive(false);
             entry.GetReference<LocText>("Version").gameObject.SetActive(false);
             entry.gameObject.SetActive(true);
@@ -257,7 +356,7 @@ namespace OniMoono.GameTweaks
             var text = MoonoTweaksMenu.Details[i];
             if (MoonoTweaksMenu.Gains[i].Length > 0)
                 text += (text.Length > 0 ? "\n\n" : "") + $"<color={Constants.POSITIVE_COLOR_STR}>{MoonoTweaksMenu.Gains[i]}</color>";
-            return text + (text.Length > 0 ? "\n" : "") + MoonoTweaksMenu.Notes[i];
+            return text + (text.Length > 0 ? "\n" : "") + string.Format(MoonoTweaksMenu.Ui("LAUNCH_OPTION_LINE"), MoonoTweaksMenu.Notes[i]);
         }
 
         void Row(int i)
@@ -280,7 +379,7 @@ namespace OniMoono.GameTweaks
             var label = entry.GetReference<LocText>("Version");
             if (locked)
             {
-                label.text = "LAUNCH OPTION";
+                label.text = MoonoTweaksMenu.Ui("LAUNCH_OPTION");
                 label.fontSize = 12;
                 // One line: the effect beside it wraps instead.
                 label.textWrappingMode = TMPro.TextWrappingModes.NoWrap;
@@ -309,7 +408,7 @@ namespace OniMoono.GameTweaks
                 effect.gameObject.AddComponent<CanvasGroup>().alpha = 0.55f;
                 var dim = toggle.gameObject.AddComponent<CanvasGroup>();
                 dim.alpha = 0.45f;
-                if (tip != null) tip.OnToolTip = () => $"Set by the launch options ({(shown[i] != 0 ? "on" : "off")})";
+                if (tip != null) tip.OnToolTip = () => MoonoTweaksMenu.Ui(shown[i] != 0 ? "LOCKED_ON" : "LOCKED_OFF");
             }
             else
             {
@@ -345,12 +444,12 @@ namespace OniMoono.GameTweaks
                 title.color = new Color(title.color.r, title.color.g, title.color.b, 0.55f);
                 effect.gameObject.AddComponent<CanvasGroup>().alpha = 0.55f;
                 tip.toolTip = "";
-                tip.OnToolTip = () => $"Set by the launch options ({MoonoTweaksMenu.Choices[i][shown[i]]})";
+                tip.OnToolTip = () => string.Format(MoonoTweaksMenu.Ui("LOCKED_CHOICE"), MoonoTweaksMenu.Choices[i][shown[i]]);
             }
             else
             {
                 tip.toolTip = "";
-                tip.OnToolTip = () => "Click for the next choice: " + string.Join(", ", MoonoTweaksMenu.Choices[i]);
+                tip.OnToolTip = () => string.Format(MoonoTweaksMenu.Ui("NEXT_CHOICE"), string.Join(MoonoTweaksMenu.Ui("LIST_SEPARATOR"), MoonoTweaksMenu.Choices[i]));
                 button.onClick += () =>
                 {
                     shown[i] = (shown[i] + 1) % MoonoTweaksMenu.Choices[i].Length;
@@ -476,7 +575,7 @@ namespace OniMoono.GameTweaks
             var error = MoonoTweaksMenu.Save(ids.ToArray(), values.ToArray());
             if (error != null)
             {
-                KMod.Manager.Dialog(gameObject, Title, $"The settings could not be saved to {MoonoTweaksMenu.SettingsPath}:\n{error}");
+                KMod.Manager.Dialog(gameObject, Title, string.Format(MoonoTweaksMenu.Ui("SAVE_FAILED"), MoonoTweaksMenu.SettingsPath, error));
                 return false;
             }
             for (int i = 0; i < shown.Length; i++)
@@ -495,8 +594,8 @@ namespace OniMoono.GameTweaks
         {
             if (Differ(shown, MoonoTweaksMenu.Saved) && !SaveShown()) return;
             if (Differ(MoonoTweaksMenu.Saved, MoonoTweaksMenu.Running))
-                KMod.Manager.Dialog(gameObject, Title, "Your changes are saved and apply when the game restarts.",
-                    UI.FRONTEND.MOD_DIALOGS.RESTART.OK, App.instance.Restart, "LATER", Deactivate);
+                KMod.Manager.Dialog(gameObject, Title, MoonoTweaksMenu.Ui("SAVED_RESTART"),
+                    UI.FRONTEND.MOD_DIALOGS.RESTART.OK, App.instance.Restart, MoonoTweaksMenu.Ui("LATER"), Deactivate);
             else Deactivate();
         }
 

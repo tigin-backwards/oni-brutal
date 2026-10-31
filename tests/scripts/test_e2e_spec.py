@@ -510,6 +510,11 @@ class Translation(unittest.TestCase):
             _, prefs = self.player(root, None, 'zh_klei')
             self.assertEqual(prefs['strings'], {'SelectedLanguageType': 'Preinstalled', 'SelectedLanguageCode': 'zh_klei'})
 
+    def test_tweaks_menu_is_a_flag(self):
+        self.assertEqual(e2e.check_spec({'from': 'main-menu', 'mods': [], 'tweaks_menu': True, 'steps': []}), [])
+        self.assertIn('`tweaks_menu` is true or false',
+                      e2e.check_spec({'from': 'main-menu', 'mods': [], 'tweaks_menu': 'yes', 'steps': []}))
+
     def test_language_is_one_of_the_games_own(self):
         self.assertEqual(e2e.check_spec({'from': 'main-menu', 'mods': [], 'language': 'zh_klei', 'steps': []}), [])
         self.assertTrue(any('`language` is one of' in p for p in

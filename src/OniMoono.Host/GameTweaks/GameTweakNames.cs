@@ -7,12 +7,14 @@ namespace OniMoono.Host.GameTweaks
 {
     /// A row's measured gain, as a player would put it ("autosave freeze ~12 s → ~5 s on a large
     /// colony"), with where it comes from so it can be refreshed: the colony, the platform and
-    /// when it was measured, and the document holding the measurement.
-    internal sealed record TweakGain(string Effect, string Colony, string Platform, string Measured, string Source);
+    /// when it was measured, and the document holding the measurement. `Key`: its translation
+    /// key's last part (STRINGS.MOONO.TWEAKS.GAINS.KEY, TweakStrings).
+    internal sealed record TweakGain(string Key, string Effect, string Colony, string Platform, string Measured, string Source);
 
-    /// A section of the Moono Tweaks screen. `Gain`: one shared by all of its rows (the save
-    /// tweaks are measured together).
-    internal sealed record TweakGroup(string Title, TweakGain? Gain = null);
+    /// A section of the Moono Tweaks screen. `Key`: its translation key's last part
+    /// (STRINGS.MOONO.TWEAKS.GROUPS.KEY, TweakStrings). `Gain`: one shared by all of its rows
+    /// (the save tweaks are measured together).
+    internal sealed record TweakGroup(string Key, string Title, TweakGain? Gain = null);
 
     /// One row of the Moono Tweaks screen and of docs/TWEAKS.md: `Title` in sentence case,
     /// `Effect` one short line on what a player gets from it, `Detail` (optional) how it does it,
@@ -49,21 +51,21 @@ namespace OniMoono.Host.GameTweaks
         // code ran about half as fast as on Windows (docs/PERFORMANCE.md, "How it's measured"); a
         // Windows remeasure is pending: update Effect, Platform and Measured together (and
         // PERFORMANCE.md).
-        static readonly TweakGain SaveGain = new("autosave freeze ~12 s → ~5 s on a large colony",
+        static readonly TweakGain SaveGain = new("SAVE", "autosave freeze ~12 s → ~5 s on a large colony",
             "U57", "Linux under WSL2", "by 2026-10-20", "docs/PERFORMANCE.md#the-tweaks (save tweaks: 11.7 → 4.8 s)");
-        static readonly TweakGain JobsGain = new("+11% frame rate on a large colony",
+        static readonly TweakGain JobsGain = new("JOBS", "+11% frame rate on a large colony",
             "U57", "Linux under WSL2", "by 2026-10-20", "docs/PERFORMANCE.md#the-tweaks (fast-jobs)");
-        static readonly TweakGain OverlaysGain = new("temperature overlay ~40% cheaper",
+        static readonly TweakGain OverlaysGain = new("OVERLAYS", "temperature overlay ~40% cheaper",
             "U57", "Linux under WSL2", "2026-10-24", "docs/research/overlays.md (Infrared.Update 10.44 → 6.0 ms; 2minnow 6.53 → 3.9)");
-        static readonly TweakGain ConveyorGain = new("no hitch on rail edits (was 0.05–0.5 s)",
+        static readonly TweakGain ConveyorGain = new("CONVEYOR", "no hitch on rail edits (was 0.05–0.5 s)",
             "U57", "Linux under WSL2", "2026-10-25", "docs/PERFORMANCE.md#the-tweaks (a rebuild 50–510 → 2–14 ms)");
 
-        public static readonly TweakGroup General = new("General");
-        public static readonly TweakGroup Saving = new("Saving", SaveGain);
-        public static readonly TweakGroup Simulation = new("Simulation");
-        public static readonly TweakGroup Graphics = new("Graphics & overlays");
+        public static readonly TweakGroup General = new("GENERAL", "General");
+        public static readonly TweakGroup Saving = new("SAVING", "Saving", SaveGain);
+        public static readonly TweakGroup Simulation = new("SIMULATION", "Simulation");
+        public static readonly TweakGroup Graphics = new("GRAPHICS", "Graphics & overlays");
         /// The tweaks that change what the game does: their own group, last, in the warning colour.
-        public static readonly TweakGroup ChangesGameplay = new("Changes gameplay");
+        public static readonly TweakGroup ChangesGameplay = new("CHANGES_GAMEPLAY", "Changes gameplay");
 
         public static readonly TweakGroup[] Groups = [General, Saving, Simulation, Graphics, ChangesGameplay];
 
@@ -142,6 +144,13 @@ namespace OniMoono.Host.GameTweaks
         /// measuring one against the rest), `all`, `exact` (all but ChangingBehaviour) or `none`
         /// (no tweak unless one is named, whatever the settings file says: test runs).
         public static bool IsKnown(string name) => name is "all" or "exact" or "none" || Array.IndexOf(All, name.StartsWith('-') ? name.Substring(1) : name) >= 0;
+
+        /// A row's gain as its tooltip shows it (the screen styles it), with the gain it comes
+        /// from: the row's own, capitalized, or its group's ("Saving together: ..."); null for none.
+        public static (TweakGain Gain, string Text)? GainText(TweakInfo row) =>
+            row.Gain != null ? (row.Gain, char.ToUpperInvariant(row.Gain.Effect[0]) + row.Gain.Effect[1..])
+            : row.Group.Gain != null ? (row.Group.Gain, $"{row.Group.Title} together: {row.Group.Gain.Effect}")
+            : null;
 
         /// docs/TWEAKS.md's list of rows, between its `<!-- tweaks:begin -->` and
         /// `<!-- tweaks:end -->` markers.

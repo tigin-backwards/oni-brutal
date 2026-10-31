@@ -1703,9 +1703,15 @@ path. A light colony without vsync ran at 115 fps through DXGI against 111 with 
 3090, 59 against 60 on the iGPU, and 159 against 102 with OpenGL; with vsync all held 60 Hz
 (two pictures in flight, above); start-up differed by less than the spread between launches. 300
 resizes, 300 minimize/restore cycles and 300 mode switches (30 exclusive) on Vulkan, and 150 each
-on the iGPU and on OpenGL, showed no failure and no growth in video memory. Not measured: Intel
-GPUs, an HDR monitor with HDR on (tools/HdrCheck is for that), Vulkan's validation layer (not
-installed), input latency.
+on the iGPU and on OpenGL, showed no failure and no growth in video memory. On a 530-nit HDR
+monitor, fullscreen at the menu (tools/HdrCheck): with Windows' HDR on (SDR white at 240 nits)
+the original, Vulkan through DXGI and through its swapchain, and OpenGL through DXGI all left the
+monitor in HDR and reached at most 240 nits, composited as SDR, with no Auto HDR boost; OpenGL
+through WGL switched the monitor out of HDR to SDR while fullscreen, a display mode change the
+original does not make. With HDR off all five stayed SDR at 80 nits, and Desktop Duplication
+(which OBS's display capture uses) lost OpenGL through WGL (`DXGI_ERROR_ACCESS_LOST`) but captured
+OpenGL through DXGI. Not measured: Intel GPUs,
+Vulkan's validation layer (not installed), input latency.
 
 **Loading splash (`--splash moo`, on by default; `--splash none` or Moono Tweaks turns it off).** The player's own presentation, not the
 game's: the presenter thread draws Gassy Moo comets (the game's `meteor_gassymoo` kanim, its

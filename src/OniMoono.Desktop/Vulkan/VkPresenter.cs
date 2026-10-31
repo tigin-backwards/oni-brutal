@@ -386,17 +386,23 @@ namespace OniMoono.Desktop.Vulkan
         }
 
         /// A minimized window has no swapchain to wait on: with vsync each picture not presented
-        /// takes what is left of `interval` refreshes at 60 Hz (the monitor is out of reach here:
-        /// GLFW's are the main thread's), counted from when the last was due so that Sleep's
-        /// coarse steps even out. Measured minimized (U60, a paused colony, the game's vsync on
-        /// Windows): the original stayed at or under 60 fps, OpenGL and DXGI at 60, and this path
-        /// at 69 to 75 before this.
+        /// takes what is left of one refresh at 60 Hz (the monitor is out of reach here: GLFW's
+        /// are the main thread's), counted from when the last was due so that Sleep's coarse steps
+        /// even out. One refresh a call, as FIFO would wait one blank a present: a frame at
+        /// vSyncCount 2 to 4 is shown that many times already. Measured minimized (U60, a paused
+        /// colony, the game's vsync on Windows): the original stayed at or under 60 fps, OpenGL
+        /// and DXGI at 60, and this path at 69 to 75 before this.
         void PaceMinimized(int interval)
         {
-            if (interval <= 0) return;
-            long wait = MinimizedWait(ref minimizedDue, GlTimings.Now, System.Diagnostics.Stopwatch.Frequency * interval / 60);
+            long period = MinimizedPeriod(interval);
+            if (period == 0) return;
+            long wait = MinimizedWait(ref minimizedDue, GlTimings.Now, period);
             if (wait > 0) Thread.Sleep((int)(wait * 1000 / System.Diagnostics.Stopwatch.Frequency));
         }
+
+        /// The time a minimized window's picture takes (Stopwatch ticks): one refresh at 60 Hz
+        /// with vsync, whatever the interval (each frame comes that many times); none without.
+        internal static long MinimizedPeriod(int interval) => interval > 0 ? System.Diagnostics.Stopwatch.Frequency / 60 : 0;
 
         /// The wait before a minimized window's picture (Stopwatch ticks), moving `due` on a
         /// period; a picture more than a period late starts the count again from now.

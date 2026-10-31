@@ -182,6 +182,23 @@ namespace OniMoono.Tests
             Assert.Equal(5016, due);
         }
 
+        /// vSyncCount 2: a frame is shown twice, each minimized picture one refresh, so a frame
+        /// takes two refreshes (30 fps), not four.
+        [Theory]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(4)]
+        public void AMinimizedFrameTakesItsIntervalInRefreshes(int interval)
+        {
+            long f = System.Diagnostics.Stopwatch.Frequency, refresh = f / 60;
+            Assert.Equal(0, OniMoono.Desktop.Vulkan.VkPresenter.MinimizedPeriod(0));
+            long due = 0, now = 10 * f, start = now;
+            for (int frame = 0; frame < 30; frame++)
+                for (int shown = 0; shown < interval; shown++) // VkPresenter's Show loop
+                    now += OniMoono.Desktop.Vulkan.VkPresenter.MinimizedWait(ref due, now, OniMoono.Desktop.Vulkan.VkPresenter.MinimizedPeriod(interval));
+            Assert.Equal(30 * interval - 1, (now - start) / refresh);
+        }
+
         [Fact]
         public void TheSlowestPercentIsTheMeanOfTheLongestIntervals()
         {

@@ -41,7 +41,9 @@ OniMcp's mod folder at the commit scripts/onimcp.py pins and builds; its licence
 allow vendoring it), E2E_DRIVER (E2eDriver's mod
 folder; default out/bin/E2eDriver/release) for specs that use it and, for --player original or
 both, E2E_ORIGINAL (the original player's executable, with a DLC-owning Steam double in its
-Plugins). Our player runs with the users' default game tweaks (`--game-tweak exact`), or with
+Plugins); E2E_ORIGINAL_ENV holds NAME=VALUE settings for the original player only (on WSL,
+`GALLIUM_DRIVER=llvmpipe` with a shared MESA_SHADER_CACHE_DIR runs it 3-4 times faster; see
+tests/e2e/README.md, "Run time"). Our player runs with the users' default game tweaks (`--game-tweak exact`), or with
 E2E_GAME_TWEAKS, space-separated `--game-tweak` values (`none`, `background-save`, `exact
 -no-save-gc`). Each invocation has a run id; each run's log, results and evidence are in
 out/e2e/SPEC/RUN_ID/PLAYER-N, and out/e2e/runs/RUN_ID.json holds one record per spec run.
@@ -107,7 +109,7 @@ def say(*parts):
 def environment():
     """The settings from the environment, else from out/local-tools/qa.env (a bash file)."""
     names = ['QA_U57_GAME', 'QA_U57_STEAM', 'E2E_ONIMCP', 'E2E_ORIGINAL', 'E2E_DRIVER', 'GALLIUM_DRIVER',
-             'MESA_D3D12_DEFAULT_ADAPTER_NAME']
+             'MESA_D3D12_DEFAULT_ADAPTER_NAME', 'E2E_ORIGINAL_ENV']
     env = {n: os.environ[n] for n in names if n in os.environ}
     qa_env = os.path.join(ROOT, 'out', 'local-tools', 'qa.env')
     if os.path.exists(qa_env):
@@ -2409,6 +2411,8 @@ class Player:
             if name in self.env:
                 env[name] = self.env[name]
         if self.kind == 'original':
+            env.update(original_environment(self.env.get('E2E_ORIGINAL_ENV')))
+        if self.kind == 'original':
             command = [original_player(self.env['E2E_ORIGINAL'], self.lane.number), *size, '-logFile', self.log]
             stdout = os.path.join(self.out, 'stdout.txt')
         else:
@@ -2574,6 +2578,21 @@ class Player:
         result = subprocess.run([sys.executable, os.path.join(ROOT, 'scripts', 'qa-tools.py'), 'signatures', self.log],
                                 capture_output=True, text=True)
         return set(result.stdout.splitlines())
+
+
+def original_environment(text):
+    """E2E_ORIGINAL_ENV's NAME=VALUE words: settings for the original player only, such as
+    `GALLIUM_DRIVER=llvmpipe LP_NUM_THREADS=4`. On WSL the original renders through Mesa's d3d12
+    driver at about 2 frames a second and takes two minutes to reach its main menu, CPU-bound in
+    one thread of copies inside the driver; llvmpipe gives it 3-4 times the frame rate and a main
+    menu in 20 s, with shots within 0.05 % of the d3d12 ones (docs in tests/e2e/README.md)."""
+    pairs = {}
+    for word in (text or '').split():
+        name, sep, value = word.partition('=')
+        if not sep or not re.fullmatch(r'[A-Za-z_]\w*', name):
+            raise SpecFailure(f'E2E_ORIGINAL_ENV: {word!r} is not NAME=VALUE')
+        pairs[name] = value
+    return pairs
 
 
 def original_player(executable, lane, root=OUT):

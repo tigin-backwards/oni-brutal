@@ -11,7 +11,8 @@ scripts/e2e.py --player both --repeat 2 NAME
 scripts/e2e.py --player original --bless NAME   # bless fixtures and references
 scripts/e2e.py --lanes 4 A B C D            # four at once, from a queue
 scripts/e2e.py --player ours --repeat 2 --record --note "..." NAME   # write tests/e2e/results/NAME.json
-scripts/e2e.py --status                     # the machine's lanes, players and perf jobs
+scripts/e2e.py --status                     # lanes, holders, waits, leftovers: look here first
+scripts/e2e.py --clean                      # clean what dead runners left on free lanes
 ```
 
 A batch of mods, one agent per worktree, follows [Batch workflow](#batch-workflow); which mods
@@ -27,9 +28,36 @@ load at all, in both players, comes first from [Load sweeps](#load-sweeps).
   others, space-separated `--game-tweak` values: `E2E_GAME_TWEAKS=none`, `=background-save`.
 - **The lock directory.** Runners in every worktree on the machine meet in one directory,
   `$E2E_LOCK_DIR` or by default `~/.cache/oni-brutal-e2e/`: lane locks, the players' budget, the
-  perf lock and the reservations below live there, never in a worktree's `out/`. `--status`
-  prints what it holds now: each held lane with its runner's pid and worktree, the players and
-  their memory, perf jobs.
+  perf lock and the reservations below live there, never in a worktree's `out/`.
+- **`--status` first.** When a run waits, `scripts/e2e.py --status` says why. For each lane
+  it prints the holder (pid, alive or gone, worktree, since when) and what the lane does now
+  (`running SPEC in ours (1/2), run ID`, or the wait it is in: a perf job, memory), the
+  processes it runs (player and Xvfb, with their pids and scope), and who listens on its ports
+  or holds its display. A lane no runner holds but whose ports or display are busy shows as
+  `FREE but busy`, with the leftovers the next runner would clean (`would clean: …`). Then:
+  the free lanes, `perf.lock` (free, shared by N spec runs, or held exclusively by whom),
+  `perf.wanted` (the pid waiting to run a perf job, alive or stale, and the lanes waiting for
+  it), the runners (each `e2e.py` with its lanes, or waiting for one), `qa.sh` runs and their
+  watchers, the players' budget, perf jobs, `oni-test-*` scopes and their runners, and X servers
+  whose launcher has gone.
+- **Nothing outlives its run.** Players and Xvfb run in sessions of their own (each player in a
+  systemd scope, `oni-test-PID-START-laneL-…`, through `scripts/contain.sh` with `ONI_SCOPE`),
+  so they would outlive a runner a `timeout` or `kill -9` ends. Instead:
+  - every process a runner starts carries `E2E_OWNER=PID:START` (the runner's pid and start
+    time), `E2E_LANE` and `E2E_LOCK_DIR`, and the lane's lock records it (pid, start time,
+    scope) while it runs;
+  - on any exit the runner sees (the end, an exception, SIGTERM, SIGINT, SIGHUP) it stops its
+    players' scopes and kills every process carrying its `E2E_OWNER`;
+  - a watcher (`e2e.py --reap-after PID START`, in a session of its own) does the same when the
+    runner dies without seeing it (SIGKILL, or its parent killing its group);
+  - a runner taking a lane whose last holder is dead first cleans what that holder left: only
+    processes whose `E2E_OWNER` names a dead runner, the lane's recorded children (checked by
+    start time), scopes named for a dead runner, and the stale `/tmp/.XN-lock` and socket of the
+    lane's display. Leftovers of runners from before `E2E_OWNER` (a player with the lane's
+    `E2E_LANE`, an Xvfb on the lane's display, with no `e2e.py` among their ancestors) count in
+    the machine's lock directory only. `--clean` does this now for every lane no runner holds.
+
+  `qa.sh` does the same for its players (see its header).
 - **Lanes** are machine-wide. Lane L uses:
   - OniMcp on port 8800 + 10 L, written to the run's `OniMcpConfig.json`;
   - E2eDriver on 8801 + 10 L, passed as `E2E_DRIVER_PORT`;
@@ -58,7 +86,10 @@ load at all, in both players, comes first from [Load sweeps](#load-sweeps).
 - **Perf jobs.** A run holds `perf.lock` in the lock directory shared. A perf job that must not
   share the machine takes it exclusively: `flock -x ~/.cache/oni-brutal-e2e/perf.lock
   scripts/qa.sh`. Runs also wait while `ps` shows a perf job (`qa.sh`, the sweep and measurement
-  scripts, `perf record`; see `PERF_JOBS`); `--no-perf-wait` skips the `ps` check.
+  scripts, `perf record`; see `PERF_JOBS`); `--no-perf-wait` skips the `ps` check. Peak memory is
+  not a perf job: it does not depend on the machine's load, so measure it with `scripts/qa.sh
+  --memory` (or `QA_MEMORY_ONLY=1 scripts/qa.sh`), which takes no lock, waits for no quiet
+  machine and stops after the first autosave, never with `flock -x`.
 - **Waits are visible.** A run waiting for a perf job, a lane or memory says what it waits for
   (the perf job's pid, how long it has run and its command; the lanes' or players' holders),
   again when that changes and every 10 minutes. `--max-wait MINUTES` (or `E2E_MAX_WAIT`) fails
@@ -596,6 +627,28 @@ For each mod of the batch:
     `git diff docs/MOD_COMPATIBILITY.md` that only your mods' rows changed. When a mod had a
     hand-written entry in `modtable.py` (`played`, `differences`, `unplayed`), remove it in the
     same commit. After a merge, regenerate rather than resolve the table by hand.
-13. **Leave no processes behind**: `scripts/e2e.py --status` lists no lane or player of yours,
-    and `ps -eo pid,args | grep "[X]vfb :3"` and `ps -eo pid,args | grep "[O]niBrutal"` show none
-    from your worktree. Kill a leftover by its pid in a separate command, never with `pkill -f`.
+13. **Leave no processes behind**: a run's players end with it, however it ends (see "Nothing
+    outlives its run"); `scripts/e2e.py --status` lists no lane, player or scope of yours. Never
+    kill a process you have not proven to be yours or a dead runner's: `--clean` does that check.
+    Kill anything else by its pid in a separate command, never with `pkill -f`.
+
+### Scratch files
+
+Agents of one session share its scratchpad folder, and two agents writing `qa.sh`, `info.sh` or
+`run.log` at its top level overwrite each other. Each agent (or run) works in a folder of its
+own and never writes outside it: `$SCRATCHPAD/<worktree or agent id>/` (for example
+`…/scratchpad/agent-a66ab08/`), with a subfolder per run when runs overlap. The same goes for
+anything written under `/tmp` or `%TEMP%` for a run: name it after the run (its run id, its lane,
+its worktree). Test tools already keep runs apart: `e2e.py` writes to `out/e2e/SPEC/RUN_ID/` in
+its worktree, `qa.sh` to `out/qa/run-DATE/`, and Windows runs use the run home they are given.
+
+### Windows test runs
+
+Every Windows test window opens on the second monitor and never takes the focus:
+`scripts/run-windows.sh` passes `-screen-fullscreen 0 -monitor 2 --no-focus` before the run's own
+arguments, and `scripts/original-windows.sh` passes `-screen-fullscreen 0 -monitor 2`, gives the
+focus back to the window that had it if the game takes it while opening, and turns BepInEx's
+console window off (`ONI_WIN_MONITOR=N` picks another monitor for both). A window gets the focus
+only through `out/local-tools/win-run.ps1 -Match RUN_HOME -Action focus`. Act on a Windows game
+process only through `win-run.ps1` (it finds the process by the run home in its command line),
+never by its name: the user plays the same executables on this machine.

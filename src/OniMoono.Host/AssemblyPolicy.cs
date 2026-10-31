@@ -101,6 +101,13 @@ namespace OniMoono.Host
             // Its conversions of floats to integers give Mono's values out of range (MonoConversions)
             // and its directory listings come in Mono's order (MonoDirectoryListing).
             if (MonoConversions.AdjustGame(image ?? File.ReadAllBytes(path), path) is { } converted) image = converted;
+            // A development build's [Debuggable(DisableOptimizations)] is ignored, as Mono ignores it
+            // (MonoJitOptimizer).
+            if (MonoJitOptimizer.Adjust(image ?? File.ReadAllBytes(path), path) is { } optimized)
+            {
+                image = optimized;
+                EngineLog.Engine($"game image: {simple}.dll asks for its code unoptimised (Debuggable); compiled optimised, as on Mono");
+            }
             return image == null ? context.LoadFromAssemblyPath(path) : context.LoadFromStream(new MemoryStream(image));
         }
 

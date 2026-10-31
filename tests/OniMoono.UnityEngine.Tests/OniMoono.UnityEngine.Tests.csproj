@@ -35,6 +35,8 @@
     <!-- The Moono Tweaks catalog (GameTweakCatalogTests; BackgroundSave names itself from it). -->
     <Compile Include="../../src/OniMoono.Host/GameTweaks/GameTweakNames.cs" Link="Host/GameTweakNames.cs" />
     <Compile Include="../../src/OniMoono.Host/GameTweaks/TweakStrings.cs" Link="Host/TweakStrings.cs" />
+    <!-- Development builds' [Debuggable(DisableOptimizations)] ignored as on Mono (MonoJitOptimizerTests). -->
+    <Compile Include="../../src/OniMoono.Host/MonoJitOptimizer.cs" Link="Host/MonoJitOptimizer.cs" />
     <!-- The brain-rate game tweak's allowance (BrainRateAllowanceTests). -->
     <Compile Include="../../src/OniMoono.GameTweaks/BrainRateAllowance.cs" Link="GameTweaks/BrainRateAllowance.cs" />
     <!-- The background-save game tweak's writes (BackgroundSaveTests), with the game's zlib. -->

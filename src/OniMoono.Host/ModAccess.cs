@@ -167,6 +167,9 @@ namespace OniMoono.Host
             // Its conversions of floats to integers give Mono's values out of range (MonoConversions),
             // and its directory listings come in Mono's order (MonoDirectoryListing, in that pass).
             if (MonoConversions.Adjust(image ?? File.ReadAllBytes(path), ref symbols, path) is { } converted) image = converted;
+            // A debug build's [Debuggable(DisableOptimizations)] is ignored, as Mono ignores it
+            // (MonoJitOptimizer).
+            if (MonoJitOptimizer.Adjust(image ?? File.ReadAllBytes(path), path) is { } optimized) image = optimized;
             // A strong-named file of another identity than the loaded assembly of its name loads
             // beside it, as in Mono (D45).
             var context = beside ? Beside(path) : AssemblyLoadContext.Default;

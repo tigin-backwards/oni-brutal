@@ -1303,6 +1303,20 @@ game or mod code can notice. Each says how it is resolved, or why it is kept.
   else gives the field type's default. Not matched: another layout's non-null read (none known),
   and a field taken by `ref`, left as Harmony emits it. `--check-types` patches an emitted static
   method taking another type, and one taking the field's own type.
+- **D56 `[Debuggable(DisableOptimizations)]` in development builds.** U60's public test is a
+  Unity development build: Assembly-CSharp, -firstpass and the other managed plugins (FMOD,
+  ImGui, LibNoiseDotNet, ArabicSupport) carry `DebuggableAttribute(DebuggingModes)` 0x107, with
+  DisableOptimizations (U59's carry 0x2). CoreCLR honours it and compiles every method of such
+  an assembly without optimisation or tiering. Mono's JIT reads only the two-boolean
+  constructor's `isJITOptimizerDisabled` (method-to-ir.c, `is_jit_optimizer_disabled`), and only
+  stops inlining for it, so Unity's player compiles U60's game code as it compiles U59's.
+  Measured on U57 under Linux (2026-10-31, at the same frame rate, the GL thread bound): the
+  main thread's frame 84.6 ms with the attribute honoured against 53.8 ms without
+  (`Game.Update` 47.1 against 27.0), the load 31–36 s against 26 s, an autosave's freeze 3.8 s
+  against 2.8 s. **Resolved in** `MonoJitOptimizer`: as a game assembly from `Managed/` or a mod's
+  assembly loads, the DisableOptimizations bit of a DebuggingModes attribute is cleared in place
+  (the blob keeps its size); the two-boolean form stays. `ONI_KEEP_DEBUGGABLE=1` leaves it, for
+  measuring.
 
 ## 3. The engine API (`OniMoono.UnityEngine`)
 

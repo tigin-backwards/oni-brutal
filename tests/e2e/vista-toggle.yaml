@@ -1,0 +1,34 @@
+# U60's vista projector: the Printing Pod's Blueprints tab has a Select Vista panel, the
+# starting-biome vistas after a No Vista toggle. Picking one scales the shown vista out and
+# destroys it, and VistaLayers unloads its sprites and textures (Resources.UnloadAsset); then
+# the new vista spawns behind the pod and its layers are loaded (Resources.Load).
+#
+# early-base has no vista. Sandstone, then Forest (Sandstone's textures unloaded), then
+# Sandstone again: its textures, unloaded, are read from the asset file again and must draw
+# as the original player draws them.
+from: early-base
+steps:
+  - click_world: {cell: [124, 208], select: Headquarters}
+  - ui_wait: {path: "**/DetailsScreen/TitleBar", cond: stable}
+  - click: {ui: "**/DetailsScreen/SideScreen/SidescreenTabHeader/TabRow/Blueprints Tab Instance"}
+  # The panel ends below the tool menu at 1280x720: scrolled up into view first.
+  - scroll: {at: "**/DetailsScreen/SideScreen/Body/BodySkin/CategoryHeader/ScrollSection/ScrollRect", notches: -10}
+  - ui_wait: {path: "**/VistaSelectionPanel/Container/Content", cond: stable, stable: 30}
+  - click: {ui: "**/VistaSelectionPanel/Container/Content/VistaTogglePrefab", index: 1}
+  - ui_wait: {path: "**/VistaSelectionPanel/Header/Label", cond: stable, stable: 60}
+  - expect_state:
+      "Components.Vistas.Count": 1
+      "Components.Vistas.Items[0].spritePath": vistas/sandstone
+  - world_shot: {name: sandstone, ortho: 8, at: [124, 210]}
+  - click: {ui: "**/VistaSelectionPanel/Container/Content/VistaTogglePrefab", index: 2}
+  - ui_wait: {path: "**/VistaSelectionPanel/Header/Label", cond: stable, stable: 60}
+  - expect_state:
+      "Components.Vistas.Count": 1
+      "Components.Vistas.Items[0].spritePath": vistas/forest
+  - world_shot: {name: forest, ortho: 8, at: [124, 210]}
+  - click: {ui: "**/VistaSelectionPanel/Container/Content/VistaTogglePrefab", index: 1}
+  - ui_wait: {path: "**/VistaSelectionPanel/Header/Label", cond: stable, stable: 60}
+  - expect_state:
+      "Components.Vistas.Count": 1
+      "Components.Vistas.Items[0].spritePath": vistas/sandstone
+  - world_shot: {name: sandstone-again, ortho: 8, at: [124, 210]}

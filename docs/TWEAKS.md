@@ -40,6 +40,10 @@ launch options:
   ([ARCHITECTURE.md](ARCHITECTURE.md#2-process-and-assembly-structure), "The GPU option").
 - `--dxgi on|off`: Windows, frames shown through a Direct3D 11 swap chain or through OpenGL's
   SwapBuffers ([ARCHITECTURE.md](ARCHITECTURE.md#35-rendering), "Presentation on Windows").
+  If HDR switches on or the screen goes very bright in fullscreen, look for the `present:` line
+  in `Player.log`: when it says SwapBuffers is used, it says why. Then, on NVIDIA, set
+  **Vulkan/OpenGL present method** to **Prefer native** in the NVIDIA Control Panel, and turn
+  Auto HDR (Windows' Graphics settings) or RTX HDR (the NVIDIA app) off for OniMoono.exe.
 
 Older setups put `--game-tweak exact` in the launch options; remove it (the setup prints the new
 line) to choose in the game instead.

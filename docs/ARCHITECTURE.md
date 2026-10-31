@@ -1560,6 +1560,77 @@ player: with vSync the swap paces frames; otherwise `Application.targetFrameRate
 otherwise none. Without a display (`--headless`, `--batchmode`) frames are paced at
 `targetFrameRate` or 60 Hz.
 
+**Presentation on Windows (DXGI).** On Windows the presenter shows the picture through a
+Direct3D 11 flip-model swap chain (`DxgiSwapChain`, `DxgiTarget`), on by default (Moono Tweaks'
+"Present through Direct3D on Windows", settings.json `"dxgi"`, `--dxgi on|off`). The original
+(Unity on D3D11) presents through an 8-bit flip-model DXGI swap chain in the default sRGB colour
+space, so Windows knows its frames are SDR. OpenGL presents through WGL with no swap chain
+Windows can see; NVIDIA's "Vulkan/OpenGL present method" (Auto by default) may layer it on DXGI,
+and Auto HDR or RTX HDR can then take the game for HDR content and push the brightness up (a
+user's report: fullscreen forced HDR and maximum brightness). The window is the same in both (a
+borderless popup the monitor's size, measured); only the presentation differed. The swap chain:
+a D3D11 device on the GL context's adapter (by its LUID: `EXT_external_objects_win32` when DXGI
+knows that LUID, else `GL_VENDOR`/`GL_RENDERER` against the DXGI adapters' descriptions; the GPU
+option's choice is the GL driver's), `R8G8B8A8_UNORM`, `FLIP_DISCARD`, two buffers, the default
+colour space (`RGB_FULL_G22_NONE_P709`), `DXGI_SCALING_STRETCH`, a frame-latency waitable object
+at a maximum latency of 2, and `ALLOW_TEARING` when the system supports it, used only without
+vsync. The presenter renders the picture into one D3D11 texture, made anew (a quarter larger)
+only when the window outgrows it, registered with GL once through `WGL_NV_DX_interop2` for
+reading and writing (the splash blends) and locked while the presenter's blit fills it, flipped
+(Direct3D's rows run top-down; the splash is drawn flipped too). The swap chain's own buffers are
+never registered with GL (re-registering them after a resize is suspected of a use-after-free in
+NVIDIA's driver, Godot PR #94503). `CopySubresourceRegion` copies the texture into the back
+buffer before `Present` at `QualitySettings.vSyncCount` (0 to 4); with vsync the presenter then
+waits on the waitable object until the picture before it retires, two pictures in flight as
+Unity's default of two queued frames (with one, a 60 Hz game lost frames on a GPU whose picture
+is copied to a monitor on another). Without vsync it does not wait, as SwapBuffers does not:
+retiring a picture can take a frame or two (29 ms a picture measured on an AMD iGPU whose picture
+is copied to a monitor on the NVIDIA card), which would cap the frame rate; the interop lock
+bounds what is in flight.
+
+A size change calls `ResizeBuffers` before the next picture; between the window's resize and that
+picture DXGI stretches the last one. A minimized window keeps its framebuffer size (§3.6), so the
+buffers keep theirs; an occluded `Present` (`DXGI_STATUS_OCCLUDED`) shows nothing and is not
+waited for. Exclusive fullscreen stays the window's (GLFW sets the display mode, a monitor-sized
+window), not DXGI's `SetFullscreenState`; DXGI is told to leave the window alone
+(`DXGI_MWA_NO_WINDOW_CHANGES | NO_ALT_ENTER`). After start-up every DXGI, D3D11 and interop object
+is used and released on the presenter thread alone, so neither `Present` nor `ResizeBuffers`
+sends the window a message the main thread (which may be waiting on the GL thread, which may be
+waiting on the presenter) would have to answer; the waits on the waitable object are not
+alertable. Start-up makes everything that can fail (the interop extension, the adapter, the D3D11
+device, the registration and a first lock) before it gives the window a swap chain, and a failure
+there leaves SwapBuffers in use, with one `present:` log line saying why. Once the window has a
+swap chain, a failure (the chain's own set-up at start-up; while running a lost device:
+`DXGI_ERROR_DEVICE_REMOVED`/`RESET`/`HUNG`, a failed lock, resize or present) releases everything
+DXGI held and starts it anew. Restarts come in bursts of ten tries, 1, 2, 4 then 8 s apart
+(about a minute, outlasting a slow driver reset); a restart that presents for 60 s ends its
+burst, so a later failure gets ten tries again. Until a restart succeeds SwapBuffers stands in,
+but it does not reach the screen on a window whose flip-model swap chain has presented
+(measured: the window kept DXGI's last picture while frames went on), so a DXGI that cannot
+restart leaves the window still. The `present:` line at start-up names the adapter and the swap
+chain's settings; `--dxgi-fault STEP` makes up a failure at one step, for testing the ways back
+(`DxgiSwapChain.Fault` lists them); with `--frame-stats` the frame counts include the
+presenter's time per picture by step, the time from a game frame's start to its picture's
+present, and, every 600 frames, the process's video memory on the adapter as DXGI counts it
+(only while DXGI presents). Captures and `ReadPixels` read the offscreen back buffers, never the
+window, so they are the same either way. With DXGI off, and off Windows, the presenter swaps as
+before.
+
+Measured on Windows 11 with an RTX 3090 and an AMD iGPU on U60 (761015, 2026-10-30, the monitor
+captured through Desktop Duplication), where this path was built: a paused colony on screen
+differed from the original's by 0.29% of pixels through DXGI and 0.31% through SwapBuffers; the
+presenter was busy 0.3 to 0.6 ms a picture through DXGI against 0.1 to 0.2 through SwapBuffers; a
+light colony without vsync ran at 159 fps through DXGI against 102 through SwapBuffers, and both
+held 60 Hz with vsync. With every restart failing (`norestart`), SwapBuffers showed new frames
+when the fault came at start-up after the swap chain was made but before it presented
+(`association,norestart`), and not when DXGI had presented first (`removed:300,norestart`). On a
+530-nit HDR monitor, fullscreen at the menu (tools/HdrCheck), with Windows' HDR on the original
+and OpenGL through DXGI left the monitor in HDR, composited as SDR at at most SDR white (240
+nits), while OpenGL through WGL switched the monitor out of HDR while fullscreen, a display mode
+change the original does not make. With HDR off, Desktop Duplication (which OBS's display
+capture uses) lost OpenGL through WGL (`DXGI_ERROR_ACCESS_LOST`) but captured OpenGL through
+DXGI. Not measured: Intel GPUs, click-to-photon latency.
+
 **Loading splash (`--splash moo`, on by default; `--splash none` or Moono Tweaks turns it off).** The player's own presentation, not the
 game's: the presenter thread draws Gassy Moo comets (the game's `meteor_gassymoo` kanim, its
 `fall_loop`, read from `sharedassets0.assets` on a worker thread at start-up) over whatever the

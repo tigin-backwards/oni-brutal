@@ -1673,8 +1673,9 @@ window), not DXGI's `SetFullscreenState`; DXGI is told to leave the window alone
 is used and released on the presenter thread alone, so neither `Present` nor `ResizeBuffers`
 sends the window a message the main thread (which may be waiting on the device thread, which may
 be waiting on the presenter) would have to answer. Start-up makes everything that can fail
-(the interop extension, the adapter, the D3D11 device, the registration or import, the first
-lock) before it gives the window a swap chain, and a failure there leaves the device's own
+(the interop extension, the adapter, the D3D11 device, the registration or import, and on OpenGL
+a first lock; Vulkan's keyed mutex is first acquired by the first picture's submission, in play)
+before it gives the window a swap chain, and a failure there leaves the device's own
 presentation in use, with one `present:` log line saying why. Once the window has a swap chain,
 a failure (the chain's own set-up at start-up; while running a lost device:
 `DXGI_ERROR_DEVICE_REMOVED`/`RESET`/`HUNG`, a failed lock, a keyed-mutex timeout, a failed image
@@ -1705,11 +1706,14 @@ path. A light colony without vsync ran at 115 fps through DXGI against 111 with 
 3090, 59 against 60 on the iGPU, and 159 against 102 with OpenGL; with vsync all held 60 Hz
 (two pictures in flight, above); start-up differed by less than the spread between launches. 300
 resizes, 300 minimize/restore cycles and 300 mode switches (30 exclusive) on Vulkan, and 150 each
-on the iGPU and on OpenGL, showed no failure and no growth in video memory. Every
-`--dxgi-fault` step on both devices (start-up before and after the swap chain, a lost device, a
-keyed-mutex timeout, a failed image view of a grown texture, ten failed restarts) ended with the
-window still showing new frames. Minimized with the game's vsync (a paused colony) the original
-stayed at or under 60 fps and every path here at 60 (Vulkan's own swapchain path by pacing its
+on the iGPU and on OpenGL, showed no failure and no growth in video memory. Each
+`--dxgi-fault` step that DXGI restarts after (start-up before and after the swap chain, a lost
+device, a keyed-mutex timeout, a failed image view of a grown texture) ended with the window
+showing new frames on both devices. With every restart failing (`norestart`), Vulkan's swapchain
+kept showing new frames; OpenGL's SwapBuffers did when the fault came at start-up after the swap
+chain was made but before it presented (`association,norestart`), and did not when DXGI had
+presented first (`removed:300,norestart`: the window kept DXGI's last picture, as above).
+Minimized with the game's vsync (a paused colony) the original stayed at or under 60 fps and every path here at 60 (Vulkan's own swapchain path by pacing its
 pictures, VkPresenter). On a 530-nit HDR
 monitor, fullscreen at the menu (tools/HdrCheck): with Windows' HDR on (SDR white at 240 nits)
 the original, Vulkan through DXGI and through its swapchain, and OpenGL through DXGI all left the

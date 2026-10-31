@@ -31,6 +31,11 @@ namespace OniMoono.Desktop.Gl
         public static long Pictures, FrameWait, Begin, Copy, Show, Wait;
         static readonly object gate = new();
         static readonly System.Collections.Generic.List<double> intervals = new();
+        static readonly System.Collections.Generic.List<double> ages = new();
+
+        /// When the game frame the presenter is showing began (presenter thread; 0 for a redraw
+        /// or a repeat): Shown counts the time from then until its picture was issued.
+        public static long FrameStarted;
         static long lastShown;
 
         /// Counted only with frame stats on (nothing reads them otherwise).
@@ -61,12 +66,15 @@ namespace OniMoono.Desktop.Gl
         public static void Shown(long waited)
         {
             lastPicture = Stopwatch.GetTimestamp() - waited;
+            long started = FrameStarted;
+            FrameStarted = 0;
             if (!On) return;
             Interlocked.Increment(ref Pictures);
             long now = Stopwatch.GetTimestamp();
             lock (gate)
             {
                 if (lastShown != 0 && intervals.Count < 100_000) intervals.Add((now - lastShown) * 1000.0 / Stopwatch.Frequency);
+                if (started != 0 && ages.Count < 100_000) ages.Add((lastPicture - started) * 1000.0 / Stopwatch.Frequency);
                 lastShown = now;
             }
         }
@@ -76,17 +84,21 @@ namespace OniMoono.Desktop.Gl
             long n = Interlocked.Exchange(ref Pictures, 0);
             long frameWait = Interlocked.Exchange(ref FrameWait, 0), begin = Interlocked.Exchange(ref Begin, 0),
                 copy = Interlocked.Exchange(ref Copy, 0), show = Interlocked.Exchange(ref Show, 0), wait = Interlocked.Exchange(ref Wait, 0);
-            double[] sorted;
+            double[] sorted, aged;
             lock (gate)
             {
                 sorted = intervals.ToArray();
                 intervals.Clear();
+                aged = ages.ToArray();
+                ages.Clear();
             }
             if (n == 0) return "presenter: nothing shown";
             static string F(double v) => v.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
             string Ms(long ticks) => F(ticks * 1000.0 / Stopwatch.Frequency / n);
             var (mean, slowest) = MeanAndSlowest(sorted);
-            return $"presenter per picture ({n}): frame wait {Ms(frameWait)}, begin {Ms(begin)}, copy {Ms(copy)}, show {Ms(show)}, vsync wait {Ms(wait)}; interval mean {F(mean)}, slowest 1% {F(slowest)}";
+            var (age, oldest) = MeanAndSlowest(aged);
+            return $"presenter per picture ({n}): frame wait {Ms(frameWait)}, begin {Ms(begin)}, copy {Ms(copy)}, show {Ms(show)}, vsync wait {Ms(wait)}; interval mean {F(mean)}, slowest 1% {F(slowest)}"
+                   + $"; frame start to present mean {F(age)}, slowest 1% {F(oldest)}";
         }
 
         /// The mean of `values`, and the mean of their slowest 1% (at least one value); sorts

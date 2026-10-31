@@ -561,7 +561,7 @@ namespace OniMoono.Desktop.Vulkan
             return read;
         }
 
-        void PresentNow(int frame, int interval, int width, int height)
+        void PresentNow(int frame, int interval, int width, int height, long started)
         {
             if (deviceLost) return;
             long t = System.Diagnostics.Stopwatch.GetTimestamp();
@@ -576,6 +576,7 @@ namespace OniMoono.Desktop.Vulkan
                 PresenterFailed(failed);
                 return;
             }
+            presenter.FrameStarted = started;
             presenter.Present(interval, width, height);
             presenter.Frame = frame + 1;
             Presented();

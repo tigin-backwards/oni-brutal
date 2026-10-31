@@ -463,7 +463,8 @@ namespace OniMoono.Desktop.Vulkan
             int interval = SwapIntervalOverride >= 0 ? SwapIntervalOverride : QualitySettings.vSyncCount;
             int width = platform.FramebufferWidth, height = platform.FramebufferHeight;
             int frame = Time.frameCount;
-            worker.Post(() => PresentNow(frame, interval, width, height));
+            long started = PlayerLoop.FrameStartedAt;
+            worker.Post(() => PresentNow(frame, interval, width, height, started));
             worker.Submit();
         }
 

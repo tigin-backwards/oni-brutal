@@ -89,7 +89,7 @@ namespace OniMoono.Desktop.Vulkan
 
         readonly Thread thread;
         readonly object gate = new();
-        readonly Queue<(VkBackBuffer Buffer, int Interval, int Width, int Height)> queue = new();
+        readonly Queue<(VkBackBuffer Buffer, int Interval, int Width, int Height, long Started)> queue = new();
         int queued;
         bool stopping, refreshWanted;
         volatile Exception failure;
@@ -101,6 +101,8 @@ namespace OniMoono.Desktop.Vulkan
 
         /// The main thread's frame the device thread is executing (diagnostics).
         public int Frame;
+        /// When the game frame being handed over began (device thread; PresenterTimings).
+        public long FrameStarted;
 
         /// Makes the surface's first swapchain at once (on the calling thread), so that a
         /// window Vulkan cannot present to falls back to OpenGL before the game starts.
@@ -233,7 +235,7 @@ namespace OniMoono.Desktop.Vulkan
             {
                 while (queued >= (interval > 0 ? MaxQueuedWithVsync : MaxQueued) && failure == null) Monitor.Wait(gate);
                 if (failure != null) return; // VkDevice reports it (Failure)
-                queue.Enqueue((b, interval, Math.Max(1, width), Math.Max(1, height)));
+                queue.Enqueue((b, interval, Math.Max(1, width), Math.Max(1, height), complete ? FrameStarted : 0));
                 queued++;
                 Monitor.PulseAll(gate);
             }
@@ -268,7 +270,7 @@ namespace OniMoono.Desktop.Vulkan
             {
                 while (true)
                 {
-                    (VkBackBuffer Buffer, int Interval, int Width, int Height) frame = default;
+                    (VkBackBuffer Buffer, int Interval, int Width, int Height, long Started) frame = default;
                     bool redraw = false;
                     lock (gate)
                     {
@@ -295,7 +297,9 @@ namespace OniMoono.Desktop.Vulkan
                     {
                         // vSyncCount 2-4: FIFO shows an image per vertical blank, so the frame
                         // is presented that many times (OpenGL's swap interval does the same).
+                        PresenterTimings.FrameStarted = frame.Started;
                         Show(frame.Buffer, frame.Interval, frame.Width, frame.Height, gameFrame: true);
+                        PresenterTimings.FrameStarted = 0;
                         // (DXGI's Present takes the interval itself.)
                         for (int again = 1; again < frame.Interval && dxgi == null; again++) Show(frame.Buffer, frame.Interval, frame.Width, frame.Height, gameFrame: false);
                     }

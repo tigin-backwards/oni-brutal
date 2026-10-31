@@ -873,9 +873,11 @@ namespace OniMoono.Desktop.Gl
             int interval = SwapIntervalOverride >= 0 ? SwapIntervalOverride : QualitySettings.vSyncCount;
             int width = platform.FramebufferWidth, height = platform.FramebufferHeight;
             int frame = Time.frameCount;
+            long started = PlayerLoop.FrameStartedAt;
             worker.Post(() =>
             {
                 presenter.Frame = frame;
+                presenter.FrameStarted = started;
                 if (gpuTiming) EndGpuTiming();
                 uniformStream?.FenceFrame();
                 if (GlGpuProfile.Enabled) GlGpuProfile.FrameEnd();

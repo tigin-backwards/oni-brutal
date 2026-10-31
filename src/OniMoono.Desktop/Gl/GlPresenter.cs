@@ -54,7 +54,7 @@ namespace OniMoono.Desktop.Gl
         readonly object gate = new();
         // Handed to the presenter under the gate; a frame counts as queued until it has been
         // presented.
-        readonly System.Collections.Generic.Queue<(Buffer Buffer, GlSync Fence, int Interval, int Width, int Height)> queue = new();
+        readonly System.Collections.Generic.Queue<(Buffer Buffer, GlSync Fence, int Interval, int Width, int Height, long Started)> queue = new();
         int queued;
         bool stopping;
         Exception failure;
@@ -130,6 +130,8 @@ namespace OniMoono.Desktop.Gl
 
         /// The main thread's frame the GL thread is executing (diagnostics).
         public int Frame;
+        /// When the game frame being handed over began (GL thread; PresenterTimings).
+        public long FrameStarted;
 
         void Allocate(Buffer b, int width, int height)
         {
@@ -208,7 +210,7 @@ namespace OniMoono.Desktop.Gl
             {
                 while (queued >= (interval > 0 ? MaxQueuedWithVsync : MaxQueued) && failure == null) Monitor.Wait(gate);
                 if (failure != null) throw new InvalidOperationException("Presenting failed.", failure);
-                queue.Enqueue((b, fence, interval, Math.Max(1, width), Math.Max(1, height)));
+                queue.Enqueue((b, fence, interval, Math.Max(1, width), Math.Max(1, height), complete ? FrameStarted : 0));
                 queued++;
                 Monitor.PulseAll(gate);
             }
@@ -249,7 +251,7 @@ namespace OniMoono.Desktop.Gl
                 target = StartTarget();
                 while (true)
                 {
-                    (Buffer Buffer, GlSync Fence, int Interval, int Width, int Height) frame = default;
+                    (Buffer Buffer, GlSync Fence, int Interval, int Width, int Height, long Started) frame = default;
                     bool redraw = false;
                     lock (gate)
                     {
@@ -279,7 +281,12 @@ namespace OniMoono.Desktop.Gl
                         if (redraw) queued++;
                     }
                     if (redraw) Redraw();
-                    else PresentBuffer(frame.Buffer, frame.Fence, frame.Interval, frame.Width, frame.Height);
+                    else
+                    {
+                        PresenterTimings.FrameStarted = frame.Started;
+                        PresentBuffer(frame.Buffer, frame.Fence, frame.Interval, frame.Width, frame.Height);
+                        PresenterTimings.FrameStarted = 0;
+                    }
                     lock (gate)
                     {
                         queued--;

@@ -199,6 +199,29 @@ namespace OniMoono.Tests
             Assert.Equal(30 * interval - 1, (now - start) / refresh);
         }
 
+        /// Frame stats' time from a game frame's start to its picture's present: counted for the
+        /// picture of a game frame (FrameStarted set), up to when it was issued, not for redraws.
+        [Fact]
+        public void FrameStartToPresentCountsGameFramesUpToTheirIssue()
+        {
+            bool was = OniMoono.Engine.PlayerLoop.FrameStats;
+            OniMoono.Engine.PlayerLoop.FrameStats = true;
+            try
+            {
+                PresenterTimings.Take();
+                long f = System.Diagnostics.Stopwatch.Frequency, now = System.Diagnostics.Stopwatch.GetTimestamp();
+                PresenterTimings.FrameStarted = now - f * 40 / 1000; // began 40 ms ago
+                PresenterTimings.Shown(waited: f * 10 / 1000);         // issued 10 ms ago
+                Assert.Equal(0, PresenterTimings.FrameStarted);
+                PresenterTimings.Shown(waited: 0);                     // a redraw: not counted
+                var line = PresenterTimings.Take();
+                var m = System.Text.RegularExpressions.Regex.Match(line, @"frame start to present mean ([0-9.]+)");
+                Assert.True(m.Success, line);
+                Assert.InRange(double.Parse(m.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture), 29.5, 35);
+            }
+            finally { OniMoono.Engine.PlayerLoop.FrameStats = was; }
+        }
+
         [Fact]
         public void TheSlowestPercentIsTheMeanOfTheLongestIntervals()
         {

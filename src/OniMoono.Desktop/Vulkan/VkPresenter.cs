@@ -66,15 +66,13 @@ namespace OniMoono.Desktop.Vulkan
 
         /// Windows: DXGI's swap chain in place of Vulkan's (VkDxgiTarget; null: the
         /// VkSwapchainKHR), the window's handle, and its restarts after a failure while running:
-        /// Vulkan's swapchain stands in until one succeeds (a second apart, MaxDxgiRestarts at
-        /// most). It does reach the screen after DXGI's (measured), unlike OpenGL's SwapBuffers;
-        /// DXGI is restarted all the same, for how Windows treats the picture.
+        /// Vulkan's swapchain stands in until one succeeds (DxgiRestarts: bursts of at most ten
+        /// tries, 1 to 8 s apart). It does reach the screen after DXGI's (measured), unlike
+        /// OpenGL's SwapBuffers; DXGI is restarted all the same, for how Windows treats the picture.
         VkDxgiTarget dxgi;
         readonly IntPtr dxgiWindow;
         bool dxgiLost;
-        int dxgiRestarts;
-        long nextDxgiRestart;
-        const int MaxDxgiRestarts = 10;
+        readonly DxgiRestarts dxgiRestarts = new();
         Action waitIdle;
         static string MadeUp => DxgiSwapChain.Fault != null ? $" (a made-up fault: --dxgi-fault {DxgiSwapChain.Fault})" : "";
 
@@ -520,6 +518,7 @@ namespace OniMoono.Desktop.Vulkan
                 return;
             }
             lastWait = dxgi.LastWait;
+            dxgiRestarts.Presented(GlTimings.Now);
         }
 
         /// The queue's lock (Brutal's Queue serializes its submissions with it; the device thread
@@ -559,15 +558,16 @@ namespace OniMoono.Desktop.Vulkan
             dxgi = RestartDxgi();
         }
 
-        /// DXGI started anew after it failed, at most MaxDxgiRestarts times, a second apart;
-        /// null when it does not start (or may not be tried yet). Vulkan's swapchain, standing
-        /// in, gives the window up first (a window has one swap chain at a time).
+        /// DXGI started anew after it failed, when DxgiRestarts allows a try; null when it does
+        /// not start (or may not be tried yet). Vulkan's swapchain, standing in, gives the window
+        /// up first (a window has one swap chain at a time).
         [System.Runtime.Versioning.SupportedOSPlatform("windows")]
         VkDxgiTarget RestartDxgi()
         {
-            if (dxgiRestarts >= MaxDxgiRestarts || GlTimings.Now < nextDxgiRestart) return null;
-            dxgiRestarts++;
-            nextDxgiRestart = GlTimings.Now + System.Diagnostics.Stopwatch.Frequency;
+            long now = GlTimings.Now;
+            if (!dxgiRestarts.MayTry(now)) return null;
+            dxgiRestarts.Tried(now);
+            int tries = dxgiRestarts.Tries;
             if (!swapchain.IsNull())
             {
                 vk.Queue.WaitIdle();
@@ -578,14 +578,15 @@ namespace OniMoono.Desktop.Vulkan
             var restarted = VkDxgiTarget.Create(vk, dxgiWindow, windowWidth, windowHeight, out string reason, out _);
             if (restarted != null)
             {
-                EngineLog.Engine($"present: DXGI started again (restart {dxgiRestarts})");
+                EngineLog.Engine($"present: DXGI started again (restart {tries})");
+                dxgiRestarts.Started(GlTimings.Now);
                 dxgiLost = false;
                 SwapchainFormat = VkDxgiTarget.Format;
                 return restarted;
             }
-            EngineLog.Engine(dxgiRestarts < MaxDxgiRestarts
-                ? $"present: DXGI restart {dxgiRestarts} failed: {reason}{MadeUp}; Vulkan's swapchain until the next"
-                : $"present: DXGI restart {dxgiRestarts} failed: {reason}{MadeUp}; no more tries: Vulkan's swapchain from here on");
+            EngineLog.Engine(!dxgiRestarts.Exhausted
+                ? $"present: DXGI restart {tries} failed: {reason}{MadeUp}; Vulkan's swapchain until the next in {DxgiRestarts.DelaySeconds(tries):F0} s"
+                : $"present: DXGI restart {tries} failed: {reason}{MadeUp}; no more tries: Vulkan's swapchain from here on");
             outOfDate = true;
             return null;
         }

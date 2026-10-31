@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using OniMoono.Desktop.Gl;
 using Xunit;
@@ -128,6 +129,41 @@ namespace OniMoono.Tests
             foreach (var f in typeof(Brutal.VulkanApi.Queue).GetFields(System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance))
                 if (f.FieldType == typeof(System.Threading.Lock)) locks++;
             Assert.Equal(1, locks);
+        }
+
+        /// Restarts after DXGI fails: ten tries a burst, 1, 2, 4 then 8 s apart (about a minute,
+        /// outlasting a slow driver reset); a restart that presents for 60 s ends the burst.
+        [Fact]
+        public void RestartsComeInBurstsThatEndAfterAMinuteOfPresenting()
+        {
+            long s = System.Diagnostics.Stopwatch.Frequency, now = 1000 * s;
+            var r = new DxgiRestarts();
+            Assert.True(r.MayTry(now));
+            double total = 0;
+            for (int i = 1; i <= DxgiRestarts.MaxPerBurst; i++)
+            {
+                Assert.True(r.MayTry(now));
+                r.Tried(now);
+                Assert.False(r.MayTry(now + s / 2));
+                total += DxgiRestarts.DelaySeconds(i);
+                now += (long)(DxgiRestarts.DelaySeconds(i) * s);
+            }
+            Assert.Equal([1.0, 2, 4, 8, 8], new[] { 1, 2, 3, 4, 9 }.Select(DxgiRestarts.DelaySeconds));
+            Assert.InRange(total - DxgiRestarts.DelaySeconds(10), 50, 60); // the span the ten tries cover
+            Assert.True(r.Exhausted);
+            Assert.False(r.MayTry(now + 3600 * s));
+            // Presenting does not end a burst whose last try failed.
+            r.Presented(now + 3600 * s);
+            Assert.True(r.Exhausted);
+
+            r = new DxgiRestarts();
+            r.Tried(now);
+            r.Started(now);
+            r.Presented(now + 30 * s);
+            Assert.Equal(1, r.Tries);
+            r.Presented(now + 61 * s);
+            Assert.Equal(0, r.Tries);
+            Assert.True(r.MayTry(now + 61 * s));
         }
 
         [Fact]

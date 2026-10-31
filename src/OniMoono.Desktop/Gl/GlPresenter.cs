@@ -327,16 +327,15 @@ namespace OniMoono.Desktop.Gl
             return new GlSwapTarget(window);
         }
 
-        /// DXGI's restarts after it failed while running, and when the next may be tried.
-        int dxgiRestarts;
-        long nextDxgiRestart;
+        /// DXGI's restarts after it failed while running (DxgiRestarts: bursts of at most ten
+        /// tries, 1 to 8 s apart).
+        readonly DxgiRestarts dxgiRestarts = new();
         bool dxgiLost;
-        const int MaxDxgiRestarts = 10;
 
         /// The target failed while running (DXGI: the device was lost, or a call failed). DXGI is
         /// started anew (a new device and swap chain), as a lost Direct3D device is recovered:
-        /// OpenGL's SwapBuffers does not reach the screen on a window that has had a flip-model
-        /// swap chain (measured: the window kept showing DXGI's last picture). Until a restart
+        /// OpenGL's SwapBuffers does not reach the screen on a window whose flip-model swap chain
+        /// has presented (measured: the window kept showing DXGI's last picture). Until a restart
         /// succeeds, and after the last, OpenGL's SwapBuffers stands in.
         void FallBack()
         {
@@ -352,23 +351,25 @@ namespace OniMoono.Desktop.Gl
             target ??= new GlSwapTarget(window);
         }
 
-        /// DXGI started anew after it failed, at most MaxDxgiRestarts times, a second apart;
-        /// null when it does not start (or may not be tried yet).
+        /// DXGI started anew after it failed, when DxgiRestarts allows a try; null when it does
+        /// not start (or may not be tried yet).
         IWindowTarget RestartDxgi()
         {
-            if (dxgiRestarts >= MaxDxgiRestarts || GlTimings.Now < nextDxgiRestart) return null;
-            dxgiRestarts++;
-            nextDxgiRestart = GlTimings.Now + System.Diagnostics.Stopwatch.Frequency;
+            long now = GlTimings.Now;
+            if (!dxgiRestarts.MayTry(now)) return null;
+            dxgiRestarts.Tried(now);
+            int tries = dxgiRestarts.Tries;
             var dxgi = DxgiTarget.Create(dxgiWindow, windowWidth, windowHeight, out string reason, out _);
             if (dxgi != null)
             {
-                EngineLog.Engine($"present: DXGI started again (restart {dxgiRestarts})");
+                EngineLog.Engine($"present: DXGI started again (restart {tries})");
+                dxgiRestarts.Started(GlTimings.Now);
                 dxgiLost = false;
                 return dxgi;
             }
-            EngineLog.Engine(dxgiRestarts < MaxDxgiRestarts
-                ? $"present: DXGI restart {dxgiRestarts} failed: {reason}{MadeUp}; OpenGL's SwapBuffers until the next, which Windows may not show"
-                : $"present: DXGI restart {dxgiRestarts} failed: {reason}{MadeUp}; no more tries: OpenGL's SwapBuffers from here on, which Windows may not show");
+            EngineLog.Engine(!dxgiRestarts.Exhausted
+                ? $"present: DXGI restart {tries} failed: {reason}{MadeUp}; OpenGL's SwapBuffers until the next in {DxgiRestarts.DelaySeconds(tries):F0} s, which Windows may not show"
+                : $"present: DXGI restart {tries} failed: {reason}{MadeUp}; no more tries: OpenGL's SwapBuffers from here on, which Windows may not show");
             return null;
         }
 
@@ -384,7 +385,7 @@ namespace OniMoono.Desktop.Gl
                 target.Dispose();
                 target = restarted;
             }
-            // Ends: a restart is tried at most once a second, and OpenGL's Begin never fails.
+            // Ends: restarts are at least a second apart, and OpenGL's Begin never fails.
             while (!target.Begin(width, height)) FallBack();
             PresenterTimings.Add(ref PresenterTimings.Begin, GlTimings.Now - t);
             return target.FlipY;
@@ -402,6 +403,7 @@ namespace OniMoono.Desktop.Gl
             if (shownOk)
             {
                 PresenterTimings.Shown(wait);
+                if (target is DxgiTarget) dxgiRestarts.Presented(GlTimings.Now);
                 return;
             }
             FallBack();

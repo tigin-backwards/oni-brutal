@@ -51,6 +51,13 @@ your home folder; the setup notices and installs the player inside the sandbox's
 You'll need an OpenGL 4.5 graphics driver. The game uses your normal Steam account, DLCs, saves,
 settings and mods.
 
+On Windows the game reaches the screen through Direct3D, as the original does, so HDR monitors
+show it as the original. If HDR switches on or the screen goes very bright in fullscreen, look
+for the `present:` line in `Player.log`: if it says Vulkan's swapchain or OpenGL's SwapBuffers is
+used, the line says why, and that is the likely cause. Then, on NVIDIA, set **Vulkan/OpenGL
+present method** to **Prefer native** in the NVIDIA Control Panel, and turn Auto HDR (Windows'
+Graphics settings) or RTX HDR (the NVIDIA app) off for OniMoono.exe.
+
 ## Performance
 
 The biggest change is swapping the very garbage Mono runtime that Unity ships for CoreCLR. On

@@ -1627,6 +1627,79 @@ player: with vSync the swap paces frames; otherwise `Application.targetFrameRate
 otherwise none. Without a display (`--headless`, `--batchmode`) frames are paced at
 `targetFrameRate` or 60 Hz.
 
+**Presentation on Windows (DXGI).** On Windows both devices present through a Direct3D 11
+flip-model swap chain (`DxgiSwapChain`), on by default (Moono Tweaks' "Present through Direct3D
+on Windows", settings.json `"dxgi"`, `--dxgi on|off`). The original (Unity 6 on D3D11) presents
+through an 8-bit flip-model DXGI swap chain in the default sRGB colour space, so Windows knows
+its frames are SDR. OpenGL presents through WGL with no swap chain Windows can see, and a
+VkSwapchainKHR is the driver's to implement; NVIDIA's "Vulkan/OpenGL present method" (Auto by
+default) may layer either on DXGI, and Auto HDR or RTX HDR can then take the game for HDR content
+and push the brightness up (a user's report: fullscreen forced HDR and maximum brightness). The
+window is the same in both (a borderless popup the monitor's size, measured); only the
+presentation differed. The swap chain: a D3D11 device on the rendering device's adapter (by its
+LUID: Vulkan's `VkPhysicalDeviceIDProperties`, OpenGL's `EXT_external_objects_win32`, else
+`GL_VENDOR`/`GL_RENDERER` against the DXGI adapters' descriptions; the GPU option's choice is the
+device's), `R8G8B8A8_UNORM`, `FLIP_DISCARD`, two buffers, the default colour space
+(`RGB_FULL_G22_NONE_P709`), `DXGI_SCALING_STRETCH`, a frame-latency waitable object at a maximum
+latency of 2, and `ALLOW_TEARING` when the system supports it, used only without vsync. Each
+device renders the picture into one D3D11 texture of its own, made anew (a quarter larger) only
+when the window outgrows it, which `CopySubresourceRegion` copies into the back buffer before
+`Present` at `QualitySettings.vSyncCount` (0 to 4); with vsync the presenter then waits on the
+waitable object until the picture before it retires, two pictures in flight as Unity's default
+of two queued frames (with one, Vulkan on the AMD iGPU lost 7% of its frames at 60 Hz: 55.2 fps
+against 59.9 on its swapchain; with two, 59.5). Without vsync it does not wait, as the swapchain
+paths do not: retiring a picture can take a frame or two (29 ms
+a picture measured on the AMD iGPU, whose picture is copied to a monitor on the NVIDIA card),
+which would cap the frame rate; the interop lock or keyed mutex bounds what is in flight.
+- *OpenGL* (`DxgiTarget`): the texture is registered with GL once through `WGL_NV_DX_interop2`
+  and locked while the presenter's blit fills it, flipped (Direct3D's rows run top-down; the
+  splash is drawn flipped too). The swap chain's own buffers are never registered with GL
+  (re-registering them after a resize is suspected of a use-after-free in NVIDIA's driver, Godot
+  PR #94503).
+- *Vulkan* (`VkDxgiTarget`): the texture has an NT handle and a keyed mutex and is imported as a
+  Vulkan image (`VK_KHR_external_memory_win32`, a dedicated allocation). The presenter's
+  submission takes it from queue family EXTERNAL, blits the frame in (both APIs store the top
+  row first: no flip), draws the splash, gives it back in `GENERAL` layout and, through
+  `VK_KHR_win32_keyed_mutex`, acquires the mutex with key 0 and releases it with key 1; D3D11
+  acquires key 1, copies, releases key 0 and presents. The mutex orders the two APIs' GPU work
+  both ways with no CPU wait between them. No VkSwapchainKHR is made while DXGI presents.
+
+A size change calls `ResizeBuffers` before the next picture; between the window's resize and that
+picture DXGI stretches the last one. A minimized window keeps its framebuffer size (§3.6), so the
+buffers keep theirs; an occluded `Present` (`DXGI_STATUS_OCCLUDED`) shows nothing and is not
+waited for. Exclusive fullscreen stays the window's (GLFW sets the display mode, a monitor-sized
+window), not DXGI's `SetFullscreenState`; DXGI is told to leave the window alone
+(`DXGI_MWA_NO_WINDOW_CHANGES | NO_ALT_ENTER`). After start-up every DXGI, D3D11 and interop object
+is used and released on the presenter thread alone, so neither `Present` nor `ResizeBuffers`
+sends the window a message the main thread (which may be waiting on the device thread, which may
+be waiting on the presenter) would have to answer. Any failure at start-up (no interop
+extension, no matching adapter, a failed device, swap chain, registration, import or first lock)
+leaves the device's own presentation in use, with one `present:` log line saying why. A failure
+while running (a lost device: `DXGI_ERROR_DEVICE_REMOVED`/`RESET`/`HUNG`, a failed lock,
+keyed-mutex wait, resize or present) releases everything DXGI held and starts it anew. Until a
+restart succeeds (one a second, ten at most) the device's own presentation stands in: Vulkan's
+swapchain reaches the screen then (measured), but OpenGL's SwapBuffers does not on a window that
+has had a flip-model swap chain (measured: the window kept DXGI's last picture while frames went
+on), so on OpenGL a DXGI that cannot restart leaves the window still. The
+`present:` line at start-up names the adapter and the swap chain's settings; `--dxgi-fault STEP`
+makes up a failure at one step, for testing the ways back; with `--frame-stats` the frame counts
+include the presenter's time per picture and, every 600 frames, the process's video memory on the
+adapter as DXGI counts it. Captures and `ReadPixels` read the offscreen back buffers, never the
+window, so they are the same either way.
+
+Measured on Windows 11 with an RTX 3090 and an AMD iGPU (U60 761015, 2026-10-30; the monitor
+captured through Desktop Duplication): a paused colony on screen differs from the original's by
+0.10% of pixels with Vulkan through DXGI and through its swapchain alike, 0.29% and 0.31% with
+OpenGL; DXGI's picture and the device's own differ less than two runs of one path do. The
+presenter is busy 0.3 to 0.6 ms a picture through DXGI against 0.1 to 0.2 on the device's own
+path. A light colony without vsync ran at 115 fps through DXGI against 111 with Vulkan on the RTX
+3090, 59 against 60 on the iGPU, and 159 against 102 with OpenGL; with vsync all held 60 Hz
+(two pictures in flight, above); start-up differed by less than the spread between launches. 300
+resizes, 300 minimize/restore cycles and 300 mode switches (30 exclusive) on Vulkan, and 150 each
+on the iGPU and on OpenGL, showed no failure and no growth in video memory. Not measured: Intel
+GPUs, an HDR monitor with HDR on (tools/HdrCheck is for that), Vulkan's validation layer (not
+installed), input latency.
+
 **Loading splash (`--splash moo`, on by default; `--splash none` or Moono Tweaks turns it off).** The player's own presentation, not the
 game's: the presenter thread draws Gassy Moo comets (the game's `meteor_gassymoo` kanim, its
 `fall_loop`, read from `sharedassets0.assets` on a worker thread at start-up) over whatever the
@@ -1780,7 +1853,8 @@ frames to a device thread; only the work posted for resources differs (`IResourc
   frames shown meanwhile; presenting is given up only after five failures in a row spanning
   ten seconds. The old swapchain is destroyed either way. The swapchain format is B8G8R8A8 or
   R8G8B8A8 UNORM in sRGB non-linear colour space, written as OpenGL's default framebuffer is (no
-  sRGB encoding).
+  sRGB encoding). On Windows, DXGI presents instead when it starts (*Presentation on Windows*
+  above).
 - *Device loss.* At start-up any failure falls back to OpenGL (*Starting* above). A device
   lost in play cannot be recovered in place (every texture, mesh and program would have to be
   made again, and the non-readable textures have no CPU copy), nor switched to OpenGL, which

@@ -616,9 +616,9 @@ replaces looking for error logs by hand. Stages (each can be run alone):
 - **verify:** U57 with every game tweak and every engine verify mode (canvas skips, component
   layouts, texel copies) for at least 10 game minutes; every check must report zero mismatches,
   and each must report.
-- **perf:** U57 with every game tweak: peak memory under 16 GB, the steady frame rate no lower
-  than the reference's less 15% (this machine's noise), and multi-target framebuffers not piling
-  up.
+- **perf:** U57 with every game tweak: peak memory under 18 GB on u60 (`mem_limit_mb`), the
+  steady frame rate no lower than the reference's less 15% (this machine's noise), and
+  multi-target framebuffers not piling up.
 
 QA rounds (2026-10-20):
 - Round 1: the Duplicant cards' garbled text (Q1), the missing standard screen modes (Q2).

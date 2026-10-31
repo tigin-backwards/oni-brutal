@@ -12,11 +12,12 @@
 #   verify   U57 with every game tweak and every engine verify mode, for at least 10 game minutes
 #            (6000 frames, six overlays; QA_VERIFY_FULL=1: 10500 frames, every overlay):
 #            every check reports zero mismatches.
-#   perf     U57 with every game tweak: peak memory under 16 GB, the steady frame rate no lower than
+#   perf     U57 with every game tweak: peak memory under the limit (18 GB on u60; see
+#            mem_limit_mb), the steady frame rate no lower than
 #            the reference's less 15% (the machine's noise), multi-target framebuffers not piling up.
 #            It holds the machine (see quiet_begin): new e2e specs wait for it.
 #   memory   (not in the default list; also --memory or QA_MEMORY_ONLY=1, which runs it alone) U57's
-#            peak resident memory only, under 16 GB: no perf lock, no wait for a quiet machine, and
+#            peak resident memory only, under the same limit: no perf lock, no wait for a quiet machine, and
 #            it stops once the first autosave has passed and RSS has settled. It reports the
 #            peak, the frame of the peak and the RssAnon/RssFile split (STAGE/memory.json).
 # verify and perf need a large Spaced Out colony and its DLC content, which cannot be published:
@@ -69,6 +70,11 @@ qa="$root/out/qa"; ref="$qa/reference"; run="$qa/run-$(date +%Y%m%d-%H%M%S)"
 mkdir -p "$run" "$ref"
 [ -f "$root/out/local-tools/qa.env" ] && source "$root/out/local-tools/qa.env"
 tools="$root/scripts/qa-tools.py"
+# The perf and memory stages' limit on U57's peak resident memory (QA_MEMORY_LIMIT_MB to change
+# it). u60: 18 GB, U59's 16 GB plus what U60 itself added: vanilla U60 peaks about 2 GB above
+# vanilla U59 (15.1 against 13.1 GB), and ours measured 16.1-16.8 GB in these stages on U60
+# (docs/research/u60-inventory.md, Performance).
+mem_limit_mb=${QA_MEMORY_LIMIT_MB:-18432}
 failures=0
 fail() { echo "FAIL $*"; echo "FAIL $*" >> "$run/summary.txt"; failures=$((failures + 1)); }
 ok() { echo "ok   $*"; echo "ok   $*" >> "$run/summary.txt"; }
@@ -408,14 +414,14 @@ stage_perf()
     u57_check perf "$out"
     [ -d "$out/hang" ] && return # a hung run has nothing more to check
     local peak; peak=$(cat "$out/peak-rss")
-    if [ "$peak" -lt $((16 * 1024 * 1024)) ]; then ok "perf: peak memory $((peak / 1024)) MB"; else fail "perf: peak memory $((peak / 1024)) MB (16 GB limit)"; fi
+    if [ "$peak" -lt $((mem_limit_mb * 1024)) ]; then ok "perf: peak memory $((peak / 1024)) MB"; else fail "perf: peak memory $((peak / 1024)) MB ($mem_limit_mb MB limit)"; fi
     read -r fps span windows <<< "$(python3 "$tools" perf "$out/stdout.txt")"
     local status; status=$(cat "$out/exit")
     local kept; kept=$(grep -aoE '[0-9]+ kept' "$out/stdout.txt" | tail -1 | cut -d' ' -f1)
     if [ "${kept:-0}" -le 1 ]; then ok "perf: multi-target framebuffers kept ${kept:-0}"; else fail "perf: $kept multi-target framebuffers kept"; fi
     awk -v f="${fps:-0}" 'BEGIN { exit !(f > 0) }' || { fail "perf: no frame rate measured"; return; }
     if [ $bless -eq 1 ]; then
-        [ "$status" = 0 ] && [ "$peak" -lt $((16 * 1024 * 1024)) ] || { fail "perf: a failed run is not a baseline"; return; }
+        [ "$status" = 0 ] && [ "$peak" -lt $((mem_limit_mb * 1024)) ] || { fail "perf: a failed run is not a baseline"; return; }
         echo "$fps" > "$ref/perf-baseline"; ok "perf: $fps fps blessed as the baseline"; return
     fi
     [ -f "$ref/perf-baseline" ] || { fail "perf: no baseline (run with --bless after checking $out)"; return; }
@@ -439,7 +445,7 @@ stage_memory()
     autosave=$(python3 -c 'import json, sys; print(json.load(open(sys.argv[1])).get("autosave_frame") or "")' "$out/memory.json" 2>/dev/null)
     [ "$peak" -gt 0 ] || { fail "memory: no memory measured (see $out/stdout.txt)"; return; }
     [ -n "$autosave" ] || fail "memory: no autosave within ${QA_MEMORY_MAX_FRAMES:-9000} frames: the peak may be later"
-    if [ "$peak" -lt $((16 * 1024 * 1024)) ]; then ok "memory: peak $((peak / 1024)) MB"; else fail "memory: peak $((peak / 1024)) MB (16 GB limit)"; fi
+    if [ "$peak" -lt $((mem_limit_mb * 1024)) ]; then ok "memory: peak $((peak / 1024)) MB"; else fail "memory: peak $((peak / 1024)) MB ($mem_limit_mb MB limit)"; fi
 }
 
 for s in "${stages[@]}"; do

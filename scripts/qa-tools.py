@@ -8,6 +8,10 @@
                                           apart); masks are relative to the crop
   qa-tools.py verify LOG                  each verify mode's last report; exit 1 on a mismatch
   qa-tools.py perf STDOUT                 steady-window frame rates and game time span
+  qa-tools.py memwatch OUT HOME PID       the memory stage's watch of a U57 player (MemWatch): its
+                                          peak RSS, the frame of the peak and the RssAnon/RssFile
+                                          split, stopping it once the first autosave has passed
+                                          and RSS has settled
 """
 import re, sys
 
@@ -202,6 +206,151 @@ def perf(path):
     span = rows[-1][3] - rows[0][3] if len(rows) > 1 else 0
     print(f'{mean:.2f} {span} {len(steady)}')
 
+class MemWatch:
+    """qa.sh's memory stage (memwatch): a player's resident memory against its frame count. The
+    frame of a sample is estimated from PerfProbe's PERF lines (every 600 frames, with the frame
+    rate since the last). Peak memory comes with the first autosave (about 2,500 frames after U57
+    has loaded) and does not depend on the machine's load; the watch says to stop once an autosave
+    has passed and RSS has not risen by more than RISE_KB for SETTLE frames since."""
+
+    PERF = re.compile(r'PERF f(\d+) fps ([\d.]+)')
+    AUTOSAVE = re.compile(r'(Saved to \[|background save written: ).*auto_save')
+
+    def __init__(self, settle=1200, rise_kb=64 * 1024):
+        self.settle, self.rise_kb = settle, rise_kb
+        self.perf = None             # (frame, fps, wall time) of the last PERF line
+        self.autosave = None         # the frame of the last autosave line
+        self.peak = None             # the sample with the most RSS: {rss, anon, file, frame, time}
+        self.level, self.risen = 0, None  # RSS that counts as a rise from, and the frame it last rose at
+        self.frame = None
+
+    def line(self, text, now):
+        m = self.PERF.search(text)
+        if m:
+            self.perf = (int(m.group(1)), float(m.group(2)), now)
+        elif self.AUTOSAVE.search(text):
+            self.autosave = self.estimate(now)
+
+    def estimate(self, now):
+        """The frame at NOW: the last PERF line's, plus its frame rate's worth since (at most the
+        600 frames to the next one); 0 before the first."""
+        if not self.perf:
+            return 0
+        frame, fps, wall = self.perf
+        return frame + int(min(600, max(0.0, now - wall) * fps))
+
+    def sample(self, rss, anon, file, now):
+        """One reading (kB); returns why to stop, or None."""
+        self.frame = self.estimate(now)
+        if self.peak is None or rss > self.peak['rss']:
+            self.peak = {'rss': rss, 'anon': anon, 'file': file, 'frame': self.frame, 'time': now}
+        if rss > self.level + self.rise_kb or self.risen is None:
+            self.level, self.risen = max(rss, self.level), self.frame
+        if self.autosave is not None and self.frame >= self.autosave and self.frame - max(self.risen, self.autosave) >= self.settle:
+            return (f'the first autosave (f{self.autosave}) has passed and RSS has not risen by more than '
+                    f'{self.rise_kb // 1024} MB for {self.frame - max(self.risen, self.autosave)} frames')
+        return None
+
+    def summary(self):
+        p = self.peak or {'rss': 0, 'anon': 0, 'file': 0, 'frame': 0}
+        return {'peak_kb': p['rss'], 'peak_frame': p['frame'], 'rss_anon_kb': p['anon'], 'rss_file_kb': p['file'],
+                'autosave_frame': self.autosave, 'last_frame': self.frame}
+
+
+def proc_status(pid):
+    """VmRSS, RssAnon and RssFile of a process in kB, or None once it has gone."""
+    values = {}
+    try:
+        with open(f'/proc/{pid}/status') as f:
+            for line in f:
+                key, _, value = line.partition(':')
+                if key in ('VmRSS', 'RssAnon', 'RssFile'):
+                    values[key] = int(value.split()[0])
+    except (OSError, ValueError):
+        return None
+    return values if 'VmRSS' in values else None
+
+
+def find_player(home):
+    """Our player (/proc comm OniMoono) whose environment names the run home HOME."""
+    import os
+    for entry in os.listdir('/proc'):
+        if not entry.isdigit():
+            continue
+        try:
+            with open(f'/proc/{entry}/comm') as f:
+                if f.read().strip() != 'OniMoono':
+                    continue
+            with open(f'/proc/{entry}/environ', 'rb') as f:
+                if f'ONI_RUN_HOME={home}'.encode() in f.read().split(b'\0'):
+                    return int(entry)
+        except OSError:
+            continue
+    return None
+
+
+def memwatch(out, home, launcher, settle=None, rise_mb=None, hang_min=None, scripts=None):
+    """qa-tools.py memwatch OUT HOME LAUNCHER_PID: watches the player of run home HOME (started by
+    LAUNCHER_PID) until MemWatch says to stop, the launcher ends, it hangs (no PERF line for
+    QA_HANG_MIN minutes: diagnostics into OUT/hang) or it passes 24 GB; stops it; writes
+    OUT/rss.txt (time, VmRSS, RssAnon, RssFile, frame), OUT/peak-rss (kB) and OUT/memory.json."""
+    import json, os, signal, subprocess, time
+    settle = int(settle or os.environ.get('QA_MEMORY_SETTLE_FRAMES') or 1200)
+    rise_mb = float(rise_mb or os.environ.get('QA_MEMORY_RISE_MB') or 64)
+    hang = 60 * float(hang_min or os.environ.get('QA_HANG_MIN') or 5)
+    watch = MemWatch(settle, int(rise_mb * 1024))
+    log_path, launcher = os.path.join(out, 'stdout.txt'), int(launcher)
+    offset, progress, perfs, reason, player = 0, time.time(), None, None, None
+    with open(os.path.join(out, 'rss.txt'), 'w') as samples:
+        while os.path.exists(f'/proc/{launcher}') and not reason:
+            now = time.time()
+            try:
+                with open(log_path, 'rb') as f:
+                    f.seek(offset)
+                    chunk = f.read()
+                cut = chunk.rfind(b'\n') + 1
+                offset += cut
+                for text in chunk[:cut].decode('utf-8', 'replace').splitlines():
+                    watch.line(text, now)
+            except OSError:
+                pass
+            if watch.perf != perfs:
+                perfs, progress = watch.perf, now
+            player = find_player(home) or player
+            values = proc_status(player) if player else None
+            if values:
+                reason = watch.sample(values['VmRSS'], values.get('RssAnon', 0), values.get('RssFile', 0), now)
+                samples.write(f'{int(now)} {values["VmRSS"]} {values.get("RssAnon", 0)} {values.get("RssFile", 0)} {watch.frame}\n')
+                samples.flush()
+                if values['VmRSS'] > 24 * 1024 * 1024:
+                    reason = 'runaway: more than 24 GB'
+                elif now - progress >= hang and not os.path.isdir(os.path.join(out, 'hang')):
+                    reason = f'hung: no PERF line for {hang / 60:g} min'
+                    subprocess.run([os.path.join(scripts or os.path.dirname(os.path.abspath(__file__)), 'hang-dump.sh'),
+                                    str(player), os.path.join(out, 'hang'), log_path], capture_output=True)
+            time.sleep(1)
+    if reason and player:
+        for sig, wait in ((signal.SIGTERM, 10), (signal.SIGKILL, 5)):
+            try:
+                os.kill(player, sig)
+            except OSError:
+                break
+            deadline = time.time() + wait
+            while os.path.exists(f'/proc/{player}') and time.time() < deadline:
+                time.sleep(0.2)
+    result = dict(watch.summary(), stopped=reason or 'the player ended', settle_frames=settle, rise_mb=rise_mb)
+    with open(os.path.join(out, 'memory.json'), 'w') as f:
+        json.dump(result, f, indent=1)
+    with open(os.path.join(out, 'peak-rss'), 'w') as f:
+        f.write(f'{result["peak_kb"]}\n')
+    mb = lambda kb: f'{kb / 1024:,.0f} MB'
+    print(f'peak {mb(result["peak_kb"])} at about f{result["peak_frame"]} (RssAnon {mb(result["rss_anon_kb"])}, '
+          f'RssFile {mb(result["rss_file_kb"])}); autosave at '
+          + (f'about f{result["autosave_frame"]}' if result['autosave_frame'] is not None else 'none seen')
+          + f'; stopped at about f{result["last_frame"]}: {result["stopped"]}')
+
+
 if __name__ == '__main__':
     cmd, *args = sys.argv[1:]
-    {'signatures': signatures, 'new-signatures': new_signatures, 'image': image, 'verify': verify, 'perf': perf}[cmd](*args)
+    {'signatures': signatures, 'new-signatures': new_signatures, 'image': image, 'verify': verify, 'perf': perf,
+     'memwatch': memwatch}[cmd](*args)

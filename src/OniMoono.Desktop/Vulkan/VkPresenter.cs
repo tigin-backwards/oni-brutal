@@ -559,18 +559,17 @@ namespace OniMoono.Desktop.Vulkan
             typeof(Queue).GetField("_lock", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         int dxgiSubmits;
 
+        /// The queue's lock; null when the binding has no such field (VkDxgiTarget then does not
+        /// start DXGI, and Vulkan's swapchain presents).
+        internal static System.Threading.Lock QueueLock(Queue queue) => QueueLockField?.GetValue(queue) as System.Threading.Lock;
+
         /// Submits the DXGI picture's batch; VkResult.Timeout when the keyed mutex was not given
         /// back in time (or --dxgi-fault mutextimeout:N, the Nth submission).
         VkResult SubmitDxgi(VkSubmitInfo2* submit, VkFence fence)
         {
             if (DxgiSwapChain.Faulty("mutextimeout", ++dxgiSubmits)) return VkResult.Timeout;
-            if (QueueLockField?.GetValue(vk.Queue) is not System.Threading.Lock gate)
-            {
-                // A binding without the field: Queue.Submit2, which cannot report a timeout.
-                vk.Queue.Submit2(new Span<VkSubmitInfo2>(submit, 1), fence);
-                return VkResult.Success;
-            }
-            using (gate.EnterScope())
+            // DXGI starts only with the lock (VkDxgiTarget.Start).
+            using (QueueLock(vk.Queue).EnterScope())
                 return vk.Device.PInvoke.vkQueueSubmit2.Invoke(vk.Queue.Handle, 1, submit, fence);
         }
 

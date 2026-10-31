@@ -1681,7 +1681,9 @@ a failure (the chain's own set-up at start-up; while running a lost device:
 view, resize or present) releases everything DXGI held and starts it anew. Vulkan calls
 `vkQueueSubmit2` itself for the DXGI submission, under the lock Brutal's `Queue` takes, to see
 `VK_TIMEOUT` from the keyed mutex (Brutal's `Submit2` returns nothing then), which would otherwise
-leave the presenter waiting on a fence that never signals. Restarts come in bursts of ten tries,
+leave the presenter waiting on a fence that never signals; a Brutal without that lock (its private
+`_lock` field) leaves DXGI off for Vulkan, with the reason on the `present:` line, and Vulkan's
+swapchain presents. Restarts come in bursts of ten tries,
 1, 2, 4 then 8 s apart (about a minute, outlasting a slow driver reset); a restart that presents
 for 60 s ends its burst, so a later failure gets ten tries again. Until a restart succeeds the
 device's own presentation stands in: Vulkan's swapchain reaches the screen then (measured), but

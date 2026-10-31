@@ -22,6 +22,9 @@ namespace OniMoono.Desktop
         public bool DebugContext { get; init; }
         /// -monitor N: the monitor to open on, 1-based as in Unity (0: the primary one).
         public int Monitor { get; init; }
+        /// --no-focus: the window opens without taking the desktop's focus, and still takes
+        /// input once someone focuses it (test runs on a desktop someone is using).
+        public bool NoFocus { get; init; }
     }
 
     /// The player window (GLFW, OpenGL 4.5 core context) and its input devices.
@@ -76,7 +79,7 @@ namespace OniMoono.Desktop
             Glfw.WindowHint(GlfwWindowHint.Doublebuffer, GLFW_TRUE);
             Glfw.WindowHint(GlfwWindowHint.Visible, GLFW_FALSE);
             // Scripted runs take no input from the desktop and do not take its focus either.
-            Glfw.WindowHint(GlfwWindowHint.FocusOnShow, settings.IgnoreUserInput ? GLFW_FALSE : GLFW_TRUE);
+            Glfw.WindowHint(GlfwWindowHint.FocusOnShow, settings.IgnoreUserInput || settings.NoFocus ? GLFW_FALSE : GLFW_TRUE);
             // The window identifies itself as the original's does, so desktops group it with,
             // and take its icon from, the same launchers. Unity's Linux player names the X11
             // class and instance after its executable (WM_CLASS "OxygenNotIncluded",
@@ -120,7 +123,7 @@ namespace OniMoono.Desktop
             });
             renderWindow.MakeContextCurrent();
             window.Visible = true;
-            if (!settings.IgnoreUserInput) window.Focus();
+            if (!settings.IgnoreUserInput && !settings.NoFocus) window.Focus();
 
             // Scripted runs (host --input) take input only from the script.
             scripted = settings.IgnoreUserInput;

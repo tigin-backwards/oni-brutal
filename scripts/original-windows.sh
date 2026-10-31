@@ -20,6 +20,13 @@
 #   own and never the installed game's. The game's code does not read the product name.
 # Unity's log goes to <run home>\Player.log. The run ends after ORIG_SECONDS (default 600), the
 # process killed.
+# As scripts/run-windows.sh's, the window opens windowed on the second monitor (`-screen-fullscreen
+# 0 -monitor 2` first, so the run's own arguments win; ONI_WIN_MONITOR=N picks another monitor),
+# and when it takes the focus as it opens, the window that had it gets it back (in its first
+# minute; Windows may refuse that). Focus it only through out/local-tools/win-run.ps1 -Match
+# RUN_HOME -Action focus. BepInEx's console window is off (BepInEx.cfg, [Logging.Console]
+# Enabled = false), so it does not open on the main monitor: BepInEx still logs to
+# BepInEx\LogOutput.log, and the game runs as before.
 #
 #   ONI_RUN_HOME='C:\...\orig-home' scripts/original-windows.sh -screen-width 1024 -screen-height 768 -screen-fullscreen 0
 set -euo pipefail
@@ -60,11 +67,40 @@ cp "$root/out/bin/OriginalIsolation/release/OriginalIsolation.dll" "$orig/BepInE
 stub="${ONI_STEAM_STUB:-$root/out/win/steamstub/steam_api64.dll}"
 [ -f "$stub" ] || { echo "no Steam double at $stub: run scripts/build-windows.sh" >&2; exit 1; }
 cp "$stub" "$orig/${name}_Data/Plugins/x86_64/steam_api64.dll"
+# No BepInEx console window: BepInEx keeps a setting it finds in its config and adds the others.
+python3 - "$orig/BepInEx/config/BepInEx.cfg" <<'PY'
+import os, re, sys
+path = sys.argv[1]
+os.makedirs(os.path.dirname(path), exist_ok=True)
+text = open(path, newline='').read() if os.path.exists(path) else ''
+if '[Logging.Console]' in text:
+    fixed = re.sub(r'(\[Logging\.Console\][^\[]*?^Enabled = )true', r'\1false', text, count=1, flags=re.M | re.S)
+else:
+    fixed = text + '[Logging.Console]\r\n\r\nEnabled = false\r\n'
+if fixed != text:
+    open(path, 'w', newline='').write(fixed)
+PY
 
 home="$(wslpath "$ONI_RUN_HOME")"; mkdir -p "$home"
-args=""; for a in -logFile "$ONI_RUN_HOME\\Player.log" "$@"; do args="$args'${a//\'/\'\'}',"; done
-powershell.exe -NoProfile -Command "
+args=""; for a in -logFile "$ONI_RUN_HOME\\Player.log" -screen-fullscreen 0 -monitor "${ONI_WIN_MONITOR:-2}" "$@"; do args="$args'${a//\'/\'\'}',"; done
+# The launcher is a script file in the run home: its C# declarations' quotes stay out of the
+# command line.
+ps1="$home/.launch-original.ps1"
+cat > "$ps1" <<EOF
 \$env:ONI_RUN_HOME = '${ONI_RUN_HOME//\'/\'\'}'
+Add-Type -Namespace OniTest -Name Focus -MemberDefinition '[DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow(); [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr w); [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr w, out uint pid);'
+\$end = (Get-Date).AddSeconds(${ORIG_SECONDS:-600})
+\$before = [OniTest.Focus]::GetForegroundWindow()
 \$p = Start-Process -FilePath '$orig_win\\$name.exe' -WorkingDirectory '$orig_win' -ArgumentList @(${args%,}) -PassThru
-if (-not \$p.WaitForExit(${ORIG_SECONDS:-600} * 1000)) { Stop-Process -Id \$p.Id -Force; 'stopped after ${ORIG_SECONDS:-600} s' } else { 'exited ' + \$p.ExitCode }
-" | tr -d '\r'
+# Whenever the game's window takes the focus in its first minute, the window that had it gets it back.
+\$until = (Get-Date).AddSeconds(60)
+while ((Get-Date) -lt \$until -and -not \$p.HasExited -and \$before -ne [IntPtr]::Zero) {
+  \$owner = [uint32]0
+  [void][OniTest.Focus]::GetWindowThreadProcessId([OniTest.Focus]::GetForegroundWindow(), [ref]\$owner)
+  if (\$owner -eq \$p.Id) { [void][OniTest.Focus]::SetForegroundWindow(\$before) }
+  Start-Sleep -Milliseconds 250
+}
+\$left = [Math]::Max(0, [int](\$end - (Get-Date)).TotalMilliseconds)
+if (-not \$p.WaitForExit(\$left)) { Stop-Process -Id \$p.Id -Force; 'stopped after ${ORIG_SECONDS:-600} s' } else { 'exited ' + \$p.ExitCode }
+EOF
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$(wslpath -w "$ps1")" | tr -d '\r'

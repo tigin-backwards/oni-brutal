@@ -15,6 +15,9 @@ stage="$(wslpath "$win_temp")/oni-brutal"
 mkdir -p "$stage"
 rm -rf "$stage/host" "$stage/steamstub"
 cp -r "$root/out/win/host" "$root/out/win/steamstub" "$stage/"
+# The validation layer scripts/get-vulkan-validation.sh fetched, for --vulkan-validation.
+vvl="$root/out/local-tools/vulkan-validation/windows"
+[ -f "$vvl/VkLayer_khronos_validation.json" ] && cp -r "$vvl" "$stage/host/vulkan-validation"
 # ONI_STEAM_STUB=PATH: another steam_api64.dll for the run (a local test setup's).
 [ -n "${ONI_STEAM_STUB:-}" ] && cp "$ONI_STEAM_STUB" "$stage/steamstub/steam_api64.dll"
 stub=steamstub

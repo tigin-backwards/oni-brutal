@@ -1892,10 +1892,16 @@ frames to a device thread; only the work posted for resources differs (`IResourc
   `crash-at:N` ends the process at presented frame N as a crash would, and `guard-build:X`
   keys the start-up guard to build X.
 - *Diagnostics.* `--vulkan-validation` (or `ONI_VULKAN_VALIDATION=1`) enables the Khronos
-  validation layer when installed, its messages in the log; `--frame-stats` counts draws,
-  pipeline binds, render passes, passes ended by uploads and submits; GPU frame time comes from
-  timestamp queries. `--check-shaders` on Vulkan builds every variant and a pipeline for its
-  pass's state, and counts what fails.
+  validation layer, its messages in the log. Without an installed one,
+  `scripts/get-vulkan-validation.sh` fetches a pinned release (Vulkan-ValidationLayers
+  vulkan-sdk-1.4.363.0 from LunarG's SDK packages, checked by SHA-256; on Linux the distro's
+  `vulkan-validationlayers` is used when installed) into the gitignored
+  out/local-tools/vulkan-validation/{linux,windows}; the player finds it there (or in
+  `vulkan-validation/` beside its executable, where `scripts/run-windows.sh` copies it) and points
+  the loader at it through `VK_ADD_LAYER_PATH`; `--frame-stats` counts draws, pipeline binds,
+  render passes, passes ended by uploads and submits; GPU frame time comes from timestamp queries.
+  `--check-shaders` on Vulkan builds every variant and a pipeline for its pass's state, and counts
+  what fails.
 
 On Windows the Vulkan swapchain is what the paused DXGI presenter (a D3D11 flip-model swapchain
 fed by the GL frame, for correct HDR and flip-model handling) aimed at: a modern, compositor-

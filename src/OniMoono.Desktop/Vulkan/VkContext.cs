@@ -177,14 +177,14 @@ namespace OniMoono.Desktop.Vulkan
             Validation |= validationSetting is "1" or "info";
             if (Validation)
             {
-                if (LayerAvailable(VK.LAYER_KHRONOS_VALIDATION))
+                if (LayerAvailable(VK.LAYER_KHRONOS_VALIDATION) || (AddLocalValidationLayer() && LayerAvailable(VK.LAYER_KHRONOS_VALIDATION)))
                 {
                     layers.Add(VK.LAYER_KHRONOS_VALIDATION);
                     extensions.Add(VK.EXT_DEBUG_UTILS_EXTENSION_NAME);
                 }
                 else
                 {
-                    EngineLog.Engine("vulkan: validation asked for, but the Khronos validation layer is not installed");
+                    EngineLog.Engine("vulkan: validation asked for, but the Khronos validation layer is not installed (scripts/get-vulkan-validation.sh fetches it)");
                     Validation = false;
                 }
             }
@@ -323,6 +323,35 @@ namespace OniMoono.Desktop.Vulkan
         }
 
         public static string Version(int v) => $"{(v >> 22) & 0x7F}.{(v >> 12) & 0x3FF}.{v & 0xFFF}";
+
+        /// A validation layer fetched by scripts/get-vulkan-validation.sh, when the system has none:
+        /// `vulkan-validation/` beside the executable (a staged Windows player), else a checkout's
+        /// out/local-tools/vulkan-validation/{windows,linux} above it; the loader is pointed there
+        /// with VK_ADD_LAYER_PATH (in the native environment, which the loader reads), unless that
+        /// is set already. False when there is none.
+        static bool AddLocalValidationLayer()
+        {
+            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("VK_ADD_LAYER_PATH"))) return false;
+            string os = OperatingSystem.IsWindows() ? "windows" : "linux";
+            const string manifest = "VkLayer_khronos_validation.json";
+            string found = null;
+            var beside = System.IO.Path.Combine(AppContext.BaseDirectory, "vulkan-validation");
+            if (System.IO.File.Exists(System.IO.Path.Combine(beside, manifest))) found = beside;
+            for (var dir = new System.IO.DirectoryInfo(AppContext.BaseDirectory); found == null && dir != null; dir = dir.Parent)
+            {
+                var candidate = System.IO.Path.Combine(dir.FullName, "out", "local-tools", "vulkan-validation", os);
+                if (System.IO.File.Exists(System.IO.Path.Combine(candidate, manifest))) found = candidate;
+            }
+            if (found == null) return false;
+            if (OperatingSystem.IsWindows()) Environment.SetEnvironmentVariable("VK_ADD_LAYER_PATH", found);
+            else if (setenv("VK_ADD_LAYER_PATH", found, 1) != 0) return false;
+            EngineLog.Engine($"vulkan: validation layer from {found}");
+            return true;
+        }
+
+        // .NET keeps its own copy of the environment on Unix: the loader reads the C library's.
+        [DllImport("libc", CharSet = CharSet.Ansi)]
+        static extern int setenv(string name, string value, int overwrite);
 
         static bool LayerAvailable(string name)
         {

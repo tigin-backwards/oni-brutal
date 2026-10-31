@@ -36,7 +36,7 @@ namespace OniMoono.Host
             static string Capitalized(string s) => s.Length > 0 ? char.ToUpperInvariant(s[0]) + s[1..] : s;
             string GainText(TweakInfo row) => row.Gain != null ? Capitalized(row.Gain.Effect)
                 : row.Group.Gain != null ? $"{row.Group.Title} together: {row.Group.Gain.Effect}" : "";
-            string Notes(TweakInfo row) => "Launch option: " + row.LaunchOption;
+            string Notes(TweakInfo row) => row.LaunchOption;
             var locked = new List<string>();
             foreach (var value in effective.CommandLineTweaks) locked.Add("--game-tweak " + value);
             if (effective.SplashSource == OptionSource.CommandLine) locked.Add("--splash " + effective.Splash);
@@ -80,7 +80,7 @@ namespace OniMoono.Host
                 rows.Select(r => r.Detail).ToArray(), rows.Select(GainText).ToArray(), rows.Select(Notes).ToArray(),
                 rows.Select(r => r.Group == GameTweakNames.ChangesGameplay).ToArray(), rows.Select(r => r.Choices).ToArray(),
                 states.Select(s => s.Value).ToArray(), states.Select(s => s.Default).ToArray(), states.Select(s => s.Locked).ToArray(),
-                string.Join(" ", locked), settingsPath, save]);
+                string.Join(" ", locked), GameTweakNames.Chinese(), settingsPath, save]);
         }
     }
 }

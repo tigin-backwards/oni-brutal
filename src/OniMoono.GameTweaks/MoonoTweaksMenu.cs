@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using HarmonyLib;
 using STRINGS;
@@ -26,6 +27,12 @@ namespace OniMoono.GameTweaks
         internal static string[][] Choices;
         internal static string LockedNote, SettingsPath;
         internal static Func<string[], int[], string> Save;
+        /// The catalog's text as it came in, and Simplified Chinese keyed by it: the screen shows
+        /// the game's language (Localize), so both are kept.
+        static string[] groupsBase, titlesBase, effectsBase, detailsBase, gainsBase, notesBase;
+        static string[][] choicesBase;
+        static Dictionary<string, string> zh;
+        static bool isChinese;
 
         /// One entry per row, in order: its section (`groups`), title and one-line effect, and
         /// its tooltip's parts: how it works (`details`), its measured gain ("" for none) and the
@@ -35,33 +42,74 @@ namespace OniMoono.GameTweaks
         /// to defaults sets it; `locked`: set by the command line (shown, not changeable;
         /// `lockedNote` names those arguments). `save(ids, values)` writes the changeable rows to
         /// the settings file, returning why it could not or null.
+        /// `chinese`: the catalog's text in Simplified Chinese, keyed by the English text, for a
+        /// game whose language is Chinese (the screen's own labels are localized in Localize).
         public static void Install(Harmony harmony, string[] ids, string[] groups, string[] titles, string[] effects,
             string[] details, string[] gains, string[] notes, bool[] changesGameplay, string[][] choices, int[] running, int[] defaults, bool[] locked,
-            string lockedNote, string settingsPath, Func<string[], int[], string> save)
+            string lockedNote, Dictionary<string, string> chinese, string settingsPath, Func<string[], int[], string> save)
         {
             Ids = ids;
-            Groups = groups;
-            Titles = titles;
-            Effects = effects;
-            Details = details;
-            Gains = gains;
-            Notes = notes;
+            groupsBase = groups;
+            titlesBase = titles;
+            effectsBase = effects;
+            detailsBase = details;
+            gainsBase = gains;
+            notesBase = notes;
             ChangesGameplay = changesGameplay;
-            Choices = choices;
+            choicesBase = choices;
             Running = running;
             Defaults = defaults;
             Saved = (int[])running.Clone();
             Locked = locked;
             LockedNote = lockedNote;
+            zh = chinese;
             SettingsPath = settingsPath;
             Save = save;
             harmony.Patch(AccessTools.Method(typeof(MainMenu), "OnPrefabInit"), postfix: new HarmonyMethod(typeof(MoonoTweaksMenu), nameof(AddButton)));
+        }
+
+        /// The game's language, as the game records it (a translation mod's code too: "zh" is
+        /// Simplified Chinese; Traditional Chinese packs use it as well).
+        static bool ChineseLanguage()
+        {
+            try
+            {
+                var code = Localization.GetLocale().Code;
+                return code != null && code.StartsWith("zh", StringComparison.OrdinalIgnoreCase);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// A catalog string in the screen's language (English when it is not Chinese, or has no
+        /// translation).
+        internal static string Tr(string english) =>
+            isChinese && english != null && zh != null && zh.TryGetValue(english, out var translated) ? translated : english;
+
+        /// One of the screen's own labels, in English or Simplified Chinese.
+        internal static string Ui(string english, string simplifiedChinese) => isChinese ? simplifiedChinese : english;
+
+        /// Resolve the catalog's text into the game's language; the screen calls this when it opens
+        /// (the locale is not loaded yet when Install runs).
+        internal static void Localize()
+        {
+            isChinese = ChineseLanguage();
+            Groups = groupsBase.Select(Tr).ToArray();
+            Titles = titlesBase.Select(Tr).ToArray();
+            Effects = effectsBase.Select(Tr).ToArray();
+            Details = detailsBase.Select(Tr).ToArray();
+            Gains = gainsBase.Select(Tr).ToArray();
+            Notes = notesBase;
+            Choices = choicesBase?.Select(c => c?.Select(Tr).ToArray()).ToArray();
         }
 
         /// After MainMenu.OnPrefabInit has made its buttons: one more, as its MakeButton makes them
         /// (the menu's button prefab, normal style, 14 pt).
         static void AddButton(MainMenu __instance)
         {
+            Localize();
             try
             {
                 var menu = Traverse.Create(__instance);
@@ -75,7 +123,7 @@ namespace OniMoono.GameTweaks
                 image.colorStyleSetting = style;
                 image.ApplyColorStyleSetting();
                 var label = button.GetComponentInChildren<LocText>();
-                label.text = "MOONO TWEAKS";
+                label.text = Ui("MOONO TWEAKS", "MOONO 调整项");
                 label.fontSize = 14;
                 int index = -1;
                 foreach (Transform child in parent.transform)
@@ -122,7 +170,7 @@ namespace OniMoono.GameTweaks
     /// defaults, Restart to apply and Close.
     public class MoonoTweaksScreen : KModalScreen
     {
-        const string Title = "MOONO TWEAKS";
+        static string Title => MoonoTweaksMenu.Ui("MOONO TWEAKS", "MOONO 调整项");
         /// The warning colour of the gameplay-changing section's heading (amber).
         const string Warning = "FFB040";
         /// Row padding (above and below, and the left inset) and the spacing between rows: a
@@ -157,19 +205,20 @@ namespace OniMoono.GameTweaks
         protected override void OnActivate()
         {
             base.OnActivate();
+            MoonoTweaksMenu.Localize();
             windowTitle.text = Title;
             windowTitle.ApplySettings();
             closeTitle.onClick += Close;
             close.onClick += Close;
-            apply.GetComponentInChildren<LocText>().text = "RESTART TO APPLY";
+            apply.GetComponentInChildren<LocText>().text = MoonoTweaksMenu.Ui("RESTART TO APPLY", "重启以应用");
             apply.onClick += Apply;
             // The Mods screen's Workshop button, as Reset to defaults (wider for its label).
-            reset.GetComponentInChildren<LocText>().text = "RESET TO DEFAULTS";
+            reset.GetComponentInChildren<LocText>().text = MoonoTweaksMenu.Ui("RESET TO DEFAULTS", "恢复默认");
             var resetRect = reset.GetComponent<RectTransform>();
             resetRect.sizeDelta = new Vector2(166f, resetRect.sizeDelta.y);
             reset.onClick += ResetToDefaults;
             reset.gameObject.SetActive(true);
-            FooterNote("Changes apply when the game restarts.");
+            FooterNote(MoonoTweaksMenu.Ui("Changes apply when the game restarts.", "更改将在游戏重启后生效。"));
             var list = entryParent.GetComponent<VerticalLayoutGroup>();
             if (list != null)
             {
@@ -181,8 +230,9 @@ namespace OniMoono.GameTweaks
             toggles = new MultiToggle[shown.Length];
             choiceButtons = new KButton[shown.Length];
             if (MoonoTweaksMenu.LockedNote.Length > 0)
-                Note($"Set by the launch options: {MoonoTweaksMenu.LockedNote}",
-                    "Those rows can't be changed here. Remove the options from the game's launch options to choose them here.");
+                Note(MoonoTweaksMenu.Ui($"Set by the launch options: {MoonoTweaksMenu.LockedNote}", $"由启动选项设置：{MoonoTweaksMenu.LockedNote}"),
+                    MoonoTweaksMenu.Ui("Those rows can't be changed here. Remove the options from the game's launch options to choose them here.",
+                        "这些行无法在此更改。请从游戏的启动选项中移除相应参数，以便在此选择。"));
             string group = null;
             for (int i = 0; i < MoonoTweaksMenu.Ids.Length; i++)
             {
@@ -244,7 +294,8 @@ namespace OniMoono.GameTweaks
             title.text = group.ToUpperInvariant();
             title.fontSize = 18;
             title.color = changesGameplay ? Util.ColorFromHex(Warning) : Color.white;
-            if (changesGameplay) BodyLine(title, "Off by default: these trade a little exactness for speed.");
+            if (changesGameplay) BodyLine(title, MoonoTweaksMenu.Ui("Off by default: these trade a little exactness for speed.",
+                "默认关闭：这些选项会牺牲一点精确性来换取速度。"));
             entry.GetReference<MultiToggle>("EnabledToggle").gameObject.SetActive(false);
             entry.GetReference<LocText>("Version").gameObject.SetActive(false);
             entry.gameObject.SetActive(true);
@@ -257,7 +308,7 @@ namespace OniMoono.GameTweaks
             var text = MoonoTweaksMenu.Details[i];
             if (MoonoTweaksMenu.Gains[i].Length > 0)
                 text += (text.Length > 0 ? "\n\n" : "") + $"<color={Constants.POSITIVE_COLOR_STR}>{MoonoTweaksMenu.Gains[i]}</color>";
-            return text + (text.Length > 0 ? "\n" : "") + MoonoTweaksMenu.Notes[i];
+            return text + (text.Length > 0 ? "\n" : "") + MoonoTweaksMenu.Ui("Launch option: ", "启动选项：") + MoonoTweaksMenu.Notes[i];
         }
 
         void Row(int i)
@@ -280,7 +331,7 @@ namespace OniMoono.GameTweaks
             var label = entry.GetReference<LocText>("Version");
             if (locked)
             {
-                label.text = "LAUNCH OPTION";
+                label.text = MoonoTweaksMenu.Ui("LAUNCH OPTION", "启动选项");
                 label.fontSize = 12;
                 // One line: the effect beside it wraps instead.
                 label.textWrappingMode = TMPro.TextWrappingModes.NoWrap;
@@ -309,7 +360,9 @@ namespace OniMoono.GameTweaks
                 effect.gameObject.AddComponent<CanvasGroup>().alpha = 0.55f;
                 var dim = toggle.gameObject.AddComponent<CanvasGroup>();
                 dim.alpha = 0.45f;
-                if (tip != null) tip.OnToolTip = () => $"Set by the launch options ({(shown[i] != 0 ? "on" : "off")})";
+                if (tip != null) tip.OnToolTip = () => shown[i] != 0
+                    ? MoonoTweaksMenu.Ui("Set by the launch options (on)", "由启动选项设置（开）")
+                    : MoonoTweaksMenu.Ui("Set by the launch options (off)", "由启动选项设置（关）");
             }
             else
             {
@@ -345,12 +398,13 @@ namespace OniMoono.GameTweaks
                 title.color = new Color(title.color.r, title.color.g, title.color.b, 0.55f);
                 effect.gameObject.AddComponent<CanvasGroup>().alpha = 0.55f;
                 tip.toolTip = "";
-                tip.OnToolTip = () => $"Set by the launch options ({MoonoTweaksMenu.Choices[i][shown[i]]})";
+                tip.OnToolTip = () => MoonoTweaksMenu.Ui($"Set by the launch options ({MoonoTweaksMenu.Choices[i][shown[i]]})",
+                    $"由启动选项设置（{MoonoTweaksMenu.Choices[i][shown[i]]}）");
             }
             else
             {
                 tip.toolTip = "";
-                tip.OnToolTip = () => "Click for the next choice: " + string.Join(", ", MoonoTweaksMenu.Choices[i]);
+                tip.OnToolTip = () => MoonoTweaksMenu.Ui("Click for the next choice: ", "点击切换到下一个选项：") + string.Join(", ", MoonoTweaksMenu.Choices[i]);
                 button.onClick += () =>
                 {
                     shown[i] = (shown[i] + 1) % MoonoTweaksMenu.Choices[i].Length;
@@ -476,7 +530,8 @@ namespace OniMoono.GameTweaks
             var error = MoonoTweaksMenu.Save(ids.ToArray(), values.ToArray());
             if (error != null)
             {
-                KMod.Manager.Dialog(gameObject, Title, $"The settings could not be saved to {MoonoTweaksMenu.SettingsPath}:\n{error}");
+                KMod.Manager.Dialog(gameObject, Title, MoonoTweaksMenu.Ui($"The settings could not be saved to {MoonoTweaksMenu.SettingsPath}:\n{error}",
+                    $"无法将设置保存到 {MoonoTweaksMenu.SettingsPath}：\n{error}"));
                 return false;
             }
             for (int i = 0; i < shown.Length; i++)
@@ -495,8 +550,9 @@ namespace OniMoono.GameTweaks
         {
             if (Differ(shown, MoonoTweaksMenu.Saved) && !SaveShown()) return;
             if (Differ(MoonoTweaksMenu.Saved, MoonoTweaksMenu.Running))
-                KMod.Manager.Dialog(gameObject, Title, "Your changes are saved and apply when the game restarts.",
-                    UI.FRONTEND.MOD_DIALOGS.RESTART.OK, App.instance.Restart, "LATER", Deactivate);
+                KMod.Manager.Dialog(gameObject, Title,
+                    MoonoTweaksMenu.Ui("Your changes are saved and apply when the game restarts.", "你的更改已保存，将在游戏重启后生效。"),
+                    UI.FRONTEND.MOD_DIALOGS.RESTART.OK, App.instance.Restart, MoonoTweaksMenu.Ui("LATER", "稍后"), Deactivate);
             else Deactivate();
         }
 

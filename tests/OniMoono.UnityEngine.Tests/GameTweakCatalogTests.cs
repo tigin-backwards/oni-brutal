@@ -57,6 +57,27 @@ namespace OniMoono.Tests
             Assert.DoesNotContain(GameTweakNames.FrameStatsRow, GameTweakNames.All);
         }
 
+        [Fact]
+        public void EveryRowAndGroupHasSimplifiedChinese()
+        {
+            foreach (var group in GameTweakNames.Groups)
+                Assert.False(string.IsNullOrWhiteSpace(group.ZhTitle), $"group '{group.Title}' has no Chinese title");
+            var chinese = GameTweakNames.Chinese();
+            foreach (var row in GameTweakNames.Rows)
+            {
+                Assert.True(row.Zh != null, $"{row.Id} has no Chinese text");
+                Assert.False(string.IsNullOrWhiteSpace(row.Zh!.Title), $"{row.Id} has no Chinese title");
+                Assert.False(string.IsNullOrWhiteSpace(row.Zh.Effect), $"{row.Id} has no Chinese one-liner");
+                Assert.True(chinese.ContainsKey(row.Title), $"{row.Id}'s title is missing from Chinese()");
+                Assert.True(chinese.ContainsKey(row.Effect), $"{row.Id}'s one-liner is missing from Chinese()");
+                if (row.Detail.Length > 0)
+                {
+                    Assert.False(string.IsNullOrWhiteSpace(row.Zh.Detail), $"{row.Id} has an English detail but no Chinese one");
+                    Assert.True(chinese.ContainsKey(row.Detail), $"{row.Id}'s detail is missing from Chinese()");
+                }
+            }
+        }
+
         /// docs/TWEAKS.md's list between its markers is GameTweakNames.Markdown();
         /// `ONI_UPDATE_DOCS=1` rewrites it there instead of failing.
         [Fact]

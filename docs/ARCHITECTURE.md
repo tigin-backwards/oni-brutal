@@ -1652,10 +1652,10 @@ paths do not: retiring a picture can take a frame or two (29 ms
 a picture measured on the AMD iGPU, whose picture is copied to a monitor on the NVIDIA card),
 which would cap the frame rate; the interop lock or keyed mutex bounds what is in flight.
 - *OpenGL* (`DxgiTarget`): the texture is registered with GL once through `WGL_NV_DX_interop2`
-  and locked while the presenter's blit fills it, flipped (Direct3D's rows run top-down; the
-  splash is drawn flipped too). The swap chain's own buffers are never registered with GL
-  (re-registering them after a resize is suspected of a use-after-free in NVIDIA's driver, Godot
-  PR #94503).
+  for reading and writing (the splash blends) and locked while the presenter's blit fills it,
+  flipped (Direct3D's rows run top-down; the splash is drawn flipped too). The swap chain's own
+  buffers are never registered with GL (re-registering them after a resize is suspected of a
+  use-after-free in NVIDIA's driver, Godot PR #94503).
 - *Vulkan* (`VkDxgiTarget`): the texture has an NT handle and a keyed mutex and is imported as a
   Vulkan image (`VK_KHR_external_memory_win32`, a dedicated allocation). The presenter's
   submission takes it from queue family EXTERNAL, blits the frame in (both APIs store the top
@@ -1672,15 +1672,22 @@ window), not DXGI's `SetFullscreenState`; DXGI is told to leave the window alone
 (`DXGI_MWA_NO_WINDOW_CHANGES | NO_ALT_ENTER`). After start-up every DXGI, D3D11 and interop object
 is used and released on the presenter thread alone, so neither `Present` nor `ResizeBuffers`
 sends the window a message the main thread (which may be waiting on the device thread, which may
-be waiting on the presenter) would have to answer. Any failure at start-up (no interop
-extension, no matching adapter, a failed device, swap chain, registration, import or first lock)
-leaves the device's own presentation in use, with one `present:` log line saying why. A failure
-while running (a lost device: `DXGI_ERROR_DEVICE_REMOVED`/`RESET`/`HUNG`, a failed lock,
-keyed-mutex wait, resize or present) releases everything DXGI held and starts it anew. Until a
-restart succeeds (one a second, ten at most) the device's own presentation stands in: Vulkan's
-swapchain reaches the screen then (measured), but OpenGL's SwapBuffers does not on a window that
-has had a flip-model swap chain (measured: the window kept DXGI's last picture while frames went
-on), so on OpenGL a DXGI that cannot restart leaves the window still. The
+be waiting on the presenter) would have to answer. Start-up makes everything that can fail
+(the interop extension, the adapter, the D3D11 device, the registration or import, the first
+lock) before it gives the window a swap chain, and a failure there leaves the device's own
+presentation in use, with one `present:` log line saying why. Once the window has a swap chain,
+a failure (the chain's own set-up at start-up; while running a lost device:
+`DXGI_ERROR_DEVICE_REMOVED`/`RESET`/`HUNG`, a failed lock, a keyed-mutex timeout, a failed image
+view, resize or present) releases everything DXGI held and starts it anew. Vulkan calls
+`vkQueueSubmit2` itself for the DXGI submission, under the lock Brutal's `Queue` takes, to see
+`VK_TIMEOUT` from the keyed mutex (Brutal's `Submit2` returns nothing then), which would otherwise
+leave the presenter waiting on a fence that never signals. Restarts come in bursts of ten tries,
+1, 2, 4 then 8 s apart (about a minute, outlasting a slow driver reset); a restart that presents
+for 60 s ends its burst, so a later failure gets ten tries again. Until a restart succeeds the
+device's own presentation stands in: Vulkan's swapchain reaches the screen then (measured), but
+OpenGL's SwapBuffers does not on a window whose flip-model swap chain has presented (measured:
+the window kept DXGI's last picture while frames went on), so on OpenGL a DXGI that cannot
+restart leaves the window still. The
 `present:` line at start-up names the adapter and the swap chain's settings; `--dxgi-fault STEP`
 makes up a failure at one step, for testing the ways back; with `--frame-stats` the frame counts
 include the presenter's time per picture and, every 600 frames, the process's video memory on the

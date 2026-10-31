@@ -346,6 +346,7 @@ namespace OniMoono.Desktop.Gl
             if (wasDxgi)
             {
                 dxgiLost = true;
+                DxgiAdapterLuid = 0;
                 target = RestartDxgi();
             }
             target ??= new GlSwapTarget(window);
@@ -365,6 +366,7 @@ namespace OniMoono.Desktop.Gl
                 EngineLog.Engine($"present: DXGI started again (restart {tries})");
                 dxgiRestarts.Started(GlTimings.Now);
                 dxgiLost = false;
+                DxgiAdapterLuid = dxgi.AdapterLuid;
                 return dxgi;
             }
             EngineLog.Engine(!dxgiRestarts.Exhausted

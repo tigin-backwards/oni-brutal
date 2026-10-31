@@ -506,7 +506,7 @@ namespace OniMoono.Desktop.Vulkan
             }
             // Windows: the process's own video memory on the device's adapter (all of it,
             // DXGI's swap chain and shared texture too), as Windows counts it.
-            if (OperatingSystem.IsWindows() && vk.Luid != 0 && OniMoono.Desktop.Gl.Dxgi.ProcessVideoMemory(vk.Luid) is var (local, nonLocal))
+            if (OperatingSystem.IsWindows() && vk.DxgiInterop && vk.Luid != 0 && OniMoono.Desktop.Gl.Dxgi.ProcessVideoMemory(vk.Luid) is var (local, nonLocal))
                 text.Append(text.Length == 0 ? "" : "; ").Append($"process {local >> 20} MiB local, {nonLocal >> 20} MiB non-local");
             return text.Length == 0 ? null : text.ToString();
         });

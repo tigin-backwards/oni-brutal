@@ -33,6 +33,7 @@ namespace OniMoono.Host.GameTweaks
             GameTweakNames.LogPathsRow => "--log-paths hidden",
             GameTweakNames.GpuRow => "--gpu " + string.Join("|", Choices!),
             GameTweakNames.RendererRow => "--renderer " + string.Join("|", Choices!),
+            GameTweakNames.DxgiRow => "--dxgi on|off",
             _ => "--game-tweak " + Id,
         };
     }
@@ -44,7 +45,7 @@ namespace OniMoono.Host.GameTweaks
     /// before the game's assemblies (Harmony among them) can be resolved, and the tests compile it in.
     internal static class GameTweakNames
     {
-        public const string SplashRow = "splash", FrameStatsRow = "frame-stats", LogPathsRow = "log-paths", GpuRow = "gpu", RendererRow = "renderer";
+        public const string SplashRow = "splash", FrameStatsRow = "frame-stats", LogPathsRow = "log-paths", GpuRow = "gpu", RendererRow = "renderer", DxgiRow = "dxgi";
         public const string FastSaveCompression = "fast-save-compression", BackgroundSave = "background-save", NoSaveGc = "no-save-gc",
             FastSerialization = "fast-serialization", FastParticleCollision = "fast-particle-collision";
 
@@ -85,6 +86,11 @@ namespace OniMoono.Host.GameTweaks
                 "Auto: Vulkan, or OpenGL when Vulkan can't start on this PC. Vulkan: Vulkan whenever it starts (also a software one). "
                 + "OpenGL: the original game's API. The picture is the same; Player.log names the one used and why.",
                 IsTweak: false, Choices: [OniMoono.Desktop.Renderers.Auto, OniMoono.Desktop.Renderers.Vulkan, OniMoono.Desktop.Renderers.OpenGl]),
+            new(DxgiRow, General, "Present through Direct3D on Windows", "Windows shows the game as it shows the original: no forced HDR or brightness. Needs a restart.",
+                "With Vulkan or OpenGL, frames go to the screen through a Direct3D 11 swap chain, as the original's do. Off: through the renderer's own "
+                + "presentation, which Auto HDR or RTX HDR can take for HDR. If it can't start, the renderer's own is used and Player.log says why. "
+                + "No effect on Linux.",
+                IsTweak: false),
 
             new(FastSerialization, Saving, "Faster save writing", "Autosaves take less time; the save file is the same.",
                 "Writes the colony's numbers without boxing each one in an object."),

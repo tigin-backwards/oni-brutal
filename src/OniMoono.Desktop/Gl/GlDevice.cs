@@ -220,7 +220,17 @@ namespace OniMoono.Desktop.Gl
         /// context was made), or the AMD one's free memory in the texture pool and the auxiliary
         /// (system memory) pool. A driver short of video memory moves allocations to system
         /// memory, after which drawing from them is much slower.
-        public override string MemoryCounters() => worker.Call(() =>
+        public override string MemoryCounters()
+        {
+            var gl = GlMemoryCounters();
+            // Windows: the process's own video memory on the GL context's adapter (all of it: the
+            // GL driver's allocations and DXGI's), as Windows counts it.
+            if (OperatingSystem.IsWindows() && presenter.DxgiAdapterLuid != 0 && Dxgi.ProcessVideoMemory(presenter.DxgiAdapterLuid) is var (local, nonLocal))
+                return (gl != null ? gl + "; " : "") + $"process {local >> 20} MiB local, {nonLocal >> 20} MiB non-local";
+            return gl;
+        }
+
+        string GlMemoryCounters() => worker.Call(() =>
         {
             if (GlPrograms.Extensions.Contains("GL_NVX_gpu_memory_info"))
             {
@@ -863,9 +873,11 @@ namespace OniMoono.Desktop.Gl
             int interval = SwapIntervalOverride >= 0 ? SwapIntervalOverride : QualitySettings.vSyncCount;
             int width = platform.FramebufferWidth, height = platform.FramebufferHeight;
             int frame = Time.frameCount;
+            long started = PlayerLoop.FrameStartedAt;
             worker.Post(() =>
             {
                 presenter.Frame = frame;
+                presenter.FrameStarted = started;
                 if (gpuTiming) EndGpuTiming();
                 uniformStream?.FenceFrame();
                 if (GlGpuProfile.Enabled) GlGpuProfile.FrameEnd();
@@ -896,7 +908,7 @@ namespace OniMoono.Desktop.Gl
         public override string TakeFrameCounters(int frames) => worker.Call(() =>
         {
             var profile = GlGpuProfile.Take(frames);
-            string text = (profile != null ? profile + "\n" : "") + GlTimings.Take(frames) + $"; draws {draws / frames}, program binds {GlBindings.ProgramBinds / frames}, texture binds {GlBindings.TextureBinds / frames}, buffer binds {GlBindings.BufferBinds / frames}, vertex array binds {GlBindings.VertexArrayBinds / frames}, skipped binds {GlBindings.Skipped / frames}, uniforms sent {GlUniforms.UniformsSent / frames}, unchanged uniforms {GlUniforms.UniformsSkipped / frames}, texture uploads {GlTextures.Uploads / (double)frames:F1} ({GlTextures.UploadBytes / frames / 1024} KiB), unchanged {GlTextures.UnchangedUploads / (double)frames:F1}";
+            string text = (profile != null ? profile + "\n" : "") + GlTimings.Take(frames) + $"; draws {draws / frames}, program binds {GlBindings.ProgramBinds / frames}, texture binds {GlBindings.TextureBinds / frames}, buffer binds {GlBindings.BufferBinds / frames}, vertex array binds {GlBindings.VertexArrayBinds / frames}, skipped binds {GlBindings.Skipped / frames}, uniforms sent {GlUniforms.UniformsSent / frames}, unchanged uniforms {GlUniforms.UniformsSkipped / frames}, texture uploads {GlTextures.Uploads / (double)frames:F1} ({GlTextures.UploadBytes / frames / 1024} KiB), unchanged {GlTextures.UnchangedUploads / (double)frames:F1}; " + PresenterTimings.Take();
             draws = 0;
             GlUniforms.UniformsSent = GlUniforms.UniformsSkipped = 0;
             GlTextures.Uploads = GlTextures.UploadBytes = GlTextures.UnchangedUploads = 0;

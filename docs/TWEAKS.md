@@ -10,10 +10,11 @@ them in **Moono Tweaks** on the main menu. Measured gains are in
 On the main menu, **Moono Tweaks** (under Mods) lists every tweak with an on/off switch, in the
 sections below, each with a line on what it does; hovering a row says how it works, its
 measured gain where it is large enough to notice, and its launch option. A **General** section
-holds four options of the player's own: the Gassy Moo loading splash (on by default), frame
-stats in the log (off by default), hiding personal paths in the log (on by default) and, for
+holds six options of the player's own: the Gassy Moo loading splash (on by default), frame
+stats in the log (off by default), hiding personal paths in the log (on by default), for
 laptops with two GPUs, the graphics card the game draws with (default, discrete or integrated;
-default does what the original does).
+default does what the original does), the renderer (auto: Vulkan, or OpenGL when Vulkan can't
+start) and, on Windows, presenting through Direct3D as the original does (on by default).
 **Reset to defaults** sets every row back to its default. Changes apply when the game restarts, which the screen does for you.
 
 Your choices are kept in `oni-moono/settings.json` in the game's own data folder (usually
@@ -43,6 +44,9 @@ launch options:
   ([ARCHITECTURE.md](ARCHITECTURE.md#35-rendering)). If Vulkan stops working in play, the game
   quits with an error; choose OpenGL here or under Renderer in Moono Tweaks if it keeps
   happening.
+- `--dxgi on|off`: Windows, frames shown through a Direct3D 11 swap chain or through the
+  renderer's own presentation (Vulkan's swapchain, OpenGL's SwapBuffers) ([ARCHITECTURE.md](ARCHITECTURE.md#35-rendering), "Presentation on
+  Windows").
 
 Older setups put `--game-tweak exact` in the launch options; remove it (the setup prints the new
 line) to choose in the game instead.

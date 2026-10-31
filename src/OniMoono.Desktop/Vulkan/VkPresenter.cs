@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using Brutal.GlfwApi;
+using Brutal.GlfwApi.Win32;
 using Brutal.VulkanApi;
+using Brutal.VulkanApi.Win32;
 using OniMoono.Desktop.Gl;
 using OniMoono.Engine;
 
@@ -25,7 +27,8 @@ namespace OniMoono.Desktop.Vulkan
     /// and IMMEDIATE (else MAILBOX) without. The swapchain is made again when the window's size or
     /// the present mode changes or the surface reports it out of date; a minimized window (a 0x0
     /// surface) is not presented to, while frames go on rendering at the size the window had (issue
-    /// #29).
+    /// #29); with vsync its pictures are paced at 60 Hz as if presented, as the original's are (and
+    /// OpenGL's and DXGI's, measured), rather than running as fast as the frames come.
     ///
     /// Ordering needs no semaphores between the two threads: both submit to the one queue, the
     /// frame before the copy that reads it, and each image's barriers wait for the work that
@@ -54,6 +57,8 @@ namespace OniMoono.Desktop.Vulkan
         VkExtent2D extent;
         VkPresentModeKHR presentMode;
         int swapInterval = -1;
+        // When the next picture of a minimized window is due, with vsync (PaceMinimized).
+        long minimizedDue;
         bool outOfDate;
         readonly VkPresentModeKHR[] presentModes = Array.Empty<VkPresentModeKHR>();
         /// Swapchain creations that failed in a row (made again after a growing delay, 0.1 s
@@ -61,6 +66,18 @@ namespace OniMoono.Desktop.Vulkan
         int recreateFailures;
         const int RecreateAttempts = 5;
         bool disposed, ownsSplash;
+
+        /// Windows: DXGI's swap chain in place of Vulkan's (VkDxgiTarget; null: the
+        /// VkSwapchainKHR), the window's handle, and its restarts after a failure while running:
+        /// Vulkan's swapchain stands in until one succeeds (DxgiRestarts: bursts of at most ten
+        /// tries, 1 to 8 s apart). It does reach the screen after DXGI's (measured), unlike
+        /// OpenGL's SwapBuffers; DXGI is restarted all the same, for how Windows treats the picture.
+        VkDxgiTarget dxgi;
+        readonly IntPtr dxgiWindow;
+        bool dxgiLost;
+        readonly DxgiRestarts dxgiRestarts = new();
+        Action waitIdle;
+        static string MadeUp => DxgiSwapChain.Fault != null ? $" (a made-up fault: --dxgi-fault {DxgiSwapChain.Fault})" : "";
 
         // Per presenter frame in flight.
         readonly VkCommandPool pool;
@@ -72,7 +89,7 @@ namespace OniMoono.Desktop.Vulkan
 
         readonly Thread thread;
         readonly object gate = new();
-        readonly Queue<(VkBackBuffer Buffer, int Interval, int Width, int Height)> queue = new();
+        readonly Queue<(VkBackBuffer Buffer, int Interval, int Width, int Height, long Started)> queue = new();
         int queued;
         bool stopping, refreshWanted;
         volatile Exception failure;
@@ -84,6 +101,8 @@ namespace OniMoono.Desktop.Vulkan
 
         /// The main thread's frame the device thread is executing (diagnostics).
         public int Frame;
+        /// When the game frame being handed over began (device thread; PresenterTimings).
+        public long FrameStarted;
 
         /// Makes the surface's first swapchain at once (on the calling thread), so that a
         /// window Vulkan cannot present to falls back to OpenGL before the game starts.
@@ -109,8 +128,28 @@ namespace OniMoono.Desktop.Vulkan
                     fences[i] = vk.Device.CreateFence(new VkFenceCreateInfo(), null);
                     acquired[i] = vk.Device.CreateSemaphore(new VkSemaphoreCreateInfo(), null);
                 }
-                Recreate(windowWidth, windowHeight, 1);
-                if (swapchain.IsNull()) throw new VulkanUnavailableException("no swapchain could be made for the window");
+                // Windows: DXGI's swap chain in place of Vulkan's (VkDxgiTarget), when it is on and
+                // starts; one log line says which, and why not DXGI.
+                if (OperatingSystem.IsWindows() && DxgiSwapChain.Enabled)
+                {
+                    dxgiWindow = (IntPtr)window.GetWin32Window();
+                    dxgi = VkDxgiTarget.Create(vk, dxgiWindow, windowWidth, windowHeight, out string reason, out bool windowTouched);
+                    if (dxgi == null)
+                    {
+                        // A failure after the swap chain was made (its last steps) is one while
+                        // running: Vulkan's swapchain stands in and DXGI is restarted.
+                        dxgiLost = windowTouched;
+                        EngineLog.Engine($"present: Vulkan's swapchain, since DXGI could not start: {reason}{MadeUp}"
+                            + (windowTouched ? "; the window had DXGI's swap chain by then, so DXGI is restarted" : ""));
+                    }
+                    else SwapchainFormat = VkDxgiTarget.Format;
+                }
+                else if (OperatingSystem.IsWindows()) EngineLog.Engine("present: Vulkan's swapchain (DXGI is off)");
+                if (dxgi == null)
+                {
+                    Recreate(windowWidth, windowHeight, 1);
+                    if (swapchain.IsNull()) throw new VulkanUnavailableException("no swapchain could be made for the window");
+                }
                 VkContext.FailAt("presenter-create");
             }
             catch
@@ -196,7 +235,7 @@ namespace OniMoono.Desktop.Vulkan
             {
                 while (queued >= (interval > 0 ? MaxQueuedWithVsync : MaxQueued) && failure == null) Monitor.Wait(gate);
                 if (failure != null) return; // VkDevice reports it (Failure)
-                queue.Enqueue((b, interval, Math.Max(1, width), Math.Max(1, height)));
+                queue.Enqueue((b, interval, Math.Max(1, width), Math.Max(1, height), complete ? FrameStarted : 0));
                 queued++;
                 Monitor.PulseAll(gate);
             }
@@ -231,7 +270,7 @@ namespace OniMoono.Desktop.Vulkan
             {
                 while (true)
                 {
-                    (VkBackBuffer Buffer, int Interval, int Width, int Height) frame = default;
+                    (VkBackBuffer Buffer, int Interval, int Width, int Height, long Started) frame = default;
                     bool redraw = false;
                     lock (gate)
                     {
@@ -239,7 +278,7 @@ namespace OniMoono.Desktop.Vulkan
                         {
                             if (splash != null && splash.Active)
                             {
-                                if (!Monitor.Wait(gate, 16)) { redraw = true; break; }
+                                if (!Monitor.Wait(gate, PresenterTimings.SplashWait(dxgi != null))) { redraw = true; break; }
                             }
                             else Monitor.Wait(gate);
                         }
@@ -258,8 +297,11 @@ namespace OniMoono.Desktop.Vulkan
                     {
                         // vSyncCount 2-4: FIFO shows an image per vertical blank, so the frame
                         // is presented that many times (OpenGL's swap interval does the same).
+                        PresenterTimings.FrameStarted = frame.Started;
                         Show(frame.Buffer, frame.Interval, frame.Width, frame.Height, gameFrame: true);
-                        for (int again = 1; again < frame.Interval; again++) Show(frame.Buffer, frame.Interval, frame.Width, frame.Height, gameFrame: false);
+                        PresenterTimings.FrameStarted = 0;
+                        // (DXGI's Present takes the interval itself.)
+                        for (int again = 1; again < frame.Interval && dxgi == null; again++) Show(frame.Buffer, frame.Interval, frame.Width, frame.Height, gameFrame: false);
                     }
                     lock (gate)
                     {
@@ -280,22 +322,29 @@ namespace OniMoono.Desktop.Vulkan
             }
         }
 
-        /// Copies a back buffer (null: black) into a swapchain image, the splash over it, and
-        /// presents.
+        /// Copies a back buffer (null: black) into the window's next picture, the splash over it,
+        /// and presents: through DXGI (ShowDxgi) or Vulkan's swapchain (ShowSwapchain).
         void Show(VkBackBuffer b, int interval, int width, int height, bool gameFrame)
         {
             if (gameFrame) shown = b;
             if (gameFrame && splash != null && splash.Active) splash.GameFrame();
-            if (interval != swapInterval || outOfDate || FailNextRecreate || OutOfMemoryRecreates > 0 || width != extent.Width || height != extent.Height)
-            {
-                if (!TryRecreate(width, height, interval)) return;
-                if (swapchain.IsNull()) return; // minimized
-            }
-            // The copy fills the swapchain's images, whose size is the surface's now, which can
-            // differ from the size the frame was handed over with (the window changed since).
-            width = extent.Width;
-            height = extent.Height;
-            var s = slot;
+            long t = GlTimings.Now;
+            lastWait = 0;
+            if (OperatingSystem.IsWindows() && dxgiLost && RestartDxgi() is { } restarted) dxgi = restarted;
+            if (OperatingSystem.IsWindows() && dxgi != null) ShowDxgi(b, interval, width, height);
+            else ShowSwapchain(b, interval, width, height);
+            PresenterTimings.Add(ref PresenterTimings.Show, GlTimings.Now - t - lastWait);
+            PresenterTimings.Add(ref PresenterTimings.Wait, lastWait);
+            PresenterTimings.Shown(lastWait);
+        }
+
+        /// Time the last Show waited for its picture to be on its way (Stopwatch ticks).
+        long lastWait;
+
+        /// The command buffer of the next presenter slot, once its last submission is done.
+        CommandBuffer BeginSlot(out int s)
+        {
+            s = slot;
             slot = (slot + 1) % Slots;
             if (submitted[s])
             {
@@ -304,22 +353,14 @@ namespace OniMoono.Desktop.Vulkan
                 vk.Device.PInvoke.vkResetFences.Invoke(vk.Device.Handle, 1, &fence);
                 submitted[s] = false;
             }
-            int index = 0;
-            var r = vk.Device.PInvoke.vkAcquireNextImageKHR.Invoke(vk.Device.Handle, swapchain, -1, acquired[s], default, &index);
-            if (r == VkResult.ErrorOutOfDateKHR)
-            {
-                outOfDate = true;
-                return;
-            }
-            if (r == VkResult.SuboptimalKHR) outOfDate = true;
-            else VkCheck.Ok(r, "vkAcquireNextImageKHR"); // surface lost: presenting ends (Failure)
+            return commands[s];
+        }
 
-            var cb = commands[s];
-            VkCheck.Ok(vk.Device.PInvoke.vkResetCommandBuffer.Invoke(cb.Handle, 0), "vkResetCommandBuffer");
-            var begin = new VkCommandBufferBeginInfo { Flags = VkCommandBufferUsageFlags.OneTimeSubmitBit };
-            VkCheck.Ok(vk.Device.PInvoke.vkBeginCommandBuffer.Invoke(cb.Handle, &begin), "vkBeginCommandBuffer (presenter)");
-            var target = images[index];
-            Barrier(cb, target, imageLayouts[index], VkImageLayout.TransferDstOptimal, VkPipelineStageFlags2.AllTransferBit, 0, VkPipelineStageFlags2.AllTransferBit, VkAccessFlags2.TransferWriteBit);
+        /// Records the copy of `b` (null: black) into `target` (in TransferDstOptimal), scaled to
+        /// `width` x `height` when its size differs. Both are stored top row first
+        /// (RenderConventions).
+        void RecordCopy(CommandBuffer cb, VkBackBuffer b, VkImage target, int width, int height)
+        {
             if (b != null)
             {
                 var color = b.Color;
@@ -333,7 +374,6 @@ namespace OniMoono.Desktop.Vulkan
                 };
                 blit.SrcOffsets[0] = new VkOffset3D(0, 0, 0);
                 blit.SrcOffsets[1] = new VkOffset3D(b.Width, b.Height, 1);
-                // Both are stored top row first (RenderConventions).
                 blit.DstOffsets[0] = new VkOffset3D(0, 0, 0);
                 blit.DstOffsets[1] = new VkOffset3D(width, height, 1);
                 cb.BlitImage(color.Image, VkImageLayout.TransferSrcOptimal, target, VkImageLayout.TransferDstOptimal, new ReadOnlySpan<VkImageBlit>(&blit, 1),
@@ -347,6 +387,70 @@ namespace OniMoono.Desktop.Vulkan
                 var range = new VkImageSubresourceRange { AspectMask = VkImageAspectFlags.ColorBit, LevelCount = 1, LayerCount = 1 };
                 vk.Device.PInvoke.vkCmdClearColorImage.Invoke(cb.Handle, target, VkImageLayout.TransferDstOptimal, &black, 1, &range);
             }
+        }
+
+        /// A minimized window has no swapchain to wait on: with vsync each picture not presented
+        /// takes what is left of one refresh at 60 Hz (the monitor is out of reach here: GLFW's
+        /// are the main thread's), counted from when the last was due so that Sleep's coarse steps
+        /// even out. One refresh a call, as FIFO would wait one blank a present: a frame at
+        /// vSyncCount 2 to 4 is shown that many times already. Measured minimized (U60, a paused
+        /// colony, the game's vsync on Windows): the original stayed at or under 60 fps, OpenGL
+        /// and DXGI at 60, and this path at 69 to 75 before this.
+        void PaceMinimized(int interval)
+        {
+            long period = MinimizedPeriod(interval);
+            if (period == 0) return;
+            long wait = MinimizedWait(ref minimizedDue, GlTimings.Now, period);
+            if (wait > 0) Thread.Sleep((int)(wait * 1000 / System.Diagnostics.Stopwatch.Frequency));
+        }
+
+        /// The time a minimized window's picture takes (Stopwatch ticks): one refresh at 60 Hz
+        /// with vsync, whatever the interval (each frame comes that many times); none without.
+        internal static long MinimizedPeriod(int interval) => interval > 0 ? System.Diagnostics.Stopwatch.Frequency / 60 : 0;
+
+        /// The wait before a minimized window's picture (Stopwatch ticks), moving `due` on a
+        /// period; a picture more than a period late starts the count again from now.
+        internal static long MinimizedWait(ref long due, long now, long period)
+        {
+            if (due < now - period) due = now;
+            long wait = due - now;
+            due += period;
+            return Math.Max(0, wait);
+        }
+
+        /// Through Vulkan's swapchain.
+        void ShowSwapchain(VkBackBuffer b, int interval, int width, int height)
+        {
+            if (interval != swapInterval || outOfDate || FailNextRecreate || OutOfMemoryRecreates > 0 || width != extent.Width || height != extent.Height || swapchain.IsNull())
+            {
+                if (!TryRecreate(width, height, interval)) return;
+                if (swapchain.IsNull())
+                {
+                    PaceMinimized(interval);
+                    return;
+                }
+            }
+            // The copy fills the swapchain's images, whose size is the surface's now, which can
+            // differ from the size the frame was handed over with (the window changed since).
+            width = extent.Width;
+            height = extent.Height;
+            var cb = BeginSlot(out int s);
+            int index = 0;
+            var r = vk.Device.PInvoke.vkAcquireNextImageKHR.Invoke(vk.Device.Handle, swapchain, -1, acquired[s], default, &index);
+            if (r == VkResult.ErrorOutOfDateKHR)
+            {
+                outOfDate = true;
+                return;
+            }
+            if (r == VkResult.SuboptimalKHR) outOfDate = true;
+            else VkCheck.Ok(r, "vkAcquireNextImageKHR"); // surface lost: presenting ends (Failure)
+
+            VkCheck.Ok(vk.Device.PInvoke.vkResetCommandBuffer.Invoke(cb.Handle, 0), "vkResetCommandBuffer");
+            var begin = new VkCommandBufferBeginInfo { Flags = VkCommandBufferUsageFlags.OneTimeSubmitBit };
+            VkCheck.Ok(vk.Device.PInvoke.vkBeginCommandBuffer.Invoke(cb.Handle, &begin), "vkBeginCommandBuffer (presenter)");
+            var target = images[index];
+            Barrier(cb, target, imageLayouts[index], VkImageLayout.TransferDstOptimal, VkPipelineStageFlags2.AllTransferBit, 0, VkPipelineStageFlags2.AllTransferBit, VkAccessFlags2.TransferWriteBit);
+            RecordCopy(cb, b, target, width, height);
             var layout = VkImageLayout.TransferDstOptimal;
             if (splash != null && splash.Active)
             {
@@ -385,9 +489,168 @@ namespace OniMoono.Desktop.Vulkan
             if (interval > 0)
             {
                 // With vsync a frame counts as queued until its copy is done (GlPresenter).
+                long t = GlTimings.Now;
                 var fence = fences[s];
                 VkCheck.Ok(vk.Device.PInvoke.vkWaitForFences.Invoke(vk.Device.Handle, 1, &fence, true, -1), "vkWaitForFences (presenter)");
+                lastWait = GlTimings.Now - t;
             }
+        }
+
+        /// Through DXGI (VkDxgiTarget): the copy goes into the shared image, which the
+        /// submission takes from and gives back to D3D11 (queue family EXTERNAL, the keyed mutex);
+        /// D3D11 then copies and presents it. A failure restarts DXGI (or, until that works,
+        /// Vulkan's swapchain stands in); the picture is not shown.
+        [System.Runtime.Versioning.SupportedOSPlatform("windows")]
+        void ShowDxgi(VkBackBuffer b, int interval, int width, int height)
+        {
+            // The interval redraws between frames use (Run).
+            swapInterval = interval;
+            var cb = BeginSlot(out int s);
+            if (!dxgi.Prepare(width, height, waitIdle ??= () => vk.Queue.WaitIdle()))
+            {
+                DxgiFailed();
+                return;
+            }
+            width = dxgi.Width;
+            height = dxgi.Height;
+            VkCheck.Ok(vk.Device.PInvoke.vkResetCommandBuffer.Invoke(cb.Handle, 0), "vkResetCommandBuffer");
+            var begin = new VkCommandBufferBeginInfo { Flags = VkCommandBufferUsageFlags.OneTimeSubmitBit };
+            VkCheck.Ok(vk.Device.PInvoke.vkBeginCommandBuffer.Invoke(cb.Handle, &begin), "vkBeginCommandBuffer (presenter)");
+            var target = dxgi.Image;
+            // Taken from D3D11; what it held is not kept (the copy writes the whole picture).
+            ExternalBarrier(cb, target, VkImageLayout.Undefined, VkImageLayout.TransferDstOptimal, acquire: true,
+                VkPipelineStageFlags2.None, 0, VkPipelineStageFlags2.AllTransferBit, VkAccessFlags2.TransferWriteBit);
+            RecordCopy(cb, b, target, width, height);
+            var layout = VkImageLayout.TransferDstOptimal;
+            if (splash != null && splash.Active)
+            {
+                Barrier(cb, target, layout, VkImageLayout.ColorAttachmentOptimal, VkPipelineStageFlags2.AllTransferBit, VkAccessFlags2.TransferWriteBit,
+                    VkPipelineStageFlags2.ColorAttachmentOutputBit, VkAccessFlags2.ColorAttachmentReadBit | VkAccessFlags2.ColorAttachmentWriteBit);
+                layout = VkImageLayout.ColorAttachmentOptimal;
+                splash.Draw(cb, dxgi.View, VkDxgiTarget.Format, width, height, s);
+            }
+            // Given back to D3D11.
+            ExternalBarrier(cb, target, layout, VkImageLayout.General, acquire: false,
+                VkPipelineStageFlags2.AllCommandsBit, VkAccessFlags2.TransferWriteBit | VkAccessFlags2.ColorAttachmentWriteBit, VkPipelineStageFlags2.None, 0);
+            VkCheck.Ok(vk.Device.PInvoke.vkEndCommandBuffer.Invoke(cb.Handle), "vkEndCommandBuffer (presenter)");
+
+            VkWin32KeyedMutexAcquireReleaseInfoKHR mutex;
+            VkDeviceMemory memoryCell;
+            nint acquireKey, releaseKey;
+            int timeout;
+            dxgi.MutexInfo(&mutex, &memoryCell, &acquireKey, &releaseKey, &timeout);
+            var buffer = new VkCommandBufferSubmitInfo { CommandBuffer = cb.Handle };
+            var submit = new VkSubmitInfo2 { Next = &mutex, CommandBufferInfoCount = 1, CommandBufferInfos = &buffer };
+            var result = SubmitDxgi(&submit, fences[s]);
+            if (result == VkResult.Timeout)
+            {
+                // The keyed mutex was not given back in time: nothing was submitted (the slot's
+                // fence will not signal, so it is not waited for), and DXGI is restarted. The
+                // fence is reset anyway once the queue is idle: the specification leaves its state
+                // after a failed submission open, and a signaled fence must not be submitted again.
+                try { vk.Queue.WaitIdle(); } catch (VkResultError) { }
+                var fence = fences[s];
+                vk.Device.PInvoke.vkResetFences.Invoke(vk.Device.Handle, 1, &fence);
+                dxgi.Fail("the Vulkan submission timed out acquiring the keyed mutex");
+                DxgiFailed();
+                return;
+            }
+            VkCheck.Ok(result, "vkQueueSubmit2 (presenter, DXGI)");
+            submitted[s] = true;
+            if (!dxgi.Show(interval))
+            {
+                DxgiFailed();
+                return;
+            }
+            lastWait = dxgi.LastWait;
+            dxgiRestarts.Presented(GlTimings.Now);
+        }
+
+        /// The queue's lock (Brutal's Queue serializes its submissions with it; the device thread
+        /// submits too): the DXGI picture's submission calls vkQueueSubmit2 itself under the same
+        /// lock, because Queue.Submit2 reports no VK_TIMEOUT, which a keyed mutex not given back
+        /// in time returns. DxgiPresentTests.TheQueueLockIsBrutalsOwn checks the field.
+        internal static readonly System.Reflection.FieldInfo QueueLockField =
+            typeof(Queue).GetField("_lock", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        int dxgiSubmits;
+
+        /// The queue's lock; null when the binding has no such field (VkDxgiTarget then does not
+        /// start DXGI, and Vulkan's swapchain presents).
+        internal static System.Threading.Lock QueueLock(Queue queue) => QueueLockField?.GetValue(queue) as System.Threading.Lock;
+
+        /// Submits the DXGI picture's batch; VkResult.Timeout when the keyed mutex was not given
+        /// back in time (or --dxgi-fault mutextimeout:N, the Nth submission).
+        VkResult SubmitDxgi(VkSubmitInfo2* submit, VkFence fence)
+        {
+            if (DxgiSwapChain.Faulty("mutextimeout", ++dxgiSubmits)) return VkResult.Timeout;
+            // DXGI starts only with the lock (VkDxgiTarget.Start).
+            using (QueueLock(vk.Queue).EnterScope())
+                return vk.Device.PInvoke.vkQueueSubmit2.Invoke(vk.Queue.Handle, 1, submit, fence);
+        }
+
+        /// DXGI failed while running: everything it held is released, and it is restarted, or
+        /// Vulkan's swapchain stands in until a restart works.
+        [System.Runtime.Versioning.SupportedOSPlatform("windows")]
+        void DxgiFailed()
+        {
+            EngineLog.Engine($"present: DXGI failed: {dxgi.Failure}{MadeUp}");
+            try { vk.Queue.WaitIdle(); } catch (VkResultError) { }
+            dxgi.Dispose();
+            dxgi = null;
+            dxgiLost = true;
+            outOfDate = true;
+            dxgi = RestartDxgi();
+        }
+
+        /// DXGI started anew after it failed, when DxgiRestarts allows a try; null when it does
+        /// not start (or may not be tried yet). Vulkan's swapchain, standing in, gives the window
+        /// up first (a window has one swap chain at a time).
+        [System.Runtime.Versioning.SupportedOSPlatform("windows")]
+        VkDxgiTarget RestartDxgi()
+        {
+            long now = GlTimings.Now;
+            if (!dxgiRestarts.MayTry(now)) return null;
+            dxgiRestarts.Tried(now);
+            int tries = dxgiRestarts.Tries;
+            if (!swapchain.IsNull())
+            {
+                vk.Queue.WaitIdle();
+                DestroyImages();
+                vk.Device.DestroySwapchainKHR(swapchain, null);
+                swapchain = default;
+            }
+            var restarted = VkDxgiTarget.Create(vk, dxgiWindow, windowWidth, windowHeight, out string reason, out _);
+            if (restarted != null)
+            {
+                EngineLog.Engine($"present: DXGI started again (restart {tries})");
+                dxgiRestarts.Started(GlTimings.Now);
+                dxgiLost = false;
+                SwapchainFormat = VkDxgiTarget.Format;
+                return restarted;
+            }
+            EngineLog.Engine(!dxgiRestarts.Exhausted
+                ? $"present: DXGI restart {tries} failed: {reason}{MadeUp}; Vulkan's swapchain until the next in {DxgiRestarts.DelaySeconds(tries):F0} s"
+                : $"present: DXGI restart {tries} failed: {reason}{MadeUp}; no more tries: Vulkan's swapchain from here on");
+            outOfDate = true;
+            return null;
+        }
+
+        /// An ownership transfer of `image` from (`acquire`) or to D3D11 (queue family EXTERNAL),
+        /// with a layout change.
+        void ExternalBarrier(CommandBuffer cb, VkImage image, VkImageLayout from, VkImageLayout to, bool acquire,
+            VkPipelineStageFlags2 srcStage, VkAccessFlags2 srcAccess, VkPipelineStageFlags2 dstStage, VkAccessFlags2 dstAccess)
+        {
+            var barrier = new VkImageMemoryBarrier2
+            {
+                SrcStageMask = srcStage, SrcAccessMask = srcAccess, DstStageMask = dstStage, DstAccessMask = dstAccess,
+                OldLayout = from, NewLayout = to,
+                SrcQueueFamilyIndex = acquire ? VK.QUEUE_FAMILY_EXTERNAL : vk.QueueFamily,
+                DstQueueFamilyIndex = acquire ? vk.QueueFamily : VK.QUEUE_FAMILY_EXTERNAL,
+                Image = image,
+                SubresourceRange = new VkImageSubresourceRange { AspectMask = VkImageAspectFlags.ColorBit, LevelCount = 1, LayerCount = 1 },
+            };
+            var dependency = new VkDependencyInfo { ImageMemoryBarrierCount = 1, ImageMemoryBarriers = &barrier };
+            cb.PipelineBarrier2(dependency);
         }
 
         static void Barrier(CommandBuffer cb, VkImage image, VkImageLayout from, VkImageLayout to, VkPipelineStageFlags2 srcStage, VkAccessFlags2 srcAccess,
@@ -572,6 +835,8 @@ namespace OniMoono.Desktop.Vulkan
             }
             try { vk.Queue.WaitIdle(); } catch (VkResultError) { }
             if (ownsSplash) splash?.Dispose();
+            if (OperatingSystem.IsWindows()) dxgi?.Dispose();
+            dxgi = null;
             DestroyImages();
             if (!swapchain.IsNull()) vk.Device.DestroySwapchainKHR(swapchain, null);
             swapchain = default;

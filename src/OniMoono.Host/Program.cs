@@ -45,7 +45,7 @@ namespace OniMoono.Host
             var migrated = PlayerSettings.MigrateIn(EngineConfig.PersistentDataPath, out var migrateProblem);
             var settings = PlayerSettings.Read(settingsPath, out var settingsProblem);
             var effective = EffectiveOptions.Resolve(GameTweaks.GameTweakNames.All, GameTweaks.GameTweakNames.ChangingBehaviour,
-                options.GameTweaks, options.Splash, options.FrameStats, settings, options.LogPaths, options.Gpu, options.Renderer);
+                options.GameTweaks, options.Splash, options.FrameStats, settings, options.LogPaths, options.Gpu, options.Renderer, options.Dxgi);
             EngineLog.Open(options.LogPath ?? EngineConfig.ConsoleLogPath, keepPrevious: options.LogPath == null,
                 effective.HideLogPaths ? LogScrubber.ForThisMachine() : null);
             // Which build this is (the commit the SDK stamps into the informational version) and
@@ -65,6 +65,7 @@ namespace OniMoono.Host
             options.Renderer = effective.Renderer;
             options.RendererSource = effective.RendererFrom;
             options.Gpu = effective.Gpu;
+            options.Dxgi = effective.Dxgi;
             OniMoono.Engine.PlayerLoop.FrameStats = effective.FrameStats;
             // The GPU for laptops with two: before anything loads the OpenGL driver (the window,
             // in Player.Run), whose GPU drivers read the choice as it loads.
@@ -2737,6 +2738,11 @@ namespace OniMoono.Host
         /// Diagnostics (--vulkan-validation, or ONI_VULKAN_VALIDATION=1): the Khronos validation
         /// layer on the Vulkan device, its messages in the log.
         public bool VulkanValidation;
+        /// --dxgi on|off: Windows, presenting through DXGI (OniMoono.Desktop.Gl.DxgiTarget), over
+        /// the Moono Tweaks settings; null when not given (then the effective value).
+        public bool? Dxgi;
+        /// Diagnostics (--dxgi-fault WHAT): a made-up DXGI failure (DxgiSwapChain.Fault).
+        public string? DxgiFault;
         /// --no-tweaks-menu: the main menu without our Moono Tweaks button, as the original's (test
         /// runs compared with the original game: scripts/e2e.py).
         public bool NoTweaksMenu;
@@ -2873,6 +2879,18 @@ namespace OniMoono.Host
                         }
                         break;
                     case "--vulkan-validation": o.VulkanValidation = true; break;
+                    case "--dxgi":
+                        {
+                            var value = args[++i];
+                            if (value is not ("on" or "off"))
+                            {
+                                Console.Error.WriteLine($"Unknown dxgi {value}; known: on, off");
+                                return null;
+                            }
+                            o.Dxgi = value == "on";
+                            break;
+                        }
+                    case "--dxgi-fault": o.DxgiFault = args[++i]; break;
                     case "--no-tweaks-menu": o.NoTweaksMenu = true; break;
                     case "--max-frame-rate":
                         {
@@ -2945,7 +2963,7 @@ namespace OniMoono.Host
                     }
                     default:
                         Console.Error.WriteLine($"Unknown option {args[i]}");
-                        Console.Error.WriteLine("usage: OniMoono [--game DIR] [--log FILE] [--run-home DIR] [--audio-wav DIR] [--headless] [--batchmode] [--frames N] [--native-override NAME=PATH] [--trace-exceptions] [--gl-debug] [--background] [--no-focus] [--splash moo|none] [--log-pointer-hits] [--vsync-count N] [--gpu-profile] [--no-bindless] [--input FRAME:ACTION[:ARGS]] [--input-file PATH] [--frame-stats] [--log-paths hidden|full] [--gpu default|discrete|integrated] [--renderer auto|vulkan|opengl] [--vulkan-validation] [--no-tweaks-menu] [--max-frame-rate N[:FRAMES]] [--dump-render-textures FRAME:DIR] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [-monitor N] [--check-types] [--game-tweak NAME|-NAME|all|exact|none] [--check-assets [--list-data-scripts FILE]] [--check-bind] [--check-shaders] [--check-natives [--native-arch x86_64|arm64] [--native-dir DIR]] [--dump-shader NAME:DIR] [--capture FRAME:PATH[:SCALE]] [--probe-ui FRAME:X,Y] [--dump-ui FRAME:PATH] [--dump-ui-vertices PATH-SUBSTRING] [--dump-hierarchy FRAME:PATH] [--report-builtin-assets FILE] [--dump-component FRAME:PATH|TYPE] [-- STEAM-COMMAND]");
+                        Console.Error.WriteLine("usage: OniMoono [--game DIR] [--log FILE] [--run-home DIR] [--audio-wav DIR] [--headless] [--batchmode] [--frames N] [--native-override NAME=PATH] [--trace-exceptions] [--gl-debug] [--background] [--no-focus] [--splash moo|none] [--log-pointer-hits] [--vsync-count N] [--gpu-profile] [--no-bindless] [--input FRAME:ACTION[:ARGS]] [--input-file PATH] [--frame-stats] [--log-paths hidden|full] [--gpu default|discrete|integrated] [--renderer auto|vulkan|opengl] [--vulkan-validation] [--dxgi on|off] [--dxgi-fault WHAT] [--no-tweaks-menu] [--max-frame-rate N[:FRAMES]] [--dump-render-textures FRAME:DIR] [-screen-width W] [-screen-height H] [-screen-fullscreen 0|1] [-window-mode exclusive|borderless|windowed] [-monitor N] [--check-types] [--game-tweak NAME|-NAME|all|exact|none] [--check-assets [--list-data-scripts FILE]] [--check-bind] [--check-shaders] [--check-natives [--native-arch x86_64|arm64] [--native-dir DIR]] [--dump-shader NAME:DIR] [--capture FRAME:PATH[:SCALE]] [--probe-ui FRAME:X,Y] [--dump-ui FRAME:PATH] [--dump-ui-vertices PATH-SUBSTRING] [--dump-hierarchy FRAME:PATH] [--report-builtin-assets FILE] [--dump-component FRAME:PATH|TYPE] [-- STEAM-COMMAND]");
                         return null;
                 }
             }

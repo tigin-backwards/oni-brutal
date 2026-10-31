@@ -38,6 +38,10 @@ namespace OniMoono.Desktop.Vulkan
         public VkPhysicalDeviceLimits Limits => Properties.Limits;
         public string DeviceName = "", DriverName = "", DriverInfo = "";
         public bool TextureCompressionBC, SamplerAnisotropy, MirrorClampToEdge, PushDescriptors;
+        /// Windows: the device's LUID (0 when the driver gives none), and whether the DXGI
+        /// interop extensions are on (VK_KHR_external_memory_win32, VK_KHR_win32_keyed_mutex).
+        public long Luid;
+        public bool DxgiInterop;
         public VkPipelineCache PipelineCache;
         VkDebugUtilsMessengerEXT messenger;
         readonly string pipelineCachePath;
@@ -168,19 +172,26 @@ namespace OniMoono.Desktop.Vulkan
             if (required == null) throw new VulkanUnavailableException("GLFW names no surface extensions");
             for (int i = 0; i < count; i++) extensions.Add(Marshal.PtrToStringUTF8((nint)required[i]));
             var layers = new HashSet<string>();
-            // "info": the layer's and the loader's informational messages too (to see it is there).
+            // "info": the layer's and the loader's informational messages too (to see it is there);
+            // "sync": synchronization validation too (VK_EXT_validation_features), off by default.
             var validationSetting = Environment.GetEnvironmentVariable("ONI_VULKAN_VALIDATION");
-            Validation |= validationSetting is "1" or "info";
+            Validation |= validationSetting is "1" or "info" or "sync";
+            bool syncValidation = false;
             if (Validation)
             {
-                if (LayerAvailable(VK.LAYER_KHRONOS_VALIDATION))
+                if (LayerAvailable(VK.LAYER_KHRONOS_VALIDATION) || (AddLocalValidationLayer() && LayerAvailable(VK.LAYER_KHRONOS_VALIDATION)))
                 {
                     layers.Add(VK.LAYER_KHRONOS_VALIDATION);
                     extensions.Add(VK.EXT_DEBUG_UTILS_EXTENSION_NAME);
+                    if (validationSetting == "sync")
+                    {
+                        extensions.Add("VK_EXT_validation_features");
+                        syncValidation = true;
+                    }
                 }
                 else
                 {
-                    EngineLog.Engine("vulkan: validation asked for, but the Khronos validation layer is not installed");
+                    EngineLog.Engine("vulkan: validation asked for, but the Khronos validation layer is not installed (scripts/get-vulkan-validation.sh fetches it)");
                     Validation = false;
                 }
             }
@@ -188,7 +199,12 @@ namespace OniMoono.Desktop.Vulkan
             fixed (byte* engineName = "Moono\0"u8)
             {
                 var app = new VkApplicationInfo { ApplicationName = appName, EngineName = engineName, ApiVersion = RequiredApi };
-                Instance = Brutal.VulkanApi.Vulkan.CreateInstance(new Instance.CreateInfo { AppInfo = app, EnabledExtensions = extensions, EnabledLayers = layers });
+                var syncFeature = VkValidationFeatureEnableEXT.SynchronizationValidationEXT;
+                var validationFeatures = new VkValidationFeaturesEXT { EnabledValidationFeatureCount = 1, EnabledValidationFeatures = &syncFeature };
+                Instance = Brutal.VulkanApi.Vulkan.CreateInstance(new Instance.CreateInfo
+                {
+                    AppInfo = app, EnabledExtensions = extensions, EnabledLayers = layers, Next = syncValidation ? &validationFeatures : null,
+                });
             }
             if (Validation)
             {
@@ -200,7 +216,7 @@ namespace OniMoono.Desktop.Vulkan
                     PfnUserCallback = new PfnVkDebugUtilsMessengerCallbackEXT(&OnValidationMessage),
                 };
                 messenger = Instance.CreateDebugUtilsMessengerEXT(info, null);
-                EngineLog.Engine("vulkan: Khronos validation layer on");
+                EngineLog.Engine(syncValidation ? "vulkan: Khronos validation layer on, with synchronization validation" : "vulkan: Khronos validation layer on");
             }
 
             var candidates = new List<VkCandidate>();
@@ -227,6 +243,10 @@ namespace OniMoono.Desktop.Vulkan
             SamplerAnisotropy = features.Features.SamplerAnisotropy;
             MirrorClampToEdge = f12.SamplerMirrorClampToEdge;
             PushDescriptors = Physical.SupportsExtension("VK_KHR_push_descriptor"u8);
+            // Windows, presenting through DXGI (VkDxgiTarget): a D3D11 texture imported as an
+            // image, its keyed mutex taken and given back by the presenter's submissions.
+            DxgiInterop = OperatingSystem.IsWindows() && OniMoono.Desktop.Gl.DxgiSwapChain.Enabled
+                          && Physical.SupportsExtension("VK_KHR_external_memory_win32"u8) && Physical.SupportsExtension("VK_KHR_win32_keyed_mutex"u8);
             DriverInfo = DriverDescription(out int driverId);
             Identity = new VkGpuIdentity((uint)Properties.VendorID, (uint)Properties.DeviceID, (uint)Properties.DriverVersion, driverId, DriverName, DeviceName);
             if (admit?.Invoke(Identity) is { } refused) throw new VulkanUnavailableException(refused);
@@ -243,6 +263,11 @@ namespace OniMoono.Desktop.Vulkan
             var queueInfo = new VkDeviceQueueCreateInfo { QueueFamilyIndex = QueueFamily, QueueCount = 1, QueuePriorities = &priority };
             var deviceExtensions = new HashSet<string> { VK.KHR_SWAPCHAIN_EXTENSION_NAME };
             if (PushDescriptors) deviceExtensions.Add("VK_KHR_push_descriptor");
+            if (DxgiInterop)
+            {
+                deviceExtensions.Add("VK_KHR_external_memory_win32");
+                deviceExtensions.Add("VK_KHR_win32_keyed_mutex");
+            }
             Device = Physical.CreateDevice(new Device.CreateInfo
             {
                 Extensions = deviceExtensions,
@@ -267,11 +292,17 @@ namespace OniMoono.Desktop.Vulkan
 
         string DriverDescription(out int driverId)
         {
-            var driver = new VkPhysicalDeviceDriverProperties();
+            var ids = new VkPhysicalDeviceIdProperties();
+            var driver = new VkPhysicalDeviceDriverProperties { Next = &ids };
             var push = new VkPhysicalDevicePushDescriptorProperties();
             var props = new VkPhysicalDeviceProperties2 { Next = &driver };
-            if (PushDescriptors) driver.Next = &push;
+            if (PushDescriptors)
+            {
+                driver.Next = &push;
+                push.Next = &ids;
+            }
             Physical.GetProperties2(ref props);
+            Luid = ids.DeviceLUIDValid ? *(long*)ids.DeviceLUID : 0;
             MaxPushDescriptors = PushDescriptors ? push.MaxPushDescriptors : 0;
             DriverName = Utf8(driver.DriverName, 256);
             driverId = (int)driver.DriverID;
@@ -304,6 +335,35 @@ namespace OniMoono.Desktop.Vulkan
         }
 
         public static string Version(int v) => $"{(v >> 22) & 0x7F}.{(v >> 12) & 0x3FF}.{v & 0xFFF}";
+
+        /// A validation layer fetched by scripts/get-vulkan-validation.sh, when the system has none:
+        /// `vulkan-validation/` beside the executable (a staged Windows player), else a checkout's
+        /// out/local-tools/vulkan-validation/{windows,linux} above it; the loader is pointed there
+        /// with VK_ADD_LAYER_PATH (in the native environment, which the loader reads), unless that
+        /// is set already. False when there is none.
+        static bool AddLocalValidationLayer()
+        {
+            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("VK_ADD_LAYER_PATH"))) return false;
+            string os = OperatingSystem.IsWindows() ? "windows" : "linux";
+            const string manifest = "VkLayer_khronos_validation.json";
+            string found = null;
+            var beside = System.IO.Path.Combine(AppContext.BaseDirectory, "vulkan-validation");
+            if (System.IO.File.Exists(System.IO.Path.Combine(beside, manifest))) found = beside;
+            for (var dir = new System.IO.DirectoryInfo(AppContext.BaseDirectory); found == null && dir != null; dir = dir.Parent)
+            {
+                var candidate = System.IO.Path.Combine(dir.FullName, "out", "local-tools", "vulkan-validation", os);
+                if (System.IO.File.Exists(System.IO.Path.Combine(candidate, manifest))) found = candidate;
+            }
+            if (found == null) return false;
+            if (OperatingSystem.IsWindows()) Environment.SetEnvironmentVariable("VK_ADD_LAYER_PATH", found);
+            else if (setenv("VK_ADD_LAYER_PATH", found, 1) != 0) return false;
+            EngineLog.Engine($"vulkan: validation layer from {found}");
+            return true;
+        }
+
+        // .NET keeps its own copy of the environment on Unix: the loader reads the C library's.
+        [DllImport("libc", CharSet = CharSet.Ansi)]
+        static extern int setenv(string name, string value, int overwrite);
 
         static bool LayerAvailable(string name)
         {

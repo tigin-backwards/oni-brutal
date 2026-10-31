@@ -166,6 +166,22 @@ namespace OniMoono.Tests
             Assert.True(r.MayTry(now + 61 * s));
         }
 
+        /// Vulkan's own path, minimized with vsync: pictures a period apart from when the last was
+        /// due, so a late wake-up shortens the next wait; one more than a period late starts over.
+        [Fact]
+        public void MinimizedPicturesArePacedAPeriodApart()
+        {
+            long due = 0;
+            Assert.Equal(0, OniMoono.Desktop.Vulkan.VkPresenter.MinimizedWait(ref due, 1000, 16));
+            Assert.Equal(1016, due);
+            Assert.Equal(16, OniMoono.Desktop.Vulkan.VkPresenter.MinimizedWait(ref due, 1000, 16));
+            // Woke at 1020, 4 late: the next wait is 4 shorter.
+            Assert.Equal(12, OniMoono.Desktop.Vulkan.VkPresenter.MinimizedWait(ref due, 1020, 16));
+            // Restored and minimized again much later: no catching up.
+            Assert.Equal(0, OniMoono.Desktop.Vulkan.VkPresenter.MinimizedWait(ref due, 5000, 16));
+            Assert.Equal(5016, due);
+        }
+
         [Fact]
         public void TheSlowestPercentIsTheMeanOfTheLongestIntervals()
         {

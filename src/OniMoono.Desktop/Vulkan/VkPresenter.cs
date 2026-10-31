@@ -27,7 +27,8 @@ namespace OniMoono.Desktop.Vulkan
     /// and IMMEDIATE (else MAILBOX) without. The swapchain is made again when the window's size or
     /// the present mode changes or the surface reports it out of date; a minimized window (a 0x0
     /// surface) is not presented to, while frames go on rendering at the size the window had (issue
-    /// #29).
+    /// #29); with vsync its pictures are paced at 60 Hz as if presented, as the original's are (and
+    /// OpenGL's and DXGI's, measured), rather than running as fast as the frames come.
     ///
     /// Ordering needs no semaphores between the two threads: both submit to the one queue, the
     /// frame before the copy that reads it, and each image's barriers wait for the work that
@@ -56,6 +57,8 @@ namespace OniMoono.Desktop.Vulkan
         VkExtent2D extent;
         VkPresentModeKHR presentMode;
         int swapInterval = -1;
+        // When the next picture of a minimized window is due, with vsync (PaceMinimized).
+        long minimizedDue;
         bool outOfDate;
         readonly VkPresentModeKHR[] presentModes = Array.Empty<VkPresentModeKHR>();
         /// Swapchain creations that failed in a row (made again after a growing delay, 0.1 s
@@ -382,13 +385,40 @@ namespace OniMoono.Desktop.Vulkan
             }
         }
 
+        /// A minimized window has no swapchain to wait on: with vsync each picture not presented
+        /// takes what is left of `interval` refreshes at 60 Hz (the monitor is out of reach here:
+        /// GLFW's are the main thread's), counted from when the last was due so that Sleep's
+        /// coarse steps even out. Measured minimized (U60, a paused colony, the game's vsync on
+        /// Windows): the original stayed at or under 60 fps, OpenGL and DXGI at 60, and this path
+        /// at 69 to 75 before this.
+        void PaceMinimized(int interval)
+        {
+            if (interval <= 0) return;
+            long wait = MinimizedWait(ref minimizedDue, GlTimings.Now, System.Diagnostics.Stopwatch.Frequency * interval / 60);
+            if (wait > 0) Thread.Sleep((int)(wait * 1000 / System.Diagnostics.Stopwatch.Frequency));
+        }
+
+        /// The wait before a minimized window's picture (Stopwatch ticks), moving `due` on a
+        /// period; a picture more than a period late starts the count again from now.
+        internal static long MinimizedWait(ref long due, long now, long period)
+        {
+            if (due < now - period) due = now;
+            long wait = due - now;
+            due += period;
+            return Math.Max(0, wait);
+        }
+
         /// Through Vulkan's swapchain.
         void ShowSwapchain(VkBackBuffer b, int interval, int width, int height)
         {
             if (interval != swapInterval || outOfDate || FailNextRecreate || OutOfMemoryRecreates > 0 || width != extent.Width || height != extent.Height || swapchain.IsNull())
             {
                 if (!TryRecreate(width, height, interval)) return;
-                if (swapchain.IsNull()) return; // minimized
+                if (swapchain.IsNull())
+                {
+                    PaceMinimized(interval);
+                    return;
+                }
             }
             // The copy fills the swapchain's images, whose size is the surface's now, which can
             // differ from the size the frame was handed over with (the window changed since).

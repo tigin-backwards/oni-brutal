@@ -1,0 +1,71 @@
+{
+ "spec": "mods/3793108683-advanced-mopping.yaml",
+ "mods": [
+  "3793108683"
+ ],
+ "verdict": "played",
+ "why": "passed once in the original and twice in ours",
+ "findings": [],
+ "note": "the Mop tool's liquid filter opens; with Water unticked a drag marks nothing, ticked it marks the three cells; Duplicants mop them, as in the original",
+ "updated": "2026-10-30",
+ "commit": "70fe9c7f",
+ "mod_dlls": {
+  "3793108683": {
+   "AdvancedMopping.dll": "1f7c861f9d00f9d6adb4b62557b73076b7a9b581be1cd64e1bb448fb7151a793"
+  }
+ },
+ "runs": {
+  "original": [
+   {
+    "run": "20261030-192138-edfaf074",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-30T21:09:16",
+    "lane": 14,
+    "signatures": 0
+   },
+   {
+    "run": "20261030-192138-edfaf074",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-30T22:12:33",
+    "lane": 14,
+    "signatures": 0
+   }
+  ],
+  "ours": [
+   {
+    "run": "20261030-192138-edfaf074",
+    "index": 1,
+    "verdict": "pass",
+    "date": "2026-10-30T22:56:31",
+    "lane": 14,
+    "reference_run": "20261030-192138-edfaf074",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "filter": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   },
+   {
+    "run": "20261030-192138-edfaf074",
+    "index": 2,
+    "verdict": "pass",
+    "date": "2026-10-30T23:09:08",
+    "lane": 14,
+    "reference_run": "20261030-192138-edfaf074",
+    "new_signatures": 0,
+    "findings": [],
+    "ui_dump": {
+     "filter": {
+      "differences": 0
+     }
+    },
+    "shots": {}
+   }
+  ]
+ }
+}

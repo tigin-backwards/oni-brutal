@@ -1,0 +1,50 @@
+# Advanced Mopping (3793108683), class T.
+#
+# What it does: the Mop tool gets a liquid filter: a panel beside the tool menu ("Mop: Liquid
+# Filter") with a search field, an All checkbox and one checkbox per liquid category (Water,
+# Liquid metal, Oils and fuels, ...), expandable to single liquids. A drag marks only the liquids
+# selected, and a mop order extracts only those. Its options (PLib) add airborne mopping from a
+# distance, a mass limit and a mopping rate; not exercised here.
+# How a player reaches it: the toolbar's Mop tool opens the panel; its checkboxes pick liquids.
+# What changes: which cells a drag marks. In Moono up to 2026.10.30.03 the panel's code named
+# UnityEngine.MissingComponentException, which the engine lacked: the panel failed to build,
+# the mod logged "Liquid filter failed" and blocked every new mop order, so no panel showed and
+# a drag marked nothing (with every tweak setting).
+#
+# setup pours 15 kg of water into three cells of the pit in the floor of the dug-out room west
+# of the printing pod (x 106-108, y 206, on solid ground).
+from: early-base
+mods: [3793108683]
+require_log: ['\[Advanced Mopping\] Strict liquid filter ready']
+setup:
+  - driver: {setup.call: {type: SimMessages, method: AddRemoveSubstance, args: [131122, Water, null, 15, 300, 255, 0]}}
+  - driver: {setup.call: {type: SimMessages, method: AddRemoveSubstance, args: [131123, Water, null, 15, 300, 255, 0]}}
+  - driver: {setup.call: {type: SimMessages, method: AddRemoveSubstance, args: [131124, Water, null, 15, 300, 255, 0]}}
+steps:
+  - run: {seconds: 2}
+  - expect_state:
+      "cells:106,206..108,206::Grid.Mass.get_Item({cell})": "> 30"
+      "all:Moppable::Length": 0
+  - driver: {camera.set: {cell: [108, 208], ortho: 8}}
+  - tool: {toolbar: Mop}
+  # The filter panel opens with the tool.
+  - ui_wait: {path: "**/ToolMenu/AdvancedMoppingLiquidFilter", cond: stable}
+  - expect_ui:
+      "**/AdvancedMoppingLiquidFilter/FilterContent/Title/Text": {text: "Mop: Liquid Filter"}
+      "**/AdvancedMoppingLiquidFilter/**/Group_Water/AlignmentWrapper/Text": {text: "Water"}
+  - ui_dump: {name: filter, root: "**/ToolMenu/AdvancedMoppingLiquidFilter"}
+  # Water unticked: a drag over the pit marks nothing.
+  - click: {ui: "**/AdvancedMoppingLiquidFilter/**/Group_Water/AlignmentWrapper/CheckBox"}
+  - drag: {from: [106, 206], to: [108, 206]}
+  - expect_state: {"all:Moppable::Length": 0}
+  # Water ticked again: the same drag marks the three cells.
+  - click: {ui: "**/AdvancedMoppingLiquidFilter/**/Group_Water/AlignmentWrapper/CheckBox"}
+  - drag: {from: [106, 206], to: [108, 206]}
+  - expect_state: {"all:Moppable::Length": 3}
+  - key: {code: Escape}
+  - ui_wait: {path: "**/ToolMenu/AdvancedMoppingLiquidFilter", cond: inactive}
+  # Duplicants mop the water up.
+  - run: {seconds: 600}
+  - expect_state:
+      "all:Moppable::Length": 0
+      "cells:106,206..108,206::Grid.Mass.get_Item({cell})": "< 20"

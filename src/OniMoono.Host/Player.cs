@@ -35,6 +35,8 @@ namespace OniMoono.Host
                 OniMoono.Desktop.Gl.GlDevice.SwapIntervalOverride = options.VSyncCount;
                 OniMoono.Desktop.Gl.GlGpuProfile.Enabled = options.GpuProfile;
                 OniMoono.Desktop.Gl.GlBindless.Disabled = options.NoBindless;
+                OniMoono.Desktop.Gl.DxgiSwapChain.Enabled = options.Dxgi != false;
+                OniMoono.Desktop.Gl.DxgiSwapChain.Fault = options.DxgiFault;
                 var device = new OniMoono.Desktop.Gl.GlDevice(platform);
                 OniMoono.Engine.Rendering.GraphicsDevice.Install(device);
             }

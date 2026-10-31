@@ -134,6 +134,18 @@ msgctxt "STRINGS.MOONO.TWEAKS.CHOICES.GPU.INTEGRATED"
 msgid "integrated"
 msgstr "集成"
 
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.DXGI.TITLE"
+msgid "Present through Direct3D on Windows"
+msgstr "Windows 上通过 Direct3D 显示"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.DXGI.EFFECT"
+msgid "Windows shows the game as it shows the original: no forced HDR or brightness. Needs a restart."
+msgstr "Windows 像显示原版一样显示游戏：不会被强制开启 HDR 或调高亮度。需要重启。"
+
+msgctxt "STRINGS.MOONO.TWEAKS.ROWS.DXGI.DETAIL"
+msgid "Frames go to the screen through a Direct3D 11 swap chain, as the original's do. Off: through OpenGL's own presentation, which Auto HDR or RTX HDR can take for HDR. If it can't start, OpenGL's own is used and Player.log says why. No effect on Linux."
+msgstr "画面像原版一样通过 Direct3D 11 交换链送到屏幕。关闭时使用 OpenGL 自身的呈现方式，可能被自动 HDR 或 RTX HDR 当作 HDR 内容。无法启动时改用 OpenGL 自身的方式，Player.log 会说明原因。在 Linux 上无效。"
+
 msgctxt "STRINGS.MOONO.TWEAKS.GROUPS.SAVING"
 msgid "Saving"
 msgstr "存档"

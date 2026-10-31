@@ -19,7 +19,8 @@ namespace OniMoono.Host
     /// defaults, so a default that changes in an update (a new tweak among them) reaches every user
     /// who has not chosen otherwise:
     ///
-    ///     { "gameTweaks": { "slow-reachability": true, "fast-jobs": false }, "splash": "moo", "frameStats": true, "logPaths": "full", "gpu": "discrete" }
+    ///     { "gameTweaks": { "slow-reachability": true, "fast-jobs": false }, "splash": "moo", "frameStats": true, "logPaths": "full", "gpu": "discrete",
+    ///       "dxgi": false }
     ///
     /// Tweaks no longer known (one removed in an update) are ignored and kept.
     internal sealed class PlayerSettings
@@ -33,6 +34,8 @@ namespace OniMoono.Host
         public string? LogPaths;
         /// "default", "discrete" or "integrated" (GpuChoice); null when not chosen.
         public string? Gpu;
+        /// Windows: presenting through DXGI (OniMoono.Desktop.Gl.DxgiTarget); null when not chosen.
+        public bool? Dxgi;
 
         public static string PathIn(string persistentDataPath) => Path.Combine(persistentDataPath, "oni-moono", "settings.json");
         /// Where players from before the Moono name (oni-brutal) kept the file.
@@ -102,6 +105,7 @@ namespace OniMoono.Host
                 var value = gpu.GetValue<string>();
                 settings.Gpu = GpuChoice.IsChoice(value) ? value : throw new FormatException($"gpu \"{value}\" is not one of: {string.Join(", ", GpuChoice.Choices)}");
             }
+            if (root["dxgi"] is JsonNode dxgi) settings.Dxgi = dxgi.GetValue<bool>();
             return settings;
         }
 
@@ -119,6 +123,7 @@ namespace OniMoono.Host
             if (FrameStats != null) root["frameStats"] = FrameStats;
             if (LogPaths != null) root["logPaths"] = LogPaths;
             if (Gpu != null) root["gpu"] = Gpu;
+            if (Dxgi != null) root["dxgi"] = Dxgi;
             return indented ? root.ToJsonString(new JsonSerializerOptions { WriteIndented = true }) + "\n" : root.ToJsonString();
         }
 
@@ -139,8 +144,8 @@ namespace OniMoono.Host
     /// The options the Moono Tweaks screen sets, as this run has them: built-in defaults, then the
     /// settings file, then the command line. A command line naming any game tweak
     /// (`--game-tweak NAME|-NAME|all|exact|none`, repeatable) sets the whole set of tweaks for the
-    /// run, as before the settings file existed; `--splash`, `--frame-stats`, `--log-paths`
-    /// and `--gpu` set theirs.
+    /// run, as before the settings file existed; `--splash`, `--frame-stats`, `--log-paths`,
+    /// `--gpu` and `--dxgi` set theirs.
     internal sealed class EffectiveOptions
     {
         public readonly IReadOnlyList<string> AllTweaks;
@@ -162,6 +167,11 @@ namespace OniMoono.Host
         public const string DefaultGpu = GpuChoice.Default;
         public string Gpu = DefaultGpu;
         public OptionSource GpuSource;
+        /// Windows: present through DXGI (on unless chosen otherwise; it falls back to OpenGL's
+        /// presentation by itself when it can't start).
+        public const bool DefaultDxgi = true;
+        public bool Dxgi = DefaultDxgi;
+        public OptionSource DxgiSource;
         /// The command line's `--game-tweak` values, in order (empty when it names none).
         public readonly IReadOnlyList<string> CommandLineTweaks;
         /// Names in the settings file that are not tweaks of this player.
@@ -184,7 +194,7 @@ namespace OniMoono.Host
 
         public static EffectiveOptions Resolve(IReadOnlyList<string> allTweaks, IReadOnlyCollection<string> changing,
             IReadOnlyList<string> commandLineTweaks, string? commandLineSplash, bool commandLineFrameStats, PlayerSettings file,
-            string? commandLineLogPaths = null, string? commandLineGpu = null)
+            string? commandLineLogPaths = null, string? commandLineGpu = null, bool? commandLineDxgi = null)
         {
             var options = new EffectiveOptions(allTweaks, commandLineTweaks);
             foreach (var name in allTweaks)
@@ -203,6 +213,8 @@ namespace OniMoono.Host
             else if (file.LogPaths != null) (options.LogPaths, options.LogPathsSource) = (file.LogPaths, OptionSource.SettingsFile);
             if (commandLineGpu != null) (options.Gpu, options.GpuSource) = (commandLineGpu, OptionSource.CommandLine);
             else if (file.Gpu != null) (options.Gpu, options.GpuSource) = (file.Gpu, OptionSource.SettingsFile);
+            if (commandLineDxgi != null) (options.Dxgi, options.DxgiSource) = (commandLineDxgi.Value, OptionSource.CommandLine);
+            else if (file.Dxgi != null) (options.Dxgi, options.DxgiSource) = (file.Dxgi.Value, OptionSource.SettingsFile);
             return options;
         }
 
@@ -212,9 +224,10 @@ namespace OniMoono.Host
         /// dropped from the file, any other recorded; options not chosen (those the command line
         /// set, shown but not changeable) keep what the file had.
         public static PlayerSettings Apply(PlayerSettings file, IReadOnlyCollection<string> changing,
-            IReadOnlyDictionary<string, bool> tweaks, bool? splashMoo, bool? frameStats, bool? hideLogPaths = null, string? gpu = null)
+            IReadOnlyDictionary<string, bool> tweaks, bool? splashMoo, bool? frameStats, bool? hideLogPaths = null, string? gpu = null,
+            bool? dxgi = null)
         {
-            var result = new PlayerSettings { Splash = file.Splash, FrameStats = file.FrameStats, LogPaths = file.LogPaths, Gpu = file.Gpu };
+            var result = new PlayerSettings { Splash = file.Splash, FrameStats = file.FrameStats, LogPaths = file.LogPaths, Gpu = file.Gpu, Dxgi = file.Dxgi };
             foreach (var (name, on) in file.GameTweaks) result.GameTweaks[name] = on;
             foreach (var (name, on) in tweaks)
             {
@@ -225,6 +238,7 @@ namespace OniMoono.Host
             if (frameStats != null) result.FrameStats = frameStats.Value ? true : null;
             if (hideLogPaths != null) result.LogPaths = (hideLogPaths.Value ? "hidden" : "full") is var logPaths && logPaths == DefaultLogPaths ? null : logPaths;
             if (gpu != null) result.Gpu = gpu == DefaultGpu ? null : gpu;
+            if (dxgi != null) result.Dxgi = dxgi == DefaultDxgi ? null : dxgi;
             return result;
         }
 
@@ -253,6 +267,7 @@ namespace OniMoono.Host
             yield return $"frame stats {(FrameStats ? "on" : "off")} ({From(FrameStatsSource)})";
             yield return $"log paths {LogPaths} ({From(LogPathsSource)})";
             yield return $"gpu {Gpu} ({From(GpuSource)})";
+            yield return $"dxgi {(Dxgi ? "on" : "off")} ({From(DxgiSource)})";
         }
     }
 }

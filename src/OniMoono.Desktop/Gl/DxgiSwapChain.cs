@@ -218,9 +218,9 @@ namespace OniMoono.Desktop.Gl
 
         /// Copies the top-left Width x Height of `source` (a D3D11 texture of the device's) into
         /// the back buffer, presents it `interval` vertical blanks after the last (0: at once)
-        /// and waits until it is on its way (one picture in flight, as the OpenGL and Vulkan
-        /// swapchain paths have with vsync): the waitable object is signalled as each presented
-        /// picture retires; an occluded picture was not queued and is not waited for. The
+        /// and, with vsync, waits until it is on its way (one picture in flight, as the OpenGL
+        /// and Vulkan swapchain paths have with vsync): the waitable object is signalled as each
+        /// presented picture retires; an occluded picture was not queued and is not waited for. The
         /// caller has made `source` ready for D3D11 (the interop unlock, the keyed mutex).
         public bool Present(void* source, int interval)
         {
@@ -248,7 +248,11 @@ namespace OniMoono.Desktop.Gl
             if (nowOccluded != occluded && PresentTrace.Enabled) PresentTrace.Log($"dxgi: present {presents}: {(nowOccluded ? "occluded (not shown)" : "shown again")}");
             occluded = nowOccluded;
             if (Dxgi.Failed(hr)) return Fail($"Present failed ({Dxgi.Hr(hr)}{DeviceState(hr)})");
-            if (nowOccluded) resync = true;
+            // Without vsync nothing waits, as on the swapchain paths: retiring can take a frame or
+            // two (measured on the AMD iGPU, its picture copied to a monitor on another GPU: 29 ms
+            // a picture), which would cap the frame rate. The next Present resyncs the count; the
+            // interop lock or keyed mutex keeps at most a picture in flight meanwhile.
+            if (nowOccluded || sync == 0) resync = true;
             else
             {
                 long t = GlTimings.Now;

@@ -1713,16 +1713,22 @@ showing new frames on both devices. With every restart failing (`norestart`), Vu
 kept showing new frames; OpenGL's SwapBuffers did when the fault came at start-up after the swap
 chain was made but before it presented (`association,norestart`), and did not when DXGI had
 presented first (`removed:300,norestart`: the window kept DXGI's last picture, as above).
-Minimized with the game's vsync (a paused colony) the original stayed at or under 60 fps and every path here at 60 (Vulkan's own swapchain path by pacing its
-pictures, VkPresenter). On a 530-nit HDR
-monitor, fullscreen at the menu (tools/HdrCheck): with Windows' HDR on (SDR white at 240 nits)
+Minimized with the game's vsync (a paused colony) the original stayed at or under 60 fps and
+every path here at 60 (Vulkan's own swapchain path by pacing its pictures, VkPresenter). On a
+530-nit HDR monitor, fullscreen at the menu (tools/HdrCheck): with Windows' HDR on (SDR white at 240 nits)
 the original, Vulkan through DXGI and through its swapchain, and OpenGL through DXGI all left the
 monitor in HDR and reached at most 240 nits, composited as SDR, with no Auto HDR boost; OpenGL
 through WGL switched the monitor out of HDR to SDR while fullscreen, a display mode change the
 original does not make. With HDR off all five stayed SDR at 80 nits, and Desktop Duplication
 (which OBS's display capture uses) lost OpenGL through WGL (`DXGI_ERROR_ACCESS_LOST`) but captured
-OpenGL through DXGI. Not measured: Intel GPUs,
-Vulkan's validation layer (not installed), input latency.
+OpenGL through DXGI. Vulkan's validation layer (1.4.363, synchronization validation included)
+reported no error through DXGI or Vulkan's swapchain on the menu, a colony for 2000 to 3000
+frames, resizes, minimizing, windowed mode switches, each DXGI fault above and the fallback to the
+swapchain; its one warning is Unity's shaders writing fragment outputs no attachment takes. From a
+frame's start to its picture's present, with the game's vsync (a paused colony), Vulkan through
+DXGI took 28 to 31 ms at either maximum frame latency (1 or 2) and through its swapchain 25 to 32;
+the time from the present to the screen, and the original's, need PresentMon, which needs rights
+this account lacks. Not measured: Intel GPUs, click-to-photon latency.
 
 **Loading splash (`--splash moo`, on by default; `--splash none` or Moono Tweaks turns it off).** The player's own presentation, not the
 game's: the presenter thread draws Gassy Moo comets (the game's `meteor_gassymoo` kanim, its
@@ -1896,7 +1902,8 @@ frames to a device thread; only the work posted for resources differs (`IResourc
   `crash-at:N` ends the process at presented frame N as a crash would, and `guard-build:X`
   keys the start-up guard to build X.
 - *Diagnostics.* `--vulkan-validation` (or `ONI_VULKAN_VALIDATION=1`) enables the Khronos
-  validation layer, its messages in the log. Without an installed one,
+  validation layer, its messages in the log (`ONI_VULKAN_VALIDATION=sync` adds its synchronization
+  checks). Without an installed one,
   `scripts/get-vulkan-validation.sh` fetches a pinned release (Vulkan-ValidationLayers
   vulkan-sdk-1.4.363.0 from LunarG's SDK packages, checked by SHA-256; on Linux the distro's
   `vulkan-validationlayers` is used when installed) into the gitignored

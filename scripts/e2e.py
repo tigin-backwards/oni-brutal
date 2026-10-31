@@ -5,7 +5,10 @@
                  [--results PATH] [--run-id ID] [--record [--note TEXT]] [--hold | --hold-on-fail]
                  SPEC...
   scripts/e2e.py --check SPEC...             parse and validate specs (and known-findings.yaml)
-  scripts/e2e.py --status                    the machine's lanes, players and perf jobs
+  scripts/e2e.py --status                    the machine's lanes, players and perf jobs, who waits on
+                                             what, and what dead runners left (look here first when a
+                                             run waits)
+  scripts/e2e.py --clean                     clean what dead runners left on lanes no runner holds
 A spec (tests/e2e/NAME.yaml; tests/e2e/README.md describes every step) starts from a fixture save
 (tests/e2e/fixtures), installs Workshop mods, gives orders through OniMcp's tools (an in-game MCP
 server), drives the UI with real X11 input (XTEST) located through E2eDriver (our test mod, a
@@ -28,7 +31,9 @@ E2E_RESERVED). Each player is counted for its memory in the machine's players' b
 (E2E_MEMORY_GB, default 40; E2E_MAX_PLAYERS, default 4). A run holds perf.lock shared, so a perf
 job taking it exclusively (`flock -x -o ~/.cache/oni-brutal-e2e/perf.lock CMD`) keeps specs from
 starting; specs also wait while ps shows a perf job. Each wait says what it waits for, and
---max-wait (or E2E_MAX_WAIT) fails the run after that many minutes.
+--max-wait (or E2E_MAX_WAIT) fails the run after that many minutes. A run's players and Xvfbs end
+with it however it ends (a watcher, e2e.py --reap-after, sees to a kill -9), and a runner taking a
+lane whose last holder died first cleans what that holder left (see "leftovers" below).
 
 Needs, in the environment or out/local-tools/qa.env: QA_U57_GAME and QA_U57_STEAM (the DLC
 content and a Steam double owning it, as for qa.sh's U57 stages), E2E_ONIMCP (a build of
@@ -49,7 +54,7 @@ tests/e2e/known-findings.yaml explains make a run of ours a warning, not a failu
 the hold file in its run folder is removed, for a look through OniMcp and E2eDriver while
 writing a spec; a QA perf stage waiting to start ends it 10 minutes later.
 """
-import contextlib, ctypes, fcntl, importlib.util, json, os, re, shutil, signal, socket, subprocess, sys
+import contextlib, ctypes, fcntl, importlib.util, itertools, json, os, re, shutil, signal, socket, subprocess, sys
 import threading, time, urllib.error, urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -556,12 +561,42 @@ def reservations(directory=None, text=None):
 class Lane:
     """A lane held by this process: its number, ports, display (None for xvfb-run -a) and lock."""
 
-    def __init__(self, number, lock_file, display=None):
+    def __init__(self, number, lock_file, display=None, record=None):
         self.number, self.lock_file, self.display = number, lock_file, display
         self.mcp_port, self.driver_port = lane_ports(number)
+        # The lock file's record: its holder (owner_record), what it does now (state) and the
+        # processes it runs there (children), for --status and for whoever takes the lane next.
+        self.record = record if record is not None else {}
+        self.children = []
+        self.guard = threading.Lock()
+        if lock_file:
+            with _held_guard:
+                _held_lanes.add(self)
+
+    def update(self, **fields):
+        """Rewrites the lock's record with FIELDS and the children."""
+        with self.guard:
+            self.record.update(fields)
+            self.record['children'] = list(self.children)
+            if self.lock_file:
+                write_record(self.lock_file, self.record)
+
+    def track(self, role, pid, scope=None):
+        """A process this lane runs now (ROLE: player, xvfb), in the lock's record."""
+        self.children.append({'role': role, 'pid': pid, 'start': process_start(pid), 'scope': scope})
+        self.update()
+
+    def untrack(self, pid):
+        self.children[:] = [c for c in self.children if c['pid'] != pid]
+        self.update()
 
     def release(self):
+        with _held_guard:
+            _held_lanes.discard(self)
         if self.lock_file:
+            self.children.clear()
+            with contextlib.suppress(OSError, ValueError):
+                self.update(state='released')
             fcntl.flock(self.lock_file, fcntl.LOCK_UN)
             self.lock_file.close()
             self.lock_file = None
@@ -584,9 +619,11 @@ def lane_problem(number, busy=port_open, display_busy=display_in_use, reserved=(
     return None
 
 
-def try_lane(number, lock_dir=None, busy=port_open, display_busy=display_in_use, reserved=(set(), set()), display=True):
+def try_lane(number, lock_dir=None, busy=port_open, display_busy=display_in_use, reserved=(set(), set()), display=True,
+             leftovers=None, log=say):
     """Lane NUMBER if no runner on the machine holds it and its ports and display are free and
-    not reserved, else None."""
+    not reserved, else None. What a dead runner left on it is cleaned first (lane_leftovers;
+    LEFTOVERS(number, record, lock_dir) stands in for it in tests)."""
     if lane_problem(number, lambda p: False, lambda d: False, reserved, display):
         return None
     lock_dir = lock_dir or shared_dir()
@@ -597,15 +634,22 @@ def try_lane(number, lock_dir=None, busy=port_open, display_busy=display_in_use,
     except OSError:
         f.close()
         return None
+    previous = read_record(f)
+    # Looked for only when the lane seems busy or its last runner recorded children (a scan of
+    # every process, made for each lane while a runner waits for one).
+    if previous.get('children') or lane_problem(number, busy, display_busy, reserved, display):
+        found = (leftovers or (lambda n, r, d: lane_leftovers(n, r, d, display=None if display else -1)))(
+            number, previous, lock_dir)
+        if found:
+            log(f'lane {number}: its last runner (pid {previous.get("pid")}) has gone; cleaning what it left')
+            clean_leftovers(found, log=lambda s: log(f'lane {number}: {s}'))
     if lane_problem(number, busy, display_busy, reserved, display):
         fcntl.flock(f, fcntl.LOCK_UN)
         f.close()
         return None
-    f.seek(0)
-    f.truncate()
-    json.dump(dict(owner_record(), lane=number), f)
-    f.flush()
-    return Lane(number, f, lane_display(number) if display else None)
+    record = dict(owner_record(), lane=number, state='idle', children=[])
+    write_record(f, record)
+    return Lane(number, f, lane_display(number) if display else None, record)
 
 
 def allocate_lane(first, lock_dir=None, busy=port_open, wait=True, log=say, last=None, display=True,
@@ -624,7 +668,8 @@ def allocate_lane(first, lock_dir=None, busy=port_open, wait=True, log=say, last
         if not wait or (give_up and give_up()):
             return None
         holders = [f'{s["lane"]}: pid {s["pid"]} in {s["root"]}' for s in lane_status(lock_dir) if first <= s['lane'] <= last]
-        waiter.tick('held: ' + (', '.join(holders) or 'none; the others are busy or reserved'))
+        waiter.tick('held: ' + (', '.join(holders) or 'none; the others are busy or reserved')
+                    + ' (scripts/e2e.py --status says by what)', key=tuple(holders))
         time.sleep(5)
 
 
@@ -650,6 +695,383 @@ def lane_status(lock_dir=None):
                 record = {}
         held.append({'pid': None, 'root': '?', 'since': '?', **record, 'lane': int(match.group(1))})
     return sorted(held, key=lambda s: s['lane'])
+
+
+# ---------------------------------------------------------------- leftovers: what a runner that died left running
+#
+# A runner's players and Xvfb run in sessions (and systemd scopes) of their own, so they outlive a
+# runner killed by `timeout` or SIGKILL, holding the lane's ports and display. So that nothing is
+# left behind:
+# - every process a runner starts carries E2E_OWNER=PID:START (the runner's pid and start time),
+#   E2E_LANE and E2E_LOCK_DIR in its environment, and each player runs in a systemd scope named
+#   oni-test-PID-START-LABEL.scope (scripts/contain.sh, ONI_SCOPE);
+# - the lane's lock records those children (pid, start time, scope) while they run;
+# - the runner tears them down on any exit it sees (normal, exception, SIGTERM, SIGINT, SIGHUP), and
+#   a watcher process (--reap-after) does it when the runner dies without seeing it (SIGKILL);
+# - a runner taking a lane whose last holder is dead first ends what that holder left: processes
+#   whose E2E_OWNER names a dead runner, the lane's recorded children (matched by start time),
+#   scopes named for a dead runner, and the stale X lock and socket of the lane's display.
+# Leftovers of runners from before E2E_OWNER (a player with the lane's E2E_LANE, or an Xvfb on the
+# lane's display, with no e2e.py among their ancestors) count in the machine's lock directory only.
+
+OWNER_ENV = 'E2E_OWNER'
+SCOPE_PREFIX = 'oni-test'
+
+
+def owner_tag(pid=None):
+    """PID:START of a process (default this one): what E2E_OWNER and scope names hold."""
+    pid = pid or os.getpid()
+    return f'{pid}:{process_start(pid)}'
+
+
+def tag_alive(tag):
+    """Whether the process a PID:START tag names still runs (that process, not a later one given
+    its pid)."""
+    match = re.fullmatch(r'(\d+):(\d+)', tag or '')
+    return bool(match) and process_start(int(match.group(1))) == int(match.group(2))
+
+
+def scope_name(label, tag=None):
+    """The systemd scope a runner (TAG, default this process) runs a player in."""
+    pid, start = (tag or owner_tag()).split(':')
+    return f'{SCOPE_PREFIX}-{pid}-{start}-' + re.sub(r'[^A-Za-z0-9_.-]', '_', label) + '.scope'
+
+
+def scope_owner(unit):
+    """(owner tag, label) of a scope named by scope_name, else None."""
+    match = re.fullmatch(rf'{SCOPE_PREFIX}-(\d+)-(\d+)-(.+)\.scope', unit)
+    return (f'{match.group(1)}:{match.group(2)}', match.group(3)) if match else None
+
+
+def read_proc(pid):
+    """A process as {pid, ppid, pgid, start, comm, args, env}, or None once it has gone."""
+    try:
+        with open(f'/proc/{pid}/stat') as f:
+            stat = f.read()
+        with open(f'/proc/{pid}/cmdline', 'rb') as f:
+            args = [a.decode(errors='replace') for a in f.read().split(b'\0')[:-1]]
+    except OSError:
+        return None
+    comm, rest = stat[stat.index('(') + 1:stat.rindex(')')], stat[stat.rindex(')') + 2:].split()
+    return {'pid': int(pid), 'ppid': int(rest[1]), 'pgid': int(rest[2]), 'start': int(rest[19]), 'comm': comm,
+            'args': args, 'env': process_environ(pid)}
+
+
+def snapshot():
+    """Every process this user can see, as read_proc gives them."""
+    procs = (read_proc(e) for e in os.listdir('/proc') if e.isdigit())
+    return [p for p in procs if p]
+
+
+def has_e2e_ancestor(proc, by_pid):
+    """Whether a runner (an e2e.py process) is among PROC's ancestors: its runner still runs."""
+    seen, p = set(), by_pid.get(proc['ppid'])
+    while p and p['pid'] not in seen and p['pid'] > 1:
+        seen.add(p['pid'])
+        if any(a.endswith('e2e.py') for a in p['args'][:3]):
+            return True
+        p = by_pid.get(p['ppid'])
+    return False
+
+
+_systemd = None
+
+
+def has_systemd():
+    """Whether a systemd user manager runs the players' scopes (scripts/contain.sh)."""
+    global _systemd
+    if _systemd is None:
+        _systemd = bool(shutil.which('systemctl')) and subprocess.run(
+            ['systemctl', '--user', 'show-environment'], capture_output=True).returncode == 0
+    return _systemd
+
+
+def test_scopes():
+    """The oni-test-* scopes loaded now."""
+    if not has_systemd():
+        return []
+    out = subprocess.run(['systemctl', '--user', 'list-units', '--type=scope', '--all', '--plain', '--no-legend',
+                          f'{SCOPE_PREFIX}-*'], capture_output=True, text=True).stdout
+    return [line.split()[0] for line in out.splitlines() if line.strip()]
+
+
+def stop_scope(unit, grace=5):
+    """Ends every process in a scope: SIGTERM, then SIGKILL after GRACE seconds."""
+    def active():
+        return subprocess.run(['systemctl', '--user', 'is-active', '--quiet', unit]).returncode == 0
+    if not has_systemd() or not active():
+        return
+    subprocess.run(['systemctl', '--user', 'kill', '--signal=SIGTERM', unit], capture_output=True)
+    deadline = time.time() + grace
+    while active() and time.time() < deadline:
+        time.sleep(0.2)
+    if active():
+        subprocess.run(['systemctl', '--user', 'kill', '--signal=SIGKILL', unit], capture_output=True)
+        subprocess.run(['systemctl', '--user', 'stop', unit], capture_output=True)
+
+
+def running(pid, start=None):
+    """Whether process PID runs (a zombie, ended but not yet reaped, does not), and is the one
+    that started at START when given."""
+    try:
+        with open(f'/proc/{pid}/stat') as f:
+            fields = f.read().rsplit(')', 1)[1].split()
+    except OSError:
+        return False
+    return fields[0] not in 'ZX' and (start is None or int(fields[19]) == start)
+
+
+def kill_verified(procs, grace=5):
+    """SIGTERM, then SIGKILL after GRACE seconds, to each of PROCS while it is still the same
+    process (its start time unchanged)."""
+    procs = [p for p in procs if process_start(p['pid']) == p['start']]
+    for p in procs:
+        with contextlib.suppress(OSError):
+            os.kill(p['pid'], signal.SIGTERM)
+    deadline = time.time() + grace
+    while time.time() < deadline and any(running(p['pid'], p['start']) for p in procs):
+        time.sleep(0.1)
+    for p in procs:
+        if running(p['pid'], p['start']):
+            with contextlib.suppress(OSError):
+                os.kill(p['pid'], signal.SIGKILL)
+
+
+def x_tmp():
+    """Where X servers keep their lock files and sockets (E2E_X_TMP: the tests')."""
+    return os.environ.get('E2E_X_TMP') or '/tmp'
+
+
+def x_lock_pid(number, tmp=None):
+    try:
+        with open(os.path.join(tmp or x_tmp(), f'.X{number}-lock')) as f:
+            return int(f.read().strip())
+    except (OSError, ValueError):
+        return None
+
+
+def socket_answers(path):
+    with socket.socket(socket.AF_UNIX) as s:
+        try:
+            s.connect(path)
+            return True
+        except OSError:
+            return False
+
+
+def machine_dir(lock_dir):
+    """Whether LOCK_DIR is the machine's (not a test's): leftovers of runners from before
+    E2E_OWNER count only there."""
+    default = os.path.join(os.path.expanduser('~'), '.cache', 'oni-brutal-e2e')
+    return os.path.realpath(lock_dir) == os.path.realpath(default)
+
+
+def lane_leftovers(number, record=None, lock_dir=None, procs=None, scopes=None, alive=tag_alive, display=None,
+                   machine=None, tmp=None):
+    """What runners that died left on lane NUMBER: [(kind, target, why)], kind 'scope' (a unit
+    name), 'process' (a read_proc dict) or 'file' (an X lock file or socket). RECORD is the lane
+    lock's last record (nothing is a leftover while its runner lives); DISPLAY the lane's X display
+    number (default its own)."""
+    lock_dir = lock_dir or shared_dir()
+    machine = machine_dir(lock_dir) if machine is None else machine
+    record = record or {}
+    procs = snapshot() if procs is None else procs
+    scopes = test_scopes() if scopes is None else scopes
+    tmp = tmp or x_tmp()
+    by_pid = {p['pid']: p for p in procs}
+    holder = f'{record["pid"]}:{record["start"]}' if record.get('pid') and record.get('start') else None
+    if holder and alive(holder):
+        return []
+    found, chosen = [], set()
+
+    def add_process(p, why):
+        if p['pid'] not in chosen and p['pid'] != os.getpid():
+            chosen.add(p['pid'])
+            found.append(('process', p, why))
+
+    for unit in scopes:
+        owner = scope_owner(unit)
+        if owner and owner[1].startswith(f'lane{number}-') and not alive(owner[0]):
+            found.append(('scope', unit, f'scope of runner {owner[0].split(":")[0]}, which has gone'))
+    for p in procs:
+        env = p['env']
+        if env.get('E2E_LANE') != str(number):
+            continue
+        if env.get('E2E_LOCK_DIR', lock_dir if machine else None) != lock_dir:
+            continue  # another lock directory's lane
+        tag = env.get(OWNER_ENV)
+        if tag:
+            if not alive(tag):
+                add_process(p, f'{p["comm"]} of runner {tag.split(":")[0]}, which has gone')
+        elif machine and p['comm'] in PLAYER_NAMES and not has_e2e_ancestor(p, by_pid):
+            add_process(p, f'{p["comm"]} on lane {number} with no runner')
+    for child in record.get('children', []):
+        p = by_pid.get(child.get('pid'))
+        if p and p['start'] == child.get('start'):
+            add_process(p, f'{child.get("role", "child")} recorded in the lane lock')
+    # The lane's display: its X server when a dead runner's, then a stale lock file and socket.
+    # Outside the machine's lock directory, only in a test's X folder (E2E_X_TMP).
+    if display is None:
+        display = int(lane_display(number)[1:]) if machine or tmp != '/tmp' else -1
+    lock_pid = x_lock_pid(display, tmp)
+    server = by_pid.get(lock_pid) if lock_pid else None
+    if server and server['comm'] == 'Xvfb' and f':{display}' in server['args']:
+        tag = server['env'].get(OWNER_ENV)
+        if (tag and not alive(tag)) or (not tag and machine and not has_e2e_ancestor(server, by_pid)):
+            add_process(server, f'Xvfb :{display} with no runner')
+    lock_file = os.path.join(tmp, f'.X{display}-lock')
+    if os.path.exists(lock_file) and (lock_pid in chosen or not server):
+        found.append(('file', lock_file, 'stale X lock'))
+        socket_file = os.path.join(tmp, '.X11-unix', f'X{display}')
+        if os.path.exists(socket_file):
+            found.append(('file', socket_file, 'stale X socket'))
+    return found
+
+
+def describe_leftover(item):
+    kind, target, why = item
+    if kind == 'process':
+        return f'pid {target["pid"]} ({why}): {" ".join(target["args"])[:120]}'
+    return f'{kind} {target} ({why})'
+
+
+def clean_leftovers(items, log=say, grace=5):
+    """Ends the scopes and processes lane_leftovers found, then removes the stale X files (each
+    checked again: the lock's process gone, no server answering on the socket)."""
+    for item in items:
+        if item[0] == 'scope':
+            log(f'cleaning {describe_leftover(item)}')
+            stop_scope(item[1], grace)
+    for item in items:
+        if item[0] == 'process':
+            log(f'cleaning {describe_leftover(item)}')
+    kill_verified([target for kind, target, _ in items if kind == 'process'], grace)
+    for item in items:
+        if item[0] != 'file':
+            continue
+        path = item[1]
+        name = os.path.basename(path)
+        if name.endswith('-lock'):
+            pid = x_lock_pid(name[2:-5], os.path.dirname(path))
+            if pid is not None and running(pid):
+                continue
+        elif socket_answers(path):
+            continue
+        log(f'cleaning {describe_leftover(item)}')
+        with contextlib.suppress(OSError):
+            os.unlink(path)
+
+
+def owned_processes(tag, procs=None):
+    """The processes whose E2E_OWNER is TAG: what a runner started, wherever they run now."""
+    return [p for p in (snapshot() if procs is None else procs) if p['env'].get(OWNER_ENV) == tag]
+
+
+def teardown_owner(tag, grace=2, log=None):
+    """Ends everything runner TAG started: its scopes, then every process carrying its E2E_OWNER,
+    and removes the X lock files its killed Xvfbs leave."""
+    log = log or (lambda s: None)
+    for unit in test_scopes():
+        owner = scope_owner(unit)
+        if owner and owner[0] == tag:
+            log(f'stopping {unit}')
+            stop_scope(unit, grace)
+    procs = owned_processes(tag)
+    for p in procs:
+        log(f'killing pid {p["pid"]}: {" ".join(p["args"])[:120]}')
+    kill_verified(procs, grace)
+    for p in procs:
+        number = next((a[1:] for a in p['args'][1:] if re.fullmatch(r':\d+', a)), None)
+        if p['comm'] == 'Xvfb' and number and x_lock_pid(number) == p['pid']:
+            for path in (os.path.join(x_tmp(), f'.X{number}-lock'), os.path.join(x_tmp(), '.X11-unix', f'X{number}')):
+                with contextlib.suppress(OSError):
+                    os.unlink(path)
+
+
+def read_record(f):
+    f.seek(0)
+    try:
+        return json.loads(f.read() or '{}')
+    except ValueError:
+        return {}
+
+
+def write_record(f, record):
+    f.seek(0)
+    f.truncate()
+    json.dump(record, f)
+    f.flush()
+
+
+def reap_after(pid, start, lock_dir=None, poll=2.0):
+    """--reap-after PID START: waits for runner PID to end, however it ends, then ends what it
+    left (teardown_owner) and cleans its lanes. Every runner (and qa.sh) starts one in a session of
+    its own, so the `timeout` or kill that ends the runner leaves it running."""
+    tag = f'{pid}:{start}'
+    while tag_alive(tag):
+        time.sleep(poll)
+    teardown_owner(tag)
+    lock_dir = lock_dir or shared_dir()
+    for name in os.listdir(lock_dir) if os.path.isdir(lock_dir) else []:
+        match = re.fullmatch(r'lane-(\d+)\.lock', name)
+        if not match:
+            continue
+        with open(os.path.join(lock_dir, name), 'a+') as f:
+            try:
+                fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except OSError:
+                continue  # a live runner holds it now, and cleans it before using it
+            try:
+                record = read_record(f)
+                if f'{record.get("pid")}:{record.get("start")}' == tag:
+                    clean_leftovers(lane_leftovers(int(match.group(1)), record, lock_dir), log=lambda s: None)
+                    record.pop('children', None)
+                    record['state'] = 'ended'
+                    write_record(f, record)
+            finally:
+                fcntl.flock(f, fcntl.LOCK_UN)
+
+
+def start_reaper(lock_dir=None):
+    """This runner's watcher (reap_after), in a session of its own."""
+    env = {k: v for k, v in os.environ.items() if k != OWNER_ENV}
+    env['E2E_LOCK_DIR'] = lock_dir or shared_dir()
+    return subprocess.Popen([sys.executable, os.path.abspath(__file__), '--reap-after', str(os.getpid()),
+                             str(process_start(os.getpid()))], env=env, start_new_session=True,
+                            stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
+# The lanes this process holds, for the teardown on a signal or at exit.
+_held_lanes = set()
+_held_guard = threading.Lock()
+
+
+def teardown_all(log=None):
+    """Ends every process this runner started and clears its lanes' records."""
+    teardown_owner(owner_tag(), log=log)
+    with _held_guard:
+        lanes = list(_held_lanes)
+    for lane in lanes:
+        with contextlib.suppress(Exception):
+            lane.children.clear()
+            lane.update(state='ended')
+
+
+def install_teardown():
+    """The teardown on SIGTERM, SIGINT and SIGHUP (`timeout`, ^C, a closed terminal) and at exit."""
+    import atexit
+
+    def on_signal(signum, frame):
+        for s in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP):
+            signal.signal(s, signal.SIG_IGN)
+        say(f'e2e: {signal.Signals(signum).name}: stopping this run\'s players')
+        try:
+            teardown_all(log=say)
+        finally:
+            os._exit(128 + signum)
+    for s in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP):
+        signal.signal(s, on_signal)
+    atexit.register(teardown_all)
 
 
 # The players' memory budget (§6.2): the machine has 62 GB. A player on a small save takes 4-6 GB,
@@ -856,24 +1278,225 @@ def machine_lock(lock_dir=None, perf_wait=True, log=say, max_wait=None):
         f.close()
 
 
-def status(lock_dir=None):
-    """What the machine's runners hold now, as lines (--status)."""
+def port_listeners(procs=None):
+    """{port: [pid]} of the TCP ports listened on now, from /proc/net/tcp and tcp6 (the
+    processes this user can see)."""
+    inodes = {}
+    for table in ('/proc/net/tcp', '/proc/net/tcp6'):
+        with contextlib.suppress(OSError), open(table) as f:
+            for line in f.readlines()[1:]:
+                fields = line.split()
+                if len(fields) > 9 and fields[3] == '0A':  # LISTEN
+                    inodes[fields[9]] = int(fields[1].rsplit(':', 1)[1], 16)
+    found = {}
+    for p in (snapshot() if procs is None else procs):
+        with contextlib.suppress(OSError):
+            for fd in os.listdir(f'/proc/{p["pid"]}/fd'):
+                with contextlib.suppress(OSError):
+                    link = os.readlink(f'/proc/{p["pid"]}/fd/{fd}')
+                    if link.startswith('socket:[') and link[8:-1] in inodes:
+                        found.setdefault(inodes[link[8:-1]], set()).add(p['pid'])
+    return {port: sorted(pids) for port, pids in found.items()}
+
+
+def flock_holders(path):
+    """[(pid, 'shared' or 'exclusive')] holding flocks on PATH, from /proc/locks."""
+    try:
+        inode = os.stat(path).st_ino
+        with open('/proc/locks') as f:
+            lines = f.read().splitlines()
+    except OSError:
+        return []
+    found = []
+    for line in lines:
+        fields = line.split()
+        if '->' in fields:
+            continue  # a waiter
+        if len(fields) >= 6 and fields[1] == 'FLOCK' and fields[5].rsplit(':', 1)[-1] == str(inode):
+            found.append((int(fields[4]), 'exclusive' if fields[3] == 'WRITE' else 'shared'))
+    return found
+
+
+def ago(seconds):
+    return f'{seconds / 3600:.1f} h' if seconds >= 5400 else f'{seconds // 60:.0f} min'
+
+
+def boot_time():
+    with contextlib.suppress(OSError, StopIteration, ValueError):
+        with open('/proc/stat') as f:
+            return int(next(line for line in f if line.startswith('btime')).split()[1])
+    return 0
+
+
+BOOT_TIME = boot_time()
+
+
+def proc_age(p):
+    """Seconds since process P (read_proc) started."""
+    return time.time() - (BOOT_TIME + p['start'] / os.sysconf('SC_CLK_TCK'))
+
+
+def compress_numbers(numbers):
+    """[1, 2, 3, 5] as '1-3, 5'."""
+    parts = []
+    for n in sorted(numbers):
+        if parts and parts[-1][1] == n - 1:
+            parts[-1][1] = n
+        else:
+            parts.append([n, n])
+    return ', '.join(f'{a}' if a == b else f'{a}-{b}' for a, b in parts)
+
+
+def known_lanes(lock_dir):
+    """FIRST_LANE..LAST_LANE and every lane with a lock file."""
+    numbers = set(range(FIRST_LANE, LAST_LANE + 1))
+    for name in os.listdir(lock_dir) if os.path.isdir(lock_dir) else []:
+        match = re.fullmatch(r'lane-(\d+)\.lock', name)
+        if match:
+            numbers.add(int(match.group(1)))
+    return sorted(numbers)
+
+
+def status(lock_dir=None, procs=None):
+    """What the machine's runners hold and wait for, and what dead ones left (--status), as lines:
+    the first thing to look at when a run waits."""
     lock_dir = lock_dir or shared_dir()
+    procs = snapshot() if procs is None else procs
+    by_pid = {p['pid']: p for p in procs}
+    listeners = port_listeners(procs)
+    scopes = test_scopes()
+
+    def who(pid):
+        p = by_pid.get(pid)
+        if not p:
+            return f'pid {pid} (gone)'
+        owner = p['env'].get(OWNER_ENV)
+        mark = f', runner {owner.split(":")[0]} {"alive" if tag_alive(owner) else "GONE"}' if owner else ''
+        return f'pid {pid} {p["comm"]} ({ago(proc_age(p))} old{mark})'
+
+    def holder_alive(record):
+        return tag_alive(f'{record.get("pid")}:{record.get("start")}')
+
     lines = [f'lock directory {lock_dir}']
     ports, displays = reservations(lock_dir)
     lines.append(f'reserved: {len(ports)} port(s), {len(displays)} display(s)')
-    for s in lane_status(lock_dir):
-        mcp, driver = lane_ports(s['lane'])
-        lines.append(f'lane {s["lane"]} (:{mcp}, :{driver}, {lane_display(s["lane"])}): pid {s["pid"]} in {s["root"]}'
-                     + (f' (out {s["out"]})' if s.get('out') and s['out'] != os.path.join(s['root'], 'out', 'e2e') else '')
-                     + f' since {s["since"]}')
+    held = {s['lane']: s for s in lane_status(lock_dir)}
+    free, cleanable = [], 0
+    for number in known_lanes(lock_dir):
+        mcp, driver = lane_ports(number)
+        display = lane_display(number)
+        head = f'lane {number} (:{mcp}, :{driver}, {display})'
+        busy = [f'port {port}: {", ".join(who(pid) for pid in listeners.get(port, [])) or "open"}'
+                for port in (mcp, driver) if port in listeners]
+        lock_pid = x_lock_pid(display[1:])
+        if lock_pid or display_ready(display[1:]):
+            busy.append(f'display {display}: ' + (who(lock_pid) if lock_pid else 'a server answers'))
+        if number in held:
+            s = held[number]
+            lines.append(f'{head}: HELD by pid {s["pid"]} ({"alive" if holder_alive(s) else "gone; a child keeps its lock"}) '
+                         f'in {s["root"]} since {s["since"]}: {s.get("state") or "?"}')
+            for c in s.get('children') or []:
+                p = by_pid.get(c['pid'])
+                lines.append(f'    {c["role"]}: pid {c["pid"]} ({"alive" if p and p["start"] == c["start"] else "gone"})'
+                             + (f', scope {c["scope"]}' if c.get('scope') else ''))
+            lines += [f'    {b}' for b in busy]
+            continue
+        record = {}
+        path = os.path.join(lock_dir, f'lane-{number}.lock')
+        if os.path.exists(path):
+            with open(path) as f:
+                record = read_record(f)
+        found = lane_leftovers(number, record, lock_dir, procs=procs, scopes=scopes)
+        if not busy and not found:
+            free.append(number)
+            continue
+        last = (f'last held by pid {record["pid"]} ({"alive" if holder_alive(record) else "gone"}) since '
+                f'{record.get("since")}: {record.get("state") or "?"}') if record.get('pid') else 'never held'
+        lines.append(f'{head}: FREE but busy; {last}')
+        lines += [f'    {b}' for b in busy]
+        lines += [f'    would clean: {describe_leftover(item)}' for item in found]
+        cleanable += len(found)
+    lines.append('free lanes: ' + (compress_numbers(free) or 'none'))
+    if cleanable:
+        lines.append(f'    {cleanable} leftover(s) of dead runners: the next runner to take those lanes cleans them; '
+                     'scripts/e2e.py --clean does now')
+    # perf.lock, perf.wanted and who waits on them.
+    holders = flock_holders(os.path.join(lock_dir, 'perf.lock'))
+    exclusive = [pid for pid, mode in holders if mode == 'exclusive']
+    shared = [pid for pid, mode in holders if mode == 'shared']
+    lines.append('perf.lock: ' + (f'held EXCLUSIVELY by {who(exclusive[0])}' if exclusive else
+                                  f'held shared by {len(shared)} spec run(s) (pids {", ".join(map(str, shared))})'
+                                  if shared else 'free'))
+    try:
+        with open(os.path.join(lock_dir, 'perf.wanted')) as f:
+            wanted = int(f.read().split()[0])
+    except (OSError, ValueError, IndexError):
+        wanted = None
+    if wanted:
+        p = by_pid.get(wanted)
+        lines.append(f'perf.wanted: {who(wanted)}' + (f': {" ".join(p["args"])[:140]}' if p else ' (stale: ignored)'))
+        if p:
+            waiting = [n for n, s in held.items() if 'perf job' in (s.get('state') or '')]
+            lines.append(f'    new spec runs wait for it; lanes waiting now: {compress_numbers(waiting) or "none"}')
+    # Runners, their watchers and qa.sh.
+    for p in procs:
+        script = p['args'][1] if len(p['args']) > 1 else ''
+        if p['pid'] == os.getpid() or not (re.search(r'(^|/)e2e\.py$', script) or re.search(r'(^|/)qa\.sh$', script)):
+            continue
+        if '--reap-after' in p['args']:
+            lines.append(f'watcher: pid {p["pid"]} for runner {p["args"][p["args"].index("--reap-after") + 1]}')
+        elif script.endswith('qa.sh'):
+            lines.append(f'qa.sh: pid {p["pid"]}, {ago(proc_age(p))}: {" ".join(p["args"])[:140]}')
+        elif '--status' not in p['args']:
+            lanes = [n for n, s in held.items() if s.get('pid') == p['pid']]
+            what = f'lanes {compress_numbers(lanes)}' if lanes else 'no lane (waiting for one, or between jobs)'
+            lines.append(f'runner: pid {p["pid"]}, {ago(proc_age(p))}, {what}: {" ".join(p["args"])[:140]}')
     budget = Budget(lock_dir)
     entries = budget.entries()
     lines.append(f'players: {sum(e["gb"] for e in entries):g} of {budget.gb:g} GB, {len(entries)} of {budget.players}')
-    lines += [f'  {e["label"]}: {e["gb"]:g} GB, pid {e["pid"]} in {e["root"]} since {e["since"]}' for e in entries]
+    lines += [f'    {e["label"]}: {e["gb"]:g} GB, pid {e["pid"]} in {e["root"]} since {e["since"]}' for e in entries]
     for pid, seconds, args in perf_processes():
         lines.append(f'perf job: pid {pid}, running {seconds // 60} min: {args[:160]}')
+    for unit in scopes:
+        owner = scope_owner(unit)
+        if owner:
+            lines.append(f'scope {unit}: runner {owner[0].split(":")[0]} {"alive" if tag_alive(owner[0]) else "GONE"}')
+    # X servers whose launcher has gone (an xvfb-run's, a runner's): nothing cleans those that are
+    # not on a lane's display, so they are only shown.
+    for p in procs:
+        parent = by_pid.get(p['ppid'])
+        # Orphans go to init, the user's systemd or, under WSL, the session's /init relay.
+        if p['comm'] == 'Xvfb' and (p['ppid'] <= 1 or not parent or parent['comm'] == 'systemd'
+                                    or parent['comm'].startswith('Relay(') or parent['args'][:1] == ['/init']):
+            lines.append(f'X server without its launcher: pid {p["pid"]}, {ago(proc_age(p))} old: {" ".join(p["args"])[:100]}')
     return lines
+
+
+def clean(lock_dir=None, log=say):
+    """--clean: what dead runners left on every lane no runner holds (lane_leftovers), cleaned."""
+    lock_dir = lock_dir or shared_dir()
+    cleaned = 0
+    for number in known_lanes(lock_dir):
+        path = os.path.join(lock_dir, f'lane-{number}.lock')
+        with open(path, 'a+') as f:
+            try:
+                fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except OSError:
+                continue  # a live runner holds it
+            try:
+                record = read_record(f)
+                found = lane_leftovers(number, record, lock_dir)
+                if found:
+                    clean_leftovers(found, log=lambda s: log(f'lane {number}: {s}'))
+                    cleaned += len(found)
+                    if record:
+                        record.pop('children', None)
+                        record['state'] = 'cleaned'
+                        write_record(f, record)
+            finally:
+                fcntl.flock(f, fcntl.LOCK_UN)
+    log(f'cleaned {cleaned} leftover(s)')
+    return cleaned
 
 
 class JobQueue:
@@ -1581,6 +2204,16 @@ def translation_prefs(mod, language=None):
 
 
 PLAYER_NAMES = ('OniMoono', 'OxygenNotInclud')  # /proc comm: ours, the original (15 characters)
+_scopes = itertools.count(1)  # numbers this runner's player scopes
+
+
+def child_marks(lane):
+    """What every process a runner starts carries in its environment, so that a teardown, the
+    watcher and the next runner on the lane find it (lane_leftovers)."""
+    marks = {OWNER_ENV: owner_tag(), 'E2E_LOCK_DIR': shared_dir()}
+    if lane is not None:
+        marks['E2E_LANE'] = str(lane.number)
+    return marks
 
 
 class Watchdog(threading.Thread):
@@ -1689,7 +2322,7 @@ class Player:
         self.save_dir = os.path.join(self.profile, 'save_files', 'e2e')
         self.fixture = fixture and os.path.join(self.save_dir, os.path.basename(fixture))
         self.display = self.xauthority = None
-        self.process = self.xvfb = None
+        self.process = self.xvfb = self.scope = None
         self.watchdog = Watchdog(self)
         shutil.rmtree(out, ignore_errors=True)
         os.makedirs(os.path.join(self.profile, 'mods', 'Local'))
@@ -1768,7 +2401,11 @@ class Player:
         size = ['-screen-width', str(WIDTH), '-screen-height', str(HEIGHT), '-screen-fullscreen', '0']
         env = dict(os.environ, XDG_CONFIG_HOME=os.path.join(self.home, 'config'),
                    XDG_CACHE_HOME=os.path.join(self.home, 'cache'),
-                   E2E_DRIVER_PORT=str(self.lane.driver_port), E2E_LANE=str(self.lane.number))
+                   E2E_DRIVER_PORT=str(self.lane.driver_port), **child_marks(self.lane))
+        # The player's own systemd scope (scripts/contain.sh), which a teardown stops whole.
+        self.scope = scope_name(f'lane{self.lane.number}-{self.kind}-{next(_scopes)}') if has_systemd() else None
+        if self.scope:
+            env['ONI_SCOPE'] = self.scope
         for name in ('GALLIUM_DRIVER', 'MESA_D3D12_DEFAULT_ADAPTER_NAME'):
             if name in self.env:
                 env[name] = self.env[name]
@@ -1798,6 +2435,7 @@ class Player:
             env['DISPLAY'] = self.display = self.lane.display
             self.process = subprocess.Popen(command, env=env, stdout=open(stdout, 'w'), stderr=subprocess.STDOUT,
                                             start_new_session=True)
+            self.lane.track('player', self.process.pid, self.scope)
         else:
             command = ['xvfb-run', '-a', '-s', ' '.join([f'-screen 0 {WIDTH}x{HEIGHT}x24', *keyboard_server_options(self.keyboard)]),
                        *command]
@@ -1806,6 +2444,7 @@ class Player:
                 fcntl.flock(lock, fcntl.LOCK_EX)
                 self.process = subprocess.Popen(command, env=env, stdout=open(stdout, 'w'), stderr=subprocess.STDOUT,
                                                 start_new_session=True)
+                self.lane.track('player', self.process.pid, self.scope)
                 self.find_display()
         with open(os.path.join(self.out, 'lane.json'), 'w') as f:
             json.dump(self.lane_record(), f)
@@ -1829,7 +2468,9 @@ class Player:
         self.xvfb = subprocess.Popen(['Xvfb', display, '-screen', '0', f'{WIDTH}x{HEIGHT}x24', '-nolisten', 'tcp',
                                       *keyboard_server_options(self.keyboard)],
                                      stdout=subprocess.DEVNULL, stderr=open(os.path.join(self.out, 'xvfb.txt'), 'w'),
-                                     start_new_session=True)
+                                     start_new_session=True, env=dict(os.environ, **child_marks(getattr(self, 'lane', None))))
+        if getattr(self, 'lane', None):
+            self.lane.track('xvfb', self.xvfb.pid)
         deadline = time.time() + 20
         while not display_ready(number):
             if self.xvfb.poll() is not None or time.time() > deadline:
@@ -1873,6 +2514,8 @@ class Player:
     def kill(self):
         with contextlib.suppress(OSError):
             os.killpg(self.process.pid, signal.SIGKILL)
+        if self.scope:
+            stop_scope(self.scope, grace=0)
 
     def load(self, mcp):
         mcp.connect()
@@ -1914,6 +2557,12 @@ class Player:
         for p in family:
             with contextlib.suppress(OSError):
                 os.kill(p, signal.SIGKILL)
+        # Whatever the player started in its scope, out of its process group.
+        if self.scope:
+            stop_scope(self.scope)
+        for process in (self.process, self.xvfb):
+            if process:
+                self.lane.untrack(process.pid)
         deadline = time.time() + 30
         while (port_open(self.lane.mcp_port) or port_open(self.lane.driver_port)) and time.time() < deadline:
             time.sleep(1)
@@ -3488,7 +4137,7 @@ def usage():
 def parse_args(argv):
     opts = {'players': 'ours', 'repeat': 1, 'bless': False, 'hold': None, 'lanes': 1, 'first_lane': FIRST_LANE,
             'last_lane': None, 'displays': None, 'xvfb_run': False, 'perf_wait': True, 'results': None, 'check': False,
-            'status': False, 'record': False, 'note': None, 'max_wait': None, 'run_id': None, 'names': []}
+            'status': False, 'clean': False, 'record': False, 'note': None, 'max_wait': None, 'run_id': None, 'names': []}
     i = 0
     takes = {'--player': 'players', '--repeat': 'repeat', '--lanes': 'lanes', '--first-lane': 'first_lane',
              '--last-lane': 'last_lane', '--displays': 'displays', '--results': 'results', '--note': 'note',
@@ -3514,6 +4163,8 @@ def parse_args(argv):
             opts['check'] = True
         elif a == '--status':
             opts['status'] = True
+        elif a == '--clean':
+            opts['clean'] = True
         elif a.startswith('-'):
             raise SpecError(f'unknown option {a}')
         else:
@@ -3553,7 +4204,7 @@ def parse_args(argv):
             raise SpecError('--displays names fewer displays than --lanes')
     if opts['record'] and (opts['hold'] == 'end'):
         raise SpecError('--record takes no --hold (a held run is exploration, not a verdict)')
-    if not opts['names'] and not opts['status']:
+    if not opts['names'] and not opts['status'] and not opts['clean']:
         raise SpecError('no spec named')
     return opts
 
@@ -3577,6 +4228,14 @@ def report(record):
 
 
 def main(argv):
+    # Internal: the watcher of a runner or qa.sh, and qa.sh's teardown of its players.
+    if argv[:1] == ['--reap-after'] and len(argv) == 3:
+        reap_after(int(argv[1]), int(argv[2]))
+        return 0
+    if argv[:1] == ['--teardown-owner'] and len(argv) == 2 and re.fullmatch(r'\d+:\d+', argv[1]):
+        teardown_owner(argv[1])
+        return 0
+    os.environ.pop(OWNER_ENV, None)  # this runner's children carry its own
     try:
         opts = parse_args(argv)
         specs = [load_spec(n) for n in opts['names']]
@@ -3584,6 +4243,10 @@ def main(argv):
     except (SpecError, ValueError) as e:
         print(f'e2e: {e}', file=sys.stderr)
         usage()
+    if opts['clean']:
+        clean()
+        if not specs and not opts['status']:
+            return 0
     if opts['status']:
         for line in status():
             print(line)
@@ -3602,6 +4265,9 @@ def main(argv):
     if missing:
         print('e2e: skipped, needs ' + ', '.join(missing) + ' (out/local-tools/qa.env)')
         return 0
+    # Its players and Xvfbs end with it, however it ends (see "leftovers").
+    install_teardown()
+    start_reaper()
     run_id = opts['run_id'] or new_run_id()
     results_path = opts['results'] or os.path.join(OUT, 'runs', run_id + '.json')
     say(f'== run {run_id}: lock directory {shared_dir()}')
@@ -3622,14 +4288,24 @@ def main(argv):
                 return dict(record, verdict='skipped', reasons=['the spec fails in the original'], out=None)
         log(f'== {spec["name"]} in {kind} ({index}/{opts["repeat"]})')
         gb = player_gb(spec, fixture_of(spec))
+        job_name = f'{spec["name"]} in {kind} ({index}/{opts["repeat"]}), run {run_id}'
+        lane.update(state=f'starting {job_name}', job=job_name)
+
+        def waits(line):  # a wait's lines also say, in the lane's lock, what the lane waits for
+            log(line)
+            if line.startswith('waiting for'):
+                lane.update(state=line)
         try:
-            with machine_lock(perf_wait=opts['perf_wait'], log=log, max_wait=opts['max_wait']), \
-                    budget.hold(gb, f'{spec["name"]}/{kind}-{index} lane {lane.number}', log, opts['max_wait']):
+            with machine_lock(perf_wait=opts['perf_wait'], log=waits, max_wait=opts['max_wait']), \
+                    budget.hold(gb, f'{spec["name"]}/{kind}-{index} lane {lane.number}', waits, opts['max_wait']):
+                lane.update(state=f'running {job_name}')
                 point_latest(os.path.join(OUT, spec['name']), run_id)
                 result = Run(spec, kind, index, env, lane, log, opts['perf_wait'],
                              reference.values if reference else None, opts['hold'], run_id).execute()
         except WaitTimeout as e:
             return dict(record, lane=lane.number, verdict='fail', reasons=[str(e)], out=None)
+        finally:
+            lane.update(state='idle', job=None)
         with state:
             results[job['id']] = result
         record.update(result['lane'], out=result['out'], outcome=result['outcome'], saves=result['saves'],

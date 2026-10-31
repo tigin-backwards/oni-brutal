@@ -260,7 +260,7 @@ namespace OniMoono.Desktop.Gl
             presents++;
             if (resync)
             {
-                for (int i = 0; i < 16 && Dxgi.WaitForSingleObjectEx(waitable, 0, 1) == Dxgi.WaitObject0; i++) { }
+                for (int i = 0; i < 16 && Dxgi.WaitForSingleObjectEx(waitable, 0, 0) == Dxgi.WaitObject0; i++) { }
                 resync = false;
                 freeSlots = (int)MaximumFrameLatency - 1;
             }
@@ -280,7 +280,7 @@ namespace OniMoono.Desktop.Gl
             else
             {
                 long t = GlTimings.Now;
-                if (Dxgi.WaitForSingleObjectEx(waitable, WaitMilliseconds, 1) != Dxgi.WaitObject0)
+                if (Dxgi.WaitForSingleObjectEx(waitable, WaitMilliseconds, 0) != Dxgi.WaitObject0)
                 {
                     resync = true;
                     if (waitTimeouts++ < 3) EngineLog.Engine($"present: DXGI picture {presents} not on its way after {WaitMilliseconds} ms; going on");

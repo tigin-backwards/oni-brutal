@@ -3,9 +3,9 @@ using System.Diagnostics;
 
 namespace OniMoono.Desktop.Gl
 {
-    /// When the presenter may restart DXGI after it failed while running (GlPresenter): at most
-    /// MaxPerBurst tries in a row, the delay between them doubling from 1 s to 8 s, so a burst
-    /// spans about a minute and outlasts a slow driver reset (TDR).
+    /// When a presenter may restart DXGI after it failed while running (GlPresenter,
+    /// Vulkan.VkPresenter): at most MaxPerBurst tries in a row, the delay between them doubling
+    /// from 1 s to 8 s, so a burst spans about a minute and outlasts a slow driver reset (TDR).
     /// A restart that then presents for ResetAfter seconds ends the burst: a later failure gets a
     /// full burst again, however long the session. Times are Stopwatch ticks.
     internal sealed class DxgiRestarts

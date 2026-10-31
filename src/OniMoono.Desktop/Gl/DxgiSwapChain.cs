@@ -3,12 +3,12 @@ using OniMoono.Engine;
 
 namespace OniMoono.Desktop.Gl
 {
-    /// Windows: the D3D11 device and flip-model swap chain OpenGL presents through (DxgiTarget),
-    /// as the original (Unity 6 on D3D11) presents, so that Windows knows the game is SDR:
-    /// R8G8B8A8_UNORM, FLIP_DISCARD, two buffers, the default colour space, a frame-latency
-    /// waitable object at a latency of 2, tearing only without vsync. The device renders into a
-    /// D3D11 texture of the target's, shared with it; Present copies it into the back buffer
-    /// (CopySubresourceRegion) and presents.
+    /// Windows: the D3D11 device and flip-model swap chain both devices present through
+    /// (DxgiTarget for OpenGL, Vulkan.VkDxgiTarget for Vulkan), as the original (Unity 6 on D3D11)
+    /// presents, so that Windows knows the game is SDR: R8G8B8A8_UNORM, FLIP_DISCARD, two buffers,
+    /// the default colour space, a frame-latency waitable object at a latency of 2, tearing only
+    /// without vsync. Each device renders into a D3D11 texture of the target's, shared with it;
+    /// Present copies it into the back buffer (CopySubresourceRegion) and presents.
     /// ARCHITECTURE §3.5, "Presentation on Windows".
     ///
     /// Threads: made on one thread and from then on used and released by the presenter thread
@@ -25,10 +25,14 @@ namespace OniMoono.Desktop.Gl
         public static bool Enabled;
 
         /// Diagnostics (`--dxgi-fault WHAT[,WHAT]`): failures made up, for testing the ways back.
-        /// At start-up (OpenGL's SwapBuffers instead): "extension" (no WGL_NV_DX_interop2),
-        /// "adapter", "device", "register", "swapchain", "association" (after the swap chain is
-        /// made: DXGI is then restarted). While running (DXGI is then restarted): "lock:N" (the
-        /// Nth interop lock), "resize:N", "removed:N" (the Nth Present failing with
+        /// At start-up (the device's own presentation instead): "adapter", "device", "swapchain",
+        /// "association" (after the swap chain is made: DXGI is then restarted);
+        /// OpenGL's "extension" (no WGL_NV_DX_interop2) and "register"; Vulkan's "queuelock" (no lock
+        /// to submit under, as if Brutal's Queue had none), "import" and
+        /// "importview:N" (the Nth image view of the shared texture: 2, a grown one, in play). While
+        /// running (DXGI is then restarted): "lock:N" (the Nth interop lock, or keyed-mutex
+        /// acquire), "mutextimeout:N" (Vulkan: the Nth submission timing out on the keyed mutex),
+        /// "resize:N", "removed:N" (the Nth Present failing with
         /// DXGI_ERROR_DEVICE_REMOVED). "norestart": every restart fails too. Each happens once,
         /// so a restart succeeds.
         public static string Fault;
@@ -240,13 +244,20 @@ namespace OniMoono.Desktop.Gl
         /// and, with vsync, waits until the picture before it is on its way (MaximumFrameLatency
         /// pictures in flight): the waitable object is signalled as each presented picture
         /// retires; an occluded picture was not queued and is not waited for. The
-        /// caller has made `source` ready for D3D11 (the interop unlock).
+        /// caller has made `source` ready for D3D11 (the interop unlock, the keyed mutex).
         public bool Present(void* source, int interval)
+        {
+            if (Failure != null) return false;
+            CopyToBackBuffer(source);
+            return PresentCopied(interval);
+        }
+
+        /// Presents what was copied into the back buffer (Present's second half, for a caller
+        /// that must release `source` between the copy and Present: the keyed mutex).
+        public bool PresentCopied(int interval)
         {
             LastWait = 0;
             if (Failure != null) return false;
-            var box = new Dxgi.Box { Right = (uint)Width, Bottom = (uint)Height, Back = 1 };
-            Dxgi.CopySubresourceRegion(context, backBuffer, 0, 0, 0, 0, source, 0, &box);
             presents++;
             if (resync)
             {
@@ -261,10 +272,10 @@ namespace OniMoono.Desktop.Gl
             if (nowOccluded != occluded && PresentTrace.Enabled) PresentTrace.Log($"dxgi: present {presents}: {(nowOccluded ? "occluded (not shown)" : "shown again")}");
             occluded = nowOccluded;
             if (Dxgi.Failed(hr)) return Fail($"Present failed ({Dxgi.Hr(hr)}{DeviceState(hr)})");
-            // Without vsync nothing waits, as with SwapBuffers: retiring can take a frame or two
-            // (measured on the AMD iGPU, its picture copied to a monitor on another GPU: 29 ms
+            // Without vsync nothing waits, as on the swapchain paths: retiring can take a frame or
+            // two (measured on the AMD iGPU, its picture copied to a monitor on another GPU: 29 ms
             // a picture), which would cap the frame rate. The next Present resyncs the count; the
-            // interop lock keeps at most a picture in flight meanwhile.
+            // interop lock or keyed mutex keeps at most a picture in flight meanwhile.
             if (nowOccluded || sync == 0) resync = true;
             else if (freeSlots > 0) freeSlots--;
             else
@@ -278,6 +289,13 @@ namespace OniMoono.Desktop.Gl
                 LastWait = GlTimings.Now - t;
             }
             return true;
+        }
+
+        /// Copies into the back buffer without presenting (see PresentCopied).
+        public void CopyToBackBuffer(void* source)
+        {
+            var box = new Dxgi.Box { Right = (uint)Width, Bottom = (uint)Height, Back = 1 };
+            Dxgi.CopySubresourceRegion(context, backBuffer, 0, 0, 0, 0, source, 0, &box);
         }
 
         /// Releases everything, in the reverse order of making it. Safe after a failure at any

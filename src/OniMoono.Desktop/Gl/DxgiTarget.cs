@@ -23,7 +23,9 @@ namespace OniMoono.Desktop.Gl
     /// window's GL context current; no other thread holds any of it.
     internal sealed unsafe class DxgiTarget : IWindowTarget
     {
-        const uint WglAccessWriteDiscard = 2;
+        // Read and write: the splash blends over what it drew, which reads the texture; WRITE_DISCARD
+        // promises the GL never reads it.
+        const uint WglAccessReadWrite = 1;
 
         readonly IntPtr hwnd;
         DxgiSwapChain chain;
@@ -209,7 +211,7 @@ namespace OniMoono.Desktop.Gl
             if (Dxgi.Failed(hr)) return Fail($"CreateTexture2D {capacityWidth}x{capacityHeight} failed ({Dxgi.Hr(hr)}{chain.DeviceState(hr)})");
             shared = t;
             texture = GlApi.GenTexture();
-            interopObject = DxgiSwapChain.Faulty("register") ? IntPtr.Zero : dxRegisterObject(interopDevice, shared, texture, TexTarget2D, WglAccessWriteDiscard);
+            interopObject = DxgiSwapChain.Faulty("register") ? IntPtr.Zero : dxRegisterObject(interopDevice, shared, texture, TexTarget2D, WglAccessReadWrite);
             if (interopObject == IntPtr.Zero) return Fail($"wglDXRegisterObjectNV failed (error 0x{Dxgi.GetLastError():X})");
             if (PresentTrace.Enabled) PresentTrace.Log($"dxgi: shared texture {capacityWidth}x{capacityHeight} for a {w}x{h} picture");
             return true;

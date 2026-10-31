@@ -128,6 +128,11 @@ ONI_RUN_HOME='C:\...' scripts/original-windows.sh -screen-width 1024 -screen-hei
 ONI_RUN_HOME='C:\...' scripts/run-windows.sh -screen-width 1024 -screen-height 768 -screen-fullscreen 0
 ```
 
+Test windows open windowed on the second monitor without taking the focus (`-monitor 2`; our
+player's `--no-focus`; `ONI_WIN_MONITOR` picks another), and the original's BepInEx console stays
+closed. Focus one only through `out/local-tools/win-run.ps1 -Match RUN_HOME -Action focus`, and act
+on Windows game processes only through it, never by name.
+
 `windows-run-home.sh` prepares a run home with a single colony, which the main menu resumes on
 its own, and mods enabled (`tools/PerfProbe` holds speed 3 and logs frame rates). The original
 runs from a renamed copy of the install (`ORIG_DIR`, default `E:\Development\BrutalNotIncluded`)
@@ -140,7 +145,9 @@ script has the details.
 ```sh
 scripts/check.sh               # before every commit
 scripts/qa.sh [STAGE...]       # the full harness: unit, dogfood, verify, perf
+scripts/qa.sh --memory         # U57's peak memory alone, beside other runs
 scripts/e2e.py SPEC...         # end-to-end specs: tests/e2e
+scripts/e2e.py --status        # what runs, holds and waits on the machine: look here first
 ```
 
 `check.sh` builds the solution, runs the test suites and the scripts' tests
@@ -156,12 +163,17 @@ the references once they have been looked at. The large-colony stages need local
 `out/local-tools/qa.env`, and are skipped without it. A large-colony run that logs no frame rate
 for `QA_HANG_MIN` minutes (default 5) is hung: its stacks go to the stage's `hang` folder
 (`scripts/hang-dump.sh`) before it is killed; `ONI_TEST_HANG=FRAME[:spin|wait]` hangs one on
-purpose.
+purpose. The `memory` stage (`--memory`, or `QA_MEMORY_ONLY=1`, runs it alone) measures the
+large colony's peak memory only: it takes no perf lock and waits for no quiet machine (memory
+does not depend on the load), and stops once the first autosave has passed and memory has not
+risen for `QA_MEMORY_SETTLE_FRAMES` frames, reporting the peak, its frame and the RssAnon/RssFile
+split. A player of `qa.sh` or `e2e.py` ends with its run, however that ends, and so does its Xvfb.
 
 `e2e.py` plays a spec (a fixture save, Workshop mods, orders and UI input) in our player, the
 original or both, and checks what came of it. Runners in every worktree share lanes (ports and
 an Xvfb display each), a players' memory budget and locks in `~/.cache/oni-brutal-e2e`
-(`E2E_LOCK_DIR`); `scripts/e2e.py --status` shows them. `qa.sh`'s perf stage writes `perf.wanted`
+(`E2E_LOCK_DIR`); `scripts/e2e.py --status` shows them, with who waits on what and what dead
+runners left (`--clean` cleans that). `qa.sh`'s perf stage writes `perf.wanted`
 there, so no new spec starts, and takes `perf.lock` exclusively once the running ones finish;
 other perf jobs can do the same with `flock -x ~/.cache/oni-brutal-e2e/perf.lock CMD`.
 [tests/e2e/README.md](../tests/e2e/README.md) describes specs, lanes and verdicts.

@@ -479,6 +479,10 @@ def main(argv):
     # A save loaded with other mods than it was saved with opens MOD DIFFERENCES, listing them;
     # with a batch's mods its OK button falls below e2e.py's 1280x720 screen.
     e2e.WIDTH, e2e.HEIGHT = (int(v) for v in opts.screen.split('x'))
+    # Its players and Xvfbs end with it, however it ends (e2e.py's "leftovers").
+    os.environ.pop(e2e.OWNER_ENV, None)
+    e2e.install_teardown()
+    e2e.start_reaper()
     runner = Runner(opts.name, env, opts.save, opts.seconds, opts.first_lane, opts.last_lane, opts.players)
     runner.requires = {r['id']: [q for q in info.get(r['id'], {}).get('requires', [])
                                  if q in info and not info[q]['malware']] for r in chosen}

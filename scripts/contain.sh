@@ -7,9 +7,14 @@
 # manager (macOS, CI containers) it only raises the OOM score. ONI_CONTAINED marks a command
 # already inside: nested calls exec directly. OOMPolicy=continue: a killed player ends alone, not
 # the scope around it (a whole QA run).
+# ONI_SCOPE=NAME.scope names the scope, inside a contained command too: a test runner
+# (scripts/e2e.py, scripts/qa.sh) starts each player in a scope of its own and stops that scope
+# whole when the run ends, so nothing the player started outlives it. It is not passed on.
 set -euo pipefail
 echo 1000 > /proc/self/oom_score_adj 2> /dev/null || true
-if [ -z "${ONI_CONTAINED:-}" ] && command -v systemd-run > /dev/null && systemctl --user show-environment > /dev/null 2>&1; then
+scope="${ONI_SCOPE:-}"
+unset ONI_SCOPE
+if { [ -z "${ONI_CONTAINED:-}" ] || [ -n "$scope" ]; } && command -v systemd-run > /dev/null && systemctl --user show-environment > /dev/null 2>&1; then
     unit="$HOME/.config/systemd/user/oni-tests.slice"
     if ! cmp -s "$(dirname "$0")/oni-tests.slice" "$unit"; then
         mkdir -p "$(dirname "$unit")"
@@ -17,7 +22,7 @@ if [ -z "${ONI_CONTAINED:-}" ] && command -v systemd-run > /dev/null && systemct
         systemctl --user daemon-reload
     fi
     export ONI_CONTAINED=1
-    exec systemd-run --user --scope --quiet --collect -p OOMPolicy=continue --slice=oni-tests.slice -- "$@"
+    exec systemd-run --user --scope --quiet --collect -p OOMPolicy=continue --slice=oni-tests.slice ${scope:+"--unit=$scope"} -- "$@"
 fi
 export ONI_CONTAINED=1
 exec "$@"

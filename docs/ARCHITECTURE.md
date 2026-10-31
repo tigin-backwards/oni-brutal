@@ -1635,6 +1635,23 @@ change the original does not make. With HDR off, Desktop Duplication (which OBS'
 capture uses) lost OpenGL through WGL (`DXGI_ERROR_ACCESS_LOST`) but captured OpenGL through
 DXGI. Not measured: Intel GPUs, click-to-photon latency.
 
+Measured again on U59 (744825, 2026-10-31, the same machine, windowed on the second monitor,
+captured through Desktop Duplication, which captured every DXGI picture): the paused DeCrew
+colony differed from the original U59's by 0.08% of pixels through DXGI and 0.37% through
+SwapBuffers (two captures of one run differ by up to 0.07%); the menu differs from the original's
+by our own UI only (the Moono Tweaks button, the BRUTAL notice), DXGI's and SwapBuffers' by 2%,
+as two captures of the moving menu do. At the menu with vsync the presenter was busy about 0.35
+ms a picture through DXGI against 0.05 to 0.1 through SwapBuffers, and a frame's start to its
+present took 35 to 36 ms either way. Every `--dxgi-fault` step ended as above: the start-up ones
+before the swap chain with SwapBuffers showing frames, `association` and the running ones
+(`lock:200`, `resize:1`, `removed:300`) with DXGI restarted on the first try and frames on
+screen, `association,norestart` with SwapBuffers showing frames while every restart failed, and
+`removed:300,norestart` and `lock:200,norestart` with the window kept on DXGI's last picture.
+150 resizes with 150 minimize/restore cycles, and 150 scripted switches between windowed sizes
+and a maximized window, showed no failure, no picture the presenter's probe found black and no
+growth in the process's video memory. OpenGL stays on the RTX 3090 with `--gpu integrated` here
+(both monitors are on it), so the AMD iGPU is not reached through OpenGL on this machine.
+
 **Loading splash (`--splash moo`, on by default; `--splash none` or Moono Tweaks turns it off).** The player's own presentation, not the
 game's: the presenter thread draws Gassy Moo comets (the game's `meteor_gassymoo` kanim, its
 `fall_loop`, read from `sharedassets0.assets` on a worker thread at start-up) over whatever the

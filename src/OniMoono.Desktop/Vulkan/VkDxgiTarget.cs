@@ -35,7 +35,7 @@ namespace OniMoono.Desktop.Vulkan
         VkImage image;
         VkDeviceMemory memory;
         VkImageView view;
-        int capacityWidth, capacityHeight, acquires;
+        int capacityWidth, capacityHeight, acquires, imports;
         string failure;
 
         public VkImage Image => image;
@@ -214,11 +214,21 @@ namespace OniMoono.Desktop.Vulkan
             memory = mem;
             r = vk.Device.PInvoke.vkBindImageMemory.Invoke(device, image, memory, default);
             if (r != VkResult.Success) return Fail($"vkBindImageMemory (shared texture) failed ({r})");
-            view = vk.Device.CreateImageView(new VkImageViewCreateInfo
+            // In play too (the window outgrew the texture): a failure here, out of memory, say, is
+            // DXGI's to recover from (a restart), not the game's end.
+            try
             {
-                Image = image, ViewType = VkImageViewType._2D, Format = Format,
-                SubresourceRange = new VkImageSubresourceRange { AspectMask = VkImageAspectFlags.ColorBit, LevelCount = 1, LayerCount = 1 },
-            }, null);
+                if (DxgiSwapChain.Faulty("importview", ++imports)) throw new VkResultError(VkResult.ErrorOutOfDeviceMemory, "--dxgi-fault importview");
+                view = vk.Device.CreateImageView(new VkImageViewCreateInfo
+                {
+                    Image = image, ViewType = VkImageViewType._2D, Format = Format,
+                    SubresourceRange = new VkImageSubresourceRange { AspectMask = VkImageAspectFlags.ColorBit, LevelCount = 1, LayerCount = 1 },
+                }, null);
+            }
+            catch (VkResultError e)
+            {
+                return Fail($"vkCreateImageView (shared texture) failed ({e.Result})");
+            }
             if (PresentTrace.Enabled) PresentTrace.Log($"dxgi: shared texture {capacityWidth}x{capacityHeight} imported into Vulkan");
             return true;
         }

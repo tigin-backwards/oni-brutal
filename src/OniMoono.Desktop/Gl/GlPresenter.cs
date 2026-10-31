@@ -311,13 +311,17 @@ namespace OniMoono.Desktop.Gl
         {
             if (dxgiWindow != IntPtr.Zero)
             {
-                var dxgi = DxgiTarget.Create(dxgiWindow, windowWidth, windowHeight, out string reason);
+                var dxgi = DxgiTarget.Create(dxgiWindow, windowWidth, windowHeight, out string reason, out bool windowTouched);
                 if (dxgi != null)
                 {
                     DxgiAdapterLuid = dxgi.AdapterLuid;
                     return dxgi;
                 }
-                EngineLog.Engine($"present: OpenGL's SwapBuffers, since DXGI could not start: {reason}{MadeUp}");
+                // A failure after the swap chain was made (its last steps) is one while running:
+                // DXGI is restarted, as SwapBuffers may not show on the window from here on.
+                dxgiLost = windowTouched;
+                EngineLog.Engine($"present: OpenGL's SwapBuffers, since DXGI could not start: {reason}{MadeUp}"
+                    + (windowTouched ? "; the window had DXGI's swap chain by then, so DXGI is restarted" : ""));
             }
             else if (OperatingSystem.IsWindows()) EngineLog.Engine("present: OpenGL's SwapBuffers (DXGI is off)");
             return new GlSwapTarget(window);
@@ -355,7 +359,7 @@ namespace OniMoono.Desktop.Gl
             if (dxgiRestarts >= MaxDxgiRestarts || GlTimings.Now < nextDxgiRestart) return null;
             dxgiRestarts++;
             nextDxgiRestart = GlTimings.Now + System.Diagnostics.Stopwatch.Frequency;
-            var dxgi = DxgiTarget.Create(dxgiWindow, windowWidth, windowHeight, out string reason);
+            var dxgi = DxgiTarget.Create(dxgiWindow, windowWidth, windowHeight, out string reason, out _);
             if (dxgi != null)
             {
                 EngineLog.Engine($"present: DXGI started again (restart {dxgiRestarts})");

@@ -25,7 +25,8 @@ namespace OniMoono.Desktop.Gl
         public static bool Enabled;
 
         /// Diagnostics (`--dxgi-fault WHAT[,WHAT]`): failures made up, for testing the ways back.
-        /// At start-up (the device's own presentation instead): "adapter", "device", "swapchain";
+        /// At start-up (the device's own presentation instead): "adapter", "device", "swapchain",
+        /// "association" (after the swap chain is made: DXGI is then restarted);
         /// OpenGL's "extension" (no WGL_NV_DX_interop2) and "register"; Vulkan's "import". While
         /// running (DXGI is then restarted): "lock:N" (the Nth interop lock, or keyed-mutex
         /// acquire), "resize:N", "removed:N" (the Nth Present failing with
@@ -68,7 +69,6 @@ namespace OniMoono.Desktop.Gl
         /// How long a present waits for its picture to be on its way before going on regardless.
         const uint WaitMilliseconds = 1000;
 
-        readonly IntPtr hwnd;
         // COM objects (one reference each, released once in Dispose).
         void* factory, device, context, swapChain, swapChain2, backBuffer;
         IntPtr waitable;
@@ -91,20 +91,22 @@ namespace OniMoono.Desktop.Gl
         /// The part of the last Present spent waiting for the picture to be on its way.
         public long LastWait { get; private set; }
 
-        DxgiSwapChain(IntPtr hwnd, long luid)
-        {
-            this.hwnd = hwnd;
-            AdapterLuid = luid;
-        }
+        /// A swap chain was made for the window: from then on, Windows will not show the device's
+        /// own presentation reliably on it (OpenGL's SwapBuffers stays frozen), so a failure after
+        /// this point is treated as one while running (DXGI is restarted).
+        public bool WindowTouched { get; private set; }
 
-        /// A device on the adapter `luid` and a swap chain for window `hwnd`, `width` x `height`;
-        /// null, with the reason, when any step fails (what was made is released).
-        public static DxgiSwapChain Create(IntPtr hwnd, long luid, int width, int height, out string reason)
+        DxgiSwapChain(long luid) => AdapterLuid = luid;
+
+        /// A D3D11 device on the adapter `luid`, without a swap chain yet (AttachWindow makes it,
+        /// once the device's interop has been shown to work); null, with the reason, when any step
+        /// fails (what was made is released).
+        public static DxgiSwapChain Open(long luid, out string reason)
         {
-            var chain = new DxgiSwapChain(hwnd, luid);
+            var chain = new DxgiSwapChain(luid);
             try
             {
-                reason = chain.Start(Math.Max(1, width), Math.Max(1, height));
+                reason = chain.OpenDevice();
             }
             catch (Exception e) when (e is DllNotFoundException or EntryPointNotFoundException)
             {
@@ -115,7 +117,7 @@ namespace OniMoono.Desktop.Gl
             return null;
         }
 
-        string Start(int w, int h)
+        string OpenDevice()
         {
             var iid = Dxgi.IIDFactory2;
             void* f;
@@ -138,7 +140,6 @@ namespace OniMoono.Desktop.Gl
             device = d;
             context = c;
             featureLevel = level;
-
             void* f5;
             if (!Dxgi.Failed(Dxgi.QueryInterface(factory, Dxgi.IIDFactory5, &f5)))
             {
@@ -146,6 +147,16 @@ namespace OniMoono.Desktop.Gl
                 tearing = !Dxgi.Failed(Dxgi.CheckFeatureSupport(f5, Dxgi.FeaturePresentAllowTearing, &allow, sizeof(int))) && allow != 0;
                 Dxgi.Release(ref f5);
             }
+            return null;
+        }
+
+        /// The swap chain for window `hwnd`, `w` x `h`: the last step of a start, once the
+        /// device's interop has been shown to work. Null on success, else the reason;
+        /// WindowTouched says whether the failure came after the swap chain was made.
+        public string AttachWindow(IntPtr hwnd, int w, int h)
+        {
+            w = Math.Max(1, w);
+            h = Math.Max(1, h);
             swapFlags = Dxgi.SwapChainFlagFrameLatencyWaitable | (tearing ? Dxgi.SwapChainFlagAllowTearing : 0);
             var desc = new Dxgi.SwapChainDesc1
             {
@@ -154,12 +165,13 @@ namespace OniMoono.Desktop.Gl
                 SwapEffect = Dxgi.SwapEffectFlipDiscard, AlphaMode = Dxgi.AlphaModeIgnore, Flags = swapFlags,
             };
             void* s = null;
-            hr = Faulty("swapchain") ? unchecked((int)0x80070005) : Dxgi.CreateSwapChainForHwnd(factory, device, hwnd, &desc, &s);
+            int hr = Faulty("swapchain") ? unchecked((int)0x80070005) : Dxgi.CreateSwapChainForHwnd(factory, device, hwnd, &desc, &s);
             if (Dxgi.Failed(hr)) return $"CreateSwapChainForHwnd failed ({Dxgi.Hr(hr)})";
             swapChain = s;
+            WindowTouched = true;
             Width = w;
             Height = h;
-            hr = Dxgi.MakeWindowAssociation(factory, hwnd, Dxgi.WindowAssociationNoWindowChanges | Dxgi.WindowAssociationNoAltEnter);
+            hr = Faulty("association") ? unchecked((int)0x887A0001) : Dxgi.MakeWindowAssociation(factory, hwnd, Dxgi.WindowAssociationNoWindowChanges | Dxgi.WindowAssociationNoAltEnter);
             if (Dxgi.Failed(hr)) return $"MakeWindowAssociation failed ({Dxgi.Hr(hr)})";
             void* s2;
             hr = Dxgi.QueryInterface(swapChain, Dxgi.IIDSwapChain2, &s2);

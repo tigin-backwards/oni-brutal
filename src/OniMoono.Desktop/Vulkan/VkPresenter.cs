@@ -130,8 +130,15 @@ namespace OniMoono.Desktop.Vulkan
                 if (OperatingSystem.IsWindows() && DxgiSwapChain.Enabled)
                 {
                     dxgiWindow = (IntPtr)window.GetWin32Window();
-                    dxgi = VkDxgiTarget.Create(vk, dxgiWindow, windowWidth, windowHeight, out string reason);
-                    if (dxgi == null) EngineLog.Engine($"present: Vulkan's swapchain, since DXGI could not start: {reason}{MadeUp}");
+                    dxgi = VkDxgiTarget.Create(vk, dxgiWindow, windowWidth, windowHeight, out string reason, out bool windowTouched);
+                    if (dxgi == null)
+                    {
+                        // A failure after the swap chain was made (its last steps) is one while
+                        // running: Vulkan's swapchain stands in and DXGI is restarted.
+                        dxgiLost = windowTouched;
+                        EngineLog.Engine($"present: Vulkan's swapchain, since DXGI could not start: {reason}{MadeUp}"
+                            + (windowTouched ? "; the window had DXGI's swap chain by then, so DXGI is restarted" : ""));
+                    }
                     else SwapchainFormat = VkDxgiTarget.Format;
                 }
                 else if (OperatingSystem.IsWindows()) EngineLog.Engine("present: Vulkan's swapchain (DXGI is off)");
@@ -546,7 +553,7 @@ namespace OniMoono.Desktop.Vulkan
                 vk.Device.DestroySwapchainKHR(swapchain, null);
                 swapchain = default;
             }
-            var restarted = VkDxgiTarget.Create(vk, dxgiWindow, windowWidth, windowHeight, out string reason);
+            var restarted = VkDxgiTarget.Create(vk, dxgiWindow, windowWidth, windowHeight, out string reason, out _);
             if (restarted != null)
             {
                 EngineLog.Engine($"present: DXGI started again (restart {dxgiRestarts})");

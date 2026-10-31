@@ -56,7 +56,7 @@ namespace OniMoono.Desktop.Vulkan
 
         /// The target for window `hwnd`, for a first picture of `width` x `height`; null, with the
         /// reason, when any step fails (what was made is released; the device is idle).
-        public static VkDxgiTarget Create(VkContext vk, IntPtr hwnd, int width, int height, out string reason)
+        public static VkDxgiTarget Create(VkContext vk, IntPtr hwnd, int width, int height, out string reason, out bool windowTouched)
         {
             var target = new VkDxgiTarget(vk, hwnd);
             try
@@ -67,6 +67,7 @@ namespace OniMoono.Desktop.Vulkan
             {
                 reason = $"{e.GetType().Name}: {e.Message}";
             }
+            windowTouched = target.chain?.WindowTouched ?? false;
             if (reason == null) return target;
             target.Dispose();
             return null;
@@ -78,9 +79,13 @@ namespace OniMoono.Desktop.Vulkan
             if (!vk.DxgiInterop) return "the Vulkan driver has no VK_KHR_external_memory_win32 and VK_KHR_win32_keyed_mutex";
             if (DxgiSwapChain.Faulty("adapter") || vk.Luid == 0) return "the Vulkan device gives no LUID to find its DXGI adapter by";
             if (!Importable(out string why)) return why;
-            chain = DxgiSwapChain.Create(hwnd, vk.Luid, w, h, out string reason);
+            // The device and the import first, the swap chain last: once the window has had one,
+            // the device's own presentation is not reliably shown on it.
+            chain = DxgiSwapChain.Open(vk.Luid, out string reason);
             if (chain == null) return reason;
             if (!MakeShared(w, h)) return Failure;
+            reason = chain.AttachWindow(hwnd, w, h);
+            if (reason != null) return reason;
             EngineLog.Engine(chain.Describe("the Vulkan device's LUID", $"shared texture {capacityWidth}x{capacityHeight} (VK_KHR_external_memory_win32, keyed mutex)"));
             return null;
         }

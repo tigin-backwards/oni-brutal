@@ -56,7 +56,7 @@ namespace OniMoono.Desktop.Gl
         /// The target for window `hwnd`, whose GL context is current, for a first picture of
         /// `width` x `height`; null, with the reason, when any step fails (what was made is
         /// released).
-        public static DxgiTarget Create(IntPtr hwnd, int width, int height, out string reason)
+        public static DxgiTarget Create(IntPtr hwnd, int width, int height, out string reason, out bool windowTouched)
         {
             var target = new DxgiTarget(hwnd);
             try
@@ -67,6 +67,7 @@ namespace OniMoono.Desktop.Gl
             {
                 reason = e.Message;
             }
+            windowTouched = target.chain?.WindowTouched ?? false;
             if (reason == null) return target;
             target.Dispose();
             return null;
@@ -87,7 +88,9 @@ namespace OniMoono.Desktop.Gl
 
             long luid = FindAdapter(out string how);
             if (luid == 0) return how;
-            chain = DxgiSwapChain.Create(hwnd, luid, w, h, out string reason);
+            // Every interop step first, the swap chain last: once the window has had a flip-model
+            // swap chain, OpenGL's own SwapBuffers no longer reaches the screen.
+            chain = DxgiSwapChain.Open(luid, out string reason);
             if (chain == null) return reason;
 
             interopDevice = dxOpenDevice(chain.Device);
@@ -103,6 +106,8 @@ namespace OniMoono.Desktop.Gl
             N.glClear(ColorBufferBit);
             if (!Unlock()) return Failure;
             if (status != FramebufferComplete) return $"the shared texture's framebuffer is incomplete (0x{status:X})";
+            reason = chain.AttachWindow(hwnd, w, h);
+            if (reason != null) return reason;
             EngineLog.Engine(chain.Describe(how, $"shared texture {capacityWidth}x{capacityHeight} (WGL_NV_DX_interop2)"));
             return null;
         }

@@ -4,7 +4,7 @@
 
 一个非官方、超快、超可疑的《缺氧》（Oxygen Not Included）Unity 层替代品，由 Claude 匠心打造。在游戏后期的殖民地中，它的帧率约为原版的 8 倍（见[性能表现](#性能表现)）。
 
-<p align="center"><img src="docs/images/moo-comet.webp" alt="一只瓦斯牛像彗星一样坠落" height="240"></p>
+<p align="center"><img src="docs/images/moo-comet.webp" alt="一只释气海牛像彗星一样坠落" height="240"></p>
 
 我做这件事主要是为了好玩，想看看《缺氧》在现代 .NET 运行时（CoreCLR）上的性能究竟能走多远。这个念头已经在我脑海里盘旋了一段时间，但现有的 C# 渲染器没有一个能让我心动。当 [BRUTAL](https://github.com/ahwootech/BRUTAL) 开源时，这似乎正好给了我一个尝试这个“性感新玩具”的好借口。
 
@@ -79,7 +79,7 @@ Moono 也会加速游戏自身的一些代码。大多数调整项不会改变�
 
 ![主菜单中 Mods 下方的 Moono Tweaks 按钮](docs/images/zh-CN/main-menu.png)
 
-<p align="center"><img src="docs/images/moono-tweaks.png" alt="Moono Tweaks 界面：一列带复选框的调整项"></p>
+<p align="center"><img src="docs/images/zh-CN/moono-tweaks.png" alt="Moono Tweaks 界面：一列带复选框的调整项"></p>
 
 ## 存档兼容性
 

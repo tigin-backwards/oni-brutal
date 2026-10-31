@@ -703,7 +703,7 @@ namespace OniMoono.Desktop
 
         /// An IMGUI ScrollWheel event's delta for a wheel scroll of `notches` (up positive, as
         /// Input.mouseScrollDelta has it): it points down for wheel-down, one per notch on Linux
-        /// as Unity's X11 player reports it, three on Windows (its default wheel lines).
+        /// and three on Windows, as Unity's players report it (measured with real wheel input).
         internal static Vector2 WheelEventDelta(Vector2 notches, bool windows)
             => new Vector2(-notches.x, -notches.y) * (windows ? 3f : 1f);
 

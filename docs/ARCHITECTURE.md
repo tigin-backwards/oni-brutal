@@ -1703,7 +1703,12 @@ path. A light colony without vsync ran at 115 fps through DXGI against 111 with 
 3090, 59 against 60 on the iGPU, and 159 against 102 with OpenGL; with vsync all held 60 Hz
 (two pictures in flight, above); start-up differed by less than the spread between launches. 300
 resizes, 300 minimize/restore cycles and 300 mode switches (30 exclusive) on Vulkan, and 150 each
-on the iGPU and on OpenGL, showed no failure and no growth in video memory. On a 530-nit HDR
+on the iGPU and on OpenGL, showed no failure and no growth in video memory. Every
+`--dxgi-fault` step on both devices (start-up before and after the swap chain, a lost device, a
+keyed-mutex timeout, a failed image view of a grown texture, ten failed restarts) ended with the
+window still showing new frames. Minimized with the game's vsync (a paused colony) the original
+stayed at or under 60 fps and every path here at 60 (Vulkan's own swapchain path by pacing its
+pictures, VkPresenter). On a 530-nit HDR
 monitor, fullscreen at the menu (tools/HdrCheck): with Windows' HDR on (SDR white at 240 nits)
 the original, Vulkan through DXGI and through its swapchain, and OpenGL through DXGI all left the
 monitor in HDR and reached at most 240 nits, composited as SDR, with no Auto HDR boost; OpenGL

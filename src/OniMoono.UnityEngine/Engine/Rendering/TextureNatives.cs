@@ -166,6 +166,10 @@ namespace OniMoono.Engine.Rendering
 
         PixelMemory memory;
         TexelSource? source;
+        /// Resources.UnloadAsset freed the texels and the device copy: the next use reads the
+        /// texture from its asset file again (Reload).
+        bool unloaded;
+        bool reloading;
 
         public override bool IsReadable => Readable;
 
@@ -188,6 +192,7 @@ namespace OniMoono.Engine.Rendering
             get
             {
                 AwaitCopy();
+                if (unloaded) Reload();
                 if (memory == null && source is { } s)
                 {
                     memory = GraphicsDevice.Pipelined ? s.ReadMemory() : new PixelMemory(s.Read());
@@ -197,7 +202,7 @@ namespace OniMoono.Engine.Rendering
             }
         }
 
-        public bool HasTexels => memory != null || source != null;
+        public bool HasTexels => memory != null || source != null || unloaded;
 
         /// Hands over the texels as they are: their memory, or where to read them from (one of
         /// the two, or neither when there are none); the texture keeps none (background uploads of
@@ -205,6 +210,7 @@ namespace OniMoono.Engine.Rendering
         public (PixelMemory Memory, TexelSource? Source) DetachTexels()
         {
             AwaitCopy();
+            if (unloaded) Reload();
             var taken = (memory, source);
             memory = null;
             source = null;
@@ -212,7 +218,48 @@ namespace OniMoono.Engine.Rendering
         }
 
         /// Texels still to be read from an asset file.
-        public bool TexelsUnread => memory == null && source != null;
+        public bool TexelsUnread => memory == null && (source != null || unloaded);
+
+        /// Unloaded by Resources.UnloadAsset and not used since.
+        public bool Unloaded => unloaded;
+
+        /// Resources.UnloadAsset: frees the texels and the device copy of a texture loaded from
+        /// the game's asset files; the object stays valid, and its next use (a draw, reading or
+        /// writing its texels) reads it from the file again, as Unity does. Its fields come back
+        /// as the file has them, as after Unity's reload: texels the game changed, or settings it
+        /// changed before unloading, are lost. Textures made at run time, and those from asset
+        /// bundles (whose files may be unmounted before the reload), keep their data. False when
+        /// nothing was freed.
+        public bool Unload()
+        {
+            if (!IsPersistent || Destroyed || unloaded || Source.File == null || Source.File.StartsWith("archive:/", StringComparison.Ordinal)
+                || this is not (Texture2DNative or Texture2DArrayNative)) return false;
+            AwaitCopy();
+            GraphicsDevice.Release(ref Gpu);
+            memory?.Free();
+            memory = null;
+            source = null;
+            unloaded = true;
+            // What the device recorded is gone; a reload may bring back texels the game changed.
+            ContentVersion++;
+            return true;
+        }
+
+        /// The texture as its asset file has it, texels still to be read (they are read when the
+        /// caller asks for them; no upload is queued: the caller is the upload, or a draw that
+        /// follows makes one).
+        void Reload()
+        {
+            lock (this)
+            {
+                if (!unloaded) return;
+                var fields = ObjectLoader.ReadFields(Source);
+                reloading = true;
+                try { Bind(fields, null); }
+                finally { reloading = false; }
+                unloaded = false;
+            }
+        }
 
         /// Texels from an asset file. As in Unity, a loaded texture is uploaded to the graphics
         /// device as part of loading (on the main thread before the next frame renders), not on
@@ -223,7 +270,7 @@ namespace OniMoono.Engine.Rendering
             memory?.Free();
             memory = null;
             source = s;
-            GraphicsDevice.QueueUpload(this);
+            if (!reloading) GraphicsDevice.QueueUpload(this);
         }
 
         /// Replaces the texels with freshly allocated memory of `size` bytes, filled with `fill`.
@@ -232,6 +279,7 @@ namespace OniMoono.Engine.Rendering
             AwaitCopy();
             memory?.Free();
             source = null;
+            unloaded = false;
             memory = new PixelMemory(size, fill);
         }
 
@@ -262,6 +310,7 @@ namespace OniMoono.Engine.Rendering
         {
             base.ReleaseResources();
             DropTexels();
+            unloaded = false;
         }
     }
 

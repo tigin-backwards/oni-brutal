@@ -22,7 +22,7 @@ Sources:
 | Game tweaks | Static review done (2 fixed, overlays left out where U60 does their work); runtime checks need a U60 player. |
 | Linux build | Done: frozen at `~/projects/oni-linux-761015`, DLC content copied (not linked) from the frozen Windows copy, test install `out/local-tools/u60orig`. |
 | Main menu and a save on U60 | Both: Linux (QA dogfood: menu, DeCrew and new game, all 13 scenarios clean) and Windows (frozen copy `E:\oni-builds\oni-win-761015`, RTX 3090, OpenGL 4.5: main menu, DeCrew loaded and dismissed its mod dialog, no errors). |
-| Performance | Measured on Linux, 2026-10-31 (see Performance): the save tweaks, fast-jobs, fast-anim-events and fast-conveyor-paths still pay; the other exact tweaks' gains are below what this machine resolves now. Frame rates do not compare: the machine was GPU-bound at about 6 fps in every configuration, U59 included. |
+| Performance | Measured on Linux, 2026-10-31 (see Performance): the save tweaks, fast-jobs, fast-anim-events and fast-conveyor-paths still pay; the other exact tweaks' gains are below what this machine resolves now. Frame rates do not compare: the machine was GPU-bound at about 6 fps in every configuration, U59 included. | Peak memory: see Memory.
 | QA and e2e on U60 | QA: unit and all 13 dogfood scenarios pass (references blessed from a reviewed U60 run); verify (U57, every tweak's verify mode) ran 840 game seconds with no mismatches and no errors logged. e2e: not yet run. |
 
 ## The build
@@ -83,14 +83,39 @@ Members U60 needs that U59 did not:
   Calls Count" and "SetPass Calls Count", which report 0 here as before.
 - `Resources.UnloadAsset`: not a development-build call. U60's `VistaLayers` loads the new
   starting-biome vista textures on demand and unloads those it stops showing (the patch notes'
-  "vista textures ... only load them on demand"). Moono keeps the data loaded: what is shown is
-  the same, but Klei's memory saving does not happen. To be measured (MB kept after the vistas
-  are toggled) before deciding on a real unload: freeing the pixel data and GPU copy, reloaded
-  from the asset file on next use.
+  "vista textures ... only load them on demand"). Moono unloads as Unity does: the texture's
+  texels and device copy are freed, the object stays valid with its instance id, and its next
+  use (a draw, a texel read or write, Resources.Load handing it out again) reads it from its
+  asset file. Run-time textures and asset-bundle textures keep their data, as do the sprites
+  (little memory). The vistas are entities a new U60 colony gets: the U57 save has none and
+  makes no UnloadAsset call, so the QA perf peak does not change with it (see Memory).
 
 Other CoreModule additions (`Random.onUnitCircle`, `JobHandle` equality, `SpriteRenderer` shader
 user values, `SystemInfo.SupportsTypedUAVShaderLoadStoreOnGraphicsFormat`) are not referenced by the
 game.
+
+## Memory
+
+Peak resident memory on the U57 save, OpenGL on Mesa's d3d12 driver, 1024x768, measured on
+2026-10-30. Every run goes to frame 3724 (PERF line); the peak comes with the first autosave, a
+new day about 2,500 frames after the colony is up, and nothing after it raised a run by more
+than 50 MB (full 4,800-frame runs: ours U59 16,395 MB, U60 16,794 MB). Two ways of loading: the
+save loaded by PerfProbe's load.txt (colony up at frame 124), and the QA perf harness's menu clicks
+(colony up at frame 905, autosave near 3,360).
+
+| Player | load.txt U59 | load.txt U60 | QA harness U59 | QA harness U60 |
+|---|---|---|---|---|
+| Unity's | 13,065 MB | 15,093 MB | | |
+| Moono | 16,344 MB | 16,794 MB (16,781 with the unload) | 15,853 MB | 16,187 MB (with the unload) |
+
+- Unity's own player grows by 2.0 GB on U60, most of it there right after the load (13.5 GB
+  against 11.1). Moono grows by 0.45 GB: its GC heap is about 170 MB larger and commits 445 MB
+  more; its textures take less (3.27 GB on the device at frame 1200, against 3.42 on U59).
+- Moono's file-backed resident memory is 2.6–2.8 GB (the asset files it maps); Unity's is under
+  200 MB.
+- QA's 14.0–14.6 GB on master are runs of 2026-10-22 to 10-24 (13.9–15.2 GB). The same harness,
+  cut at frame 3724, gives 15.85 GB on master today (8ac69537): master has grown since, and the
+  U60 branch adds 0.3–0.45 GB on top of it, not 2.3 GB.
 
 ## UI packages
 

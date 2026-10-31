@@ -1,7 +1,19 @@
-# Issue #41 with the reporter's Fast Track (GitHub build 0.18.6, installed as Workshop ID
-# 9000000001 from ONI_WS; it is not on the Workshop). Fast Track draws tiles and animations with
-# MeshRenderers of its own (MeshRendererOptions = All by default). The conduits-in-tiles
-# fixture: a wire, a gas pipe and a liquid pipe through five tiles and on into open air.
+# Issue #41: in the Power overlay, wire laid through a floor of built tiles was not drawn, while
+# wire in open air was; a player's gas overlay showed the same for pipes. Both players had Fast
+# Track (PeterHan.FastTrack, a GitHub build, not on the Workshop: install 0.18.6 as
+# $ONI_WS/9000000001 to run this spec).
+#
+# Fast Track's CullConduits (on by default) disables the animation of every wire and pipe inside
+# a solid cell, and shows it again in the overlays from its own AddTargetIfVisible: a transpiler
+# replaces the overlay modes' calls to the game's. Our fast-overlays tweak rerouted the same calls
+# with a transpiler of its own, installed before any mod and run first at an equal priority, so
+# Fast Track's found no call to replace and the hidden wires and pipes stayed hidden. The tweaks'
+# call-site transpilers now run after every mod's (CallSiteReroute).
+#
+# The conduits-in-tiles fixture (issue-41-conduits-in-tiles.yaml): a wire, a gas pipe and a
+# liquid pipe run through five tiles (x 110 to 114, y 207) and on into open air. In each overlay
+# as many wires, or pipes of its kind, have their animation disabled as in the original (Fast
+# Track keeps those out of view hidden: the fixture has one such wire).
 from: conduits-in-tiles
 mods: [9000000001]
 steps:
@@ -9,10 +21,16 @@ steps:
   - world_shot: {name: plain, ortho: 6, at: [114, 208]}
   - open: {key: F2}
   - run: {seconds: 1, speed: 1}
+  - expect_state:
+      "count:all:Wire::[*] if .GetComponent<KBatchedAnimController>.enabled == false": "== original"
   - world_shot: {name: power, ortho: 6, at: [114, 208]}
   - open: {key: F6}
   - run: {seconds: 1, speed: 1}
+  - expect_state:
+      "count:all:Conduit::[*] if .type == Liquid and .GetComponent<KBatchedAnimController>.enabled == false": "== original"
   - world_shot: {name: liquid, ortho: 6, at: [114, 208]}
   - open: {key: F7}
   - run: {seconds: 1, speed: 1}
+  - expect_state:
+      "count:all:Conduit::[*] if .type == Gas and .GetComponent<KBatchedAnimController>.enabled == false": "== original"
   - world_shot: {name: gas, ortho: 6, at: [114, 208]}

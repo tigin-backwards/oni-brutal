@@ -541,7 +541,12 @@ namespace OniMoono.Desktop.Vulkan
             if (result == VkResult.Timeout)
             {
                 // The keyed mutex was not given back in time: nothing was submitted (the slot's
-                // fence will not signal, so it is not waited for), and DXGI is restarted.
+                // fence will not signal, so it is not waited for), and DXGI is restarted. The
+                // fence is reset anyway once the queue is idle: the specification leaves its state
+                // after a failed submission open, and a signaled fence must not be submitted again.
+                try { vk.Queue.WaitIdle(); } catch (VkResultError) { }
+                var fence = fences[s];
+                vk.Device.PInvoke.vkResetFences.Invoke(vk.Device.Handle, 1, &fence);
                 dxgi.Fail("the Vulkan submission timed out acquiring the keyed mutex");
                 DxgiFailed();
                 return;

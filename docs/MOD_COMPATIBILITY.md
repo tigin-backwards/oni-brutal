@@ -2117,6 +2117,7 @@ installs get developer checks subscribers never see).
 | 2271 | [](https://steamcommunity.com/sharedfiles/filedetails/?id=2733975631) | ⬜ | ⬜ | ⬜ | a translation: installed disabled, as a subscription leaves it; not swept |
 | 2273 | [小野花[small_wildflower]](https://steamcommunity.com/sharedfiles/filedetails/?id=3752870013) | ✅ | ✅ | ⬜ |  |
 | 2274 | [Dynamic Constructions](https://steamcommunity.com/sharedfiles/filedetails/?id=2627722791) | ✅ | ✅ | ⬜ |  |
+| – | [3793108683](https://steamcommunity.com/sharedfiles/filedetails/?id=3793108683) | ✅ | ✅ | ✅ | spec tests/e2e/mods/3793108683-advanced-mopping.yaml: the Mop tool's liquid filter opens; with Water unticked a drag marks nothing, ticked it marks the three cells; Duplicants mop them, as in the original |
 
 ## Known differences
 

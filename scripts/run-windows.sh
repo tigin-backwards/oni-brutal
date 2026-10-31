@@ -7,6 +7,10 @@
 # game's audio goes to <run home>\fmodoutput.wav (--audio-wav). Extra arguments go to the host.
 # As scripts/run.sh, `--game-tweak none --splash none --log-paths full` come first: no tweaks, no
 # loading splash and the log's paths as logged unless the run names them.
+# The window opens windowed on the second monitor without taking the focus (`-screen-fullscreen 0
+# -monitor 2 --no-focus`; ONI_WIN_MONITOR=N picks another monitor), so a test never covers or
+# takes over the user's main one. Focus it only through out/local-tools/win-run.ps1 -Match RUN_HOME
+# -Action focus, and act on its process only through win-run.ps1 (by its run home, never by name).
 #   scripts/run-windows.sh --frames 600 --capture 590:C:/path/shot.png
 set -euo pipefail
 source "$(dirname "$0")/env.sh"
@@ -21,4 +25,4 @@ stub=steamstub
 run_home="${ONI_RUN_HOME:-$win_temp\\oni-brutal\\run-home}"
 game="${ONI_WIN_GAME_DIR:-C:\\Program Files (x86)\\Steam\\steamapps\\common\\OxygenNotIncluded}"
 exec "$stage/host/OniMoono.exe" --game "$game" --run-home "$run_home" --audio-wav "$run_home" --game-tweak none --splash none --log-paths full \
-  --native-override "steam_api64=$win_temp\\oni-brutal\\$stub\\steam_api64.dll" "$@"
+  --native-override "steam_api64=$win_temp\\oni-brutal\\$stub\\steam_api64.dll" -screen-fullscreen 0 -monitor "${ONI_WIN_MONITOR:-2}" --no-focus "$@"

@@ -231,7 +231,7 @@ namespace OniMoono.Host
                 "windowed" => FullScreenMode.Windowed,
                 _ => mode,
             };
-            return new OniMoono.Desktop.WindowSettings(EngineConfig.ProductName, width, height, mode) { IgnoreUserInput = options.Input.Any || options.Background, DebugContext = options.GlDebug, Monitor = options.Monitor };
+            return new OniMoono.Desktop.WindowSettings(EngineConfig.ProductName, width, height, mode) { IgnoreUserInput = options.Input.Any || options.Background, DebugContext = options.GlDebug, Monitor = options.Monitor, NoFocus = options.NoFocus };
         }
 
         /// Frame pacing as in Unity's desktop player: with vSync the swap paces frames (the
